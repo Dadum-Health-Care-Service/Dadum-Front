@@ -1,0 +1,332 @@
+/* 기본 Textarea 래퍼 스타일 */
+.textarea-wrapper {
+  margin-bottom: 16px;
+}
+
+.textarea__label {
+  display: block;
+  font-size: 14px;
+  color: #374151;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.textarea__required {
+  color: #ef4444;
+  margin-left: 4px;
+}
+
+/* 기본 Textarea 필드 스타일 */
+.textarea__field {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  background: #ffffff;
+  color: #1f2937;
+  line-height: 1.5;
+  min-height: 80px;
+}
+
+/* Variant별 스타일 */
+.textarea--outlined {
+  border: 2px solid #d1d5db;
+  background: #ffffff;
+}
+
+.textarea--outlined:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.textarea--outlined:hover:not(:disabled):not(:read-only) {
+  border-color: #9ca3af;
+}
+
+.textarea--filled {
+  border: 2px solid transparent;
+  background: #f3f4f6;
+  border-bottom: 2px solid #d1d5db;
+  border-radius: 8px 8px 0 0;
+}
+
+.textarea--filled:focus {
+  outline: none;
+  background: #ffffff;
+  border-bottom-color: #3b82f6;
+  box-shadow: 0 2px 0 0 #3b82f6;
+}
+
+.textarea--filled:hover:not(:disabled):not(:read-only) {
+  background: #e5e7eb;
+}
+
+.textarea--standard {
+  border: none;
+  border-bottom: 2px solid #d1d5db;
+  border-radius: 0;
+  background: transparent;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.textarea--standard:focus {
+  outline: none;
+  border-bottom-color: #3b82f6;
+  box-shadow: 0 2px 0 0 #3b82f6;
+}
+
+.textarea--standard:hover:not(:disabled):not(:read-only) {
+  border-bottom-color: #9ca3af;
+}
+
+/* 크기별 스타일 */
+.textarea--small {
+  padding: 8px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+  min-height: 60px;
+}
+
+.textarea--medium {
+  padding: 10px 12px;
+  font-size: 14px;
+  border-radius: 8px;
+  min-height: 80px;
+}
+
+.textarea--large {
+  padding: 12px 16px;
+  font-size: 16px;
+  border-radius: 8px;
+  min-height: 100px;
+}
+
+/* 리사이즈 옵션 */
+.textarea--resize-none {
+  resize: none;
+}
+
+.textarea--resize-vertical {
+  resize: vertical;
+}
+
+.textarea--resize-horizontal {
+  resize: horizontal;
+}
+
+.textarea--resize-both {
+  resize: both;
+}
+
+/* 에러 상태 */
+.textarea--error {
+  border-color: #ef4444 !important;
+}
+
+.textarea--error:focus {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+}
+
+/* 비활성화 상태 */
+.textarea--disabled {
+  background-color: #f9fafb !important;
+  color: #9ca3af !important;
+  cursor: not-allowed !important;
+  border-color: #e5e7eb !important;
+  resize: none !important;
+}
+
+.textarea--disabled:hover {
+  border-color: #e5e7eb !important;
+}
+
+.textarea--disabled::placeholder {
+  color: #d1d5db !important;
+}
+
+/* 읽기 전용 상태 */
+.textarea--readonly {
+  background-color: #f9fafb !important;
+  cursor: default !important;
+  resize: none !important;
+}
+
+.textarea--readonly:focus {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+}
+
+/* 정보 영역 */
+.textarea__info {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+  min-height: 16px;
+}
+
+.textarea__char-count {
+  font-size: 12px;
+  color: #6b7280;
+  font-variant-numeric: tabular-nums;
+}
+
+.textarea--error + .textarea__info .textarea__char-count {
+  color: #ef4444;
+}
+
+/* 도움말 텍스트 */
+.textarea__helper-text {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+.textarea__helper-text--error {
+  color: #ef4444;
+}
+
+/* 플레이스홀더 스타일 */
+.textarea__field::placeholder {
+  color: #9ca3af;
+  opacity: 1;
+}
+
+.textarea__field:disabled::placeholder {
+  color: #d1d5db;
+}
+
+/* 포커스 상태 */
+.textarea__field:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* 스크롤바 스타일 (Webkit 브라우저) */
+.textarea__field::-webkit-scrollbar {
+  width: 8px;
+}
+
+.textarea__field::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.textarea__field::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.textarea__field::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .textarea--small {
+    padding: 6px 8px;
+    font-size: 12px;
+    min-height: 50px;
+  }
+  
+  .textarea--medium {
+    padding: 8px 10px;
+    font-size: 13px;
+    min-height: 70px;
+  }
+  
+  .textarea--large {
+    padding: 10px 12px;
+    font-size: 14px;
+    min-height: 90px;
+  }
+}
+
+/* 접근성을 위한 고대비 모드 지원 */
+@media (prefers-contrast: high) {
+  .textarea--outlined {
+    border-width: 3px;
+  }
+  
+  .textarea__field:focus-visible {
+    outline-width: 3px;
+  }
+}
+
+/* 다크 모드 지원 */
+@media (prefers-color-scheme: dark) {
+  .textarea__label {
+    color: #e5e7eb;
+  }
+  
+  .textarea__field {
+    background: #374151;
+    color: #f9fafb;
+    border-color: #6b7280;
+  }
+  
+  .textarea--outlined {
+    background: #374151;
+    border-color: #6b7280;
+  }
+  
+  .textarea--filled {
+    background: #4b5563;
+    border-bottom-color: #6b7280;
+  }
+  
+  .textarea--filled:focus {
+    background: #374151;
+  }
+  
+  .textarea--filled:hover:not(:disabled):not(:read-only) {
+    background: #374151;
+  }
+  
+  .textarea--standard {
+    border-bottom-color: #6b7280;
+  }
+  
+  .textarea--disabled {
+    background-color: #1f2937 !important;
+    color: #6b7280 !important;
+    border-color: #4b5563 !important;
+  }
+  
+  .textarea--readonly {
+    background-color: #1f2937 !important;
+  }
+  
+  .textarea__char-count {
+    color: #d1d5db;
+  }
+  
+  .textarea__helper-text {
+    color: #d1d5db;
+  }
+  
+  .textarea__field::placeholder {
+    color: #6b7280;
+  }
+  
+  .textarea__field:disabled::placeholder {
+    color: #4b5563;
+  }
+  
+  .textarea__field::-webkit-scrollbar-track {
+    background: #1f2937;
+  }
+  
+  .textarea__field::-webkit-scrollbar-thumb {
+    background: #4b5563;
+  }
+  
+  .textarea__field::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
+  }
+}
