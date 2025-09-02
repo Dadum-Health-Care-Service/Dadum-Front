@@ -62,6 +62,7 @@ const Home = () => {
             <Col key={routine.id} lg={4} md={6} className="mb-3">
               <CardComponent
                 variant="primary"
+                title={routine.title}
                 className={styles.routineCard}
                 onClick={() => console.log(`루틴 ${routine.id} 클릭`)}
               >

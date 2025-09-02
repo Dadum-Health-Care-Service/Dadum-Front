@@ -147,6 +147,7 @@ const Routine = () => {
           <div key={routine.id} className={styles.routineCard}>
             <CardComponent
               variant={routine.completed ? "success" : "primary"}
+              title={routine.title}
               className={styles.routineCardComponent}
               badge={routine.completed ? "완료" : "진행중"}
             >

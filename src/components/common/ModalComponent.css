@@ -49,6 +49,8 @@
   transition: all 0.3s ease;
   animation: modalSlideIn 0.3s ease-out;
   box-sizing: border-box;
+  /* 모달 내부 레이아웃 개선 */
+  max-height: 90vh;
 }
 
 /* 모달 애니메이션 */
@@ -175,6 +177,30 @@
   max-height: calc(100% - 120px);
   min-height: 0;
   flex-shrink: 1;
+  /* 스크롤바 스타일링 및 스크롤 동작 개선 */
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+  /* 스크롤 시 하단 여백 추가 */
+  padding-bottom: 80px;
+}
+
+/* 웹킷 스크롤바 스타일링 */
+.modal__content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal__content::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.modal__content::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.modal__content::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 /* 모달 섹션 */
@@ -190,13 +216,33 @@
 .modal__actions {
   display: flex;
   gap: 12px;
-  padding: 10px 24px 10px 24px;
+  padding: 24px 24px 16px 24px;
   border-top: 1px solid #e5e7eb;
   background: #ffffff;
+  flex-shrink: 0;
+  /* 액션 영역을 하단에 고정 */
   position: sticky;
   bottom: 0;
   margin-top: auto;
+  /* 액션 영역을 더 명확하게 구분 */
+  /*box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);*/
+  z-index: 10;
+  /* Header와 동일한 너비와 높이 설정 */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 모달 푸터 */
+.modal__footer {
   flex-shrink: 0;
+  border-top: 1px solid #e5e7eb;
+  background: #ffffff;
+  /* Footer 영역을 더 명확하게 구분 */
+  /*box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);*/
+  z-index: 10;
+  /* Header와 동일한 너비와 높이 설정 */
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .modal__actions--left {
@@ -225,7 +271,7 @@
 }
 
 .modal__actions {
-  padding: 12px 20px 20px 20px;
+  padding: 20px 20px 12px 20px;
 }
 
 .modal__title {

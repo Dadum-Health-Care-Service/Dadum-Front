@@ -1,43 +1,90 @@
 # ModalComponent
 
-공통 컴포넌트들의 스타일을 참고하여 일관된 디자인으로 제작된 모달 컴포넌트입니다.
+모달 다이얼로그를 쉽게 구현할 수 있는 공통 컴포넌트입니다.
 
 ## 주요 특징
 
-- **일관된 디자인**: HeaderComponent, ContainerComponent와 동일한 디자인 언어
-- **접근성**: 키보드 네비게이션, 스크린 리더 지원
-- **반응형**: 모든 화면 크기에서 최적화
+- **간단한 사용법**: 최소한의 props로 모달 구현
+- **반응형 디자인**: 모든 화면 크기에서 최적화
+- **접근성 지원**: 키보드 네비게이션 및 스크린 리더 지원
 - **커스터마이징**: 크기, 스타일, 동작 방식 조정 가능
-- **애니메이션**: 부드러운 열기/닫기 효과
-- **다크 모드**: 시스템 설정에 따른 자동 테마 전환
+- **TypeScript 친화적**: 명확한 타입 정의와 상수 제공
+
+## 기본 사용법
+
+```jsx
+import ModalComponent from "./ModalComponent";
+
+const MyComponent = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <ModalComponent
+      isOpen={isOpen}
+      onClose={() => setIsOpen(false)}
+      title="모달 제목"
+      subtitle="모달 부제목"
+    >
+      <p>모달 내용입니다.</p>
+    </ModalComponent>
+  );
+};
+```
 
 ## Props
 
-| Prop                  | Type                                              | Default   | Description                |
-| --------------------- | ------------------------------------------------- | --------- | -------------------------- |
-| `isOpen`              | boolean                                           | -         | 모달 열림/닫힘 상태 (필수) |
-| `onClose`             | function                                          | -         | 모달 닫기 함수 (필수)      |
-| `title`               | string                                            | ""        | 모달 제목                  |
-| `subtitle`            | string                                            | ""        | 모달 부제목                |
-| `children`            | ReactNode                                         | -         | 모달 내용                  |
-| `size`                | "small" \| "medium" \| "large"                    | "medium"  | 모달 크기                  |
-| `variant`             | "default" \| "elevated" \| "outlined" \| "filled" | "default" | 모달 스타일                |
-| `showCloseButton`     | boolean                                           | true      | 닫기 버튼 표시 여부        |
-| `closeOnOverlayClick` | boolean                                           | true      | 오버레이 클릭 시 닫기 여부 |
-| `className`           | string                                            | ""        | 추가 CSS 클래스            |
+### 필수 Props
 
-## 크기별 스타일
+| Prop      | 타입       | 설명                |
+| --------- | ---------- | ------------------- |
+| `isOpen`  | `boolean`  | 모달 열림/닫힘 상태 |
+| `onClose` | `function` | 모달 닫기 함수      |
 
-- **small**: 400px × 200px (최소)
-- **medium**: 600px × 300px (최소)
-- **large**: 800px × 400px (최소)
+### 선택 Props
 
-## Variant별 스타일
+| Prop                  | 타입        | 기본값      | 설명                                                      |
+| --------------------- | ----------- | ----------- | --------------------------------------------------------- |
+| `title`               | `string`    | `""`        | 모달 제목                                                 |
+| `subtitle`            | `string`    | `""`        | 모달 부제목                                               |
+| `children`            | `ReactNode` | -           | 모달 내용                                                 |
+| `footer`              | `ReactNode` | -           | 모달 푸터 (주로 ModalActions 사용)                        |
+| `size`                | `string`    | `"medium"`  | 모달 크기 (`small`, `medium`, `large`)                    |
+| `variant`             | `string`    | `"default"` | 모달 스타일 (`default`, `elevated`, `outlined`, `filled`) |
+| `showCloseButton`     | `boolean`   | `true`      | 닫기 버튼 표시 여부                                       |
+| `closeOnOverlayClick` | `boolean`   | `true`      | 오버레이 클릭 시 닫기 여부                                |
+| `className`           | `string`    | `""`        | 추가 CSS 클래스                                           |
 
-- **default**: 기본 스타일, 투명 테두리
-- **elevated**: 그림자 강화, 입체감 있는 디자인
-- **outlined**: 테두리 있는 스타일
-- **filled**: 배경색이 채워진 스타일
+## 상수 사용법
+
+타입 안전성을 위해 상수를 사용하는 것을 권장합니다:
+
+```jsx
+import ModalComponent from "./ModalComponent";
+
+// 크기 상수 사용
+<ModalComponent
+  size={ModalComponent.SIZES.LARGE}
+  variant={ModalComponent.VARIANTS.ELEVATED}
+  // ... 기타 props
+>
+  내용
+</ModalComponent>;
+```
+
+### 사용 가능한 상수
+
+#### 크기 (SIZES)
+
+- `ModalComponent.SIZES.SMALL` - 작은 모달
+- `ModalComponent.SIZES.MEDIUM` - 중간 모달 (기본값)
+- `ModalComponent.SIZES.LARGE` - 큰 모달
+
+#### 스타일 (VARIANTS)
+
+- `ModalComponent.VARIANTS.DEFAULT` - 기본 스타일 (기본값)
+- `ModalComponent.VARIANTS.ELEVATED` - 그림자 강화
+- `ModalComponent.VARIANTS.OUTLINED` - 테두리 강조
+- `ModalComponent.VARIANTS.FILLED` - 배경색 채움
 
 ## 하위 컴포넌트
 
@@ -47,6 +94,7 @@
 
 ```jsx
 <ModalComponent.Section>
+  <h3>섹션 제목</h3>
   <p>섹션 내용</p>
 </ModalComponent.Section>
 ```
@@ -57,34 +105,97 @@
 
 ```jsx
 <ModalComponent.Actions align="right">
-  <ButtonComponent variant="outline-secondary">취소</ButtonComponent>
-  <ButtonComponent variant="primary">확인</ButtonComponent>
+  <ButtonComponent variant="secondary" onClick={onCancel}>
+    취소
+  </ButtonComponent>
+  <ButtonComponent variant="primary" onClick={onSave}>
+    저장
+  </ButtonComponent>
 </ModalComponent.Actions>
 ```
 
-`align` prop으로 버튼 정렬을 조정할 수 있습니다:
+#### Actions Props
 
-- `"left"`: 왼쪽 정렬
-- `"center"`: 가운데 정렬
-- `"right"`: 오른쪽 정렬 (기본값)
+| Prop       | 타입        | 기본값    | 설명                                  |
+| ---------- | ----------- | --------- | ------------------------------------- |
+| `align`    | `string`    | `"right"` | 버튼 정렬 (`left`, `center`, `right`) |
+| `children` | `ReactNode` | -         | 액션 버튼들                           |
+
+## Footer 사용법
+
+`footer` prop을 사용하여 모달 하단에 고정된 액션 영역을 만들 수 있습니다:
+
+```jsx
+<ModalComponent
+  isOpen={isOpen}
+  onClose={onClose}
+  footer={
+    <ModalComponent.Actions>
+      <ButtonComponent variant="primary" onClick={onSave}>
+        저장
+      </ButtonComponent>
+      <ButtonComponent variant="secondary" onClick={onClose}>
+        취소
+      </ButtonComponent>
+    </ModalComponent.Actions>
+  }
+>
+  모달 내용
+</ModalComponent>
+```
+
+## 이벤트 처리
+
+### 키보드 이벤트
+
+- **ESC 키**: 모달 닫기
+- **Tab 키**: 모달 내부 요소 간 이동
+
+### 마우스 이벤트
+
+- **오버레이 클릭**: 모달 닫기 (설정 가능)
+- **모달 내부 클릭**: 이벤트 전파 방지
+
+## 접근성
+
+- `aria-label` 속성으로 닫기 버튼 설명
+- `tabIndex` 설정으로 키보드 포커스 관리
+- 스크린 리더 지원을 위한 시맨틱 마크업
+
+## 반응형 디자인
+
+모든 화면 크기에서 최적화된 경험을 제공합니다:
+
+- **모바일**: 전체 화면 활용, 터치 친화적
+- **태블릿**: 적절한 여백과 크기 조정
+- **데스크톱**: 최대 너비 제한으로 가독성 향상
+
+## CSS 클래스 구조
+
+```css
+.modal-overlay          /* 모달 배경 오버레이 */
+/* 모달 배경 오버레이 */
+├── .modal              /* 모달 컨테이너 */
+│   ├── .modal--small  /* 작은 크기 */
+│   ├── .modal--medium /* 중간 크기 */
+│   ├── .modal--large  /* 큰 크기 */
+│   ├── .modal--default /* 기본 스타일 */
+│   ├── .modal--elevated /* 그림자 강화 */
+│   ├── .modal--outlined /* 테두리 강조 */
+│   ├── .modal--filled /* 배경색 채움 */
+│   ├── .modal__header /* 헤더 영역 */
+│   ├── .modal__content /* 내용 영역 */
+│   └── .modal__footer; /* 푸터 영역 */
+```
 
 ## 사용 예시
 
 ### 기본 모달
 
 ```jsx
-import ModalComponent from "./ModalComponent";
-
-const [isOpen, setIsOpen] = useState(false);
-
-<ModalComponent
-  isOpen={isOpen}
-  onClose={() => setIsOpen(false)}
-  title="알림"
-  subtitle="중요한 메시지입니다"
->
-  <p>모달 내용을 여기에 작성하세요.</p>
-</ModalComponent>;
+<ModalComponent isOpen={isOpen} onClose={onClose} title="알림">
+  <p>작업이 완료되었습니다.</p>
+</ModalComponent>
 ```
 
 ### 폼 모달
@@ -92,29 +203,27 @@ const [isOpen, setIsOpen] = useState(false);
 ```jsx
 <ModalComponent
   isOpen={isOpen}
-  onClose={() => setIsOpen(false)}
-  title="사용자 정보"
-  subtitle="새로운 사용자를 추가합니다"
-  size="large"
-  variant="elevated"
->
-  <form onSubmit={handleSubmit}>
-    <ModalComponent.Section>
-      <InputComponent placeholder="이름" />
-      <InputComponent placeholder="이메일" type="email" />
-    </ModalComponent.Section>
-
+  onClose={onClose}
+  title="사용자 정보 입력"
+  size={ModalComponent.SIZES.LARGE}
+  variant={ModalComponent.VARIANTS.ELEVATED}
+  footer={
     <ModalComponent.Actions>
-      <ButtonComponent
-        variant="outline-secondary"
-        onClick={() => setIsOpen(false)}
-      >
+      <ButtonComponent variant="primary" onClick={onSubmit}>
+        제출
+      </ButtonComponent>
+      <ButtonComponent variant="secondary" onClick={onClose}>
         취소
       </ButtonComponent>
-      <ButtonComponent variant="primary" type="submit">
-        저장
-      </ButtonComponent>
     </ModalComponent.Actions>
+  }
+>
+  <form>
+    <ModalComponent.Section>
+      <label>
+        이름: <input type="text" />
+      </label>
+    </ModalComponent.Section>
   </form>
 </ModalComponent>
 ```
@@ -124,53 +233,34 @@ const [isOpen, setIsOpen] = useState(false);
 ```jsx
 <ModalComponent
   isOpen={isOpen}
-  onClose={() => setIsOpen(false)}
+  onClose={onClose}
   title="삭제 확인"
-  subtitle="이 작업은 되돌릴 수 없습니다"
-  size="small"
-  variant="outlined"
+  size={ModalComponent.SIZES.SMALL}
+  variant={ModalComponent.VARIANTS.OUTLINED}
+  footer={
+    <ModalComponent.Actions>
+      <ButtonComponent variant="danger" onClick={onConfirm}>
+        삭제
+      </ButtonComponent>
+      <ButtonComponent variant="secondary" onClick={onClose}>
+        취소
+      </ButtonComponent>
+    </ModalComponent.Actions>
+  }
 >
-  <p>정말로 삭제하시겠습니까?</p>
-
-  <ModalComponent.Actions>
-    <ButtonComponent
-      variant="outline-secondary"
-      onClick={() => setIsOpen(false)}
-    >
-      취소
-    </ButtonComponent>
-    <ButtonComponent variant="danger" onClick={handleDelete}>
-      삭제
-    </ButtonComponent>
-  </ModalComponent.Actions>
+  <p>정말로 이 항목을 삭제하시겠습니까?</p>
 </ModalComponent>
 ```
 
-## 접근성 기능
+## 주의사항
 
-- **키보드 네비게이션**: ESC 키로 모달 닫기
-- **포커스 관리**: 모달 열림 시 자동 포커스
-- **스크린 리더**: 적절한 ARIA 레이블 및 역할
-- **오버레이 클릭**: 배경 클릭 시 모달 닫기
+1. **body 스크롤**: 모달이 열리면 자동으로 body 스크롤을 비활성화합니다.
+2. **z-index**: 모달은 높은 z-index 값을 사용하여 다른 요소 위에 표시됩니다.
+3. **포커스 관리**: 모달이 열리면 첫 번째 포커스 가능한 요소에 포커스가 이동합니다.
+4. **메모리 누수 방지**: 컴포넌트가 언마운트될 때 body 스타일을 자동으로 복원합니다.
 
-## 반응형 디자인
+## 성능 최적화
 
-- **데스크톱**: 최대 너비 제한, 중앙 정렬
-- **태블릿**: 화면 너비에 맞춘 조정
-- **모바일**: 전체 화면 활용, 세로 스택 레이아웃
-
-## 스타일 커스터마이징
-
-CSS 변수나 클래스 오버라이드를 통해 추가 스타일링이 가능합니다:
-
-```css
-.modal {
-  --modal-border-radius: 16px;
-  --modal-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
-}
-
-.modal--custom {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
-```
+- 조건부 렌더링으로 불필요한 DOM 생성 방지
+- `useEffect`를 사용한 사이드 이펙트 관리
+- 이벤트 핸들러 최적화

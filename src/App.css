@@ -16,6 +16,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* 커스텀 SelectComponent는 별도 CSS 파일에서 관리 */
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

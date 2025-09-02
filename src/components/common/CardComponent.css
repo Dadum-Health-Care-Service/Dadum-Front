@@ -37,6 +37,11 @@
   line-height: 1.4;
 }
 
+.card__button-container {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .card__button {
   background: white;
   border: 2px solid #2196f3;
