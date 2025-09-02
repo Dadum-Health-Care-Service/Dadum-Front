@@ -1,5 +1,5 @@
 import React from "react";
-import "./HeaderComponent.css";
+import styles from "./HeaderComponent.module.css";
 
 const HeaderComponent = ({
   children,
@@ -15,57 +15,59 @@ const HeaderComponent = ({
   const getVariantClass = () => {
     switch (variant) {
       case "elevated":
-        return "header--elevated";
+        return styles["header--elevated"];
       case "outlined":
-        return "header--outlined";
+        return styles["header--outlined"];
       case "filled":
-        return "header--filled";
+        return styles["header--filled"];
       default:
-        return "header--default";
+        return styles["header--default"];
     }
   };
 
   const getSizeClass = () => {
     switch (size) {
       case "small":
-        return "header--small";
+        return styles["header--small"];
       case "large":
-        return "header--large";
+        return styles["header--large"];
       default:
-        return "header--medium";
+        return styles["header--medium"];
     }
   };
 
   const getAlignClass = () => {
     switch (align) {
       case "center":
-        return "header--center";
+        return styles["header--center"];
       case "right":
-        return "header--right";
+        return styles["header--right"];
       default:
-        return "header--left";
+        return styles["header--left"];
     }
   };
 
   const headerClasses = [
-    "header",
+    styles.header,
     getVariantClass(),
     getSizeClass(),
     getAlignClass(),
-    sticky ? "header--sticky" : "",
+    sticky ? styles["header--sticky"] : "",
     className,
   ]
     .filter(Boolean)
     .join(" ");
 
   return (
-    <header className={`${headerClasses} header HeaderComponent`} {...props}>
-      <div className="header__content">
-        {title && <h1 className="header__title">{title}</h1>}
+    <header className={headerClasses} {...props}>
+      <div className={styles["header__content"]}>
+        {title && <h1 className={styles["header__title"]}>{title}</h1>}
 
-        {subtitle && <p className="header__subtitle">{subtitle}</p>}
+        {subtitle && <p className={styles["header__subtitle"]}>{subtitle}</p>}
 
-        {children && <div className="header__actions">{children}</div>}
+        {children && (
+          <div className={styles["header__actions"]}>{children}</div>
+        )}
       </div>
     </header>
   );
@@ -74,7 +76,7 @@ const HeaderComponent = ({
 // HeaderSection 컴포넌트
 const HeaderSection = ({ children, className = "", ...props }) => {
   return (
-    <div className={`header__section ${className}`} {...props}>
+    <div className={`${styles["header__section"]} ${className}`} {...props}>
       {children}
     </div>
   );
@@ -83,9 +85,11 @@ const HeaderSection = ({ children, className = "", ...props }) => {
 // HeaderBrand 컴포넌트
 const HeaderBrand = ({ logo, brandName, className = "", ...props }) => {
   return (
-    <div className={`header__brand ${className}`} {...props}>
-      {logo && <div className="header__logo">{logo}</div>}
-      {brandName && <h2 className="header__brand-name">{brandName}</h2>}
+    <div className={`${styles["header__brand"]} ${className}`} {...props}>
+      {logo && <div className={styles["header__logo"]}>{logo}</div>}
+      {brandName && (
+        <h2 className={styles["header__brand-name"]}>{brandName}</h2>
+      )}
     </div>
   );
 };
@@ -93,7 +97,7 @@ const HeaderBrand = ({ logo, brandName, className = "", ...props }) => {
 // HeaderNavigation 컴포넌트
 const HeaderNavigation = ({ children, className = "", ...props }) => {
   return (
-    <nav className={`header__navigation ${className}`} {...props}>
+    <nav className={`${styles["header__navigation"]} ${className}`} {...props}>
       {children}
     </nav>
   );
@@ -110,9 +114,9 @@ const HeaderMenuItem = ({
   ...props
 }) => {
   const itemClasses = [
-    "header__menu-item",
-    active ? "header__menu-item--active" : "",
-    disabled ? "header__menu-item--disabled" : "",
+    styles["header__menu-item"],
+    active ? styles["header__menu-item--active"] : "",
+    disabled ? styles["header__menu-item--disabled"] : "",
     className,
   ]
     .filter(Boolean)

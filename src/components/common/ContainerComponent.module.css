@@ -4,6 +4,7 @@
     "Ubuntu", "Cantarell", sans-serif;
   transition: all 0.2s ease;
   box-sizing: border-box;
+  width: 100%;
 }
 
 /* variant별 스타일 */

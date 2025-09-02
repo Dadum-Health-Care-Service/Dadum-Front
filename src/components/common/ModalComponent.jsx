@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import "./ModalComponent.css";
+import styles from "./ModalComponent.module.css";
 
 // 모달 크기 상수
 const MODAL_SIZES = {
@@ -16,25 +16,25 @@ const MODAL_VARIANTS = {
   FILLED: "filled",
 };
 
-// 모달 크기별 CSS 클래스 매핑
+// 모달 크기별 CSS 클래스 매핑 (CSS Modules 사용)
 const SIZE_CLASSES = {
-  [MODAL_SIZES.SMALL]: "modal--small",
-  [MODAL_SIZES.MEDIUM]: "modal--medium",
-  [MODAL_SIZES.LARGE]: "modal--large",
+  [MODAL_SIZES.SMALL]: styles["modal--small"],
+  [MODAL_SIZES.MEDIUM]: styles["modal--medium"],
+  [MODAL_SIZES.LARGE]: styles["modal--large"],
 };
 
-// 모달 스타일별 CSS 클래스 매핑
+// 모달 스타일별 CSS 클래스 매핑 (CSS Modules 사용)
 const VARIANT_CLASSES = {
-  [MODAL_VARIANTS.DEFAULT]: "modal--default",
-  [MODAL_VARIANTS.ELEVATED]: "modal--elevated",
-  [MODAL_VARIANTS.OUTLINED]: "modal--outlined",
-  [MODAL_VARIANTS.FILLED]: "modal--filled",
+  [MODAL_VARIANTS.DEFAULT]: styles["modal--default"],
+  [MODAL_VARIANTS.ELEVATED]: styles["modal--elevated"],
+  [MODAL_VARIANTS.OUTLINED]: styles["modal--outlined"],
+  [MODAL_VARIANTS.FILLED]: styles["modal--filled"],
 };
 
 // 유틸리티 함수: CSS 클래스 생성
 const createModalClasses = (size, variant, className) => {
   const classes = [
-    "modal",
+    styles.modal,
     SIZE_CLASSES[size] || SIZE_CLASSES[MODAL_SIZES.MEDIUM],
     VARIANT_CLASSES[variant] || VARIANT_CLASSES[MODAL_VARIANTS.DEFAULT],
     className,
@@ -65,6 +65,8 @@ const ModalComponent = ({
   showCloseButton = true,
   closeOnOverlayClick = true,
   className = "",
+  // 외부에서 넘어올 수 있으나 DOM으로 전달되면 안 됨
+  hasFooter, // eslint-disable-line no-unused-vars
   ...props
 }) => {
   // 모달 열림/닫힘에 따른 body 스타일 관리
@@ -76,9 +78,9 @@ const ModalComponent = ({
     };
   }, [isOpen]);
 
-  // 오버레이 클릭 처리
+  // 오버레이 클릭 처리 (className 비교 대신 currentTarget 비교)
   const handleOverlayClick = (e) => {
-    if (closeOnOverlayClick && e.target.classList.contains("modal-overlay")) {
+    if (closeOnOverlayClick && e.target === e.currentTarget) {
       onClose();
     }
   };
@@ -106,7 +108,7 @@ const ModalComponent = ({
 
   return (
     <div
-      className="modal-overlay"
+      className={styles["modal-overlay"]}
       onClick={handleOverlayClick}
       onKeyDown={handleKeyDown}
       tabIndex={-1}
@@ -114,15 +116,17 @@ const ModalComponent = ({
       <div className={modalClasses} onClick={handleModalClick} {...props}>
         {/* 헤더 영역 */}
         {shouldShowHeader && (
-          <div className="modal__header">
-            <div className="modal__header-content">
-              {title && <h2 className="modal__title">{title}</h2>}
-              {subtitle && <p className="modal__subtitle">{subtitle}</p>}
+          <div className={styles["modal__header"]}>
+            <div className={styles["modal__header-content"]}>
+              {title && <h2 className={styles["modal__title"]}>{title}</h2>}
+              {subtitle && (
+                <p className={styles["modal__subtitle"]}>{subtitle}</p>
+              )}
             </div>
             {showCloseButton && (
               <button
                 type="button"
-                className="modal__close-button"
+                className={styles["modal__close-button"]}
                 onClick={onClose}
                 aria-label="닫기"
               >
@@ -133,10 +137,10 @@ const ModalComponent = ({
         )}
 
         {/* 콘텐츠 영역 */}
-        <div className="modal__content">{children}</div>
+        <div className={styles["modal__content"]}>{children}</div>
 
         {/* 푸터 영역 */}
-        {footer && <div className="modal__footer">{footer}</div>}
+        {footer && <div className={styles["modal__footer"]}>{footer}</div>}
       </div>
     </div>
   );
@@ -145,7 +149,7 @@ const ModalComponent = ({
 // 모달 섹션 컴포넌트
 const ModalSection = ({ children, className = "", ...props }) => {
   return (
-    <div className={`modal__section ${className}`} {...props}>
+    <div className={`${styles["modal__section"]} ${className}`} {...props}>
       {children}
     </div>
   );
@@ -158,9 +162,12 @@ const ModalActions = ({
   align = "right", // left, center, right
   ...props
 }) => {
-  const alignClass = `modal__actions--${align}`;
+  const alignClass = styles[`modal__actions--${align}`];
   return (
-    <div className={`modal__actions ${alignClass} ${className}`} {...props}>
+    <div
+      className={`${styles["modal__actions"]} ${alignClass} ${className}`}
+      {...props}
+    >
       {children}
     </div>
   );

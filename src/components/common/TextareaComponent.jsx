@@ -1,79 +1,82 @@
-import React from 'react';
-import './TextareaComponent.css';
+import React from "react";
+import styles from "./TextareaComponent.module.css";
 
 const TextareaComponent = ({
-  label = '',
+  label = "",
   value,
   onChange,
-  placeholder = '',
-  variant = 'outlined', // outlined, filled, standard
-  size = 'medium', // small, medium, large
+  placeholder = "",
+  variant = "outlined", // outlined, filled, standard
+  size = "medium", // small, medium, large
   disabled = false,
   required = false,
   error = false,
-  helperText = '',
-  className = '',
+  helperText = "",
+  className = "",
   rows = 4,
   cols,
   maxLength,
-  resize = 'vertical', // none, both, horizontal, vertical
+  resize = "vertical", // none, both, horizontal, vertical
   autoFocus = false,
   readOnly = false,
   ...props
 }) => {
   const getVariantClass = () => {
     switch (variant) {
-      case 'filled':
-        return 'textarea--filled';
-      case 'standard':
-        return 'textarea--standard';
+      case "filled":
+        return styles["textarea--filled"];
+      case "standard":
+        return styles["textarea--standard"];
       default:
-        return 'textarea--outlined';
+        return styles["textarea--outlined"];
     }
   };
 
   const getSizeClass = () => {
     switch (size) {
-      case 'small':
-        return 'textarea--small';
-      case 'large':
-        return 'textarea--large';
+      case "small":
+        return styles["textarea--small"];
+      case "large":
+        return styles["textarea--large"];
       default:
-        return 'textarea--medium';
+        return styles["textarea--medium"];
     }
   };
 
   const getResizeClass = () => {
     switch (resize) {
-      case 'none':
-        return 'textarea--resize-none';
-      case 'both':
-        return 'textarea--resize-both';
-      case 'horizontal':
-        return 'textarea--resize-horizontal';
+      case "none":
+        return styles["textarea--resize-none"];
+      case "both":
+        return styles["textarea--resize-both"];
+      case "horizontal":
+        return styles["textarea--resize-horizontal"];
       default:
-        return 'textarea--resize-vertical';
+        return styles["textarea--resize-vertical"];
     }
   };
 
   const textareaClasses = [
-    'textarea__field',
+    styles["textarea__field"],
     getVariantClass(),
     getSizeClass(),
     getResizeClass(),
-    error ? 'textarea--error' : '',
-    disabled ? 'textarea--disabled' : '',
-    readOnly ? 'textarea--readonly' : ''
-  ].filter(Boolean).join(' ');
+    error ? styles["textarea--error"] : "",
+    disabled ? styles["textarea--disabled"] : "",
+    readOnly ? styles["textarea--readonly"] : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
-    <div className={`textarea-wrapper ${className}`}>
+    <div className={`${styles["textarea-wrapper"]} ${className}`}>
       {label && (
-        <label htmlFor={label} className="textarea__label">
-          {label} {required && <span className="textarea__required">*</span>}
+        <label htmlFor={label} className={styles["textarea__label"]}>
+          {label}{" "}
+          {required && <span className={styles["textarea__required"]}>*</span>}
         </label>
       )}
-      
+
       <textarea
         id={label}
         value={value}
@@ -87,21 +90,26 @@ const TextareaComponent = ({
         cols={cols}
         maxLength={maxLength}
         className={textareaClasses}
-        aria-invalid={error ? 'true' : 'false'}
+        aria-invalid={error ? "true" : "false"}
         aria-describedby={helperText ? `${label}-helper-text` : undefined}
         {...props}
       />
-      
-      <div className="textarea__info">
+
+      <div className={styles["textarea__info"]}>
         {maxLength && (
-          <span className="textarea__char-count">
+          <span className={styles["textarea__char-count"]}>
             {value ? value.length : 0}/{maxLength}
           </span>
         )}
       </div>
-      
+
       {helperText && (
-        <p id={`${label}-helper-text`} className={`textarea__helper-text ${error ? 'textarea__helper-text--error' : ''}`}>
+        <p
+          id={`${label}-helper-text`}
+          className={`${styles["textarea__helper-text"]} ${
+            error ? styles["textarea__helper-text--error"] : ""
+          }`}
+        >
           {helperText}
         </p>
       )}
@@ -111,10 +119,10 @@ const TextareaComponent = ({
 
 // 사용 예시 컴포넌트
 const TextareaExample = () => {
-  const [description, setDescription] = React.useState('');
-  const [feedback, setFeedback] = React.useState('');
-  const [notes, setNotes] = React.useState('');
-  const [review, setReview] = React.useState('');
+  const [description, setDescription] = React.useState("");
+  const [feedback, setFeedback] = React.useState("");
+  const [notes, setNotes] = React.useState("");
+  const [review, setReview] = React.useState("");
 
   const handleDescriptionChange = (e) => {
     setDescription(e.target.value);
@@ -133,11 +141,11 @@ const TextareaExample = () => {
   };
 
   return (
-    <div style={{ padding: '20px', maxWidth: '800px' }}>
+    <div style={{ padding: "20px", maxWidth: "800px" }}>
       <h2>TextareaComponent 사용 예시</h2>
-      
+
       <h3>1. 기본 Textarea</h3>
-      <div style={{ display: 'grid', gap: '20px', marginBottom: '30px' }}>
+      <div style={{ display: "grid", gap: "20px", marginBottom: "30px" }}>
         <TextareaComponent
           label="설명"
           value={description}
@@ -147,12 +155,12 @@ const TextareaExample = () => {
           rows={4}
           required
         />
-        
-        <p>입력된 내용: {description || '없음'}</p>
+
+        <p>입력된 내용: {description || "없음"}</p>
       </div>
 
       <h3>2. Variant별 Textarea</h3>
-      <div style={{ display: 'grid', gap: '20px', marginBottom: '30px' }}>
+      <div style={{ display: "grid", gap: "20px", marginBottom: "30px" }}>
         <TextareaComponent
           label="Outlined Textarea"
           variant="outlined"
@@ -161,7 +169,7 @@ const TextareaExample = () => {
           placeholder="피드백을 입력해주세요..."
           rows={3}
         />
-        
+
         <TextareaComponent
           label="Filled Textarea"
           variant="filled"
@@ -170,7 +178,7 @@ const TextareaExample = () => {
           placeholder="피드백을 입력해주세요..."
           rows={3}
         />
-        
+
         <TextareaComponent
           label="Standard Textarea"
           variant="standard"
@@ -182,7 +190,7 @@ const TextareaExample = () => {
       </div>
 
       <h3>3. 크기별 Textarea</h3>
-      <div style={{ display: 'grid', gap: '20px', marginBottom: '30px' }}>
+      <div style={{ display: "grid", gap: "20px", marginBottom: "30px" }}>
         <TextareaComponent
           label="Small Textarea"
           size="small"
@@ -191,7 +199,7 @@ const TextareaExample = () => {
           placeholder="간단한 메모..."
           rows={2}
         />
-        
+
         <TextareaComponent
           label="Medium Textarea"
           size="medium"
@@ -200,7 +208,7 @@ const TextareaExample = () => {
           placeholder="일반적인 내용..."
           rows={3}
         />
-        
+
         <TextareaComponent
           label="Large Textarea"
           size="large"
@@ -212,7 +220,7 @@ const TextareaExample = () => {
       </div>
 
       <h3>4. 리사이즈 옵션</h3>
-      <div style={{ display: 'grid', gap: '20px', marginBottom: '30px' }}>
+      <div style={{ display: "grid", gap: "20px", marginBottom: "30px" }}>
         <TextareaComponent
           label="리사이즈 불가"
           resize="none"
@@ -222,7 +230,7 @@ const TextareaExample = () => {
           rows={3}
           helperText="사용자가 크기를 조절할 수 없습니다"
         />
-        
+
         <TextareaComponent
           label="세로로만 리사이즈"
           resize="vertical"
@@ -232,7 +240,7 @@ const TextareaExample = () => {
           rows={3}
           helperText="세로 방향으로만 크기를 조절할 수 있습니다"
         />
-        
+
         <TextareaComponent
           label="가로로만 리사이즈"
           resize="horizontal"
@@ -242,7 +250,7 @@ const TextareaExample = () => {
           rows={3}
           helperText="가로 방향으로만 크기를 조절할 수 있습니다"
         />
-        
+
         <TextareaComponent
           label="양방향 리사이즈"
           resize="both"
@@ -255,7 +263,7 @@ const TextareaExample = () => {
       </div>
 
       <h3>5. 글자 수 제한과 특별한 상태</h3>
-      <div style={{ display: 'grid', gap: '20px', marginBottom: '30px' }}>
+      <div style={{ display: "grid", gap: "20px", marginBottom: "30px" }}>
         <TextareaComponent
           label="글자 수 제한 (최대 100자)"
           value={description}
@@ -265,7 +273,7 @@ const TextareaExample = () => {
           rows={4}
           helperText="제품에 대한 간단한 설명을 작성해주세요"
         />
-        
+
         <TextareaComponent
           label="에러 상태 Textarea"
           error
@@ -275,7 +283,7 @@ const TextareaExample = () => {
           required
           rows={3}
         />
-        
+
         <TextareaComponent
           label="비활성화된 Textarea"
           disabled
@@ -283,7 +291,7 @@ const TextareaExample = () => {
           helperText="현재 편집이 불가능한 상태입니다"
           rows={3}
         />
-        
+
         <TextareaComponent
           label="읽기 전용 Textarea"
           readOnly
@@ -294,7 +302,7 @@ const TextareaExample = () => {
       </div>
 
       <h3>6. 자동 포커스</h3>
-      <div style={{ display: 'grid', gap: '20px', marginBottom: '30px' }}>
+      <div style={{ display: "grid", gap: "20px", marginBottom: "30px" }}>
         <TextareaComponent
           label="자동 포커스 Textarea"
           autoFocus

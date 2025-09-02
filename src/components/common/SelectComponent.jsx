@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import "./SelectComponent.css";
+import styles from "./SelectComponent.module.css";
 
 const SelectComponent = ({
   children,
@@ -24,32 +24,32 @@ const SelectComponent = ({
   const getVariantClass = () => {
     switch (variant) {
       case "filled":
-        return "select--filled";
+        return styles["select--filled"];
       case "standard":
-        return "select--standard";
+        return styles["select--standard"];
       default:
-        return "select--outlined";
+        return styles["select--outlined"];
     }
   };
 
   const getSizeClass = () => {
     switch (size) {
       case "small":
-        return "select--small";
+        return styles["select--small"];
       case "large":
-        return "select--large";
+        return styles["select--large"];
       default:
-        return "select--medium";
+        return styles["select--medium"];
     }
   };
 
   const selectClasses = [
-    "select__field",
+    styles["select__field"],
     getVariantClass(),
     getSizeClass(),
-    error ? "select--error" : "",
-    disabled ? "select--disabled" : "",
-    isOpen ? "select--open" : "",
+    error ? styles["select--error"] : "",
+    disabled ? styles["select--disabled"] : "",
+    isOpen ? styles["select--open"] : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -106,14 +106,18 @@ const SelectComponent = ({
   };
 
   return (
-    <div className={`select-wrapper ${className}`} ref={dropdownRef}>
+    <div
+      className={`${styles["select-wrapper"]} ${className}`}
+      ref={dropdownRef}
+    >
       {label && (
-        <label htmlFor={label} className="select__label">
-          {label} {required && <span className="select__required">*</span>}
+        <label htmlFor={label} className={styles["select__label"]}>
+          {label}{" "}
+          {required && <span className={styles["select__required"]}>*</span>}
         </label>
       )}
 
-      <div className="select__custom-wrapper">
+      <div className={styles["select__custom-wrapper"]}>
         <div
           className={selectClasses}
           onClick={toggleDropdown}
@@ -124,18 +128,20 @@ const SelectComponent = ({
           aria-haspopup="listbox"
           aria-label={label || "선택"}
         >
-          <span className="select__selected-text">
+          <span className={styles["select__selected-text"]}>
             {selectedLabel || placeholder}
           </span>
-          <span className="select__arrow">▼</span>
+          <span className={styles["select__arrow"]}>▼</span>
         </div>
 
         {isOpen && (
-          <div className="select__dropdown">
-            <div className="select__dropdown-content">
+          <div className={styles["select__dropdown"]}>
+            <div className={styles["select__dropdown-content"]}>
               {!multiple && placeholder && (
                 <div
-                  className="select__option select__option--placeholder"
+                  className={
+                    styles["select__option select__option--placeholder"]
+                  }
                   onClick={() => handleOptionClick("", placeholder)}
                 >
                   {placeholder}
@@ -158,8 +164,8 @@ const SelectComponent = ({
       {helperText && (
         <p
           id={`${label}-helper-text`}
-          className={`select__helper-text ${
-            error ? "select__helper-text--error" : ""
+          className={`${styles["select__helper-text"]} ${
+            error ? styles["select__helper-text--error"] : ""
           }`}
         >
           {helperText}
@@ -187,9 +193,9 @@ const OptionComponent = ({
 
   return (
     <div
-      className={`select__option ${className} ${
-        selected ? "select__option--selected" : ""
-      } ${disabled ? "select__option--disabled" : ""}`}
+      className={`${styles["select__option"]} ${className} ${
+        selected ? styles["select__option--selected"] : ""
+      } ${disabled ? styles["select__option--disabled"] : ""}`}
       onClick={handleClick}
       role="option"
       aria-selected={selected}

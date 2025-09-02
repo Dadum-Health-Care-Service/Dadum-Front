@@ -1,5 +1,5 @@
 import React from "react";
-import "./ContainerComponent.css";
+import styles from "./ContainerComponent.module.css";
 
 const ContainerComponent = ({
   children,
@@ -16,24 +16,24 @@ const ContainerComponent = ({
   const getVariantClass = () => {
     switch (variant) {
       case "elevated":
-        return "container--elevated";
+        return styles["container--elevated"];
       case "outlined":
-        return "container--outlined";
+        return styles["container--outlined"];
       case "filled":
-        return "container--filled";
+        return styles["container--filled"];
       default:
-        return "container--default";
+        return styles["container--default"];
     }
   };
 
   const getSizeClass = () => {
     switch (size) {
       case "small":
-        return "container--small";
+        return styles["container--small"];
       case "large":
-        return "container--large";
+        return styles["container--large"];
       default:
-        return "container--medium";
+        return styles["container--medium"];
     }
   };
 
@@ -41,13 +41,13 @@ const ContainerComponent = ({
     if (padding === "auto") return "";
     switch (padding) {
       case "none":
-        return "container--padding-none";
+        return styles["container--padding-none"];
       case "small":
-        return "container--padding-small";
+        return styles["container--padding-small"];
       case "large":
-        return "container--padding-large";
+        return styles["container--padding-large"];
       default:
-        return "container--padding-medium";
+        return styles["container--padding-medium"];
     }
   };
 
@@ -55,11 +55,11 @@ const ContainerComponent = ({
     if (margin === "none") return "";
     switch (margin) {
       case "small":
-        return "container--margin-small";
+        return styles["container--margin-small"];
       case "large":
-        return "container--margin-large";
+        return styles["container--margin-large"];
       default:
-        return "container--margin-medium";
+        return styles["container--margin-medium"];
     }
   };
 
@@ -67,13 +67,13 @@ const ContainerComponent = ({
     if (borderRadius === "auto") return "";
     switch (borderRadius) {
       case "none":
-        return "container--radius-none";
+        return styles["container--radius-none"];
       case "small":
-        return "container--radius-small";
+        return styles["container--radius-small"];
       case "large":
-        return "container--radius-large";
+        return styles["container--radius-large"];
       default:
-        return "container--radius-medium";
+        return styles["container--radius-medium"];
     }
   };
 
@@ -81,25 +81,25 @@ const ContainerComponent = ({
     if (shadow === "auto") return "";
     switch (shadow) {
       case "none":
-        return "container--shadow-none";
+        return styles["container--shadow-none"];
       case "small":
-        return "container--shadow-small";
+        return styles["container--shadow-small"];
       case "large":
-        return "container--shadow-large";
+        return styles["container--shadow-large"];
       default:
-        return "container--shadow-medium";
+        return styles["container--shadow-medium"];
     }
   };
 
   const containerClasses = [
-    "container",
+    styles.container,
     getVariantClass(),
     getSizeClass(),
     getPaddingClass(),
     getMarginClass(),
     getBorderRadiusClass(),
     getShadowClass(),
-    disabled ? "container--disabled" : "",
+    disabled ? styles["container--disabled"] : "",
     className,
   ]
     .filter(Boolean)

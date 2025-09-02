@@ -4,7 +4,7 @@ import ButtonComponent from "./ButtonComponent";
 import InputComponent from "./InputComponent";
 import SelectComponent from "./SelectComponent";
 import TextareaComponent from "./TextareaComponent";
-import "./ModalExample.css";
+import styles from "./ModalExample.module.css";
 
 // 모달 타입별 설정을 객체로 분리하여 관리
 const MODAL_CONFIGS = {
@@ -201,30 +201,30 @@ const ExerciseSetRow = ({ set, exerciseId, onSetChange }) => {
   };
 
   return (
-    <div className="set-row">
+    <div className={styles["set-row"]}>
       <InputComponent
         value={set.setNumber}
         onChange={(e) => handleChange("setNumber", e.target.value)}
-        className="set-number-input"
+        className={styles["set-number-input"]}
         type="number"
         min="1"
       />
       <InputComponent
         value={set.reps}
         onChange={(e) => handleChange("reps", e.target.value)}
-        className="set-input"
+        className={styles["set-input"]}
         type="number"
       />
       <InputComponent
         value={set.weight}
         onChange={(e) => handleChange("weight", e.target.value)}
-        className="set-input"
+        className={styles["set-input"]}
         type="number"
       />
       <InputComponent
         value={set.rest}
         onChange={(e) => handleChange("rest", e.target.value)}
-        className="set-input"
+        className={styles["set-input"]}
         type="number"
       />
     </div>
@@ -234,15 +234,15 @@ const ExerciseSetRow = ({ set, exerciseId, onSetChange }) => {
 // 운동 카드 렌더링 컴포넌트
 const ExerciseCard = ({ exercise, onSetChange }) => {
   return (
-    <div key={exercise.id} className="exercise-card">
-      <div className="exercise-header">
-        <div className="exercise-icon">🏋️</div>
-        <div className="exercise-name">{exercise.name}</div>
-        <div className="exercise-category">{exercise.category}</div>
+    <div key={exercise.id} className={styles["exercise-card"]}>
+      <div className={styles["exercise-header"]}>
+        <div className={styles["exercise-icon"]}>🏋️</div>
+        <div className={styles["exercise-name"]}>{exercise.name}</div>
+        <div className={styles["exercise-category"]}>{exercise.category}</div>
       </div>
 
-      <div className="exercise-sets">
-        <div className="sets-header">
+      <div className={styles["exercise-sets"]}>
+        <div className={styles["sets-header"]}>
           <span>세트</span>
           <span>횟수</span>
           <span>중량(kg)</span>
@@ -408,27 +408,30 @@ const ModalExample = () => {
 
       case "workout":
         return (
-          <div className="workout-detail-modal">
+          <div className={styles["workout-detail-modal"]}>
             {/* 상단 요약 정보 */}
-            <div className="workout-summary">
-              <div className="summary-card">
-                <div className="summary-label">총 운동 시간</div>
-                <div className="summary-value">{workoutData.totalTime}</div>
+            <div className={styles["workout-summary"]}>
+              <div className={styles["summary-card"]}>
+                <div className={styles["summary-label"]}>총 운동 시간</div>
+                <div className={styles["summary-value"]}>
+                  {workoutData.totalTime}
+                </div>
               </div>
-              <div className="summary-card">
-                <div className="summary-label">총 세트 수</div>
-                <div className="summary-value">{workoutData.totalSets}</div>
+              <div className={styles["summary-card"]}>
+                <div className={styles["summary-label"]}>총 세트 수</div>
+                <div className={styles["summary-value"]}>
+                  {workoutData.totalSets}
+                </div>
               </div>
-              <div className="summary-card">
-                <div className="summary-label">예상 소모 칼로리</div>
-                <div className="summary-value">
+              <div className={styles["summary-card"]}>
+                <div className={styles["summary-label"]}>예상 소모 칼로리</div>
+                <div className={styles["summary-value"]}>
                   {workoutData.estimatedCalories}
                 </div>
               </div>
             </div>
-
             {/* 운동 목록 */}
-            <div className="workout-exercises">
+            <div className={styles["workout-exercises"]}>
               {workoutData.exercises.map((exercise) => (
                 <ExerciseCard
                   key={exercise.id}

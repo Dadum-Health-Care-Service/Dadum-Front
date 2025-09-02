@@ -1,19 +1,19 @@
-import React, { useState } from 'react';
-import './InputComponent.css';
+import React, { useState } from "react";
+import styles from "./InputComponent.module.css";
 
-const InputComponent = ({ 
+const InputComponent = ({
   label,
-  placeholder = '',
-  value = '',
+  placeholder = "",
+  value = "",
   onChange,
-  type = 'text',
+  type = "text",
   disabled = false,
   required = false,
-  error = '',
-  helperText = '',
-  className = '',
-  size = 'medium', // small, medium, large
-  variant = 'outlined' // outlined, filled, standard
+  error = "",
+  helperText = "",
+  className = "",
+  size = "medium", // small, medium, large
+  variant = "outlined", // outlined, filled, standard
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [internalValue, setInternalValue] = useState(value);
@@ -36,49 +36,51 @@ const InputComponent = ({
 
   const getSizeClass = () => {
     switch (size) {
-      case 'small':
-        return 'input--small';
-      case 'large':
-        return 'input--large';
+      case "small":
+        return styles["input--small"];
+      case "large":
+        return styles["input--large"];
       default:
-        return 'input--medium';
+        return styles["input--medium"];
     }
   };
 
   const getVariantClass = () => {
     switch (variant) {
-      case 'filled':
-        return 'input--filled';
-      case 'standard':
-        return 'input--standard';
+      case "filled":
+        return styles["input--filled"];
+      case "standard":
+        return styles["input--standard"];
       default:
-        return 'input--outlined';
+        return styles["input--outlined"];
     }
   };
 
   const inputClasses = [
-    'input-component',
+    styles["input-component"],
     getSizeClass(),
     getVariantClass(),
-    isFocused ? 'input--focused' : '',
-    error ? 'input--error' : '',
-    disabled ? 'input--disabled' : '',
-    className
-  ].filter(Boolean).join(' ');
+    isFocused ? styles["input--focused"] : "",
+    error ? styles["input--error"] : "",
+    disabled ? styles["input--disabled"] : "",
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <div className={inputClasses}>
       {label && (
-        <label className="input__label">
+        <label className={styles["input__label"]}>
           {label}
-          {required && <span className="input__required">*</span>}
+          {required && <span className={styles["input__required"]}>*</span>}
         </label>
       )}
-      
-      <div className="input__wrapper">
+
+      <div className={styles["input__wrapper"]}>
         <input
           type={type}
-          className="input__field"
+          className={styles["input__field"]}
           placeholder={placeholder}
           value={internalValue}
           onChange={handleChange}
@@ -88,13 +90,13 @@ const InputComponent = ({
           required={required}
         />
       </div>
-      
+
       {(error || helperText) && (
-        <div className="input__helper">
+        <div className={styles["input__helper"]}>
           {error ? (
-            <span className="input__error-text">{error}</span>
+            <span className={styles["input__error-text"]}>{error}</span>
           ) : (
-            <span className="input__helper-text">{helperText}</span>
+            <span className={styles["input__helper-text"]}>{helperText}</span>
           )}
         </div>
       )}
@@ -105,25 +107,25 @@ const InputComponent = ({
 // 사용 예시 컴포넌트
 const InputExample = () => {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    description: ''
+    name: "",
+    email: "",
+    password: "",
+    description: "",
   });
 
   const [errors, setErrors] = useState({});
 
   const handleInputChange = (field) => (e) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: e.target.value
+      [field]: e.target.value,
     }));
-    
+
     // 에러 제거
     if (errors[field]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [field]: ''
+        [field]: "",
       }));
     }
   };
@@ -131,30 +133,33 @@ const InputExample = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const newErrors = {};
-    
-    if (!formData.name) newErrors.name = '이름을 입력해주세요.';
-    if (!formData.email) newErrors.email = '이메일을 입력해주세요.';
-    if (!formData.password) newErrors.password = '비밀번호를 입력해주세요.';
-    
+
+    if (!formData.name) newErrors.name = "이름을 입력해주세요.";
+    if (!formData.email) newErrors.email = "이메일을 입력해주세요.";
+    if (!formData.password) newErrors.password = "비밀번호를 입력해주세요.";
+
     setErrors(newErrors);
-    
+
     if (Object.keys(newErrors).length === 0) {
-      alert('폼이 성공적으로 제출되었습니다!');
-      console.log('Form data:', formData);
+      alert("폼이 성공적으로 제출되었습니다!");
+      console.log("Form data:", formData);
     }
   };
 
   return (
-    <div style={{ padding: '20px', maxWidth: '600px' }}>
+    <div style={{ padding: "20px", maxWidth: "600px" }}>
       <h2>InputComponent 사용 예시</h2>
-      
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+      <form
+        onSubmit={handleSubmit}
+        style={{ display: "flex", flexDirection: "column", gap: "20px" }}
+      >
         <h3>1. 기본 입력 필드</h3>
         <InputComponent
           label="이름"
           placeholder="이름을 입력하세요"
           value={formData.name}
-          onChange={handleInputChange('name')}
+          onChange={handleInputChange("name")}
           required
           error={errors.name}
           helperText="실명을 입력해주세요"
@@ -165,7 +170,7 @@ const InputExample = () => {
           type="email"
           placeholder="example@email.com"
           value={formData.email}
-          onChange={handleInputChange('email')}
+          onChange={handleInputChange("email")}
           required
           error={errors.email}
         />
@@ -175,7 +180,7 @@ const InputExample = () => {
           type="password"
           placeholder="비밀번호를 입력하세요"
           value={formData.password}
-          onChange={handleInputChange('password')}
+          onChange={handleInputChange("password")}
           required
           error={errors.password}
           helperText="8자 이상 입력해주세요"
@@ -227,8 +232,11 @@ const InputExample = () => {
           disabled
         />
 
-        <div style={{ marginTop: '20px' }}>
-          <button type="submit" style={{ padding: '12px 24px', fontSize: '16px' }}>
+        <div style={{ marginTop: "20px" }}>
+          <button
+            type="submit"
+            style={{ padding: "12px 24px", fontSize: "16px" }}
+          >
             제출
           </button>
         </div>

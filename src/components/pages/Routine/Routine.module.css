@@ -1,5 +1,5 @@
 .routine {
-  padding: 1rem;
+  padding: 2rem;
 }
 
 .header {
@@ -64,9 +64,11 @@
 }
 
 .categories {
+  display: flex;
+  flex-wrap: nowrap;
   gap: 0.5rem;
+  padding: 1rem;
   margin-bottom: 1.5rem;
-  flex-wrap: wrap;
   justify-content: center;
 }
 

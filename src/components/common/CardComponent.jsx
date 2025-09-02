@@ -1,6 +1,6 @@
 import React from "react";
 import ButtonComponent from "./ButtonComponent";
-import "./CardComponent.css";
+import styles from "./CardComponent.module.css";
 
 const CardComponent = ({
   title = "루틴 제목",
@@ -18,7 +18,9 @@ const CardComponent = ({
 
   return (
     <div
-      className={`card ${className} ${disabled ? "card--disabled" : ""}`}
+      className={`${styles.card} ${className} ${
+        disabled ? styles["card--disabled"] : ""
+      }`}
       onClick={handleClick}
       role="button"
       tabIndex={disabled ? -1 : 0}
@@ -29,11 +31,11 @@ const CardComponent = ({
         }
       }}
     >
-      <div className="card__content">
-        <h3 className="card__title">{title}</h3>
-        <p className="card__details">{details}</p>
+      <div className={styles["card__content"]}>
+        <h3 className={styles["card__title"]}>{title}</h3>
+        <p className={styles["card__details"]}>{details}</p>
       </div>
-      <div className="card__button-container">
+      <div className={styles["card__button-container"]} onClick={handleClick}>
         <ButtonComponent variant="outline" onClick={onClick} size="medium">
           {buttonText}
         </ButtonComponent>
