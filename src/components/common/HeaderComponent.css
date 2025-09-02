@@ -1,0 +1,399 @@
+/* 기본 헤더 스타일 */
+.header {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", sans-serif;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+/* Variant별 스타일 */
+.header--default {
+  background: transparent;
+  border: none;
+}
+
+.header--elevated {
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: none;
+}
+
+.header--outlined {
+  background: #ffffff;
+  border: 2px solid #e3f2fd;
+  box-shadow: none;
+}
+
+.header--filled {
+  background: #f8fafc;
+  border: none;
+  box-shadow: none;
+}
+
+/* 크기별 스타일 */
+.header--small {
+  padding: 16px 24px;
+}
+
+.header--medium {
+  padding: 24px 32px;
+}
+
+.header--large {
+  padding: 32px 40px;
+}
+
+/* 정렬별 스타일 */
+.header--left .header__content {
+  text-align: left;
+}
+
+.header--center .header__content {
+  text-align: center;
+}
+
+.header--right .header__content {
+  text-align: right;
+}
+
+/* Sticky 헤더 */
+.header--sticky {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* 헤더 콘텐츠 */
+.header__content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* 제목 스타일 */
+.header__title {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1.2;
+}
+
+.header--small .header__title {
+  font-size: 1.5rem;
+}
+
+.header--large .header__title {
+  font-size: 2.5rem;
+}
+
+/* 부제목 스타일 */
+.header__subtitle {
+  margin: 0;
+  font-size: 1rem;
+  color: #6b7280;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+.header--small .header__subtitle {
+  font-size: 0.875rem;
+}
+
+.header--large .header__subtitle {
+  font-size: 1.125rem;
+}
+
+/* 액션 영역 */
+.header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header--center .header__actions {
+  justify-content: center;
+}
+
+.header--right .header__actions {
+  justify-content: flex-end;
+}
+
+/* 헤더 섹션 */
+.header__section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* 브랜드 영역 */
+.header__brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.header__logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  font-size: 24px;
+  background: #f3f4f6;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.header--small .header__logo {
+  width: 32px;
+  height: 32px;
+  font-size: 20px;
+}
+
+.header--large .header__logo {
+  width: 48px;
+  height: 48px;
+  font-size: 28px;
+}
+
+.header__brand-name {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.2;
+}
+
+.header--small .header__brand-name {
+  font-size: 1.125rem;
+}
+
+.header--large .header__brand-name {
+  font-size: 1.5rem;
+}
+
+/* 네비게이션 */
+.header__navigation {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* 메뉴 아이템 */
+.header__menu-item {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  text-decoration: none;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.header__menu-item:hover:not(.header__menu-item--disabled) {
+  background: rgba(59, 130, 246, 0.04);
+  color: #1d4ed8;
+}
+
+.header__menu-item:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* 활성 메뉴 아이템 */
+.header__menu-item--active {
+  background: rgba(59, 130, 246, 0.08);
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.header__menu-item--active:hover {
+  background: rgba(59, 130, 246, 0.12);
+}
+
+/* 비활성화된 메뉴 아이템 */
+.header__menu-item--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .header--small {
+    padding: 12px 16px;
+  }
+
+  .header--medium {
+    padding: 16px 20px;
+  }
+
+  .header--large {
+    padding: 20px 24px;
+  }
+
+  .header__title {
+    font-size: 1.75rem;
+  }
+
+  .header--small .header__title {
+    font-size: 1.25rem;
+  }
+
+  .header--large .header__title {
+    font-size: 2rem;
+  }
+
+  .header__content {
+    gap: 8px;
+  }
+
+  .header__actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .header__section {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .header__navigation {
+    justify-content: center;
+    gap: 4px;
+  }
+
+  .header__menu-item {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header--small {
+    padding: 8px 12px;
+  }
+
+  .header--medium {
+    padding: 12px 16px;
+  }
+
+  .header--large {
+    padding: 16px 20px;
+  }
+
+  .header__title {
+    font-size: 1.5rem;
+  }
+
+  .header--small .header__title {
+    font-size: 1.125rem;
+  }
+
+  .header--large .header__title {
+    font-size: 1.75rem;
+  }
+
+  .header__logo {
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
+  }
+
+  .header--small .header__logo {
+    width: 28px;
+    height: 28px;
+    font-size: 18px;
+  }
+
+  .header--large .header__logo {
+    width: 36px;
+    height: 36px;
+    font-size: 22px;
+  }
+
+  .header__brand-name {
+    font-size: 1.125rem;
+  }
+
+  .header--small .header__brand-name {
+    font-size: 1rem;
+  }
+
+  .header--large .header__brand-name {
+    font-size: 1.25rem;
+  }
+}
+
+/* 접근성을 위한 고대비 모드 지원 */
+@media (prefers-contrast: high) {
+  .header--outlined {
+    border-width: 3px;
+  }
+
+  .header__menu-item:focus-visible {
+    outline-width: 3px;
+  }
+}
+
+/* 다크 모드 지원 */
+@media (prefers-color-scheme: dark) {
+  .header--elevated,
+  .header--outlined {
+    background: #1f2937;
+    border-color: #4b5563;
+  }
+
+  .header--filled {
+    background: #374151;
+  }
+
+  .header__title {
+    color: #f9fafb;
+  }
+
+  .header__subtitle {
+    color: #d1d5db;
+  }
+
+  .header__brand-name {
+    color: #f9fafb;
+  }
+
+  .header__logo {
+    background: #4b5563;
+  }
+
+  .header__menu-item {
+    color: #e5e7eb;
+  }
+
+  .header__menu-item:hover:not(.header__menu-item--disabled) {
+    background: rgba(59, 130, 246, 0.1);
+    color: #60a5fa;
+  }
+
+  .header__menu-item--active {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+  }
+
+  .header__menu-item--active:hover {
+    background: rgba(59, 130, 246, 0.2);
+  }
+}

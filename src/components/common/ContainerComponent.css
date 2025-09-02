@@ -1,0 +1,247 @@
+/* 기본 컨테이너 스타일 */
+.container {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+/* variant별 스타일 */
+.container--default {
+  background: #ffffff;
+  border: 2px solid transparent;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.container--elevated {
+  background: #ffffff;
+  border: 2px solid transparent;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.container--outlined {
+  background: #ffffff;
+  border: 2px solid #e3f2fd;
+  box-shadow: none;
+}
+
+.container--filled {
+  background: #f8fafc;
+  border: 2px solid transparent;
+  box-shadow: none;
+}
+
+/* 크기별 스타일 */
+.container--small {
+  border-radius: 8px;
+}
+
+.container--medium {
+  border-radius: 12px;
+}
+
+.container--large {
+  border-radius: 16px;
+}
+
+/* 패딩 클래스 */
+.container--padding-none {
+  padding: 0;
+}
+
+.container--padding-small {
+  padding: 16px;
+}
+
+.container--padding-medium {
+  padding: 20px;
+}
+
+.container--padding-large {
+  padding: 30px;
+}
+
+/* 마진 클래스 */
+.container--margin-none {
+  margin: 0;
+}
+
+.container--margin-small {
+  margin: 10px 0;
+}
+
+.container--margin-medium {
+  margin: 20px 0;
+}
+
+.container--large {
+  margin: 30px 0;
+}
+
+/* 둥근 모서리 클래스 */
+.container--radius-none {
+  border-radius: 0;
+}
+
+.container--radius-small {
+  border-radius: 8px;
+}
+
+.container--radius-medium {
+  border-radius: 12px;
+}
+
+.container--radius-large {
+  border-radius: 16px;
+}
+
+/* 그림자 클래스 */
+.container--shadow-none {
+  box-shadow: none;
+}
+
+.container--shadow-small {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.container--shadow-medium {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.container--shadow-large {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+/* 호버 효과 */
+.container:hover:not(.container--disabled) {
+  transform: translateY(-1px);
+}
+
+.container--default:hover:not(.container--disabled) {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.container--elevated:hover:not(.container--disabled) {
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+}
+
+.container--outlined:hover:not(.container--disabled) {
+  border-color: #bbdefb;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+}
+
+.container--filled:hover:not(.container--disabled) {
+  background: #f1f5f9;
+}
+
+/* 클릭 가능한 컨테이너 */
+.container[role="button"] {
+  cursor: pointer;
+  user-select: none;
+}
+
+.container[role="button"]:active:not(.container--disabled) {
+  transform: translateY(0);
+}
+
+.container--default[role="button"]:active:not(.container--disabled) {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.container--elevated[role="button"]:active:not(.container--disabled) {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* 포커스 상태 */
+.container[role="button"]:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* 비활성화 상태 */
+.container--disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.container--disabled:hover {
+  transform: none;
+}
+
+/* 클릭 가능한 컨테이너 커스텀 스타일 */
+.clickable-container {
+  transition: all 0.3s ease;
+}
+
+.clickable-container:hover {
+  transform: translateY(-2px);
+}
+
+.clickable-container:active {
+  transform: translateY(0);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .container--padding-small {
+    padding: 12px;
+  }
+  
+  .container--padding-medium {
+    padding: 16px;
+  }
+  
+  .container--padding-large {
+    padding: 24px;
+  }
+  
+  .container--margin-small {
+    margin: 8px 0;
+  }
+  
+  .container--margin-medium {
+    margin: 16px 0;
+  }
+  
+  .container--large {
+    margin: 24px 0;
+  }
+}
+
+/* 접근성을 위한 고대비 모드 지원 */
+@media (prefers-contrast: high) {
+  .container--outlined {
+    border-width: 3px;
+  }
+  
+  .container[role="button"]:focus-visible {
+    outline-width: 3px;
+  }
+}
+
+/* 다크 모드 지원 */
+@media (prefers-color-scheme: dark) {
+  .container--default,
+  .container--elevated,
+  .container--outlined {
+    background: #1f2937;
+    color: #f9fafb;
+  }
+  
+  .container--filled {
+    background: #374151;
+    color: #f9fafb;
+  }
+  
+  .container--outlined {
+    border-color: #4b5563;
+  }
+  
+  .container--outlined:hover:not(.container--disabled) {
+    border-color: #6b7280;
+  }
+  
+  .container--filled:hover:not(.container--disabled) {
+    background: #4b5563;
+  }
+}

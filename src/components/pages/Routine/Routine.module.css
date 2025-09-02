@@ -1,0 +1,174 @@
+.routine {
+  padding-top: 2rem;
+  padding-bottom: 6rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.searchFilter {
+  margin-bottom: 2rem;
+}
+
+.categories {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.categoryBadge {
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+.categoryBadge:hover {
+  transform: translateY(-2px);
+}
+
+.routinesGrid {
+  margin-bottom: 2rem;
+}
+
+.routineCard {
+  height: 100%;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+.routineHeader {
+  margin-bottom: 1.5rem;
+}
+
+.routineInfo {
+  margin-bottom: 1rem;
+}
+
+.routineTitle {
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+}
+
+.routineDescription {
+  color: #6c757d;
+  font-size: 0.9rem;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.routineMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.routineStats {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.time {
+  display: flex;
+  align-items: center;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.icon {
+  margin-right: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.difficultyBadge {
+  font-size: 0.8rem;
+  padding: 0.25rem 0.75rem;
+}
+
+.tasksList {
+  margin-bottom: 1.5rem;
+  flex-grow: 1;
+}
+
+.tasksList h6 {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.tasksList ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.taskItem {
+  padding: 0.25rem 0;
+  color: #6c757d;
+  font-size: 0.85rem;
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.taskItem::before {
+  content: '•';
+  color: #4facfe;
+  font-weight: bold;
+  position: absolute;
+  left: 0;
+}
+
+.routineActions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: auto;
+}
+
+.buttonIcon {
+  margin-right: 0.25rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+  
+  .title {
+    font-size: 2rem;
+  }
+  
+  .routineActions {
+    flex-direction: column;
+  }
+  
+  .routineMeta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
