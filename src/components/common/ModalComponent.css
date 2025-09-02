@@ -15,19 +15,6 @@
   pointer-events: auto;
 }
 
-/* 모바일에서 오버레이 패딩 조정 */
-@media (max-width: 768px) {
-  .modal-overlay {
-    padding: 16px;
-  }
-}
-
-@media (max-width: 480px) {
-  .modal-overlay {
-    padding: 12px;
-  }
-}
-
 /* 모달 자체는 포인터 이벤트를 허용하되, 오버레이 클릭은 처리 */
 .modal {
   pointer-events: auto;
@@ -99,23 +86,26 @@
 
 /* 크기별 스타일 */
 .modal--small {
-  width: 400px;
-  height: 300px;
-  max-width: 90vw;
+  width: calc(100vw - 48px);
+  height: auto;
+  min-height: 200px;
+  max-width: 400px;
   max-height: 90vh;
 }
 
 .modal--medium {
-  width: 600px;
-  height: 450px;
-  max-width: 90vw;
+  width: calc(100vw - 48px);
+  height: auto;
+  min-height: 300px;
+  max-width: 600px;
   max-height: 90vh;
 }
 
 .modal--large {
-  width: 800px;
-  height: 600px;
-  max-width: 90vw;
+  width: calc(100vw - 48px);
+  height: auto;
+  min-height: 400px;
+  max-width: 800px;
   max-height: 90vh;
 }
 
@@ -187,19 +177,6 @@
   flex-shrink: 1;
 }
 
-/* 모바일에서 콘텐츠 패딩 조정 */
-@media (max-width: 768px) {
-  .modal__content {
-    padding: 12px 20px 20px 20px;
-  }
-}
-
-@media (max-width: 480px) {
-  .modal__content {
-    padding: 8px 16px 16px 16px;
-  }
-}
-
 /* 모달 섹션 */
 .modal__section {
   margin-bottom: 20px;
@@ -234,98 +211,35 @@
   justify-content: flex-end;
 }
 
-/* 반응형 디자인 */
-@media (max-width: 768px) {
-  .modal-overlay {
-    padding: 16px;
-  }
-
-  .modal--small {
-    width: calc(100vw - 32px);
-    height: auto;
-    min-height: 250px;
-    max-width: none;
-  }
-
-  .modal--medium {
-    width: calc(100vw - 32px);
-    height: auto;
-    min-height: 350px;
-    max-width: none;
-  }
-
-  .modal--large {
-    width: calc(100vw - 32px);
-    height: auto;
-    min-height: 450px;
-    max-width: none;
-  }
-
-  .modal__header {
-    padding: 20px 20px 12px 20px;
-  }
-
-  .modal__content {
-    padding: 12px 20px 20px 20px;
-  }
-
-  .modal__actions {
-    padding: 12px 20px 20px 20px;
-  }
-
-  .modal__title {
-    font-size: 1.25rem;
-  }
+/* 반응형 디자인 - 모든 화면에서 동일한 스타일 */
+.modal-overlay {
+  padding: 16px;
 }
 
+.modal__header {
+  padding: 20px 20px 12px 20px;
+}
+
+.modal__content {
+  padding: 12px 20px 20px 20px;
+}
+
+.modal__actions {
+  padding: 12px 20px 20px 20px;
+}
+
+.modal__title {
+  font-size: 1.25rem;
+}
+
+/* 모바일에서 액션 버튼 세로 배치 */
 @media (max-width: 480px) {
-  .modal-overlay {
-    padding: 12px;
-  }
-
-  .modal--small,
-  .modal--medium,
-  .modal--large {
-    width: calc(100vw - 24px);
-    height: auto;
-    min-height: 200px;
-    max-width: none;
-  }
-
-  .modal__header {
-    padding: 16px 16px 8px 16px;
-  }
-
-  .modal__content {
-    padding: 8px 16px 16px 16px;
-  }
-
   .modal__actions {
-    padding: 8px 16px 16px 16px;
     flex-direction: column;
   }
 
   .modal__actions > * {
     width: 100%;
-  }
-}
-
-/* 추가 반응형 브레이크포인트 */
-@media (max-width: 1024px) {
-  .modal--large {
-    width: calc(100vw - 40px);
-    height: auto;
-    min-height: 500px;
-  }
-}
-
-@media (max-width: 640px) {
-  .modal--small,
-  .modal--medium,
-  .modal--large {
-    width: calc(100vw - 32px);
-    height: auto;
-    min-height: 220px;
   }
 }
 
