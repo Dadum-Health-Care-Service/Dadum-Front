@@ -1,0 +1,383 @@
+/* 모달 오버레이 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+  box-sizing: border-box;
+  pointer-events: auto;
+}
+
+/* 모바일에서 오버레이 패딩 조정 */
+@media (max-width: 768px) {
+  .modal-overlay {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-overlay {
+    padding: 12px;
+  }
+}
+
+/* 모달 자체는 포인터 이벤트를 허용하되, 오버레이 클릭은 처리 */
+.modal {
+  pointer-events: auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* 모달 내부 요소들도 포인터 이벤트 허용 */
+.modal * {
+  pointer-events: auto;
+}
+
+/* 모달 내부 클릭 시 이벤트 전파 방지 */
+.modal__header,
+.modal__content,
+.modal__actions {
+  pointer-events: auto;
+}
+
+/* 기본 모달 스타일 */
+.modal {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", sans-serif;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+  animation: modalSlideIn 0.3s ease-out;
+  box-sizing: border-box;
+}
+
+/* 모달 애니메이션 */
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Variant별 스타일 */
+.modal--default {
+  border: 2px solid transparent;
+}
+
+.modal--elevated {
+  border: 2px solid transparent;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modal--outlined {
+  border: 2px solid #e3f2fd;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.modal--filled {
+  background: #f8fafc;
+  border: 2px solid transparent;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* 크기별 스타일 */
+.modal--small {
+  width: 400px;
+  height: 300px;
+  max-width: 90vw;
+  max-height: 90vh;
+}
+
+.modal--medium {
+  width: 600px;
+  height: 450px;
+  max-width: 90vw;
+  max-height: 90vh;
+}
+
+.modal--large {
+  width: 800px;
+  height: 600px;
+  max-width: 90vw;
+  max-height: 90vh;
+}
+
+/* 모달 헤더 */
+.modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 24px 24px 16px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  gap: 16px;
+}
+
+.modal__header-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.modal__title {
+  margin: 0 0 8px 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.2;
+}
+
+.modal__subtitle {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+/* 닫기 버튼 */
+.modal__close-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  color: #6b7280;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.modal__close-button:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #374151;
+}
+
+.modal__close-button:focus-visible {
+  outline: 2px solid #4facfe;
+  outline-offset: 2px;
+}
+
+/* 모달 콘텐츠 */
+.modal__content {
+  flex: 1;
+  padding: 16px 24px 24px 24px;
+  overflow-y: auto;
+  max-height: calc(100% - 120px);
+  min-height: 0;
+  flex-shrink: 1;
+}
+
+/* 모바일에서 콘텐츠 패딩 조정 */
+@media (max-width: 768px) {
+  .modal__content {
+    padding: 12px 20px 20px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal__content {
+    padding: 8px 16px 16px 16px;
+  }
+}
+
+/* 모달 섹션 */
+.modal__section {
+  margin-bottom: 20px;
+}
+
+.modal__section:last-child {
+  margin-bottom: 0;
+}
+
+/* 모달 액션 */
+.modal__actions {
+  display: flex;
+  gap: 12px;
+  padding: 10px 24px 10px 24px;
+  border-top: 1px solid #e5e7eb;
+  background: #ffffff;
+  position: sticky;
+  bottom: 0;
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+.modal__actions--left {
+  justify-content: flex-start;
+}
+
+.modal__actions--center {
+  justify-content: center;
+}
+
+.modal__actions--right {
+  justify-content: flex-end;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .modal-overlay {
+    padding: 16px;
+  }
+
+  .modal--small {
+    width: calc(100vw - 32px);
+    height: auto;
+    min-height: 250px;
+    max-width: none;
+  }
+
+  .modal--medium {
+    width: calc(100vw - 32px);
+    height: auto;
+    min-height: 350px;
+    max-width: none;
+  }
+
+  .modal--large {
+    width: calc(100vw - 32px);
+    height: auto;
+    min-height: 450px;
+    max-width: none;
+  }
+
+  .modal__header {
+    padding: 20px 20px 12px 20px;
+  }
+
+  .modal__content {
+    padding: 12px 20px 20px 20px;
+  }
+
+  .modal__actions {
+    padding: 12px 20px 20px 20px;
+  }
+
+  .modal__title {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-overlay {
+    padding: 12px;
+  }
+
+  .modal--small,
+  .modal--medium,
+  .modal--large {
+    width: calc(100vw - 24px);
+    height: auto;
+    min-height: 200px;
+    max-width: none;
+  }
+
+  .modal__header {
+    padding: 16px 16px 8px 16px;
+  }
+
+  .modal__content {
+    padding: 8px 16px 16px 16px;
+  }
+
+  .modal__actions {
+    padding: 8px 16px 16px 16px;
+    flex-direction: column;
+  }
+
+  .modal__actions > * {
+    width: 100%;
+  }
+}
+
+/* 추가 반응형 브레이크포인트 */
+@media (max-width: 1024px) {
+  .modal--large {
+    width: calc(100vw - 40px);
+    height: auto;
+    min-height: 500px;
+  }
+}
+
+@media (max-width: 640px) {
+  .modal--small,
+  .modal--medium,
+  .modal--large {
+    width: calc(100vw - 32px);
+    height: auto;
+    min-height: 220px;
+  }
+}
+
+/* 접근성을 위한 고대비 모드 지원 */
+@media (prefers-contrast: high) {
+  .modal--outlined {
+    border-width: 3px;
+  }
+
+  .modal__close-button:focus-visible {
+    outline-width: 3px;
+  }
+}
+
+/* 다크 모드 지원 */
+@media (prefers-color-scheme: dark) {
+  .modal {
+    background: #1f2937;
+    color: #f9fafb;
+  }
+
+  .modal--outlined {
+    border-color: #4b5563;
+  }
+
+  .modal--filled {
+    background: #374151;
+  }
+
+  .modal__header {
+    border-bottom-color: #4b5563;
+  }
+
+  .modal__title {
+    color: #f9fafb;
+  }
+
+  .modal__subtitle {
+    color: #d1d5db;
+  }
+
+  .modal__actions {
+    border-top-color: #4b5563;
+    background: #374151;
+  }
+
+  .modal__close-button {
+    color: #d1d5db;
+  }
+
+  .modal__close-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #f9fafb;
+  }
+}

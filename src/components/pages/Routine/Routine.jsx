@@ -12,7 +12,9 @@ import CardComponent from "../../common/CardComponent";
 import ButtonComponent from "../../common/ButtonComponent";
 import InputComponent from "../../common/InputComponent";
 import SelectComponent from "../../common/SelectComponent";
+import ContainerComponent from "../../common/ContainerComponent";
 import styles from "./Routine.module.css";
+import ModalExample from "../../common/ModalExample";
 
 const Routine = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -89,7 +91,8 @@ const Routine = () => {
   };
 
   return (
-    <Container className={styles.routine}>
+    <ContainerComponent className={`${styles.routine}`}>
+      <ModalExample />
       {/* Header */}
       <div className={styles.header}>
         <h1 className={styles.title}>루틴 관리</h1>
@@ -208,7 +211,7 @@ const Routine = () => {
           </Col>
         ))}
       </Row>
-    </Container>
+    </ContainerComponent>
   );
 };
 

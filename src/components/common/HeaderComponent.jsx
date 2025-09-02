@@ -59,7 +59,7 @@ const HeaderComponent = ({
     .join(" ");
 
   return (
-    <header className={`${headerClasses} header`} {...props}>
+    <header className={`${headerClasses} header HeaderComponent`} {...props}>
       <div className="header__content">
         {title && <h1 className="header__title">{title}</h1>}
 

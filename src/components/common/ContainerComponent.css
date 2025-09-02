@@ -1,6 +1,7 @@
 /* 기본 컨테이너 스타일 */
 .container {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", sans-serif;
   transition: all 0.2s ease;
   box-sizing: border-box;
 }
@@ -112,9 +113,6 @@
 }
 
 /* 호버 효과 */
-.container:hover:not(.container--disabled) {
-  transform: translateY(-1px);
-}
 
 .container--default:hover:not(.container--disabled) {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
@@ -186,23 +184,23 @@
   .container--padding-small {
     padding: 12px;
   }
-  
+
   .container--padding-medium {
     padding: 16px;
   }
-  
+
   .container--padding-large {
     padding: 24px;
   }
-  
+
   .container--margin-small {
     margin: 8px 0;
   }
-  
+
   .container--margin-medium {
     margin: 16px 0;
   }
-  
+
   .container--large {
     margin: 24px 0;
   }
@@ -213,7 +211,7 @@
   .container--outlined {
     border-width: 3px;
   }
-  
+
   .container[role="button"]:focus-visible {
     outline-width: 3px;
   }
@@ -227,20 +225,20 @@
     background: #1f2937;
     color: #f9fafb;
   }
-  
+
   .container--filled {
     background: #374151;
     color: #f9fafb;
   }
-  
+
   .container--outlined {
     border-color: #4b5563;
   }
-  
+
   .container--outlined:hover:not(.container--disabled) {
     border-color: #6b7280;
   }
-  
+
   .container--filled:hover:not(.container--disabled) {
     background: #4b5563;
   }
