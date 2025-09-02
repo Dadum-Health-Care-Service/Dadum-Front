@@ -1,0 +1,271 @@
+/* =========================================================
+  Variables
+========================================================= */
+:root {
+  --bottom-nav-h: 0px;   /* runtime injected by JS (0 if absent) */
+
+  /* component sizes */
+  --fab-h: 56px;
+  --fab-gap: 6px;          /* 네비와 FAB 사이 간격 */
+  --toolbar-offset: 10px;  /* 상단 "전체/팔로워" 오프셋 */
+
+  /* theme */
+  --text: #0F172A;
+  --muted: #64748B;
+  --primary: #0A66FF;
+  --primary-2: #3BAAFF;
+  --border: #D6E4FF;
+  --light: #F5F9FF;
+  --radius: 14px;
+}
+
+/* =========================================================
+  Page container
+  ▶ 하단 패딩에서 FAB 높이 제거 (빈공간 축소)
+========================================================= */
+.social-root {
+  width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+
+  padding: 16px 12px
+    calc(
+      var(--bottom-nav-h, 0px) +
+      var(--fab-gap) +
+      env(safe-area-inset-bottom, 0px)
+    );
+
+  font-family: Inter, system-ui, -apple-system, "Noto Sans KR", sans-serif;
+  color: var(--text);
+  background: linear-gradient(180deg, #f6f9ff, #e9f0ff);
+}
+
+/* reduce Bootstrap influence */
+.social-root button,
+.social-root input,
+.social-root select,
+.social-root textarea {
+  font: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* =========================================================
+  Top segment (전체 / 팔로워)
+  ▶ safe-area 포함 오프셋 + 자연스러운 배경
+========================================================= */
+.social-root .m-toolbar {
+  position: sticky;
+  top: calc(env(safe-area-inset-top, 0px) + var(--toolbar-offset));
+  margin-top: var(--toolbar-offset);
+  padding-bottom: 8px;
+  z-index: 5;
+  background: linear-gradient(180deg, #f6f9ff 75%, rgba(246,249,255,0));
+}
+
+.social-root .seg { display: flex; gap: 8px; }
+
+.social-root .seg-btn {
+  padding: 8px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--primary);
+  font-weight: 800;
+  cursor: pointer;
+}
+.social-root .seg-btn.is-active {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--primary), var(--primary-2));
+}
+
+/* =========================================================
+  Feed / Cards
+========================================================= */
+.social-root .m-feed { display: grid; gap: 12px; margin-top: 8px; }
+
+/* ▶ 피드의 맨 아래에만 FAB 높이만큼 여유 (FAB에 가리지 않음) */
+.social-root .m-feed::after{
+  content: "";
+  display: block;
+  height: calc(var(--fab-h) + 8px);
+}
+
+.social-root .m-card {
+  overflow: hidden;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  background: #fff;
+  box-shadow: 0 6px 20px rgba(157, 184, 255, .18);
+}
+
+.social-root .m-card-head {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+}
+
+.social-root .avatar {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--primary-2));
+  display: inline-block;
+}
+.social-root .avatar.lg { width: 32px; height: 32px; }
+
+.social-root .meta .row1 { display: flex; align-items: baseline; gap: 6px; }
+.social-root .name { font-weight: 800; font-size: 14px; }
+.social-root .sub  { color: var(--muted); font-size: 12px; }
+
+.social-root .more {
+  border: 0; background: transparent; color: var(--muted); font-size: 20px;
+}
+
+.social-root .m-card-body { padding: 0 12px 12px; }
+.social-root .text { margin: 0 0 8px; line-height: 1.5; }
+
+.social-root .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.social-root .chip {
+  padding: 6px 10px; border: 1px solid #E5EDFF; border-radius: 999px;
+  background: var(--light); color: var(--primary); font-size: 12px;
+}
+
+.social-root .media-skeleton {
+  height: 150px; border: 1.5px solid var(--border);
+  border-radius: 10px; background: linear-gradient(135deg, #EAF4FF, #D7E8FF);
+}
+
+.social-root .m-card-actions {
+  display: flex; gap: 16px; padding: 10px 12px; border-top: 1px solid #EEF3FF;
+}
+.social-root .icon-txt {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 0; background: transparent; color: var(--muted); font-weight: 700; cursor: pointer;
+}
+
+/* =========================================================
+  FAB (글쓰기)
+========================================================= */
+.social-root .compose-fab {
+  position: fixed;
+  left: 16px; right: 16px;
+  bottom: calc(var(--bottom-nav-h, 0px) + var(--fab-gap) + env(safe-area-inset-bottom, 0px));
+  height: var(--fab-h, 56px);
+  border: 0; border-radius: 14px;
+  padding: 12px 16px; color: #fff; font-weight: 900;
+  background: linear-gradient(135deg, var(--primary), var(--primary-2));
+  box-shadow: 0 10px 24px rgba(10, 102, 255, .25);
+  cursor: pointer; z-index: 11000;
+}
+.social-root .compose-fab.fab--circle{
+  left: auto; right: 16px; width: 56px; height: 56px; padding: 0;
+  border-radius: 50%; display: grid; place-items: center; font-size: 20px;
+}
+
+/* =========================================================
+  Modal (Portal)
+========================================================= */
+body.modal-open { overflow: hidden; touch-action: none; }
+body.modal-open .bottom-navigation,
+body.modal-open .bottom-nav,
+body.modal-open [data-bottom-nav],
+body.modal-open #bottom-nav { pointer-events: none !important; opacity: 0 !important; }
+
+.compose-modal,
+.social-root .compose-modal {
+  position: fixed; inset: 0; display: none;
+  align-items: center; justify-content: center;
+  padding: max(12px, env(safe-area-inset-top, 0px))
+           max(12px, env(safe-area-inset-right, 0px))
+           max(12px, env(safe-area-inset-bottom, 0px))
+           max(12px, env(safe-area-inset-left, 0px));
+  pointer-events: none; z-index: 12000;
+}
+.compose-modal.open { display: flex !important; }
+.compose-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(15, 23, 42, .45); backdrop-filter: blur(2px);
+  pointer-events: auto; z-index: 12000;
+}
+.compose-card {
+  position: relative; width: min(430px, calc(100vw - 24px));
+  max-height: min(86vh, calc(100dvh - 24px));
+  display: flex; flex-direction: column; overflow: hidden;
+  border-radius: 16px; background: #fff; box-shadow: 0 20px 40px rgba(15, 23, 42, .35);
+  pointer-events: auto; z-index: 12001;
+}
+.compose-card-head {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 52px; padding: 0 12px; border-bottom: 1px solid #E5EDFF;
+}
+.compose-title { margin: 0; font-size: 16px; font-weight: 900; }
+.compose-close  { border: 0; background: transparent; color: #64748B; font-size: 20px; }
+.compose-card-body { padding: 12px; overflow: auto; }
+.compose-row { display: flex; gap: 10px; }
+.compose-row textarea {
+  flex: 1; min-height: 120px; resize: vertical;
+  padding: 10px; border: 1.5px solid #E5EDFF; border-radius: 12px; font-size: 14px;
+}
+
+/* =========================================================
+  Compose actions
+========================================================= */
+.compose-actions {
+  display: grid; grid-template-columns: 1fr auto;
+  align-items: center; column-gap: 8px; row-gap: 8px; margin-top: 10px;
+}
+.compose-actions .tools { display: flex; gap: 8px; overflow-x: auto; }
+.tool-btn{
+  display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px;
+  border: 1.5px solid var(--border); border-radius: 10px; background: #fff; color: var(--text); font-weight: 700; cursor: pointer;
+}
+.tool-btn .ico { font-size: 16px; line-height: 1; }
+.tool-btn:hover { border-color: #b8cbff; box-shadow: 0 3px 10px rgba(157, 184, 255, .25); }
+
+.compose-actions .submit { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+.pill-select{
+  height: 36px; padding: 0 12px; border: 1.5px solid var(--border); border-radius: 999px; color: var(--muted); background: #fff;
+}
+
+/* CTA (게시하기) */
+.compose-card .cta{
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 36px; min-width: 96px; padding: 0 16px; border: 0; border-radius: 10px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-2)) !important;
+  color: #fff !important; font-weight: 900; box-shadow: 0 6px 16px rgba(10, 102, 255, .25);
+  transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+}
+.compose-card .cta:hover:not(:disabled){ transform: translateY(-1px); filter: brightness(1.03); }
+.compose-card .cta:active:not(:disabled){ transform: translateY(0); filter: brightness(.98); box-shadow: 0 5px 12px rgba(10, 102, 255, .22); }
+.compose-card .cta:disabled{ background: #E7EEFF !important; color: #9CB4FF !important; box-shadow: none; cursor: not-allowed; }
+
+/* fallback if .btn-primary is used */
+.social-root .compose-card .btn-primary,
+.social-root .compose-card .btn-primary.post-btn{
+  height: 36px; min-width: 96px; padding: 0 16px; border: 0 !important; border-radius: 10px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-2)) !important;
+  color: #fff !important; font-weight: 900; box-shadow: 0 6px 16px rgba(10, 102, 255, .25);
+}
+.social-root .compose-card .btn-primary:disabled,
+.social-root .compose-card .btn-primary.post-btn:disabled{
+  background: #E7EEFF !important; color: #9CB4FF !important; box-shadow: none;
+}
+
+/* legacy namespaced controls */
+.social-root .btn-outline{
+  padding: 8px 12px; border: 1.5px solid var(--primary); border-radius: 10px;
+  background: #fff; color: var(--primary); font-weight: 800; cursor: pointer;
+}
+.social-root .btn-outline.sm{ padding: 6px 10px; font-size: 13px; }
+.social-root .select{
+  height: 36px; padding: 0 10px; border: 1.5px solid var(--border); border-radius: 10px; color: var(--muted);
+}
+
+/* =========================================================
+  Desktop
+========================================================= */
+@media (min-width: 768px){
+  .social-root{ padding-bottom: 24px; }
+}

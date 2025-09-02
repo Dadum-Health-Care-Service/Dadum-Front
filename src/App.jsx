@@ -13,6 +13,7 @@ import BottomNavigation from "./components/common/BottomNavigation";
 // Pages
 import Home from "./components/pages/Home/Home.jsx";
 import Routine from "./components/pages/Routine/Routine.jsx";
+import Social from "./components/pages/Social/Social.jsx";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -59,12 +60,7 @@ function App() {
           </div>
         );
       case "social":
-        return (
-          <div className="container mt-5 pt-5">
-            <h1>소셜 페이지</h1>
-            <p>소셜 기능은 개발 중입니다.</p>
-          </div>
-        );
+        return <Social />;
       case "mypage":
         return (
           <div className="container mt-5 pt-5">
