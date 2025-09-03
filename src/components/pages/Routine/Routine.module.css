@@ -46,7 +46,7 @@
   box-sizing: border-box;
 }
 
-.filterSelect .select__field {
+.filterSelect .select-field {
   width: 100%;
   min-width: 0;
   max-width: 100%;

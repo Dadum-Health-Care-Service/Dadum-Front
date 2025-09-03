@@ -1,84 +1,85 @@
 /* 기본 폼 컴포넌트 스타일 */
 .form-component {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", sans-serif;
   transition: all 0.2s ease;
 }
 
 /* variant별 스타일 */
-.form--default {
+.default {
   background: #ffffff;
   border: 2px solid transparent;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.form--outlined {
+.outlined {
   background: #ffffff;
   border: 2px solid #e3f2fd;
   box-shadow: none;
 }
 
-.form--filled {
+.filled {
   background: #f8fafc;
   border: 2px solid transparent;
   box-shadow: none;
 }
 
-.form--elevated {
+.elevated {
   background: #ffffff;
   border: 2px solid transparent;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
 /* 크기별 스타일 */
-.form--small {
+.small {
   border-radius: 8px;
   padding: 16px;
 }
 
-.form--medium {
+.medium {
   border-radius: 12px;
   padding: 20px;
 }
 
-.form--large {
+.large {
   border-radius: 16px;
   padding: 30px;
 }
 
 /* 레이아웃별 스타일 */
-.form--vertical .form__fields {
+.vertical .form-fields {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-.form--horizontal .form__fields {
+.horizontal .form-fields {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
   align-items: start;
 }
 
-.form--grid .form__fields {
+.grid .form-fields {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
 }
 
 /* 폼 헤더 */
-.form__header {
+.form-header {
   margin-bottom: 24px;
   text-align: center;
 }
 
-.form__title {
+.form-title {
   font-size: 1.5rem;
   font-weight: 600;
   color: #1f2937;
   margin: 0 0 8px 0;
 }
 
-.form__subtitle {
+.form-subtitle {
   font-size: 1rem;
   color: #6b7280;
   margin: 0;
@@ -86,14 +87,14 @@
 }
 
 /* 폼 콘텐츠 */
-.form__content {
+.form-content {
   display: flex;
   flex-direction: column;
   gap: 24px;
 }
 
 /* 폼 액션 */
-.form__actions {
+.form-actions {
   display: flex;
   gap: 12px;
   justify-content: center;
@@ -102,8 +103,8 @@
   border-top: 1px solid #e5e7eb;
 }
 
-.form__submit,
-.form__reset {
+.form-submit,
+.form-reset {
   padding: 10px 20px;
   border: none;
   border-radius: 8px;
@@ -114,46 +115,46 @@
   min-width: 100px;
 }
 
-.form__submit--primary {
+.form-submit--primary {
   background: #3b82f6;
   color: #ffffff;
 }
 
-.form__submit--primary:hover:not(:disabled) {
+.form-submit--primary:hover:not(:disabled) {
   background: #2563eb;
 }
 
-.form__submit--primary:active:not(:disabled) {
+.form-submit--primary:active:not(:disabled) {
   background: #1d4ed8;
   transform: translateY(1px);
 }
 
-.form__submit--secondary {
+.form-submit--secondary {
   background: #6b7280;
   color: #ffffff;
 }
 
-.form__submit--secondary:hover:not(:disabled) {
+.form-submit--secondary:hover:not(:disabled) {
   background: #4b5563;
 }
 
-.form__reset--outline {
+.form-reset--outline {
   background: transparent;
   color: #3b82f6;
   border: 2px solid #3b82f6;
 }
 
-.form__reset--outline:hover:not(:disabled) {
+.form-reset--outline:hover:not(:disabled) {
   background: #3b82f6;
   color: #ffffff;
 }
 
-.form__reset--ghost {
+.form-reset--ghost {
   background: transparent;
   color: #6b7280;
 }
 
-.form__reset--ghost:hover:not(:disabled) {
+.form-reset--ghost:hover:not(:disabled) {
   background: #f3f4f6;
   color: #374151;
 }
@@ -293,99 +294,99 @@
 }
 
 /* 비활성화 상태 */
-.form--disabled {
+.disabled {
   opacity: 0.6;
   cursor: not-allowed;
   pointer-events: none;
 }
 
-.form--disabled .form__submit,
-.form--disabled .form__reset {
+.disabled .form-submit,
+.disabled .form-reset {
   cursor: not-allowed;
 }
 
 /* 호버 효과 */
-.form--outlined:hover:not(.form--disabled) {
+.outlined:hover:not(.disabled) {
   border-color: #bbdefb;
 }
 
-.form--filled:hover:not(.form--disabled) {
+.filled:hover:not(.disabled) {
   background: #f1f5f9;
 }
 
 /* 반응형 디자인 */
 @media (max-width: 768px) {
-  .form--small {
+  .small {
     padding: 12px;
   }
-  
-  .form--medium {
+
+  .medium {
     padding: 16px;
   }
-  
-  .form--large {
+
+  .large {
     padding: 24px;
   }
-  
-  .form__actions {
+
+  .form-actions {
     flex-direction: column;
     align-items: stretch;
   }
-  
-  .form__submit,
-  .form__reset {
+
+  .form-submit,
+  .form-reset {
     width: 100%;
   }
-  
-  .form--horizontal .form__fields {
+
+  .horizontal .form-fields {
     grid-template-columns: 1fr;
   }
-  
-  .form--grid .form__fields {
+
+  .grid .form-fields {
     grid-template-columns: 1fr;
   }
 }
 
 /* 접근성을 위한 고대비 모드 지원 */
 @media (prefers-contrast: high) {
-  .form--outlined {
+  .outlined {
     border-width: 3px;
   }
-  
-  .form__submit:focus-visible,
-  .form__reset:focus-visible {
+
+  .form-submit:focus-visible,
+  .form-reset:focus-visible {
     outline-width: 3px;
   }
 }
 
 /* 다크 모드 지원 */
 @media (prefers-color-scheme: dark) {
-  .form--default,
-  .form--outlined,
-  .form--elevated {
+  .default,
+  .outlined,
+  .elevated {
     background: #1f2937;
     color: #f9fafb;
   }
-  
-  .form--filled {
+
+  .filled {
     background: #374151;
     color: #f9fafb;
   }
-  
-  .form--outlined {
+
+  .outlined {
     border-color: #4b5563;
   }
-  
+
   .form-section--outlined {
     background: #1f2937;
     border-color: #4b5563;
   }
-  
+
   .form-section--filled {
     background: #374151;
     border-color: #4b5563;
   }
-  
+
   .form-input,
   .form-select,
   .form-textarea {
@@ -393,21 +394,21 @@
     color: #f9fafb;
     border-color: #6b7280;
   }
-  
-  .form__title,
+
+  .form-title,
   .form-section__title {
     color: #f9fafb;
   }
-  
-  .form__subtitle,
+
+  .form-subtitle,
   .form-section__subtitle {
     color: #d1d5db;
   }
-  
+
   .form-field__label {
     color: #e5e7eb;
   }
-  
+
   .form-checkbox__text {
     color: #e5e7eb;
   }

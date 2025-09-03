@@ -132,6 +132,7 @@ const INITIAL_WORKOUT_DATA = {
 const FormField = ({ field, value, onChange }) => {
   const { id, label, type, placeholder, required, options, rows } = field;
 
+  // 입력 필드 렌더링
   const renderInput = () => {
     switch (type) {
       case "select":
@@ -196,6 +197,7 @@ const FormField = ({ field, value, onChange }) => {
 
 // 운동 세트 행 렌더링 컴포넌트
 const ExerciseSetRow = ({ set, exerciseId, onSetChange }) => {
+  // 세트 변경 핸들러
   const handleChange = (field, value) => {
     onSetChange(exerciseId, set.setNumber, field, value);
   };
@@ -233,30 +235,44 @@ const ExerciseSetRow = ({ set, exerciseId, onSetChange }) => {
 
 // 운동 카드 렌더링 컴포넌트
 const ExerciseCard = ({ exercise, onSetChange }) => {
+  // 운동 헤더 렌더링
+  const renderExerciseHeader = () => (
+    <div className={styles["exercise-header"]}>
+      <div className={styles["exercise-icon"]}>🏋️</div>
+      <div className={styles["exercise-name"]}>{exercise.name}</div>
+      <div className={styles["exercise-category"]}>{exercise.category}</div>
+    </div>
+  );
+
+  // 세트 헤더 렌더링
+  const renderSetsHeader = () => (
+    <div className={styles["sets-header"]}>
+      <span>세트</span>
+      <span>횟수</span>
+      <span>중량(kg)</span>
+      <span>휴식(초)</span>
+    </div>
+  );
+
+  // 운동 세트들 렌더링
+  const renderExerciseSets = () => (
+    <div className={styles["exercise-sets"]}>
+      {renderSetsHeader()}
+      {exercise.sets.map((set) => (
+        <ExerciseSetRow
+          key={set.setNumber}
+          set={set}
+          exerciseId={exercise.id}
+          onSetChange={onSetChange}
+        />
+      ))}
+    </div>
+  );
+
   return (
     <div key={exercise.id} className={styles["exercise-card"]}>
-      <div className={styles["exercise-header"]}>
-        <div className={styles["exercise-icon"]}>🏋️</div>
-        <div className={styles["exercise-name"]}>{exercise.name}</div>
-        <div className={styles["exercise-category"]}>{exercise.category}</div>
-      </div>
-
-      <div className={styles["exercise-sets"]}>
-        <div className={styles["sets-header"]}>
-          <span>세트</span>
-          <span>횟수</span>
-          <span>중량(kg)</span>
-          <span>휴식(초)</span>
-        </div>
-        {exercise.sets.map((set) => (
-          <ExerciseSetRow
-            key={set.setNumber}
-            set={set}
-            exerciseId={exercise.id}
-            onSetChange={onSetChange}
-          />
-        ))}
-      </div>
+      {renderExerciseHeader()}
+      {renderExerciseSets()}
     </div>
   );
 };
@@ -265,7 +281,8 @@ const ExerciseCard = ({ exercise, onSetChange }) => {
 const ModalFooter = ({ modalType, onSave, onClose }) => {
   if (!MODAL_CONFIGS[modalType]?.hasFooter) return null;
 
-  const getFooterButtons = () => {
+  // 푸터 버튼들 렌더링
+  const renderFooterButtons = () => {
     switch (modalType) {
       case "workout":
         return (
@@ -305,9 +322,12 @@ const ModalFooter = ({ modalType, onSave, onClose }) => {
     }
   };
 
-  return <ModalComponent.Actions>{getFooterButtons()}</ModalComponent.Actions>;
+  return (
+    <ModalComponent.Actions>{renderFooterButtons()}</ModalComponent.Actions>
+  );
 };
 
+// 메인 ModalExample 컴포넌트
 const ModalExample = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [modalType, setModalType] = useState("basic");
@@ -319,31 +339,31 @@ const ModalExample = () => {
   });
   const [workoutData, setWorkoutData] = useState(INITIAL_WORKOUT_DATA);
 
-  // 모달 열기
+  // 모달 열기 핸들러
   const handleOpenModal = (type) => {
     setModalType(type);
     setIsOpen(true);
   };
 
-  // 모달 닫기
+  // 모달 닫기 핸들러
   const handleCloseModal = () => {
     setIsOpen(false);
     setFormData({ name: "", email: "", category: "", message: "" });
   };
 
-  // 폼 입력 변경 처리
+  // 폼 입력 변경 핸들러
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 폼 제출 처리
+  // 폼 제출 핸들러
   const handleSubmit = () => {
     console.log("Form submitted:", formData);
     handleCloseModal();
   };
 
-  // 운동 세트 변경 처리
+  // 운동 세트 변경 핸들러
   const handleSetChange = (exerciseId, setNumber, field, value) => {
     setWorkoutData((prev) => ({
       ...prev,
@@ -360,89 +380,98 @@ const ModalExample = () => {
     }));
   };
 
-  // 운동 데이터 저장
+  // 운동 데이터 저장 핸들러
   const handleSaveWorkout = () => {
     console.log("운동 데이터 저장:", workoutData);
     alert("운동 데이터가 저장되었습니다!");
   };
 
+  // 기본 모달 내용 렌더링
+  const renderBasicModalContent = () => (
+    <div>
+      <p>
+        이것은 기본 모달입니다. 간단한 메시지나 확인을 위해 사용할 수 있습니다.
+      </p>
+      <p>모달은 사용자의 주의를 끌고 중요한 정보를 표시하는 데 유용합니다.</p>
+    </div>
+  );
+
+  // 폼 모달 내용 렌더링
+  const renderFormModalContent = () => (
+    <form>
+      <ModalComponent.Section>
+        {FORM_FIELDS.map((field) => (
+          <FormField
+            key={field.id}
+            field={field}
+            value={formData[field.id]}
+            onChange={handleInputChange}
+          />
+        ))}
+      </ModalComponent.Section>
+    </form>
+  );
+
+  // 확인 모달 내용 렌더링
+  const renderConfirmationModalContent = () => (
+    <div>
+      <p>정말로 이 작업을 수행하시겠습니까?</p>
+      <p>이 작업은 되돌릴 수 없습니다.</p>
+    </div>
+  );
+
+  // 운동 요약 정보 렌더링
+  const renderWorkoutSummary = () => (
+    <div className={styles["workout-summary"]}>
+      <div className={styles["summary-card"]}>
+        <div className={styles["summary-label"]}>총 운동 시간</div>
+        <div className={styles["summary-value"]}>{workoutData.totalTime}</div>
+      </div>
+      <div className={styles["summary-card"]}>
+        <div className={styles["summary-label"]}>총 세트 수</div>
+        <div className={styles["summary-value"]}>{workoutData.totalSets}</div>
+      </div>
+      <div className={styles["summary-card"]}>
+        <div className={styles["summary-label"]}>예상 소모 칼로리</div>
+        <div className={styles["summary-value"]}>
+          {workoutData.estimatedCalories}
+        </div>
+      </div>
+    </div>
+  );
+
+  // 운동 목록 렌더링
+  const renderWorkoutExercises = () => (
+    <div className={styles["workout-exercises"]}>
+      {workoutData.exercises.map((exercise) => (
+        <ExerciseCard
+          key={exercise.id}
+          exercise={exercise}
+          onSetChange={handleSetChange}
+        />
+      ))}
+    </div>
+  );
+
+  // 운동 모달 내용 렌더링
+  const renderWorkoutModalContent = () => (
+    <div className={styles["workout-detail-modal"]}>
+      {renderWorkoutSummary()}
+      {renderWorkoutExercises()}
+    </div>
+  );
+
   // 모달 내용 렌더링
   const renderModalContent = () => {
     switch (modalType) {
       case "basic":
-        return (
-          <div>
-            <p>
-              이것은 기본 모달입니다. 간단한 메시지나 확인을 위해 사용할 수
-              있습니다.
-            </p>
-            <p>
-              모달은 사용자의 주의를 끌고 중요한 정보를 표시하는 데 유용합니다.
-            </p>
-          </div>
-        );
-
+        return renderBasicModalContent();
       case "form":
-        return (
-          <form>
-            <ModalComponent.Section>
-              {FORM_FIELDS.map((field) => (
-                <FormField
-                  key={field.id}
-                  field={field}
-                  value={formData[field.id]}
-                  onChange={handleInputChange}
-                />
-              ))}
-            </ModalComponent.Section>
-          </form>
-        );
-
+        return renderFormModalContent();
       case "confirmation":
-        return (
-          <div>
-            <p>정말로 이 작업을 수행하시겠습니까?</p>
-            <p>이 작업은 되돌릴 수 없습니다.</p>
-          </div>
-        );
-
+        return renderConfirmationModalContent();
       case "workout":
-        return (
-          <div className={styles["workout-detail-modal"]}>
-            {/* 상단 요약 정보 */}
-            <div className={styles["workout-summary"]}>
-              <div className={styles["summary-card"]}>
-                <div className={styles["summary-label"]}>총 운동 시간</div>
-                <div className={styles["summary-value"]}>
-                  {workoutData.totalTime}
-                </div>
-              </div>
-              <div className={styles["summary-card"]}>
-                <div className={styles["summary-label"]}>총 세트 수</div>
-                <div className={styles["summary-value"]}>
-                  {workoutData.totalSets}
-                </div>
-              </div>
-              <div className={styles["summary-card"]}>
-                <div className={styles["summary-label"]}>예상 소모 칼로리</div>
-                <div className={styles["summary-value"]}>
-                  {workoutData.estimatedCalories}
-                </div>
-              </div>
-            </div>
-            {/* 운동 목록 */}
-            <div className={styles["workout-exercises"]}>
-              {workoutData.exercises.map((exercise) => (
-                <ExerciseCard
-                  key={exercise.id}
-                  exercise={exercise}
-                  onSetChange={handleSetChange}
-                />
-              ))}
-            </div>
-          </div>
-        );
-
+        return renderWorkoutModalContent();
       default:
         return <div>기본 내용</div>;
     }
@@ -469,35 +498,70 @@ const ModalExample = () => {
     }
   };
 
+  // 모달 열기 버튼들 렌더링
+  const renderModalOpenButtons = () => (
+    <div style={{ display: "grid", gap: "16px", marginBottom: "30px" }}>
+      {Object.keys(MODAL_CONFIGS).map((type) => (
+        <ButtonComponent
+          key={type}
+          variant={
+            type === "basic"
+              ? "primary"
+              : type === "form"
+              ? "success"
+              : type === "confirmation"
+              ? "warning"
+              : "info"
+          }
+          onClick={() => handleOpenModal(type)}
+        >
+          {type === "basic" && "기본 모달 열기"}
+          {type === "form" && "폼 모달 열기"}
+          {type === "confirmation" && "확인 모달 열기"}
+          {type === "workout" && "운동 상세 정보 모달 열기"}
+        </ButtonComponent>
+      ))}
+    </div>
+  );
+
+  // 모달 특징 설명 렌더링
+  const renderModalFeatures = () => (
+    <div
+      style={{
+        marginTop: "30px",
+        padding: "20px",
+        background: "#f8f9fa",
+        borderRadius: "8px",
+      }}
+    >
+      <h3>ModalComponent 특징</h3>
+      <ul>
+        <li>
+          <strong>접근성</strong>: 키보드 네비게이션 및 스크린 리더 지원
+        </li>
+        <li>
+          <strong>반응형</strong>: 모든 화면 크기에서 최적화
+        </li>
+        <li>
+          <strong>커스터마이징</strong>: 크기, 스타일, 동작 방식 조정 가능
+        </li>
+        <li>
+          <strong>애니메이션</strong>: 부드러운 열기/닫기 효과
+        </li>
+        <li>
+          <strong>다크 모드</strong>: 시스템 설정에 따른 자동 테마 전환
+        </li>
+      </ul>
+    </div>
+  );
+
   const currentConfig = getCurrentModalConfig();
 
   return (
     <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
       <h2>ModalComponent 사용 예시</h2>
 
-      {/* 모달 열기 버튼들 */}
-      <div style={{ display: "grid", gap: "16px", marginBottom: "30px" }}>
-        {Object.keys(MODAL_CONFIGS).map((type) => (
-          <ButtonComponent
-            key={type}
-            variant={
-              type === "basic"
-                ? "primary"
-                : type === "form"
-                ? "success"
-                : type === "confirmation"
-                ? "warning"
-                : "info"
-            }
-            onClick={() => handleOpenModal(type)}
-          >
-            {type === "basic" && "기본 모달 열기"}
-            {type === "form" && "폼 모달 열기"}
-            {type === "confirmation" && "확인 모달 열기"}
-            {type === "workout" && "운동 상세 정보 모달 열기"}
-          </ButtonComponent>
-        ))}
-      </div>
+      {renderModalOpenButtons()}
 
       {/* 모달 컴포넌트 */}
       <ModalComponent
@@ -515,34 +579,7 @@ const ModalExample = () => {
         {renderModalContent()}
       </ModalComponent>
 
-      {/* 모달 특징 설명 */}
-      <div
-        style={{
-          marginTop: "30px",
-          padding: "20px",
-          background: "#f8f9fa",
-          borderRadius: "8px",
-        }}
-      >
-        <h3>ModalComponent 특징</h3>
-        <ul>
-          <li>
-            <strong>접근성</strong>: 키보드 네비게이션 및 스크린 리더 지원
-          </li>
-          <li>
-            <strong>반응형</strong>: 모든 화면 크기에서 최적화
-          </li>
-          <li>
-            <strong>커스터마이징</strong>: 크기, 스타일, 동작 방식 조정 가능
-          </li>
-          <li>
-            <strong>애니메이션</strong>: 부드러운 열기/닫기 효과
-          </li>
-          <li>
-            <strong>다크 모드</strong>: 시스템 설정에 따른 자동 테마 전환
-          </li>
-        </ul>
-      </div>
+      {renderModalFeatures()}
     </div>
   );
 };

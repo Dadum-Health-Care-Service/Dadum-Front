@@ -37,22 +37,22 @@ const InputComponent = ({
   const getSizeClass = () => {
     switch (size) {
       case "small":
-        return styles["input--small"];
+        return styles["small"];
       case "large":
-        return styles["input--large"];
+        return styles["large"];
       default:
-        return styles["input--medium"];
+        return styles["medium"];
     }
   };
 
   const getVariantClass = () => {
     switch (variant) {
       case "filled":
-        return styles["input--filled"];
+        return styles["filled"];
       case "standard":
-        return styles["input--standard"];
+        return styles["standard"];
       default:
-        return styles["input--outlined"];
+        return styles["outlined"];
     }
   };
 
@@ -60,9 +60,9 @@ const InputComponent = ({
     styles["input-component"],
     getSizeClass(),
     getVariantClass(),
-    isFocused ? styles["input--focused"] : "",
-    error ? styles["input--error"] : "",
-    disabled ? styles["input--disabled"] : "",
+    isFocused ? styles["focused"] : "",
+    error ? styles["error"] : "",
+    disabled ? styles["disabled"] : "",
     className,
   ]
     .filter(Boolean)
@@ -71,16 +71,16 @@ const InputComponent = ({
   return (
     <div className={inputClasses}>
       {label && (
-        <label className={styles["input__label"]}>
+        <label className={styles["input-label"]}>
           {label}
-          {required && <span className={styles["input__required"]}>*</span>}
+          {required && <span className={styles["input-required"]}>*</span>}
         </label>
       )}
 
-      <div className={styles["input__wrapper"]}>
+      <div className={styles["input-wrapper"]}>
         <input
           type={type}
-          className={styles["input__field"]}
+          className={styles["input-field"]}
           placeholder={placeholder}
           value={internalValue}
           onChange={handleChange}
@@ -92,11 +92,11 @@ const InputComponent = ({
       </div>
 
       {(error || helperText) && (
-        <div className={styles["input__helper"]}>
+        <div className={styles["input-helper"]}>
           {error ? (
-            <span className={styles["input__error-text"]}>{error}</span>
+            <span className={styles["input-error-text"]}>{error}</span>
           ) : (
-            <span className={styles["input__helper-text"]}>{helperText}</span>
+            <span className={styles["input-helper-text"]}>{helperText}</span>
           )}
         </div>
       )}

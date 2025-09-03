@@ -139,7 +139,7 @@ body {
 /* HeaderComponent 스타일 통일 */
 .HeaderComponent,
 .header,
-.header__content,
+.header-content,
 header {
   width: 100%;
   max-width: 1360px;

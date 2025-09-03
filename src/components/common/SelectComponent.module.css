@@ -5,7 +5,7 @@
   box-sizing: border-box;
 }
 
-.select__label {
+.select-label {
   display: block;
   font-size: 14px;
   color: #374151;
@@ -13,13 +13,13 @@
   font-weight: 500;
 }
 
-.select__required {
+.select-required {
   color: #ef4444;
   margin-left: 4px;
 }
 
 /* 기본 Select 필드 스타일 */
-.select__field {
+.select-field {
   width: 100%;
   padding: 10px 12px;
   border-radius: 8px;
@@ -34,40 +34,40 @@
 }
 
 /* Variant별 스타일 */
-.select--outlined {
+.outlined {
   border: 2px solid #d1d5db;
   background: #ffffff;
 }
 
-.select--outlined:focus {
+.outlined:focus {
   outline: none;
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-.select--outlined:hover:not(:disabled) {
+.outlined:hover:not(:disabled) {
   border-color: #9ca3af;
 }
 
-.select--filled {
+.filled {
   border: 2px solid transparent;
   background: #f3f4f6;
   border-bottom: 2px solid #d1d5db;
   border-radius: 8px 8px 0 0;
 }
 
-.select--filled:focus {
+.filled:focus {
   outline: none;
   background: #ffffff;
   border-bottom-color: #3b82f6;
   box-shadow: 0 2px 0 0 #3b82f6;
 }
 
-.select--filled:hover:not(:disabled) {
+.filled:hover:not(:disabled) {
   background: #e5e7eb;
 }
 
-.select--standard {
+.standard {
   border: none;
   border-bottom: 2px solid #d1d5db;
   border-radius: 0;
@@ -76,89 +76,89 @@
   padding-right: 0;
 }
 
-.select--standard:focus {
+.standard:focus {
   outline: none;
   border-bottom-color: #3b82f6;
   box-shadow: 0 2px 0 0 #3b82f6;
 }
 
-.select--standard:hover:not(:disabled) {
+.standard:hover:not(:disabled) {
   border-bottom-color: #9ca3af;
 }
 
 /* 크기별 스타일 */
-.select--small {
+.small {
   padding: 8px 10px;
   font-size: 12px;
   border-radius: 6px;
 }
 
-.select--medium {
+.medium {
   padding: 10px 12px;
   font-size: 14px;
   border-radius: 8px;
 }
 
-.select--large {
+.large {
   padding: 12px 16px;
   font-size: 16px;
   border-radius: 8px;
 }
 
 /* 에러 상태 */
-.select--error {
+.error {
   border-color: #ef4444 !important;
 }
 
-.select--error:focus {
+.error:focus {
   border-color: #ef4444 !important;
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
 }
 
 /* 비활성화 상태 */
-.select--disabled {
+.disabled {
   background-color: #f9fafb !important;
   color: #9ca3af !important;
   cursor: not-allowed !important;
   border-color: #e5e7eb !important;
 }
 
-.select--disabled:hover {
+.disabled:hover {
   border-color: #e5e7eb !important;
 }
 
 /* 다중 선택 스타일 */
-.select__field[multiple] {
+.select-field[multiple] {
   min-height: 120px;
   padding: 8px;
 }
 
-.select__field[multiple] option {
+.select-field[multiple] option {
   padding: 8px;
   margin: 2px 0;
   border-radius: 4px;
 }
 
-.select__field[multiple] option:checked {
+.select-field[multiple] option:checked {
   background: #3b82f6;
   color: #ffffff;
 }
 
 /* 옵션 스타일 */
-.select__option {
+.select-option {
   padding: 8px 12px;
   color: #1f2937;
   background: #ffffff;
 }
 
 /* 커스텀 드롭다운 래퍼 */
-.select__custom-wrapper {
+.select-custom-wrapper {
   position: relative;
   width: 100%;
 }
 
 /* 커스텀 드롭다운 필드 */
-.select__field {
+.select-field {
   width: 100%;
   padding: 10px 12px;
   border-radius: 8px;
@@ -178,7 +178,7 @@
 }
 
 /* 선택된 텍스트 */
-.select__selected-text {
+.select-selected-text {
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -186,7 +186,7 @@
 }
 
 /* 화살표 아이콘 */
-.select__arrow {
+.select-arrow {
   font-size: 12px;
   color: #6b7280;
   transition: transform 0.2s ease;
@@ -195,12 +195,12 @@
 }
 
 /* 드롭다운 열린 상태 */
-.select--open .select__arrow {
+.open .select-arrow {
   transform: rotate(180deg);
 }
 
 /* 드롭다운 리스트 */
-.select__dropdown {
+.select-dropdown {
   position: absolute;
   top: 100%;
   left: 0;
@@ -217,17 +217,17 @@
 }
 
 /* 드롭다운 콘텐츠 */
-.select__dropdown-content {
+.select-dropdown-content {
   padding: 4px 0;
 }
 
 /* 드롭다운 리스트의 너비를 강제로 제한 */
-.select__field:focus {
+.select-field:focus {
   outline: none;
 }
 
 /* 커스텀 드롭다운 옵션 */
-.select__option {
+.select-option {
   padding: 10px 12px;
   color: #1f2937;
   background: #ffffff;
@@ -241,95 +241,95 @@
   box-sizing: border-box;
 }
 
-.select__option:hover {
+.select-option:hover {
   background: #f3f4f6;
 }
 
-.select__option--selected {
+.select-option--selected {
   background: #3b82f6;
   color: #ffffff;
 }
 
-.select__option--selected:hover {
+.select-option--selected:hover {
   background: #2563eb;
 }
 
-.select__option--disabled {
+.select-option--disabled {
   color: #9ca3af;
   background: #f9fafb;
   cursor: not-allowed;
 }
 
-.select__option--placeholder {
+.select-option--placeholder {
   color: #6b7280;
   font-style: italic;
 }
 
 /* 드롭다운 리스트의 너비를 입력창과 동일하게 맞춤 */
-.select__field:focus {
+.select-field:focus {
   outline: none;
 }
 
 /* 모바일에서 커스텀 드롭다운 최적화 */
 @media (max-width: 768px) {
-  .select__field {
+  .select-field {
     min-height: 48px; /* 모바일에서 터치하기 편한 크기 */
     padding: 12px 16px;
   }
 
-  .select__option {
+  .select-option {
     padding: 12px 16px; /* 모바일에서 터치하기 편한 크기 */
     min-height: 48px;
     display: flex;
     align-items: center;
   }
 
-  .select__dropdown {
+  .select-dropdown {
     max-height: 250px; /* 모바일에서 더 많은 옵션 표시 */
   }
 }
 
-.select__option:hover {
+.select-option:hover {
   background: #f3f4f6;
 }
 
-.select__option:disabled {
+.select-option:disabled {
   color: #9ca3af;
   background: #f9fafb;
   cursor: not-allowed;
 }
 
 /* 도움말 텍스트 */
-.select__helper-text {
+.select-helper-text {
   margin-top: 4px;
   font-size: 12px;
   color: #6b7280;
   line-height: 1.4;
 }
 
-.select__helper-text--error {
+.select-helper-text--error {
   color: #ef4444;
 }
 
 /* 포커스 상태 */
-.select__field:focus-visible {
+.select-field:focus-visible {
   outline: 2px solid #3b82f6;
   outline-offset: 2px;
 }
 
 /* 반응형 디자인 */
 @media (max-width: 768px) {
-  .select--small {
+  .small {
     padding: 6px 8px;
     font-size: 12px;
   }
 
-  .select--medium {
+  .medium {
     padding: 8px 10px;
     font-size: 13px;
   }
 
-  .select--large {
+  .large {
     padding: 10px 12px;
     font-size: 14px;
   }
@@ -337,61 +337,61 @@
 
 /* 접근성을 위한 고대비 모드 지원 */
 @media (prefers-contrast: high) {
-  .select--outlined {
+  .outlined {
     border-width: 3px;
   }
 
-  .select__field:focus-visible {
+  .select-field:focus-visible {
     outline-width: 3px;
   }
 }
 
 /* 다크 모드 지원 */
 @media (prefers-color-scheme: dark) {
-  .select__label {
+  .select-label {
     color: #e5e7eb;
   }
 
-  .select__field {
+  .select-field {
     background: #374151;
     color: #f9fafb;
     border-color: #6b7280;
   }
 
-  .select--outlined {
+  .outlined {
     background: #374151;
     border-color: #6b7280;
   }
 
-  .select--filled {
+  .filled {
     background: #4b5563;
     border-bottom-color: #6b7280;
   }
 
-  .select--filled:focus {
+  .filled:focus {
     background: #374151;
   }
 
-  .select--standard {
+  .standard {
     border-bottom-color: #6b7280;
   }
 
-  .select--disabled {
+  .disabled {
     background-color: #1f2937 !important;
     color: #6b7280 !important;
     border-color: #4b5563 !important;
   }
 
-  .select__option {
+  .select-option {
     background: #374151;
     color: #f9fafb;
   }
 
-  .select__option:hover {
+  .select-option:hover {
     background: #4b5563;
   }
 
-  .select__helper-text {
+  .select-helper-text {
     color: #d1d5db;
   }
 }

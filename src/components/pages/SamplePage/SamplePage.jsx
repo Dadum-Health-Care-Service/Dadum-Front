@@ -190,7 +190,7 @@ const SamplePage = () => {
               details={routine.details}
               buttonText={routine.buttonText}
               onClick={() => handleCardClick(routine.id)}
-              className={selectedCard === routine.id ? "card--selected" : ""}
+              className={selectedCard === routine.id ? "selected" : ""}
             />
           ))}
         </div>
