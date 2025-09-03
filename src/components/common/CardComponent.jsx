@@ -1,13 +1,14 @@
-import React from 'react';
-import './CardComponent.css';
+import React from "react";
+import ButtonComponent from "./ButtonComponent";
+import styles from "./CardComponent.module.css";
 
-const CardComponent = ({ 
-  title = '루틴 제목',
-  details = '월/수/금 · 45분',
-  buttonText = '시작',
+const CardComponent = ({
+  title = "루틴 제목",
+  details = "월/수/금 · 45분",
+  buttonText = "시작",
   onClick,
-  className = '',
-  disabled = false
+  className = "",
+  disabled = false,
 }) => {
   const handleClick = () => {
     if (!disabled && onClick) {
@@ -16,29 +17,29 @@ const CardComponent = ({
   };
 
   return (
-    <div 
-      className={`card ${className} ${disabled ? 'card--disabled' : ''}`}
+    <div
+      className={`${styles.card} ${className} ${
+        disabled ? styles["card--disabled"] : ""
+      }`}
       onClick={handleClick}
       role="button"
       tabIndex={disabled ? -1 : 0}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
+        if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           handleClick();
         }
       }}
     >
-      <div className="card__content">
-        <h3 className="card__title">{title}</h3>
-        <p className="card__details">{details}</p>
+      <div className={styles["card__content"]}>
+        <h3 className={styles["card__title"]}>{title}</h3>
+        <p className={styles["card__details"]}>{details}</p>
       </div>
-      <button 
-        className="card__button"
-        disabled={disabled}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {buttonText}
-      </button>
+      <div className={styles["card__button-container"]} onClick={handleClick}>
+        <ButtonComponent variant="outline" onClick={onClick} size="medium">
+          {buttonText}
+        </ButtonComponent>
+      </div>
     </div>
   );
 };

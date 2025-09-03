@@ -1,5 +1,5 @@
 .routine {
-  padding: 1rem;
+  padding: 2rem;
 }
 
 .header {
@@ -35,13 +35,40 @@
 
 .filterSelect {
   flex: 1;
+  width: 100%;
+}
+
+/* SelectComponent의 드롭다운 너비를 입력창과 동일하게 맞춤 */
+.filterSelect .select-wrapper {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.filterSelect .select-field {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
+}
+
+/* 드롭다운 옵션들의 너비 강제 제한 */
+.filterSelect select option {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-wrap: break-word;
 }
 
 .categories {
   display: flex;
+  flex-wrap: nowrap;
   gap: 0.5rem;
+  padding: 1rem;
   margin-bottom: 1.5rem;
-  flex-wrap: wrap;
   justify-content: center;
 }
 

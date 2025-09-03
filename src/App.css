@@ -16,6 +16,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* 커스텀 SelectComponent는 별도 CSS 파일에서 관리 */
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
@@ -104,7 +106,6 @@ body {
 
   /* 모바일에서 메인 컨테이너 패딩 조정 */
   .App main {
-    padding: 0 15px;
     max-width: 100%;
   }
 }
@@ -125,9 +126,8 @@ body {
 .header,
 .App main {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1320px;
   margin: 0 auto;
-  padding: 0 20px;
   box-sizing: border-box;
 }
 
@@ -139,10 +139,10 @@ body {
 /* HeaderComponent 스타일 통일 */
 .HeaderComponent,
 .header,
-.header__content,
+.header-content,
 header {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1360px;
   margin: 0 auto;
   padding: 0 20px;
   box-sizing: border-box;
@@ -151,7 +151,6 @@ header {
 /* 로그인 화면 전체 화면 차지 */
 .App main:has(.container) {
   max-width: 100%;
-  padding: 0;
   margin: 0;
 }
 
