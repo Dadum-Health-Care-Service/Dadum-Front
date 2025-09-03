@@ -107,6 +107,30 @@
   position: relative;
   background: transparent;
 }
+.list-item__content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.list-item__content-container {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.list-item__content-container-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.list-item__content-container-children {
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: black;
+}
 
 .small .list-item {
   padding: 8px 12px;
@@ -253,6 +277,17 @@
   align-items: center;
 }
 
+.list-item-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  width: 24px;
+  height: 24px;
+  font-size: 16px;
+}
+
 /* 리스트 헤더 */
 .list-header {
   padding: 8px 16px;
@@ -304,6 +339,19 @@
 
 .horizontal .list-item-content {
   flex: none;
+}
+
+/* expandable일 때 space-between 적용 */
+.list-item--expandable {
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.list-item--expandable .list-item-end {
+  justify-content: flex-end;
+  width: auto;
+  align-self: flex-start;
+  margin-top: 0;
 }
 
 /* 반응형 디자인 */

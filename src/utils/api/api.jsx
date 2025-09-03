@@ -1,17 +1,23 @@
 import axios from "axios";
 
-const host = "http://localhost:8080/api/v1";
+const main = "http://localhost:8080/api/v1";
+const ai = "http://localhost:8000";
+const host ={
+  main:main,
+  ai:ai
+}
 
-function GET(URL, data) {
-  return axios.get(host + URL, data, {
+
+function GET(URL, data,isAuth = true, source = "main") {
+  return axios.get(host[source] + URL, data, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
   });
 }
 
-function POST(URL, data, isAuth = true) {
-  return axios.post(host + URL, data, {
+function POST(URL, data, isAuth = true, source = "main") {
+  return axios.post(host[source] + URL, data, {
     headers: {
       Authorization: isAuth
         ? `Bearer ${localStorage.getItem("accessToken")}`
@@ -20,16 +26,16 @@ function POST(URL, data, isAuth = true) {
   });
 }
 
-function PUT(URL, data) {
-  return axios.put(host + URL, data, {
+function PUT(URL, data, isAuth = true, source = "main") {
+  return axios.put(host[source] + URL, data, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
   });
 }
 
-function DELETE(URL, data) {
-  return axios.delete(host + URL, data, {
+function DELETE(URL, data, isAuth = true, source = "main") {
+  return axios.delete(host[source] + URL, data, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },

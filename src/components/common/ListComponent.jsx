@@ -39,6 +39,9 @@ const ListItem = ({
   selected = false,
   disabled = false,
   onClick,
+  expandable = false,
+  expanded = false,
+  onToggle,
   className = "",
   ...props
 }) => {
@@ -48,6 +51,8 @@ const ListItem = ({
     const selectedClass = selected ? styles["list-item--selected"] : "";
     const disabledClass = disabled ? styles["list-item--disabled"] : "";
     const clickableClass = onClick ? styles["list-item--clickable"] : "";
+    const expandableClass = expandable ? styles["list-item--expandable"] : "";
+    const expandedClass = expanded ? styles["list-item--expanded"] : "";
     const customClass = className;
 
     return [
@@ -55,6 +60,8 @@ const ListItem = ({
       selectedClass,
       disabledClass,
       clickableClass,
+      expandableClass,
+      expandedClass,
       customClass,
     ]
       .filter(Boolean)
@@ -65,6 +72,17 @@ const ListItem = ({
   const handleClick = (e) => {
     if (!disabled && onClick) {
       onClick(e);
+      if (expandable && onToggle) {
+        onToggle();
+      }
+    }
+  };
+
+  // 토글 핸들러
+  const handleToggle = (e) => {
+    if (expandable && onToggle) {
+      e.stopPropagation();
+      onToggle();
     }
   };
 
@@ -73,6 +91,10 @@ const ListItem = ({
     if (onClick && !disabled && (e.key === "Enter" || e.key === " ")) {
       e.preventDefault();
       handleClick(e);
+    }
+    if (expandable && onToggle && e.key === "ArrowDown") {
+      e.preventDefault();
+      onToggle();
     }
   };
 
@@ -91,20 +113,33 @@ const ListItem = ({
   // 콘텐츠 섹션 렌더링
   const renderContentSection = () => (
     <div className={styles["list-item__content"]}>
-      {primary && <div className={styles["list-item__primary"]}>{primary}</div>}
-      {secondary && (
-        <div className={styles["list-item__secondary"]}>{secondary}</div>
-      )}
-      {children}
+      <div className={styles["list-item__content-container"]}>
+        <div className={styles["list-item__content-container-titles"]}>
+          {primary && (
+            <div className={styles["list-item__primary"]}>{primary}</div>
+          )}
+          {secondary && (
+            <div className={styles["list-item__secondary"]}>{secondary}</div>
+          )}
+        </div>
+        {expandable && (
+          <button
+            className={styles["list-item-toggle"]}
+            onClick={handleToggle}
+            aria-expanded={expanded}
+            aria-label={expanded ? "접기" : "펼치기"}
+          >
+            {expanded ? "▲" : "▼"}
+          </button>
+        )}
+      </div>
+      <div className={styles["list-item__content-container-children"]}>
+        {children}
+      </div>
     </div>
   );
 
   // 끝 섹션 렌더링
-  const renderEndSection = () => {
-    if (!action) return null;
-
-    return <div className={styles["list-item__end"]}>{action}</div>;
-  };
 
   return (
     <li
@@ -117,7 +152,6 @@ const ListItem = ({
     >
       {renderStartSection()}
       {renderContentSection()}
-      {renderEndSection()}
     </li>
   );
 };

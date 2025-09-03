@@ -21,10 +21,10 @@ const SelectComponent = ({
 
   // Select 클래스명 생성
   const getSelectClassName = () => {
-    const baseClass = styles["select__field"];
-    const errorClass = error ? styles["select--error"] : "";
-    const disabledClass = disabled ? styles["select--disabled"] : "";
-    const openClass = isOpen ? styles["select--open"] : "";
+    const baseClass = styles["select-field"];
+    const errorClass = error ? styles["error"] : "";
+    const disabledClass = disabled ? styles["disabled"] : "";
+    const openClass = isOpen ? styles["open"] : "";
     const customClass = className;
 
     return [baseClass, errorClass, disabledClass, openClass, customClass]
@@ -90,26 +90,26 @@ const SelectComponent = ({
     if (!label) return null;
 
     return (
-      <label htmlFor={label} className={styles["select__label"]}>
+      <label htmlFor={label} className={styles["select-label"]}>
         {label}{" "}
-        {required && <span className={styles["select__required"]}>*</span>}
+        {required && <span className={styles["select-required"]}>*</span>}
       </label>
     );
   };
 
   // 선택된 텍스트 렌더링
   const renderSelectedText = () => (
-    <span className={styles["select__selected-text"]}>
+    <span className={styles["select-selected-text"]}>
       {selectedLabel || placeholder}
     </span>
   );
 
   // 화살표 아이콘 렌더링
-  const renderArrow = () => <span className={styles["select__arrow"]}>▼</span>;
+  const renderArrow = () => <span className={styles["select-arrow"]}>▼</span>;
 
   // 드롭다운 옵션들 렌더링
   const renderDropdownOptions = () => (
-    <div className={styles["select__dropdown-content"]}>
+    <div className={styles["select-dropdown-content"]}>
       {React.Children.map(children, (child) => {
         if (React.isValidElement(child)) {
           return React.cloneElement(child, {
@@ -127,9 +127,7 @@ const SelectComponent = ({
     if (!isOpen) return null;
 
     return (
-      <div className={styles["select__dropdown"]}>
-        {renderDropdownOptions()}
-      </div>
+      <div className={styles["select-dropdown"]}>{renderDropdownOptions()}</div>
     );
   };
 
@@ -140,8 +138,8 @@ const SelectComponent = ({
     return (
       <p
         id={`${label}-helper-text`}
-        className={`${styles["select__helper-text"]} ${
-          error ? styles["select__helper-text--error"] : ""
+        className={`${styles["select-helper-text"]} ${
+          error ? styles["select-helper-text--error"] : ""
         }`}
       >
         {helperText}
@@ -156,7 +154,7 @@ const SelectComponent = ({
     >
       {renderLabel()}
 
-      <div className={styles["select__custom-wrapper"]}>
+      <div className={styles["select-custom-wrapper"]}>
         <div
           className={getSelectClassName()}
           onClick={toggleDropdown}
@@ -198,9 +196,9 @@ const OptionComponent = ({
 
   // 옵션 클래스명 생성
   const getOptionClassName = () => {
-    const baseClass = styles["select__option"];
-    const selectedClass = selected ? styles["select__option--selected"] : "";
-    const disabledClass = disabled ? styles["select__option--disabled"] : "";
+    const baseClass = styles["select-option"];
+    const selectedClass = selected ? styles["select-option--selected"] : "";
+    const disabledClass = disabled ? styles["select-option--disabled"] : "";
     const customClass = className;
 
     return [baseClass, selectedClass, disabledClass, customClass]

@@ -15,9 +15,11 @@ import SelectComponent from "../../common/SelectComponent";
 import ContainerComponent from "../../common/ContainerComponent";
 import styles from "./Routine.module.css";
 import ModalExample from "../../common/ModalExample";
+import RoutineCreateModal from "./RoutineCreateModal/RoutineCreateModal";
 
 const Routine = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
 
   const categories = [
@@ -92,11 +94,19 @@ const Routine = () => {
 
   return (
     <ContainerComponent className={`${styles.routine}`}>
+      <RoutineCreateModal
+        isModalOpen={isCreateModalOpen}
+        setIsModalOpen={setIsCreateModalOpen}
+      />
       <ModalExample />
       {/* Header */}
       <div className={styles.header}>
         <h1 className={styles.title}>루틴 관리</h1>
-        <ButtonComponent variant="primary" size="lg">
+        <ButtonComponent
+          variant="primary"
+          size="lg"
+          onClick={() => setIsCreateModalOpen(true)}
+        >
           <FaPlus className={styles.buttonIcon} />새 루틴 만들기
         </ButtonComponent>
       </div>

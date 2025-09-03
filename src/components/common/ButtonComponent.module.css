@@ -15,6 +15,15 @@
   text-decoration: none;
   white-space: nowrap;
 }
+.button-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 
 /* 크기별 스타일 */
 .small {
@@ -134,5 +143,8 @@
     padding: 10px 20px;
     font-size: 15px;
     min-height: 44px;
+  }
+  .button-label {
+    font-size: 13px;
   }
 }
