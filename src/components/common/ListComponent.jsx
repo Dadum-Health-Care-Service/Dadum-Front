@@ -42,6 +42,7 @@ const ListItem = ({
   expandable = false,
   expanded = false,
   onToggle,
+  noPadding = false,
   className = "",
   ...props
 }) => {
@@ -53,6 +54,7 @@ const ListItem = ({
     const clickableClass = onClick ? styles["list-item--clickable"] : "";
     const expandableClass = expandable ? styles["list-item--expandable"] : "";
     const expandedClass = expanded ? styles["list-item--expanded"] : "";
+    const noPaddingClass = noPadding ? styles["list-item--no-padding"] : "";
     const customClass = className;
 
     return [
@@ -62,6 +64,7 @@ const ListItem = ({
       clickableClass,
       expandableClass,
       expandedClass,
+      noPaddingClass,
       customClass,
     ]
       .filter(Boolean)

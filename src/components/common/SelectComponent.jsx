@@ -8,11 +8,14 @@ const SelectComponent = ({
   value,
   onChange,
   placeholder = "선택해주세요",
+  variant = "outlined", // outlined, filled, standard
+  size = "medium", // small, medium, large
+  disabled = false,
   required = false,
   error = false,
   helperText = "",
-  disabled = false,
   className = "",
+  multiple = false,
   ...props
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,12 +25,22 @@ const SelectComponent = ({
   // Select 클래스명 생성
   const getSelectClassName = () => {
     const baseClass = styles["select-field"];
+    const variantClass = styles[variant] || styles["outlined"];
+    const sizeClass = styles[size] || styles["medium"];
     const errorClass = error ? styles["error"] : "";
     const disabledClass = disabled ? styles["disabled"] : "";
     const openClass = isOpen ? styles["open"] : "";
     const customClass = className;
 
-    return [baseClass, errorClass, disabledClass, openClass, customClass]
+    return [
+      baseClass,
+      variantClass,
+      sizeClass,
+      errorClass,
+      disabledClass,
+      openClass,
+      customClass,
+    ]
       .filter(Boolean)
       .join(" ");
   };
@@ -36,16 +49,27 @@ const SelectComponent = ({
   useEffect(() => {
     if (children) {
       const options = Array.isArray(children) ? children : [children];
-      const selectedOption = options.find(
-        (option) => option.props.value === value
-      );
-      if (selectedOption) {
-        setSelectedLabel(selectedOption.props.children);
+
+      if (multiple && Array.isArray(value)) {
+        // Multiple 선택인 경우
+        const selectedOptions = options.filter((option) =>
+          value.includes(option.props.value)
+        );
+        const labels = selectedOptions.map((option) => option.props.children);
+        setSelectedLabel(labels.join(", "));
       } else {
-        setSelectedLabel("");
+        // Single 선택인 경우
+        const selectedOption = options.find(
+          (option) => option.props.value === value
+        );
+        if (selectedOption) {
+          setSelectedLabel(selectedOption.props.children);
+        } else {
+          setSelectedLabel("");
+        }
       }
     }
-  }, [value, children]);
+  }, [value, children, multiple]);
 
   // 외부 클릭 시 드롭다운 닫기
   useEffect(() => {
@@ -73,9 +97,21 @@ const SelectComponent = ({
 
   // 옵션 클릭 핸들러
   const handleOptionClick = (optionValue, optionLabel) => {
-    onChange({ target: { value: optionValue } });
-    setSelectedLabel(optionLabel);
-    setIsOpen(false);
+    if (multiple) {
+      // Multiple 선택인 경우
+      const currentValues = Array.isArray(value) ? value : [];
+      const newValues = currentValues.includes(optionValue)
+        ? currentValues.filter((v) => v !== optionValue) // 이미 선택된 경우 제거
+        : [...currentValues, optionValue]; // 새로운 선택 추가
+
+      onChange({ target: { value: newValues } });
+      // Multiple 선택에서는 드롭다운을 닫지 않음
+    } else {
+      // Single 선택인 경우
+      onChange({ target: { value: optionValue } });
+      setSelectedLabel(optionLabel);
+      setIsOpen(false);
+    }
   };
 
   // 드롭다운 토글
@@ -112,9 +148,14 @@ const SelectComponent = ({
     <div className={styles["select-dropdown-content"]}>
       {React.Children.map(children, (child) => {
         if (React.isValidElement(child)) {
+          const isSelected = multiple
+            ? Array.isArray(value) && value.includes(child.props.value)
+            : child.props.value === value;
+
           return React.cloneElement(child, {
             onClick: handleOptionClick,
-            selected: child.props.value === value,
+            selected: isSelected,
+            multiple: multiple,
           });
         }
         return child;

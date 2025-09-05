@@ -132,6 +132,25 @@
   color: black;
 }
 
+/* No padding modifier */
+.list-item--no-padding .list-item__content-container {
+  padding: 12px 16px;
+}
+.list-item--no-padding .list-item__content-container-children {
+  padding: 0;
+}
+
+/* Expanded content full width */
+.list-item--expanded .list-item__content-container-children {
+  margin: 0 -16px;
+  padding: 0 16px;
+}
+
+/* Remove parent padding when expanded */
+.list-item--expanded {
+  padding: 0;
+}
+
 .small .list-item {
   padding: 8px 12px;
 }
