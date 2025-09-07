@@ -4,6 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import "./App.css";
 import PoseAccuracyMVP from "./components/pages/Pose/PoseAccuracyMVP.jsx";
+import Login from "./components/pages/Login/Login.jsx";
 
 // Common Components
 import HeaderComponent from "./components/common/HeaderComponent";
@@ -261,6 +262,11 @@ function App() {
     }
   };
 
+  // PC: /login 경로에서는 로그인 페이지만 단독 렌더링
+  if (typeof window !== 'undefined' && window.location.pathname === '/login') {
+    return <Login onLoginSuccess={() => { window.location.href = '/'; }} />;
+  }
+
   return (
     <Router>
       <AuthProvider>
@@ -360,16 +366,16 @@ function App() {
                       : "0",
                     display: "flex",
                     minHeight: isLoggedIn ? "auto" : "100vh",
-                  }}
-                >
-                  {renderContent()}
-                </main>
-              </div>
-            </SuggestProvider>
-          </RoutineProvider>
-        </RunProvider>
-      </AuthProvider>
-    </Router>
+                   }}
+              >
+                {renderContent()}
+              </main>
+            </div>
+          </SuggestProvider>
+        </RoutineProvider>
+      </RunProvider>
+    </AuthProvider>
+  </Router>
   );
 }
 
