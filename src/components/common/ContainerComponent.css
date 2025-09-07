@@ -8,8 +8,8 @@
 /* variant별 스타일 */
 .container--default {
   background: #ffffff;
-  border: 2px solid transparent;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb; /* 얇은 외곽선 */
+  box-shadow: none; /* 기본 그림자 제거 */
 }
 
 .container--elevated {

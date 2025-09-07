@@ -7,8 +7,8 @@
 /* variant별 스타일 */
 .form--default {
   background: #ffffff;
-  border: 2px solid transparent;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: none; /* 컨테이너 외곽선과 겹치지 않도록 제거 */
+  box-shadow: none; /* 좌우 겹쳐 보이는 원인 제거 */
 }
 
 .form--outlined {
@@ -25,8 +25,8 @@
 
 .form--elevated {
   background: #ffffff;
-  border: 2px solid transparent;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e5e7eb; /* 컨테이너와 동일한 얇은 외곽선 */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* 은은한 그림자 */
 }
 
 /* 크기별 스타일 */
