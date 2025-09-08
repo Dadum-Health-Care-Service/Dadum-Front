@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { BrowserRouter as Router } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
@@ -13,16 +13,18 @@ import BottomNavigation from "./components/common/BottomNavigation";
 // Pages
 import Home from "./components/pages/Home/Home.jsx";
 import Routine from "./components/pages/Routine/Routine.jsx";
+import Admin from "./components/pages/Admin/Admin.jsx";
 
 //Contexts
 import { RunProvider } from "./context/RunContext.jsx";
 import { RoutineProvider } from "./context/RoutineContext.jsx";
 import { SuggestProvider } from "./context/SuggestContext.jsx";
-import { AuthProvider } from "./context/AuthContext.jsx";
+import { AuthProvider, AuthContext } from "./context/AuthContext.jsx";
 import { POST } from "./utils/api/api";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [activeTab, setActiveTab] = useState("home");
   const [selectedListItem, setSelectedListItem] = useState(null);
   const [activeHeaderMenu, setActiveHeaderMenu] = useState("home");
@@ -53,7 +55,7 @@ function App() {
       },
       false
     ).then((res) => {
-      localStorage.setItem("token", res.data.accessToken);
+      dispatch({ type: "LOGIN", user: res.data });
       setIsLoggedIn(true);
     });
   };
@@ -84,7 +86,11 @@ function App() {
   const handleLogoutClick = () => setIsLoggedIn(false);
   const handleTabChange = (tabId) => setActiveTab(tabId);
   const handleHeaderMenuClick = (menuId) => setActiveHeaderMenu(menuId);
-
+  const handleAdminLoginClick = () => {
+    setIsLoggedIn(true);
+    setIsAdmin(true);
+    setActiveTab("admin");
+  };
   const renderContent = () => {
     // 로그인되지 않은 경우 로그인 화면 표시
     if (!isLoggedIn) {
@@ -112,6 +118,13 @@ function App() {
               onClick={handleSignupClick}
             >
               회원가입
+            </ButtonComponent>
+            <ButtonComponent
+              variant="outline-primary"
+              size="lg"
+              onClick={handleAdminLoginClick}
+            >
+              관리자 로그인
             </ButtonComponent>
           </div>
         </div>
@@ -147,6 +160,8 @@ function App() {
             <p>마이페이지 기능은 개발 중입니다.</p>
           </div>
         );
+      case "admin":
+        return <Admin />;
       default:
         return <Home />;
     }
