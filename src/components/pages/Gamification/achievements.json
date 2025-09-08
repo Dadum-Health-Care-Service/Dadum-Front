@@ -32,7 +32,7 @@
       "rule": { "current_session_min": { ">=": 30 } },
       "constraints": {},
       "repeatable": false,
-      "icon": "🔥"
+      "icon": "streak-3"
     },
     {
       "id": "ACH_ROUTINE_START",
@@ -44,7 +44,7 @@
       "rule": { "weekly_sessions": { ">=": 3 } },
       "constraints": {},
       "repeatable": false,
-      "icon": "📅"
+      "icon": "calendar-week"
     },
     {
       "id": "ACH_FIRST_300_MIN",
@@ -69,7 +69,7 @@
       "rule": { "consecutive_days_with_valid_session": { ">=": 3 } },
       "constraints": { "daily_total_cap_minutes": 120 },
       "repeatable": false,
-      "icon": "🔥"
+      "icon": "calendar-3"
     },
     {
       "id": "ACH_STREAK_7",
@@ -81,7 +81,7 @@
       "rule": { "consecutive_days_with_valid_session": { ">=": 7 } },
       "constraints": { "daily_total_cap_minutes": 120 },
       "repeatable": false,
-      "icon": "🔥🔥"
+      "icon": "check-7"
     },
     {
       "id": "ACH_STREAK_14",
@@ -93,7 +93,7 @@
       "rule": { "consecutive_days_with_valid_session": { ">=": 14 } },
       "constraints": { "daily_total_cap_minutes": 120 },
       "repeatable": false,
-      "icon": "🔥🔥🔥"
+      "icon": "trophy-14"
     },
 
     {
@@ -107,7 +107,7 @@
       "constraints": {},
       "repeatable": true,
       "reset": "week",
-      "icon": "📊"
+      "icon": "chart-bar"
     },
     {
       "id": "ACH_WEEKLY3_4W_CONSEC",
@@ -124,7 +124,7 @@
       },
       "constraints": {},
       "repeatable": false,
-      "icon": "🏆"
+      "icon": "trophy-milestone"
     },
     {
       "id": "ACH_WEEKLY_4",
@@ -137,12 +137,12 @@
       "constraints": {},
       "repeatable": true,
       "reset": "week",
-      "icon": "🎯"
+      "icon": "target"
     },
 
     {
       "id": "ACH_DEEPFOCUS_60",
-      "name": "딥 포커스 60",
+      "name": "DEEP FOCUS 60",
       "category": "Session",
       "description": "단일 세션 60분 이상",
       "trigger": "session_end",
@@ -154,7 +154,7 @@
     },
     {
       "id": "ACH_MICRO_3X10",
-      "name": "마이크로 3×10",
+      "name": "MICRO 3×10",
       "category": "Session Pattern",
       "description": "하루에 10분 이상 세션 3회, 세션 간 3시간 이상 간격",
       "trigger": "day_close",
@@ -167,11 +167,11 @@
       "constraints": {},
       "repeatable": true,
       "reset": "day",
-      "icon": "⚡"
+      "icon": "bolt"
     },
     {
       "id": "ACH_DOUBLE_SESSION_DAY",
-      "name": "더블 세션 데이",
+      "name": "Double Session Day",
       "category": "Session Pattern",
       "description": "하루에 20분 이상 세션 2회, 세션 간 6시간 이상 간격",
       "trigger": "day_close",
@@ -184,7 +184,7 @@
       "constraints": { "max_awards_per_month": 4 },
       "repeatable": true,
       "reset": "day",
-      "icon": "🔄"
+      "icon": "sync"
     },
 
     {
@@ -198,7 +198,7 @@
       "constraints": {},
       "repeatable": true,
       "reset": "month",
-      "icon": "📈"
+      "icon": "chart-line"
     },
     {
       "id": "ACH_MONTH_900",
@@ -211,7 +211,7 @@
       "constraints": {},
       "repeatable": true,
       "reset": "month",
-      "icon": "📊"
+      "icon": "chart-bar"
     },
     {
       "id": "ACH_MONTH_20",
@@ -224,7 +224,7 @@
       "constraints": {},
       "repeatable": true,
       "reset": "month",
-      "icon": "🎯"
+      "icon": "target"
     },
 
     {
@@ -237,7 +237,7 @@
       "rule": { "lifetime_distinct_categories": { ">=": 3 } },
       "constraints": {},
       "repeatable": false,
-      "icon": "🎭"
+      "icon": "palette"
     },
     {
       "id": "ACH_SPECIALIST_10",
@@ -253,7 +253,7 @@
       "repeatable": true,
       "per_category": true,
       "category_key": "TYPE",
-      "icon": "🎯"
+      "icon": "target"
     },
 
     {
@@ -273,7 +273,7 @@
       "constraints": {},
       "repeatable": true,
       "reset": "month",
-      "icon": "🌅"
+      "icon": "sunrise"
     },
     {
       "id": "ACH_AFTERWORK_RUNNER",
@@ -292,7 +292,7 @@
       "constraints": {},
       "repeatable": true,
       "reset": "month",
-      "icon": "🌆"
+      "icon": "sunset"
     }
   ]
 }
