@@ -1,0 +1,298 @@
+{
+  "version": "1.0",
+  "timezone": "Asia/Seoul",
+  "valid_session_definition": {
+    "min_active_minutes": 10,
+    "min_gap_between_sessions_minutes": 30,
+    "no_overlap": true
+  },
+  "caps": {
+    "daily_total_cap_minutes": 120
+  },
+  "achievements": [
+    {
+      "id": "ACH_FIRST_SESSION",
+      "name": "첫 발자국",
+      "category": "Onboarding",
+      "description": "유효 세션 1회 완료",
+      "trigger": "session_end",
+      "window": "lifetime",
+      "rule": { "total_valid_sessions": { ">=": 1 } },
+      "constraints": {},
+      "repeatable": false,
+      "icon": "🚶‍♂️"
+    },
+    {
+      "id": "ACH_WARMUP_30",
+      "name": "워밍업 30",
+      "category": "Onboarding",
+      "description": "단일 세션 30분 이상",
+      "trigger": "session_end",
+      "window": "per_session",
+      "rule": { "current_session_min": { ">=": 30 } },
+      "constraints": {},
+      "repeatable": false,
+      "icon": "🔥"
+    },
+    {
+      "id": "ACH_ROUTINE_START",
+      "name": "루틴 시작",
+      "category": "Onboarding",
+      "description": "한 주에 유효 세션 3회 이상",
+      "trigger": "week_close",
+      "window": "iso_week",
+      "rule": { "weekly_sessions": { ">=": 3 } },
+      "constraints": {},
+      "repeatable": false,
+      "icon": "📅"
+    },
+    {
+      "id": "ACH_FIRST_300_MIN",
+      "name": "첫 300분",
+      "category": "Milestone",
+      "description": "누적 유효 시간 300분 달성",
+      "trigger": "session_end",
+      "window": "lifetime",
+      "rule": { "lifetime_active_minutes": { ">=": 300 } },
+      "constraints": {},
+      "repeatable": false,
+      "icon": "⏱️"
+    },
+
+    {
+      "id": "ACH_STREAK_3",
+      "name": "3일 연속",
+      "category": "Streak",
+      "description": "3일 연속 하루 1회 이상 유효 세션",
+      "trigger": "day_close",
+      "window": "rolling",
+      "rule": { "consecutive_days_with_valid_session": { ">=": 3 } },
+      "constraints": { "daily_total_cap_minutes": 120 },
+      "repeatable": false,
+      "icon": "🔥"
+    },
+    {
+      "id": "ACH_STREAK_7",
+      "name": "7일 연속",
+      "category": "Streak",
+      "description": "7일 연속 하루 1회 이상 유효 세션",
+      "trigger": "day_close",
+      "window": "rolling",
+      "rule": { "consecutive_days_with_valid_session": { ">=": 7 } },
+      "constraints": { "daily_total_cap_minutes": 120 },
+      "repeatable": false,
+      "icon": "🔥🔥"
+    },
+    {
+      "id": "ACH_STREAK_14",
+      "name": "14일 연속",
+      "category": "Streak",
+      "description": "14일 연속 하루 1회 이상 유효 세션",
+      "trigger": "day_close",
+      "window": "rolling",
+      "rule": { "consecutive_days_with_valid_session": { ">=": 14 } },
+      "constraints": { "daily_total_cap_minutes": 120 },
+      "repeatable": false,
+      "icon": "🔥🔥🔥"
+    },
+
+    {
+      "id": "ACH_WEEKLY_3",
+      "name": "주 3일 성공",
+      "category": "Weekly",
+      "description": "한 주에 활동한 날이 3일 이상",
+      "trigger": "week_close",
+      "window": "iso_week",
+      "rule": { "active_days_in_week": { ">=": 3 } },
+      "constraints": {},
+      "repeatable": true,
+      "reset": "week",
+      "icon": "📊"
+    },
+    {
+      "id": "ACH_WEEKLY3_4W_CONSEC",
+      "name": "4주 연속 주3일",
+      "category": "Weekly",
+      "description": "4주 연속으로 매주 활동한 날 3일 이상",
+      "trigger": "week_close",
+      "window": "rolling_4_weeks",
+      "rule": {
+        "consecutive_weeks_active_days_in_week": {
+          "min_active_days": 3,
+          "weeks": 4
+        }
+      },
+      "constraints": {},
+      "repeatable": false,
+      "icon": "🏆"
+    },
+    {
+      "id": "ACH_WEEKLY_4",
+      "name": "주 4일 도전",
+      "category": "Weekly",
+      "description": "한 주에 활동한 날이 4일 이상",
+      "trigger": "week_close",
+      "window": "iso_week",
+      "rule": { "active_days_in_week": { ">=": 4 } },
+      "constraints": {},
+      "repeatable": true,
+      "reset": "week",
+      "icon": "🎯"
+    },
+
+    {
+      "id": "ACH_DEEPFOCUS_60",
+      "name": "딥 포커스 60",
+      "category": "Session",
+      "description": "단일 세션 60분 이상",
+      "trigger": "session_end",
+      "window": "per_session",
+      "rule": { "current_session_min": { ">=": 60 } },
+      "constraints": {},
+      "repeatable": false,
+      "icon": "🧘‍♂️"
+    },
+    {
+      "id": "ACH_MICRO_3X10",
+      "name": "마이크로 3×10",
+      "category": "Session Pattern",
+      "description": "하루에 10분 이상 세션 3회, 세션 간 3시간 이상 간격",
+      "trigger": "day_close",
+      "window": "day",
+      "rule": {
+        "sessions_count_in_day": { ">=": 3 },
+        "each_session_min": { ">=": 10 },
+        "min_gap_minutes_between_sessions": { ">=": 180 }
+      },
+      "constraints": {},
+      "repeatable": true,
+      "reset": "day",
+      "icon": "⚡"
+    },
+    {
+      "id": "ACH_DOUBLE_SESSION_DAY",
+      "name": "더블 세션 데이",
+      "category": "Session Pattern",
+      "description": "하루에 20분 이상 세션 2회, 세션 간 6시간 이상 간격",
+      "trigger": "day_close",
+      "window": "day",
+      "rule": {
+        "sessions_count_in_day": { ">=": 2 },
+        "each_session_min": { ">=": 20 },
+        "min_gap_minutes_between_sessions": { ">=": 360 }
+      },
+      "constraints": { "max_awards_per_month": 4 },
+      "repeatable": true,
+      "reset": "day",
+      "icon": "🔄"
+    },
+
+    {
+      "id": "ACH_MONTH_600",
+      "name": "월 600분",
+      "category": "Monthly Volume",
+      "description": "달력월 누적 유효 시간 600분 이상",
+      "trigger": "month_close",
+      "window": "calendar_month",
+      "rule": { "monthly_active_minutes": { ">=": 600 } },
+      "constraints": {},
+      "repeatable": true,
+      "reset": "month",
+      "icon": "📈"
+    },
+    {
+      "id": "ACH_MONTH_900",
+      "name": "월 900분",
+      "category": "Monthly Volume",
+      "description": "달력월 누적 유효 시간 900분 이상",
+      "trigger": "month_close",
+      "window": "calendar_month",
+      "rule": { "monthly_active_minutes": { ">=": 900 } },
+      "constraints": {},
+      "repeatable": true,
+      "reset": "month",
+      "icon": "📊"
+    },
+    {
+      "id": "ACH_MONTH_20",
+      "name": "월 20회",
+      "category": "Monthly Volume",
+      "description": "달력월 유효 세션 20회 이상",
+      "trigger": "month_close",
+      "window": "calendar_month",
+      "rule": { "monthly_valid_sessions": { ">=": 20 } },
+      "constraints": {},
+      "repeatable": true,
+      "reset": "month",
+      "icon": "🎯"
+    },
+
+    {
+      "id": "ACH_CROSS_TRAINER",
+      "name": "크로스 트레이너",
+      "category": "Variety",
+      "description": "서로 다른 카테고리 3종 이상 시도",
+      "trigger": "session_end",
+      "window": "lifetime",
+      "rule": { "lifetime_distinct_categories": { ">=": 3 } },
+      "constraints": {},
+      "repeatable": false,
+      "icon": "🎭"
+    },
+    {
+      "id": "ACH_SPECIALIST_10",
+      "name": "전문화 10",
+      "category": "Expertise",
+      "description": "동일 카테고리 유효 세션 10회 (카테고리별 달성)",
+      "trigger": "session_end",
+      "window": "lifetime",
+      "rule": {
+        "category_lifetime_sessions": { ">=": 10 }
+      },
+      "constraints": {},
+      "repeatable": true,
+      "per_category": true,
+      "category_key": "TYPE",
+      "icon": "🎯"
+    },
+
+    {
+      "id": "ACH_SUNSHINE_CLUB",
+      "name": "선샤인 클럽",
+      "category": "Time-of-Day",
+      "description": "06:00–09:00 사이 세션 월 8회 이상",
+      "trigger": "month_close",
+      "window": "calendar_month",
+      "rule": {
+        "monthly_sessions_in_time_window": {
+          "start": "06:00",
+          "end": "09:00",
+          "count": { ">=": 8 }
+        }
+      },
+      "constraints": {},
+      "repeatable": true,
+      "reset": "month",
+      "icon": "🌅"
+    },
+    {
+      "id": "ACH_AFTERWORK_RUNNER",
+      "name": "퇴근 러너",
+      "category": "Time-of-Day",
+      "description": "18:00–21:00 사이 세션 월 12회 이상",
+      "trigger": "month_close",
+      "window": "calendar_month",
+      "rule": {
+        "monthly_sessions_in_time_window": {
+          "start": "18:00",
+          "end": "21:00",
+          "count": { ">=": 12 }
+        }
+      },
+      "constraints": {},
+      "repeatable": true,
+      "reset": "month",
+      "icon": "🌆"
+    }
+  ]
+}

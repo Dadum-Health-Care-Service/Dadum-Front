@@ -1,0 +1,260 @@
+/* Gamification 페이지 스타일 */
+.gamificationContainer {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.pageTitle {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+/* 통계 섹션 */
+.statsSection {
+  margin-bottom: 2rem;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.statItem {
+  text-align: center;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.statItem:hover {
+  transform: translateY(-2px);
+}
+
+.statNumber {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.statNumber.primary {
+  color: #007bff;
+}
+
+.statNumber.success {
+  color: #28a745;
+}
+
+.statNumber.warning {
+  color: #ffc107;
+}
+
+.statNumber.info {
+  color: #17a2b8;
+}
+
+.statLabel {
+  color: #6c757d;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.progressSection {
+  margin-top: 1rem;
+}
+
+.progressLabel {
+  font-size: 0.85rem;
+  color: #6c757d;
+  margin-bottom: 0.5rem;
+}
+
+/* 업적 카테고리 섹션 */
+.categorySection {
+  margin-bottom: 2rem;
+}
+
+.categoryTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.achievementsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+/* 업적 아이템 */
+.achievementItem {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.achievementItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.achievementItem.unlocked {
+  border-color: #28a745;
+  background: linear-gradient(135deg, #f8fff9 0%, #ffffff 100%);
+}
+
+.achievementItem.locked {
+  border-color: #dee2e6;
+  opacity: 0.7;
+}
+
+.achievementItem.unlocked::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #28a745, #20c997);
+}
+
+.achievementHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.achievementIcon {
+  font-size: 2rem;
+  margin-right: 1rem;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  border-radius: 50%;
+  border: 2px solid #e9ecef;
+}
+
+.achievementItem.unlocked .achievementIcon {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  border-color: #28a745;
+  color: white;
+}
+
+.achievementInfo {
+  flex: 1;
+}
+
+.achievementName {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 0.5rem 0;
+}
+
+.achievementDescription {
+  color: #6c757d;
+  font-size: 0.9rem;
+  margin: 0 0 1rem 0;
+  line-height: 1.4;
+}
+
+.achievementFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.statusBadge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.statusBadge.unlocked {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.statusBadge.locked {
+  background-color: #e2e3e5;
+  color: #6c757d;
+  border: 1px solid #d6d8db;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .gamificationContainer {
+    padding: 15px;
+  }
+  
+  .pageTitle {
+    font-size: 2rem;
+  }
+  
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  
+  .statItem {
+    padding: 1rem;
+  }
+  
+  .statNumber {
+    font-size: 2rem;
+  }
+  
+  .achievementsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .achievementItem {
+    padding: 1rem;
+  }
+  
+  .achievementHeader {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .achievementIcon {
+    margin-right: 0;
+    margin-bottom: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .achievementFooter {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: stretch;
+  }
+}
