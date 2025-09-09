@@ -14,6 +14,7 @@ import ContainerComponent from "./components/common/ContainerComponent";
 // Pages
 import Home from "./components/pages/Home/Home.jsx";
 import Routine from "./components/pages/Routine/Routine.jsx";
+import Login from "./components/pages/Login/Login.jsx";
 
 //Contexts
 import { RunProvider } from "./context/RunContext.jsx";
@@ -47,17 +48,18 @@ function App() {
   }, []);
 
   const handleLoginClick = () => {
-    POST(
-      "/users/login",
-      {
-        email: "test@test.com",
-        password: "testuser",
-      },
-      false
-    ).then((res) => {
-      localStorage.setItem("token", res.data.accessToken);
-      setIsLoggedIn(true);
-    });
+    setActiveTab("login");
+    // POST(
+    //   "/users/login",
+    //   {
+    //     email: "test@test.com",
+    //     password: "testuser",
+    //   },
+    //   false
+    // ).then((res) => {
+    //   localStorage.setItem("token", res.data.accessToken);
+    //   setIsLoggedIn(true);
+    // });
   };
   const handleSignupClick = () => {
     POST(
@@ -148,8 +150,14 @@ function App() {
   const handleHeaderMenuClick = (menuId) => setActiveHeaderMenu(menuId);
 
   const renderContent = () => {
-    // 로그인되지 않은 경우 로그인 화면 표시
+    // 로그인되지 않은 경우
     if (!isLoggedIn) {
+      // activeTab이 "login"인 경우 Login 컴포넌트 표시
+      if (activeTab === "login") {
+        return <Login />;
+      }
+
+      // 기본 로그인 화면 표시
       return (
         <div className="login-container">
           <div className="login-header">
@@ -218,6 +226,8 @@ function App() {
         return <Routine />;
       case "pose": // ← 새 탭: 자세 분석
         return <PoseAccuracyMVP />;
+      case "login":
+        return <Login />;
       case "statistics":
         return (
           <div className="container mt-5 pt-5">
