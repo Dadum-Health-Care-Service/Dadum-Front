@@ -21,6 +21,12 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      "/passwordless": {
+        target: "http://192.168.0.4",
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/passwordless/, "/api/Login"), // /passwordless -> /api/Login
+      },
     },
   },
 
