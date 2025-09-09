@@ -164,6 +164,7 @@ export default function ExerciseSelectModal({ isModalOpen, setIsModalOpen }) {
   const [translatedExerciseInstructions, setTranslatedExerciseInstructions] =
     useState([]);
   const [activeTab, setActiveTab] = useState("전체");
+  const [selectedTabDetails, setSelectedTabDetails] = useState([]);
 
   useEffect(() => {
     fetch(
@@ -186,6 +187,9 @@ export default function ExerciseSelectModal({ isModalOpen, setIsModalOpen }) {
 
   const handleToggleExercise = (exercise) => {
     setExpandedExercise(expandedExercise === exercise ? null : exercise);
+  };
+  const handleTabDetailDropdownChange = (value) => {
+    setSelectedTabDetails((prev) => [...prev, value.target.value]);
   };
 
   const renderModalContent = () => {
@@ -270,6 +274,7 @@ export default function ExerciseSelectModal({ isModalOpen, setIsModalOpen }) {
                 <TabDetailDropdown
                   placeholder={`${activeTab} 세부 옵션`}
                   size="small"
+                  onChange={handleTabDetailDropdownChange}
                   options={
                     activeTab === "운동 카테고리"
                       ? [
@@ -311,6 +316,25 @@ export default function ExerciseSelectModal({ isModalOpen, setIsModalOpen }) {
             variant="outlined"
             size="medium"
           />
+          {selectedTabDetails.map((detail) => (
+            <div
+              key={detail}
+              style={{
+                width: "fit-content",
+                backgroundColor: "#76ABF0",
+                color: "#ffffff",
+                padding: "4px 12px",
+                borderRadius: "20px",
+                fontSize: "12px",
+                fontWeight: "500",
+                fontStyle: "italic",
+                textTransform: "uppercase",
+                letterSpacing: "0.5px",
+              }}
+            >
+              #{detail}
+            </div>
+          ))}
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
           <h3>운동 목록</h3>
