@@ -6,6 +6,7 @@ import SelectComponent from "../../common/SelectComponent";
 import ButtonComponent from "../../common/ButtonComponent";
 import ListComponent from "../../common/ListComponent";
 import { POST } from "../../../utils/api/api";
+
 import styles from "./Login.module.css";
 
 function Login() {
@@ -24,11 +25,18 @@ function Login() {
   const [signupPw, setSignupPw] = useState("");
   const [signupPwConfirm, setSignupPwConfirm] = useState("");
 
+  // PushConnector 연결
+  const [pushConnectorUrl, setPushConnectorUrl] = useState("");
+  const [pushConnectorToken, setPushConnectorToken] = useState("");
+
   // QR 코드 관련 상태
   const [isQrLoading, setIsQrLoading] = useState(true);
   const [qrImageUrl, setQrImageUrl] = useState("");
   const [serverUrl, setServerUrl] = useState("");
   const [regCode, setRegCode] = useState("");
+
+  //QR 등록 여부
+  const [isQrRegistered, setIsQrRegistered] = useState(false);
 
   // view 상태가 'passwordless'로 변경될 때 QR 코드를 생성하는 로직 (Side Effect)
   useEffect(() => {
@@ -95,6 +103,8 @@ function Login() {
           setQrImageUrl(qrData.qr);
           setServerUrl(qrData.serverUrl);
           setRegCode(qrData.registerKey);
+          setPushConnectorUrl(qrData.pushConnectorUrl);
+          setPushConnectorToken(qrData.pushConnectorToken);
         } catch (error) {
           console.error("QR 코드 정보 가져오기 오류:", error);
           alert(error.message);
@@ -107,6 +117,53 @@ function Login() {
 
     fetchQrCodeData();
   }, [view, loginId, loginPw]); // loginPw도 의존성에 추가
+
+  useEffect(() => {
+    const confirmQrRegistered = async () => {
+      console.log("confirmQrRegistered");
+      await POST(
+        "/users/auth/passwordless/register",
+        { passwordlessToken: pushConnectorToken },
+        true
+      ).then(async (res) => {
+        console.log(res.data);
+        if (res.status === 200) {
+          await POST(
+            "/passwordlessCallApi",
+            { url: "isApUrl", params: `userId=${loginId}&QRReg=T` },
+            false,
+            "passwordless"
+          ).then((res) => {
+            console.log(res.data);
+            if (res.data.result === "OK") {
+              setIsQrRegistered(true);
+              setView("loggedIn");
+            }
+          });
+        }
+      });
+    };
+    if (view === "passwordless" && pushConnectorToken) {
+      const handshakeMessage = {
+        type: "hand",
+        pushConnectorToken: pushConnectorToken,
+      };
+      const ws = new WebSocket(`/passwordless-ws`);
+      ws.onopen = () => {
+        ws.send(JSON.stringify(handshakeMessage));
+      };
+      ws.onmessage = (event) => {
+        console.log(
+          "Server Message:",
+          JSON.parse(event.data),
+          JSON.parse(event.data).type
+        );
+        if (JSON.parse(event.data).type === "result") {
+          confirmQrRegistered();
+        }
+      };
+    }
+  }, [pushConnectorToken]);
 
   // 로그인 처리 핸들러
   const handleLogin = (e) => {
@@ -136,7 +193,7 @@ function Login() {
         },
         false
       ).then((res) => {
-        localStorage.setItem("token", res.data.accessToken);
+        localStorage.setItem("accessToken", res.data.accessToken);
         setView("loggedIn");
       });
 

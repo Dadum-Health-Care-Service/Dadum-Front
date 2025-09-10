@@ -183,7 +183,7 @@ function App() {
             >
               회원가입
             </ButtonComponent>
-            <ButtonComponent
+            {/* <ButtonComponent
               variant="outline-primary"
               size="lg"
               className="signup-button"
@@ -212,7 +212,7 @@ function App() {
                 <h4>패스워드리스 등록</h4>
                 <img src={QR} alt="QR" />
               </ContainerComponent>
-            )}
+            )} */}
           </div>
         </div>
       );

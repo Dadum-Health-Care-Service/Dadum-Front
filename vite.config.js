@@ -27,6 +27,12 @@ export default defineConfig({
         secure: false,
         rewrite: (path) => path.replace(/^\/passwordless/, "/api/Login"), // /passwordless -> /api/Login
       },
+      "/passwordless-ws": {
+        target: "http://192.168.0.4:15010",
+        changeOrigin: true,
+        secure: false,
+        ws: true,
+      },
     },
   },
 
