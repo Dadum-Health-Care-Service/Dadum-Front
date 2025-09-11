@@ -38,6 +38,11 @@ function Login() {
   //QR 등록 여부
   const [isQrRegistered, setIsQrRegistered] = useState(false);
 
+  //서비스 패스워드 설정
+  const [servicePassword, setServicePassword] = useState("");
+  const [currentTerm, setCurrentTerm] = useState(0);
+  const [termLength, setTermLength] = useState(0);
+
   // view 상태가 'passwordless'로 변경될 때 QR 코드를 생성하는 로직 (Side Effect)
   useEffect(() => {
     const fetchQrCodeData = async () => {
@@ -143,7 +148,7 @@ function Login() {
         }
       });
     };
-    if (view === "passwordless" && pushConnectorToken) {
+    const connectWebSocket = async () => {
       const handshakeMessage = {
         type: "hand",
         pushConnectorToken: pushConnectorToken,
@@ -153,16 +158,30 @@ function Login() {
         ws.send(JSON.stringify(handshakeMessage));
       };
       ws.onmessage = (event) => {
-        console.log(
-          "Server Message:",
-          JSON.parse(event.data),
-          JSON.parse(event.data).type
-        );
-        if (JSON.parse(event.data).type === "result") {
-          confirmQrRegistered();
+        if (view === "passwordless" && pushConnectorToken) {
+          console.log(
+            "Server Message:",
+            JSON.parse(event.data),
+            JSON.parse(event.data).type
+          );
+          if (JSON.parse(event.data).type === "result") {
+            confirmQrRegistered();
+          }
+        }
+        if (view === "login" && loginType === "passwordless") {
+          console.log(
+            "Server Message:",
+            JSON.parse(event.data),
+            JSON.parse(event.data).type
+          );
+          if (JSON.parse(event.data).type === "result") {
+            console.log("로그인 성공");
+            setView("loggedIn");
+          }
         }
       };
-    }
+    };
+    connectWebSocket();
   }, [pushConnectorToken]);
 
   // 로그인 처리 핸들러
@@ -196,26 +215,84 @@ function Login() {
         localStorage.setItem("accessToken", res.data.accessToken);
         setView("loggedIn");
       });
-
-      //패스워드리스 로그인
-      // POST(
-      //   "/loginCheck",
-      //   { id: "test02", pw: "test02" },
-      //   false,
-      //   "passwordless"
-      // ).then((res) => {
-      //   console.log(res.data);
-      //   // 임시로 로그인 성공 화면으로 이동
-      //   setView("loggedIn");
-      // });
     } else {
       console.log("로그인 방식: 패스워드리스");
-      alert(
-        `'${loginId}'님, 패스워드리스 로그인을 요청했습니다. (시뮬레이션)\n스마트폰 앱에서 승인해주세요.`
-      );
+      const handshakeMessage = {
+        type: "hand",
+        pushConnectorToken: pushConnectorToken,
+      };
+      const getApUrlResponse = async () => {
+        await POST(
+          "/passwordlessCallApi",
+          { url: "isApUrl", params: `userId=${loginId}&QRReg=` },
+          false,
+          "passwordless"
+        ).then((res) => {
+          console.log(res.data);
+          if (res.data.result === "OK") {
+            const ApUrlResponseDetail = JSON.parse(res.data.data);
+            if (ApUrlResponseDetail.data.exist === true) {
+              getTokenForOneTime();
+            }
+          }
+        });
+      };
+      const getTokenForOneTime = async () => {
+        await POST(
+          "/passwordlessCallApi",
+          { url: "getTokenForOneTimeUrl", params: `userId=${loginId}` },
+          false,
+          "passwordless"
+        ).then((res) => {
+          if (res.data.result === "OK") {
+            const oneTimeToken = res.data.oneTimeToken;
+            console.log(oneTimeToken);
+            getSpUrlResponse(oneTimeToken);
+          }
+        });
+      };
+      const getSpUrlResponse = async (oneTimeToken) => {
+        await POST(
+          "/passwordlessCallApi",
+          {
+            url: "getSpUrl",
+            params: `userId=${loginId}&token=${oneTimeToken}`,
+          },
+          false,
+          "passwordless"
+        ).then((res) => {
+          console.log(res.data);
+          if (res.data.result === "OK") {
+            const SpUrlResponseDetail = JSON.parse(res.data.data);
+            console.log(SpUrlResponseDetail);
+            setPushConnectorUrl(SpUrlResponseDetail.data.pushConnectorUrl);
+            setPushConnectorToken(SpUrlResponseDetail.data.pushConnectorToken);
+            setServicePassword(SpUrlResponseDetail.data.servicePassword);
+            setTermLength(SpUrlResponseDetail.data.term);
+            setCurrentTerm(SpUrlResponseDetail.data.term);
+            setTimer();
+          }
+        });
+      };
+
+      getApUrlResponse();
     }
   };
+  const setTimer = () => {
+    const interval = setInterval(() => {
+      setCurrentTerm((prev) => {
+        console.log(prev); // 현재 값 확인
+        if (prev <= 1) {
+          clearInterval(interval);
+          setServicePassword("");
+          return 0; // 0으로 고정
+        }
+        return prev - 1;
+      });
+    }, 1000);
 
+    return interval;
+  };
   // 회원가입 처리 핸들러
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -315,6 +392,19 @@ function Login() {
               />
             </FormComponent.Field>
           )}
+          {loginType === "passwordless" && (
+            <div className={styles["passwordless-progress"]}>
+              <div className={styles["passwordless-progress-service-password"]}>
+                {servicePassword}
+              </div>
+              <div
+                className={styles["passwordless-progress-bar"]}
+                style={{
+                  width: `${(currentTerm / termLength) * 100}%`,
+                }}
+              ></div>
+            </div>
+          )}
 
           <FormComponent.Field className={styles["login-type-field"]}>
             <input
@@ -344,6 +434,7 @@ function Login() {
             >
               로그인
             </ButtonComponent>
+
             <ButtonComponent
               variant="outline-primary"
               size="large"
