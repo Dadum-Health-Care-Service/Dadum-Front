@@ -207,14 +207,28 @@ function Login() {
       POST(
         "/users/login",
         {
-          email: "test@test.com",
-          password: "testuser",
+          email: loginId,
+          password: loginPw,
         },
         false
-      ).then((res) => {
-        localStorage.setItem("accessToken", res.data.accessToken);
-        setView("loggedIn");
-      });
+      )
+        .then((res) => {
+          localStorage.setItem("accessToken", res.data.accessToken);
+          setView("loggedIn");
+        })
+        .catch((error) => {
+          console.error("로그인 오류:", error);
+          if (error.response?.status === 403) {
+            console.log(error.response.data);
+            alert(error.response.data);
+          } else if (error.response?.status === 404) {
+            alert(error.response.data);
+          } else {
+            alert(error.response.data);
+          }
+        });
+
+      //메인서버 로그인
     } else {
       console.log("로그인 방식: 패스워드리스");
       const handshakeMessage = {
