@@ -322,6 +322,7 @@ function Login({ setIsLoggedIn, setActiveTab }) {
             setServicePassword(SpUrlResponseDetail.data.servicePassword);
             setTermLength(SpUrlResponseDetail.data.term);
             setCurrentTerm(SpUrlResponseDetail.data.term);
+            console.log(SpUrlResponseDetail.data.servicePassword);
             setTimer();
           }
         });
@@ -336,7 +337,6 @@ function Login({ setIsLoggedIn, setActiveTab }) {
         console.log(prev); // 현재 값 확인
         if (prev <= 1) {
           clearInterval(interval);
-          setServicePassword("");
           return 0; // 0으로 고정
         }
         return prev - 1;
@@ -446,9 +446,13 @@ function Login({ setIsLoggedIn, setActiveTab }) {
           )}
           {loginType === "passwordless" && (
             <div className={styles["passwordless-progress"]}>
-              <div className={styles["passwordless-progress-service-password"]}>
-                {servicePassword}
-              </div>
+              {termLength > 0 && (
+                <div
+                  className={styles["passwordless-progress-service-password"]}
+                >
+                  {servicePassword}
+                </div>
+              )}
               <div
                 className={styles["passwordless-progress-bar"]}
                 style={{
