@@ -9,7 +9,7 @@ import { POST } from "../../../utils/api/api";
 
 import styles from "./Login.module.css";
 
-function Login() {
+function Login({ setIsLoggedIn, setActiveTab }) {
   // 현재 보여줄 뷰를 관리하는 상태 ('login', 'register', 'passwordless')
   const [view, setView] = useState("login");
 
@@ -37,6 +37,9 @@ function Login() {
 
   //QR 등록 여부
   const [isQrRegistered, setIsQrRegistered] = useState(false);
+
+  //세션 ID 설정
+  const [sessionId, setSessionId] = useState("");
 
   //서비스 패스워드 설정
   const [servicePassword, setServicePassword] = useState("");
@@ -142,7 +145,8 @@ function Login() {
             console.log(res.data);
             if (res.data.result === "OK") {
               setIsQrRegistered(true);
-              setView("loggedIn");
+              setIsLoggedIn(true);
+              setActiveTab("home");
             }
           });
         }
@@ -157,7 +161,7 @@ function Login() {
       ws.onopen = () => {
         ws.send(JSON.stringify(handshakeMessage));
       };
-      ws.onmessage = (event) => {
+      ws.onmessage = async (event) => {
         if (view === "passwordless" && pushConnectorToken) {
           console.log(
             "Server Message:",
@@ -175,8 +179,40 @@ function Login() {
             JSON.parse(event.data).type
           );
           if (JSON.parse(event.data).type === "result") {
-            console.log("로그인 성공");
-            setView("loggedIn");
+            await POST(
+              "/passwordlessCallApi",
+              {
+                url: "resultUrl",
+                params: `userId=${loginId}&sessionId=${sessionId}`,
+              },
+              false,
+              "passwordless"
+            ).then(async (res) => {
+              console.log(res.data);
+              const resultData = JSON.parse(res.data.data);
+              if (res.data.result === "OK") {
+                console.log(resultData);
+                console.log(resultData.data.auth);
+                if (resultData.data.auth === "Y") {
+                  setIsLoggedIn(true);
+                  setActiveTab("home");
+                } else {
+                  await POST(
+                    "/passwordlessCallApi",
+                    {
+                      url: "cancelUrl",
+                      params: `userId=${loginId}&sessionId=${sessionId}`,
+                    },
+                    false,
+                    "passwordless"
+                  ).then((res) => {
+                    alert("사용자에 의한 연결 취소");
+                    setCurrentTerm(0);
+                    setServicePassword("");
+                  });
+                }
+              }
+            });
           }
         }
       };
@@ -214,7 +250,8 @@ function Login() {
       )
         .then((res) => {
           localStorage.setItem("accessToken", res.data.accessToken);
-          setView("loggedIn");
+          setIsLoggedIn(true);
+          setActiveTab("home");
         })
         .catch((error) => {
           console.error("로그인 오류:", error);
@@ -277,6 +314,7 @@ function Login() {
         ).then((res) => {
           console.log(res.data);
           if (res.data.result === "OK") {
+            setSessionId(res.data.sessionId);
             const SpUrlResponseDetail = JSON.parse(res.data.data);
             console.log(SpUrlResponseDetail);
             setPushConnectorUrl(SpUrlResponseDetail.data.pushConnectorUrl);

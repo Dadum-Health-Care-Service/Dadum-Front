@@ -154,7 +154,9 @@ function App() {
     if (!isLoggedIn) {
       // activeTab이 "login"인 경우 Login 컴포넌트 표시
       if (activeTab === "login") {
-        return <Login />;
+        return (
+          <Login setIsLoggedIn={setIsLoggedIn} setActiveTab={setActiveTab} />
+        );
       }
 
       // 기본 로그인 화면 표시
@@ -227,7 +229,9 @@ function App() {
       case "pose": // ← 새 탭: 자세 분석
         return <PoseAccuracyMVP />;
       case "login":
-        return <Login />;
+        return (
+          <Login setIsLoggedIn={setIsLoggedIn} setActiveTab={setActiveTab} />
+        );
       case "statistics":
         return (
           <div className="container mt-5 pt-5">
