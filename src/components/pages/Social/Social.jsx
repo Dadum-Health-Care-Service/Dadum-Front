@@ -53,7 +53,6 @@ function ComposeModal({ open, onClose, text, setText, privacy, setPrivacy }) {
             <div className="tools">
               <button className="tool-btn" type="button" aria-label="사진 또는 영상 첨부"><span className="ico">🖼️</span></button>
               <button className="tool-btn" type="button" aria-label="운동 기록 첨부"><span className="ico">🏋️</span></button>
-              <button className="tool-btn" type="button" aria-label="위치 추가"><span className="ico">📍</span></button>
             </div>
 
             <div className="submit">
