@@ -11,6 +11,7 @@ import HeaderComponent from "./components/common/HeaderComponent";
 import ButtonComponent from "./components/common/ButtonComponent";
 import BottomNavigation from "./components/common/BottomNavigation";
 import ContainerComponent from "./components/common/ContainerComponent";
+import Chatbot from "./components/common/Chatbot";
 
 // Pages
 import Home from "./components/pages/Home/Home.jsx";
@@ -356,26 +357,42 @@ function App() {
                   </>
                 )}
 
-                <main
-                  style={{
-                    marginTop: isLoggedIn ? (isMobile ? "20px" : "0") : "0",
-                    marginBottom: isLoggedIn
-                      ? isMobile
-                        ? "80px"
-                        : "20px"
-                      : "0",
-                    display: "flex",
-                    minHeight: isLoggedIn ? "auto" : "100vh",
-                   }}
-              >
-                {renderContent()}
-              </main>
-            </div>
-          </SuggestProvider>
-        </RoutineProvider>
-      </RunProvider>
-    </AuthProvider>
-  </Router>
+  <main
+              style={{
+                marginTop: isLoggedIn ? (isMobile ? "20px" : "0") : "0",
+                marginBottom: isLoggedIn
+                  ? isMobile
+                    ? "80px"
+                    : "20px"
+                  : "0",
+                display: "flex",
+                minHeight: isLoggedIn ? "auto" : "100vh",
+              }}
+            >
+              {renderContent()}
+            </main>
+
+            {/* 모바일 환경에서만 하단 네비게이션 표시 */}
+            {isMobile && (
+              <BottomNavigation
+                activeTab={activeTab}
+                onTabChange={handleTabChange}
+              />
+            )}
+
+            {/* 챗봇 - 모든 페이지에서 사용 가능 */}
+            <Chatbot
+              onMessageSend={(userMessage, botResponse) => {
+                console.log("사용자 메시지:", userMessage);
+                console.log("봇 응답:", botResponse);
+              }}
+            />
+          </div>
+        </SuggestProvider>
+      </RoutineProvider>
+    </RunProvider>
+  </AuthProvider>
+</Router>
   );
 }
 
