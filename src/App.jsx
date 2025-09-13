@@ -10,6 +10,7 @@ import Login from "./components/pages/Login/Login.jsx";
 import HeaderComponent from "./components/common/HeaderComponent";
 import ButtonComponent from "./components/common/ButtonComponent";
 import BottomNavigation from "./components/common/BottomNavigation";
+import Chatbot from "./components/common/Chatbot";
 
 // Pages
 import Home from "./components/pages/Home/Home.jsx";
@@ -156,6 +157,14 @@ function App() {
             onTabChange={handleTabChange}
           />
         )}
+
+        {/* 챗봇 - 모든 페이지에서 사용 가능 */}
+        <Chatbot 
+          onMessageSend={(userMessage, botResponse) => {
+            console.log('사용자 메시지:', userMessage);
+            console.log('봇 응답:', botResponse);
+          }}
+        />
       </div>
     </Router>
   );

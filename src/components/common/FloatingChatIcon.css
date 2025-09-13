@@ -1,0 +1,201 @@
+/* FloatingChatIcon 스타일 */
+.floating-chat-icon {
+  position: fixed;
+  bottom: 100px; /* 하단 네비게이션 위에 위치 */
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(79, 172, 254, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.floating-chat-icon:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 8px 30px rgba(79, 172, 254, 0.6);
+}
+
+.floating-chat-icon:active {
+  transform: translateY(0) scale(0.95);
+}
+
+.floating-chat-icon:focus {
+  outline: none;
+  box-shadow: 0 4px 20px rgba(79, 172, 254, 0.4), 0 0 0 3px rgba(79, 172, 254, 0.2);
+}
+
+/* 크기별 스타일 */
+.floating-icon--small {
+  width: 48px;
+  height: 48px;
+  bottom: 90px;
+  right: 16px;
+}
+
+.floating-icon--medium {
+  width: 56px;
+  height: 56px;
+  bottom: 95px;
+  right: 18px;
+}
+
+.floating-icon--large {
+  width: 60px;
+  height: 60px;
+  bottom: 100px;
+  right: 20px;
+}
+
+/* 열린 상태 스타일 */
+.floating-icon--open {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  box-shadow: 0 4px 20px rgba(255, 107, 107, 0.4);
+}
+
+.floating-icon--open:hover {
+  box-shadow: 0 8px 30px rgba(255, 107, 107, 0.6);
+}
+
+.floating-icon--open:focus {
+  box-shadow: 0 4px 20px rgba(255, 107, 107, 0.4), 0 0 0 3px rgba(255, 107, 107, 0.2);
+}
+
+/* 아이콘 내용 */
+.floating-icon__content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.floating-icon__svg {
+  width: 24px;
+  height: 24px;
+  transition: transform 0.3s ease;
+}
+
+.floating-icon--small .floating-icon__svg {
+  width: 20px;
+  height: 20px;
+}
+
+.floating-icon--medium .floating-icon__svg {
+  width: 22px;
+  height: 22px;
+}
+
+.floating-icon--large .floating-icon__svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* 알림 배지 */
+.floating-icon__badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #ff4757;
+  color: white;
+  border-radius: 50%;
+  min-width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  border: 2px solid white;
+  animation: pulse 2s infinite;
+}
+
+.floating-icon__badge-text {
+  line-height: 1;
+  padding: 0 4px;
+}
+
+/* 펄스 애니메이션 */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7);
+  }
+  70% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 10px rgba(255, 71, 87, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 71, 87, 0);
+  }
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .floating-chat-icon {
+    bottom: 90px; /* 모바일에서 하단 네비게이션과의 간격 조정 */
+    right: 16px;
+  }
+  
+  .floating-icon--small {
+    bottom: 80px;
+    right: 12px;
+  }
+  
+  .floating-icon--medium {
+    bottom: 85px;
+    right: 14px;
+  }
+  
+  .floating-icon--large {
+    bottom: 90px;
+    right: 16px;
+  }
+}
+
+/* 매우 작은 화면 */
+@media (max-width: 480px) {
+  .floating-chat-icon {
+    width: 56px;
+    height: 56px;
+    bottom: 85px;
+    right: 12px;
+  }
+  
+  .floating-icon__svg {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+/* 접근성 개선 */
+@media (prefers-reduced-motion: reduce) {
+  .floating-chat-icon {
+    transition: none;
+  }
+  
+  .floating-icon__badge {
+    animation: none;
+  }
+}
+
+/* 다크 모드 지원 (선택사항) */
+@media (prefers-color-scheme: dark) {
+  .floating-chat-icon {
+    box-shadow: 0 4px 20px rgba(79, 172, 254, 0.6);
+  }
+  
+  .floating-chat-icon:hover {
+    box-shadow: 0 8px 30px rgba(79, 172, 254, 0.8);
+  }
+}
