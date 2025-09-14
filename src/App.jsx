@@ -10,11 +10,11 @@ import Login from "./components/pages/Login/Login.jsx";
 import HeaderComponent from "./components/common/HeaderComponent";
 import ButtonComponent from "./components/common/ButtonComponent";
 import BottomNavigation from "./components/common/BottomNavigation";
-import Chatbot from "./components/common/Chatbot";
 
 // Pages
 import Home from "./components/pages/Home/Home.jsx";
 import Routine from "./components/pages/Routine/Routine.jsx";
+import Chatbot from "./components/pages/Chatbot/Chatbot.jsx";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -158,7 +158,7 @@ function App() {
           />
         )}
 
-        {/* 챗봇 - 모든 페이지에서 사용 가능 */}
+        {/* 플로팅 챗봇 - 모든 페이지에서 사용 가능 */}
         <Chatbot 
           onMessageSend={(userMessage, botResponse) => {
             console.log('사용자 메시지:', userMessage);
