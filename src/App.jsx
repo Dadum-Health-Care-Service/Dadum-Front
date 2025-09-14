@@ -357,7 +357,7 @@ function App() {
                   </>
                 )}
 
-  <main
+ <main
               style={{
                 marginTop: isLoggedIn ? (isMobile ? "20px" : "0") : "0",
                 marginBottom: isLoggedIn
