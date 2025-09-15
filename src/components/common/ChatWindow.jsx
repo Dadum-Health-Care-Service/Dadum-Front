@@ -32,11 +32,22 @@ const ChatWindow = ({
     }
   }, [isOpen]);
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = async (e) => {
     e.preventDefault();
     if (inputValue.trim() && onSendMessage && !isLoading) {
-      onSendMessage(inputValue.trim());
+      const messageText = inputValue.trim();
+      
+      // 입력창을 먼저 비우기 (사용자 경험 개선)
       setInputValue('');
+      
+      try {
+        // onSendMessage가 async 함수이므로 await로 기다림
+        await onSendMessage(messageText);
+      } catch (error) {
+        console.error('메시지 전송 실패:', error);
+        // 실패 시 입력창에 다시 텍스트 복원
+        setInputValue(messageText);
+      }
     }
   };
 

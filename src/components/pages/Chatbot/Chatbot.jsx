@@ -57,6 +57,23 @@ const Chatbot = ({
     };
     setMessages(prev => [...prev, botMessage]);
 
+    // 간단한 오프토픽 프론트 가드
+    const offTopic = /(근황|뉴스|정치|연예|주가|스캔들|가십|드라마|영화|주식|코인)/i.test(text.trim());
+    const onTopic = /(운동|루틴|스트레칭|유산소|근력|웨이트|스쿼트|벤치|데드|재활|부상|체지방|다이어트|식단)/i.test(text.trim());
+    
+    if (!onTopic && offTopic) {
+      // 오프토픽 메시지로 교체
+      setMessages(prev =>
+        prev.map(m =>
+          m.id === streamingId 
+            ? { ...m, text: '그 주제는 제 범위 밖이에요. 운동/건강 관련해서는 도와드릴게요. 예: 어깨 통증 스트레칭, 체지방 감량 식단, 3일 분할 루틴 💪' }
+            : m
+        )
+      );
+      streamingMsgIdRef.current = null;
+      return;
+    }
+
     try {
       await streamChatResponse(text.trim(), streamingId);
     } catch (error) {
@@ -75,7 +92,7 @@ const Chatbot = ({
     }
   };
 
-  // 실시간 스트리밍 응답 처리
+  // 실시간 스트리밍 응답 처리 (완벽한 SSE 파서)
   const streamChatResponse = async (userMessage, streamingId) => {
     const response = await fetch('http://localhost:8080/api/chat/stream', {
       method: 'POST',
@@ -85,7 +102,18 @@ const Chatbot = ({
       },
       body: JSON.stringify({
         messages: [
-          { role: 'system', content: '당신은 다듬(Dadum) 운동 앱의 전문 챗봇입니다. 한국어로 친근하게 답하세요.' },
+          {
+            role: 'system',
+            content: `당신은 다듬(Dadum) '운동/건강' 전용 챗봇이다.
+
+[역할] 운동/루틴/부상예방/회복/영양·식단/운동생리만 다룬다. 연예·정치·유명인 근황·일반 시사 등은 다루지 않는다.
+
+[규칙]
+1) 스코프 밖이면 정중히 거절: "그 주제는 제 범위 밖이에요. 운동/건강 관련해서는 도와드릴게요. 예: 어깨 통증 스트레칭, 체지방 감량 식단, 3일 분할 루틴"
+2) 운동으로 재구성 제안 1줄.
+3) 최신뉴스/근황 요청은 답변하지 않음.
+4) 한국어, 5문장 이내, 이모지는 최대 1개.`
+          },
           { role: 'user', content: userMessage }
         ]
       })
