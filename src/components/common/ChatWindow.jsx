@@ -106,14 +106,17 @@ const ChatWindow = ({
               <p>운동이나 건강에 대해 궁금한 것이 있으시면 언제든 물어보세요!</p>
             </div>
           ) : (
-            messages.map((message, index) => (
+            messages.map((message) => (
               <div 
-                key={index} 
+                key={message.id} 
                 className={`chat-window__message ${message.sender === 'user' ? 'chat-window__message--user' : 'chat-window__message--bot'}`}
               >
                 <div className="chat-window__message-content">
                   <div className="chat-window__message-text">
                     {message.text}
+                    {message.text === '' && message.sender === 'bot' && (
+                      <span className="chat-window__cursor">|</span>
+                    )}
                   </div>
                   <div className="chat-window__message-time">
                     {formatTime(message.timestamp)}

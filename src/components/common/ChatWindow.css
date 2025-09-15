@@ -1,4 +1,15 @@
 /* ChatWindow 스타일 */
+
+/* 스트리밍 커서 애니메이션 */
+.chat-window__cursor {
+  animation: blink 1s infinite;
+  color: #007bff;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
 .chat-window-overlay {
   position: fixed;
   top: 0;
