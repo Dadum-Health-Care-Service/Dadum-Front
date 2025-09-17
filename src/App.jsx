@@ -9,10 +9,12 @@ import PoseAccuracyMVP from "./components/pages/Pose/PoseAccuracyMVP.jsx";
 import HeaderComponent from "./components/common/HeaderComponent";
 import ButtonComponent from "./components/common/ButtonComponent";
 import BottomNavigation from "./components/common/BottomNavigation";
+import ContainerComponent from "./components/common/ContainerComponent";
 
 // Pages
 import Home from "./components/pages/Home/Home.jsx";
 import Routine from "./components/pages/Routine/Routine.jsx";
+import Login from "./components/pages/Login/Login.jsx";
 import Gamification from "./components/pages/Gamification/Gamification.jsx";
 
 //Contexts
@@ -20,7 +22,7 @@ import { RunProvider } from "./context/RunContext.jsx";
 import { RoutineProvider } from "./context/RoutineContext.jsx";
 import { SuggestProvider } from "./context/SuggestContext.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
-import { POST } from "./utils/api/api";
+import { POST, GET } from "./utils/api/api";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -28,6 +30,7 @@ function App() {
   const [selectedListItem, setSelectedListItem] = useState(null);
   const [activeHeaderMenu, setActiveHeaderMenu] = useState("home");
   const [isMobile, setIsMobile] = useState(false);
+  const [QR, setQR] = useState(null);
 
   // 반응형 디자인을 위한 화면 크기 감지
   useEffect(() => {
@@ -46,17 +49,18 @@ function App() {
   }, []);
 
   const handleLoginClick = () => {
-    POST(
-      "/users/login",
-      {
-        email: "test@test.com",
-        password: "testuser",
-      },
-      false
-    ).then((res) => {
-      localStorage.setItem("token", res.data.accessToken);
-      setIsLoggedIn(true);
-    });
+    setActiveTab("login");
+    // POST(
+    //   "/users/login",
+    //   {
+    //     email: "test@test.com",
+    //     password: "testuser",
+    //   },
+    //   false
+    // ).then((res) => {
+    //   localStorage.setItem("token", res.data.accessToken);
+    //   setIsLoggedIn(true);
+    // });
   };
   const handleSignupClick = () => {
     POST(
@@ -82,13 +86,81 @@ function App() {
       setIsLoggedIn(true);
     });
   };
+
+  const handlePasswordlessSignupClick = () => {
+    POST("/join", { id: "test02", pw: "test02" }, false, "passwordless").then(
+      (res) => {
+        console.log(res.data);
+      }
+    );
+  };
+  const handlePasswordlessLoginClick = () => {
+    POST(
+      "/loginCheck",
+      { id: "test02", pw: "test02" },
+      false,
+      "passwordless"
+    ).then((res) => {
+      console.log(res.data);
+    });
+  };
+  const handlePasswordlessRegisterClick = async () => {
+    await POST(
+      "/passwordlessManageCheck",
+      { id: "test02", pw: "test02" },
+      false,
+      "passwordless"
+    ).then(async (res) => {
+      console.log(res.data);
+      if (res.data.result === "OK") {
+        const passwordlessToken = res.data.PasswordlessToken;
+        await POST(
+          "/passwordlessCallApi",
+          { url: "isApUrl", params: `userId=${"test02"}&QRReg=` },
+          false,
+          "passwordless"
+        ).then(async (res) => {
+          if (res.data.result === "OK") {
+            console.log(`userId=test02&token=${passwordlessToken}`);
+            await POST(
+              "/passwordlessCallApi",
+              {
+                url: "joinApUrl",
+                params: `userId=${"test02"}&token=${passwordlessToken}`,
+              },
+              false,
+              "passwordless"
+            ).then((res) => {
+              console.log(JSON.parse(res.data.data));
+              const result_data = JSON.parse(res.data.data);
+              console.log(result_data.data.qr);
+              setQR(result_data.data.qr);
+            });
+          }
+        });
+      }
+    });
+  };
+
+  useEffect(() => {
+    console.log(QR);
+  }, [QR]);
+
   const handleLogoutClick = () => setIsLoggedIn(false);
   const handleTabChange = (tabId) => setActiveTab(tabId);
   const handleHeaderMenuClick = (menuId) => setActiveHeaderMenu(menuId);
 
   const renderContent = () => {
-    // 로그인되지 않은 경우 로그인 화면 표시
+    // 로그인되지 않은 경우
     if (!isLoggedIn) {
+      // activeTab이 "login"인 경우 Login 컴포넌트 표시
+      if (activeTab === "login") {
+        return (
+          <Login setIsLoggedIn={setIsLoggedIn} setActiveTab={setActiveTab} />
+        );
+      }
+
+      // 기본 로그인 화면 표시
       return (
         <div className="login-container">
           <div className="login-header">
@@ -114,6 +186,36 @@ function App() {
             >
               회원가입
             </ButtonComponent>
+            {/* <ButtonComponent
+              variant="outline-primary"
+              size="lg"
+              className="signup-button"
+              onClick={handlePasswordlessSignupClick}
+            >
+              패스워드리스 가입
+            </ButtonComponent>
+            <ButtonComponent
+              variant="outline-primary"
+              size="lg"
+              className="signup-button"
+              onClick={handlePasswordlessLoginClick}
+            >
+              패스워드리스 로그인
+            </ButtonComponent>
+            <ButtonComponent
+              variant="outline-primary"
+              size="lg"
+              className="signup-button"
+              onClick={handlePasswordlessRegisterClick}
+            >
+              패스워드리스 등록
+            </ButtonComponent>
+            {QR && (
+              <ContainerComponent>
+                <h4>패스워드리스 등록</h4>
+                <img src={QR} alt="QR" />
+              </ContainerComponent>
+            )} */}
           </div>
         </div>
       );
@@ -129,6 +231,10 @@ function App() {
         return <Gamification />;
       case "pose": // ← 새 탭: 자세 분석
         return <PoseAccuracyMVP />;
+      case "login":
+        return (
+          <Login setIsLoggedIn={setIsLoggedIn} setActiveTab={setActiveTab} />
+        );
       case "statistics":
         return (
           <div className="container mt-5 pt-5">

@@ -21,6 +21,18 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      "/passwordless": {
+        target: "PASSWORDLESS_URL",
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/passwordless/, "/api/Login"), // /passwordless -> /api/Login
+      },
+      "/passwordless-ws": {
+        target: "PASSWORDLESS_URL:15010",
+        changeOrigin: true,
+        secure: false,
+        ws: true,
+      },
     },
   },
 
