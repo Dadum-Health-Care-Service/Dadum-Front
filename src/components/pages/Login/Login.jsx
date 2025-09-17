@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import ContainerComponent from "../../common/ContainerComponent";
 import FormComponent from "../../common/FormComponent";
 import InputComponent from "../../common/InputComponent";
@@ -6,13 +6,14 @@ import SelectComponent from "../../common/SelectComponent";
 import ButtonComponent from "../../common/ButtonComponent";
 import ListComponent from "../../common/ListComponent";
 import { POST } from "../../../utils/api/api";
+import { AuthContext } from "../../../context/AuthContext";
 
 import styles from "./Login.module.css";
 
 function Login({ setIsLoggedIn, setActiveTab }) {
   // 현재 보여줄 뷰를 관리하는 상태 ('login', 'register', 'passwordless')
   const [view, setView] = useState("login");
-
+  const { dispatch } = useContext(AuthContext);
   // 로그인 타입 라디오 버튼 상태
   const [loginType, setLoginType] = useState("password");
 
@@ -194,8 +195,16 @@ function Login({ setIsLoggedIn, setActiveTab }) {
                 console.log(resultData);
                 console.log(resultData.data.auth);
                 if (resultData.data.auth === "Y") {
-                  setIsLoggedIn(true);
-                  setActiveTab("home");
+                  await POST(
+                    "/users/auth/passwordless/login",
+                    { email: loginId, passwordlessToken: pushConnectorToken },
+                    false
+                  ).then((res) => {
+                    console.log(res.data);
+                    dispatch({ type: "LOGIN", user: res.data });
+                    setIsLoggedIn(true);
+                    setActiveTab("home");
+                  });
                 } else {
                   await POST(
                     "/passwordlessCallApi",
@@ -221,7 +230,7 @@ function Login({ setIsLoggedIn, setActiveTab }) {
   }, [pushConnectorToken]);
 
   // 로그인 처리 핸들러
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault(); // 폼 기본 제출 동작 방지
 
     if (!loginId) {
@@ -240,7 +249,7 @@ function Login({ setIsLoggedIn, setActiveTab }) {
       console.log("로그인 방식: 비밀번호");
 
       //메인서버 로그인
-      POST(
+      await POST(
         "/users/login",
         {
           email: loginId,
@@ -249,7 +258,7 @@ function Login({ setIsLoggedIn, setActiveTab }) {
         false
       )
         .then((res) => {
-          localStorage.setItem("accessToken", res.data.accessToken);
+          dispatch({ type: "LOGIN", user: res.data });
           setIsLoggedIn(true);
           setActiveTab("home");
         })
