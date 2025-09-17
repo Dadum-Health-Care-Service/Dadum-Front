@@ -29,11 +29,13 @@ export default function MyPage(){
         }}>
             <ContainerComponent size="large">
                 <div className="header-column">
-                    <HeaderComponent variant="default" size="large" sticky>
-                        <HeaderComponent.Section>
-                            <HeaderComponent.Brand logo="🏠" brandName="마이 페이지" />
-                        </HeaderComponent.Section>
-                    </HeaderComponent>
+                    <div>
+                        <HeaderComponent variant="default" size="large" sticky>
+                            <HeaderComponent.Section>
+                                <HeaderComponent.Brand logo="🏠" brandName="마이 페이지" />
+                            </HeaderComponent.Section>
+                        </HeaderComponent>
+                    </div>
 
                     <HeaderComponent.Section>
                         <HeaderComponent.Navigation className="pb-2">
