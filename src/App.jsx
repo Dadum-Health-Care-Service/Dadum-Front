@@ -13,6 +13,7 @@ import BottomNavigation from "./components/common/BottomNavigation";
 // Pages
 import Home from "./components/pages/Home/Home.jsx";
 import Routine from "./components/pages/Routine/Routine.jsx";
+import Gamification from "./components/pages/Gamification/Gamification.jsx";
 
 //Contexts
 import { RunProvider } from "./context/RunContext.jsx";
@@ -124,6 +125,8 @@ function App() {
         return <Home />;
       case "routine":
         return <Routine />;
+      case "achievement":
+        return <Gamification />;
       case "pose": // ← 새 탭: 자세 분석
         return <PoseAccuracyMVP />;
       case "statistics":
@@ -187,6 +190,15 @@ function App() {
                               }}
                             >
                               루틴
+                            </HeaderComponent.MenuItem>
+                            <HeaderComponent.MenuItem
+                              active={activeHeaderMenu === "achievement"}
+                              onClick={() => {
+                                handleHeaderMenuClick("achievement");
+                                setActiveTab("achievement");
+                              }}
+                            >
+                              업적
                             </HeaderComponent.MenuItem>
                             <HeaderComponent.MenuItem
                               active={activeHeaderMenu === "pose"}

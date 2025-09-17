@@ -7,6 +7,7 @@ import {
   FaUser,
   FaComments,
   FaCamera,
+  FaTrophy,
 } from "react-icons/fa";
 import styles from "./BottomNavigation.module.css";
 
@@ -14,6 +15,7 @@ import styles from "./BottomNavigation.module.css";
 const NAVIGATION_TABS = [
   { id: "home", label: "홈", icon: FaHome },
   { id: "routine", label: "루틴", icon: FaList },
+  { id: "achievement", label: "업적", icon: FaTrophy },
   { id: "pose", label: "분석", icon: FaCamera },
   { id: "statistics", label: "통계", icon: FaChartBar },
   { id: "social", label: "소셜", icon: FaComments },

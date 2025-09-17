@@ -1,0 +1,394 @@
+/* Gamification 페이지 스타일 */
+.gamificationContainer {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: #ffffff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* 웹 환경에서 2열 레이아웃 */
+@media (min-width: 1024px) {
+  .gamificationContainer {
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 32px;
+  }
+  
+  .mobileTitle {
+    display: none;
+  }
+  
+  .statsColumn {
+    flex: 0 0 320px;
+    position: sticky;
+    top: 24px;
+  }
+  
+  .achievementsColumn {
+    flex: 1;
+    min-width: 0; /* flex item이 축소될 수 있도록 */
+  }
+  
+  /* 웹에서는 업적 컨테이너의 너비를 고정하여 일정한 레이아웃 유지 */
+  .achievementsContainer {
+    width: 700px; /* 고정 너비로 설정 */
+    min-width: 700px;
+    max-width: 700px;
+  }
+  
+  /* 웹에서는 카테고리 간격을 더 줄임 */
+  .categoriesList {
+    gap: 2px;
+  }
+  
+  .categorySection {
+    padding-bottom: 4px;
+  }
+  
+  .categoryHeader {
+    padding: 8px 16px;
+  }
+}
+
+/* 모바일 환경 */
+@media (max-width: 1023px) {
+  .mobileTitle {
+    margin-bottom: 16px;
+  }
+}
+
+.pageTitle {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+/* 통계 섹션 */
+.statsSection {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 20px;
+  margin-bottom: 24px;
+}
+
+.statItem {
+  text-align: center;
+  padding: 20px 16px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.statItem:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.statNumber {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  line-height: 1;
+}
+
+.statNumber.primary {
+  color: #3b82f6;
+}
+
+.statNumber.success {
+  color: #10b981;
+}
+
+.statNumber.warning {
+  color: #f59e0b;
+}
+
+.statNumber.info {
+  color: #06b6d4;
+}
+
+.statLabel {
+  color: #64748b;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.progressSection {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.progressLabel {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+/* 업적 컨테이너 */
+.achievementsContainer {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.containerTitle {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.categoriesList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* 업적 카테고리 섹션 */
+.categorySection {
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 4px;
+}
+
+.categorySection:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* 카테고리 헤더 (클릭 가능) */
+.categoryHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.categoryHeader:hover {
+  background: #f8fafc;
+}
+
+.categoryHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.categoryTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.categoryCount {
+  background: #e2e8f0;
+  color: #475569;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* 확장 아이콘 */
+.expandIcon {
+  font-size: 1rem;
+  color: #64748b;
+  transition: transform 0.3s ease;
+}
+
+.expandIcon.expanded {
+  transform: rotate(180deg);
+}
+
+.achievementsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+  animation: slideDown 0.3s ease-out;
+}
+
+/* 웹 환경에서 2열 그리드 */
+@media (min-width: 1024px) {
+  .achievementsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 업적 아이템 */
+.achievementItem {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.achievementItem:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.achievementItem.unlocked {
+  background: #f0fdf4;
+  border-color: #10b981;
+}
+
+.achievementItem.locked {
+  opacity: 0.8;
+}
+
+.achievementHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.achievementIcon {
+  font-size: 1.2rem;
+  margin-right: 12px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+/* SVG 아이콘 스타일 (통합) */
+.achievementIconSvg {
+  width: 60%;
+  height: 60%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.achievementItem:hover .achievementIconSvg {
+  transform: scale(1.1);
+}
+
+.achievementItem.unlocked .achievementIcon {
+  background: #dcfce7;
+  border-color: #10b981;
+}
+
+.achievementInfo {
+  flex: 1;
+}
+
+.achievementName {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 4px 0;
+}
+
+.achievementDescription {
+  color: #64748b;
+  font-size: 0.875rem;
+  margin: 0 0 12px 0;
+  line-height: 1.4;
+}
+
+.achievementFooter {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.statusBadge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.statusBadge.unlocked {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.statusBadge.locked {
+  background-color: #f1f5f9;
+  color: #64748b;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .gamificationContainer {
+    padding: 16px;
+    gap: 16px;
+  }
+  
+  .pageTitle {
+    font-size: 2rem;
+  }
+  
+  .statsSection,
+  .achievementsContainer {
+    padding: 16px;
+  }
+  
+  .statItem {
+    padding: 16px 12px;
+  }
+  
+  .statNumber {
+    font-size: 1.75rem;
+  }
+  
+  .achievementItem {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+}
