@@ -22,6 +22,7 @@ import { AuthProvider } from "./context/AuthContext.jsx";
 import { POST } from "./utils/api/api";
 import MyPage from "./components/pages/MyPage/MyPage.jsx";
 import SamplePage from "./components/pages/SamplePage/SamplePage.jsx";
+import { ModalProvider } from "./context/ModalContext.jsx";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -155,110 +156,112 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <RunProvider>
-          <RoutineProvider>
-            <SuggestProvider>
-              <div className="App">
-                {/* 로그인된 경우에만 헤더와 네비게이션 표시 */}
-                {isLoggedIn && (
-                  <>
-                    {/* 웹 환경에서만 헤더 표시 */}
-                    {!isMobile && (
-                      <HeaderComponent variant="elevated" size="large" sticky>
-                        <HeaderComponent.Section>
-                          <HeaderComponent.Brand
-                            logo="🎯"
-                            brandName="다듬"
-                            onClick={() => {
-                              setActiveTab("home");
-                              setActiveHeaderMenu("home");
-                            }}
-                            style={{ cursor: "pointer" }}
-                          />
-                        </HeaderComponent.Section>
-
-                        <HeaderComponent.Section>
-                          <HeaderComponent.Navigation>
-                            <HeaderComponent.MenuItem
-                              active={activeHeaderMenu === "routine"}
+        <ModalProvider>
+          <RunProvider>
+            <RoutineProvider>
+              <SuggestProvider>
+                <div className="App">
+                  {/* 로그인된 경우에만 헤더와 네비게이션 표시 */}
+                  {isLoggedIn && (
+                    <>
+                      {/* 웹 환경에서만 헤더 표시 */}
+                      {!isMobile && (
+                        <HeaderComponent variant="elevated" size="large" sticky>
+                          <HeaderComponent.Section>
+                            <HeaderComponent.Brand
+                              logo="🎯"
+                              brandName="다듬"
                               onClick={() => {
-                                handleHeaderMenuClick("routine");
-                                setActiveTab("routine");
+                                setActiveTab("home");
+                                setActiveHeaderMenu("home");
                               }}
-                            >
-                              루틴
-                            </HeaderComponent.MenuItem>
-                            <HeaderComponent.MenuItem
-                              active={activeHeaderMenu === "pose"}
-                              onClick={() => {
-                                handleHeaderMenuClick("pose");
-                                setActiveTab("pose");
-                              }}
-                            >
-                              분석
-                            </HeaderComponent.MenuItem>
-                            <HeaderComponent.MenuItem
-                              active={activeHeaderMenu === "statistics"}
-                              onClick={() =>
-                                handleHeaderMenuClick("statistics")
-                              }
-                            >
-                              통계
-                            </HeaderComponent.MenuItem>
-                            <HeaderComponent.MenuItem
-                              active={activeHeaderMenu === "social"}
-                              onClick={() => {handleHeaderMenuClick("social")}}
-                            >
-                              소셜
-                            </HeaderComponent.MenuItem>
-                            <HeaderComponent.MenuItem
-                              active={activeHeaderMenu === "mypage"}
-                              onClick={() => {
-                                handleHeaderMenuClick("mypage");
-                                setActiveTab("mypage")
-                              }}
-                            >
-                              마이페이지
-                            </HeaderComponent.MenuItem>
-                          </HeaderComponent.Navigation>
-                          <ButtonComponent
-                            variant="outline-secondary"
-                            onClick={handleLogoutClick}
-                          >
-                            로그아웃
-                          </ButtonComponent>
-                        </HeaderComponent.Section>
-                      </HeaderComponent>
-                    )}
+                              style={{ cursor: "pointer" }}
+                            />
+                          </HeaderComponent.Section>
 
-                    {/* 모바일 환경에서만 하단 네비게이션 표시 */}
-                    {isMobile && (
-                      <BottomNavigation
-                        activeTab={activeTab}
-                        onTabChange={handleTabChange}
-                      />
-                    )}
-                  </>
-                )}
+                          <HeaderComponent.Section>
+                            <HeaderComponent.Navigation>
+                              <HeaderComponent.MenuItem
+                                active={activeHeaderMenu === "routine"}
+                                onClick={() => {
+                                  handleHeaderMenuClick("routine");
+                                  setActiveTab("routine");
+                                }}
+                              >
+                                루틴
+                              </HeaderComponent.MenuItem>
+                              <HeaderComponent.MenuItem
+                                active={activeHeaderMenu === "pose"}
+                                onClick={() => {
+                                  handleHeaderMenuClick("pose");
+                                  setActiveTab("pose");
+                                }}
+                              >
+                                분석
+                              </HeaderComponent.MenuItem>
+                              <HeaderComponent.MenuItem
+                                active={activeHeaderMenu === "statistics"}
+                                onClick={() =>
+                                  handleHeaderMenuClick("statistics")
+                                }
+                              >
+                                통계
+                              </HeaderComponent.MenuItem>
+                              <HeaderComponent.MenuItem
+                                active={activeHeaderMenu === "social"}
+                                onClick={() => {handleHeaderMenuClick("social")}}
+                              >
+                                소셜
+                              </HeaderComponent.MenuItem>
+                              <HeaderComponent.MenuItem
+                                active={activeHeaderMenu === "mypage"}
+                                onClick={() => {
+                                  handleHeaderMenuClick("mypage");
+                                  setActiveTab("mypage")
+                                }}
+                              >
+                                마이페이지
+                              </HeaderComponent.MenuItem>
+                            </HeaderComponent.Navigation>
+                            <ButtonComponent
+                              variant="outline-secondary"
+                              onClick={handleLogoutClick}
+                            >
+                              로그아웃
+                            </ButtonComponent>
+                          </HeaderComponent.Section>
+                        </HeaderComponent>
+                      )}
 
-                <main
-                  style={{
-                    marginTop: isLoggedIn ? (isMobile ? "20px" : "0") : "0",
-                    marginBottom: isLoggedIn
-                      ? isMobile
-                        ? "80px"
-                        : "20px"
-                      : "0",
-                    display: "flex",
-                    minHeight: isLoggedIn ? "auto" : "100vh",
-                  }}
-                >
-                  {renderContent()}
-                </main>
-              </div>
-            </SuggestProvider>
-          </RoutineProvider>
-        </RunProvider>
+                      {/* 모바일 환경에서만 하단 네비게이션 표시 */}
+                      {isMobile && (
+                        <BottomNavigation
+                          activeTab={activeTab}
+                          onTabChange={handleTabChange}
+                        />
+                      )}
+                    </>
+                  )}
+
+                  <main
+                    style={{
+                      marginTop: isLoggedIn ? (isMobile ? "20px" : "0") : "0",
+                      marginBottom: isLoggedIn
+                        ? isMobile
+                          ? "80px"
+                          : "20px"
+                        : "0",
+                      display: "flex",
+                      minHeight: isLoggedIn ? "auto" : "100vh",
+                    }}
+                  >
+                    {renderContent()}
+                  </main>
+                </div>
+              </SuggestProvider>
+            </RoutineProvider>
+          </RunProvider>
+        </ModalProvider>
       </AuthProvider>
     </Router>
   );
