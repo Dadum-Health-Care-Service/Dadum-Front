@@ -37,7 +37,7 @@ export default function MyPage(){
                         </HeaderComponent>
                     </div>
 
-                    <HeaderComponent.Section>
+                    <HeaderComponent align="center">
                         <HeaderComponent.Navigation className="pb-2">
                             <HeaderComponent.MenuItem
                                 active={activeHeaderMenu === "profile"}
@@ -64,7 +64,7 @@ export default function MyPage(){
                                 설정
                             </HeaderComponent.MenuItem>
                         </HeaderComponent.Navigation>
-                    </HeaderComponent.Section>
+                    </HeaderComponent>
                 </div>
             </ContainerComponent>
             <ContainerComponent size="large">

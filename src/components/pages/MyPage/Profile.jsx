@@ -165,7 +165,7 @@ export default function Profile(){
         }
     };
 
-    const handleSubmit = async (e) =>{
+    const handleSubmit = async () =>{
         const newErrors = {};
         if(!inputs.name) newErrors.name = "이름은 필수 입력값입니다.";
         if(!inputs.nickName) newErrors.nickName = "닉네임은 필수 입력값입니다.";
@@ -364,7 +364,6 @@ export default function Profile(){
                             required
                             error={errors.name}
                             className="mb-3"
-                            id="edit-profile-name"
                         />
                         <InputComponent
                             label="닉네임"
