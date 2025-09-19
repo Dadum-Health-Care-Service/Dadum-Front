@@ -1,0 +1,65 @@
+.ds-root {
+  gap: 12px;
+}
+
+.ds-card {
+  margin-top: 12px;
+}
+
+.ds-totals {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ds-box {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+}
+
+.ds-label {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-bottom: 6px;
+}
+
+.ds-value {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.ds-meals {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.ds-meal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.ds-meal__title {
+  font-weight: 600;
+}
+
+.ds-meal__meta {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.ds-meal__kcal {
+  font-weight: 700;
+  text-align: right;
+}
+
+.ds-meal__macros {
+  font-size: 12px;
+  opacity: 0.85;
+  text-align: right;
+}
