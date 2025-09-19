@@ -1,10 +1,15 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import "./App.css";
 import PoseAccuracyMVP from "./components/pages/Pose/PoseAccuracyMVP.jsx";
 import Login from "./components/pages/Login/Login.jsx";
+import { AuthProvider } from "./context/AuthContext.jsx";
+import { RunProvider } from "./context/RunContext.jsx";
+import { RoutineProvider } from "./context/RoutineContext.jsx";
+import { SuggestProvider } from "./context/SuggestContext.jsx";
+import { ModalProvider } from "./context/ModalContext.jsx";
 
 // Common Components
 import HeaderComponent from "./components/common/HeaderComponent";
@@ -12,29 +17,18 @@ import ButtonComponent from "./components/common/ButtonComponent";
 import BottomNavigation from "./components/common/BottomNavigation";
 import ContainerComponent from "./components/common/ContainerComponent";
 
-
 // Pages
 import Home from "./components/pages/Home/Home.jsx";
 import Routine from "./components/pages/Routine/Routine.jsx";
-import Admin from "./components/pages/Admin/Admin.jsx";
-
-//Contexts
-import { RunProvider } from "./context/RunContext.jsx";
-import { RoutineProvider } from "./context/RoutineContext.jsx";
-import { SuggestProvider } from "./context/SuggestContext.jsx";
-import { AuthProvider, AuthContext } from "./context/AuthContext.jsx";
-import { POST } from "./utils/api/api";
-import MyPage from "./components/pages/MyPage/MyPage.jsx";
-import SamplePage from "./components/pages/SamplePage/SamplePage.jsx";
-import { ModalProvider } from "./context/ModalContext.jsx";
 import Chatbot from "./components/pages/Chatbot/Chatbot.jsx";
+import Gamification from "./components/pages/Gamification/Gamification.jsx";
+import MyPage from "./components/pages/MyPage/MyPage.jsx";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [activeTab, setActiveTab] = useState("login");
-  const [isAdmin, setIsAdmin] = useState(false);
   const [selectedListItem, setSelectedListItem] = useState(null);
-  const [activeHeaderMenu, setActiveHeaderMenu] = useState("home");
+  const [activeHeaderMenu, setActiveHeaderMenu] = useState("login");
   const [isMobile, setIsMobile] = useState(false);
   const [QR, setQR] = useState(null);
 
@@ -69,7 +63,28 @@ function App() {
     // });
   };
   const handleSignupClick = () => {
-    setActiveTab("login");
+    POST(
+      "/users/signup",
+      {
+        usersName: "테스트유저",
+        email: "test@test.com",
+        profileImg: "/img/userAvatar.png",
+        nickName: "테스트닉네임",
+        phoneNum: "01012345678",
+        biosDto: {
+          gender: 0,
+          age: 40,
+          height: 180,
+          weight: 90,
+        },
+        authDto: {
+          password: "testuser",
+        },
+      },
+      false
+    ).then(() => {
+      setIsLoggedIn(true);
+    });
   };
 
   const handlePasswordlessSignupClick = () => {
@@ -134,11 +149,7 @@ function App() {
   const handleLogoutClick = () => setIsLoggedIn(false);
   const handleTabChange = (tabId) => setActiveTab(tabId);
   const handleHeaderMenuClick = (menuId) => setActiveHeaderMenu(menuId);
-  const handleAdminLoginClick = () => {
-    setIsLoggedIn(true);
-    setIsAdmin(true);
-    setActiveTab("admin");
-  };
+
   const renderContent = () => {
     // 로그인되지 않은 경우
     if (!isLoggedIn) {
@@ -233,57 +244,47 @@ function App() {
         );
       case "social":
         return (
-          <SamplePage />
-          //<div className="container mt-5 pt-5">
-          //  <h1>소셜 페이지</h1>
-          //  <p>소셜 기능은 개발 중입니다.</p>
-          //</div>
+          <div className="container mt-5 pt-5">
+            <h1>소셜 페이지</h1>
+            <p>소셜 기능은 개발 중입니다.</p>
+          </div>
         );
       case "mypage":
-        return (
-          <MyPage />
-        );
-      case "admin":
-        return <Admin />;
+        return <MyPage />;
       default:
         return <Home />;
     }
   };
 
   // PC: /login 경로에서는 로그인 페이지만 단독 렌더링
-  if (typeof window !== 'undefined' && window.location.pathname === '/login') {
-    return <Login onLoginSuccess={() => { window.location.href = '/'; }} />;
+  if (typeof window !== "undefined" && window.location.pathname === "/login") {
+    return (
+      <Login
+        onLoginSuccess={() => {
+          window.location.href = "/";
+        }}
+      />
+    );
   }
 
   return (
     <Router>
       <AuthProvider>
         <ModalProvider>
-        <RunProvider>
-          <RoutineProvider>
-            <SuggestProvider>
-              <div className="App">
-                {/* 로그인된 경우에만 헤더와 네비게이션 표시 */}
-                {isLoggedIn && (
-                  <>
-                    {/* 웹 환경에서만 헤더 표시 */}
-                    {!isMobile && (
-                      <HeaderComponent variant="elevated" size="large" sticky>
-                        <HeaderComponent.Section>
-                          <HeaderComponent.Brand
-                            logo="🎯"
-                            brandName="다듬"
-                            onClick={() => {
-                              setActiveTab("home");
-                              setActiveHeaderMenu("home");
-                            }}
-                            style={{ cursor: "pointer" }}
-                          />
-                        </HeaderComponent.Section>
-                        <HeaderComponent.Section>
-                          <HeaderComponent.Navigation>
-                            <HeaderComponent.MenuItem
-                              active={activeHeaderMenu === "routine"}
+          <RunProvider>
+            <RoutineProvider>
+              <SuggestProvider>
+                <div className="App">
+                  {/* 로그인된 경우에만 헤더와 네비게이션 표시 */}
+                  {isLoggedIn && (
+                    <>
+                      {/* 웹 환경에서만 헤더 표시 */}
+                      {!isMobile && (
+                        <HeaderComponent variant="elevated" size="large" sticky>
+                          <HeaderComponent.Section>
+                            <HeaderComponent.Brand
+                              logo="🎯"
+                              brandName="다듬"
                               onClick={() => {
                                 setActiveTab("home");
                                 setActiveHeaderMenu("home");
@@ -291,7 +292,6 @@ function App() {
                               style={{ cursor: "pointer" }}
                             />
                           </HeaderComponent.Section>
-
                           <HeaderComponent.Section>
                             <HeaderComponent.Navigation>
                               <HeaderComponent.MenuItem
@@ -302,6 +302,15 @@ function App() {
                                 }}
                               >
                                 루틴
+                              </HeaderComponent.MenuItem>
+                              <HeaderComponent.MenuItem
+                                active={activeHeaderMenu === "achievement"}
+                                onClick={() => {
+                                  handleHeaderMenuClick("achievement");
+                                  setActiveTab("achievement");
+                                }}
+                              >
+                                업적
                               </HeaderComponent.MenuItem>
                               <HeaderComponent.MenuItem
                                 active={activeHeaderMenu === "pose"}
@@ -322,111 +331,63 @@ function App() {
                               </HeaderComponent.MenuItem>
                               <HeaderComponent.MenuItem
                                 active={activeHeaderMenu === "social"}
-                                onClick={() => {handleHeaderMenuClick("social")}}
+                                onClick={() => handleHeaderMenuClick("social")}
                               >
                                 소셜
-                              </HeaderComponent.MenuItem>
-                              <HeaderComponent.MenuItem
-                                active={activeHeaderMenu === "mypage"}
-                                onClick={() => {
-                                  handleHeaderMenuClick("mypage");
-                                  setActiveTab("mypage")
-                                }}
-                              >
-                                마이페이지
                               </HeaderComponent.MenuItem>
                             </HeaderComponent.Navigation>
                             <ButtonComponent
                               variant="outline-secondary"
                               onClick={handleLogoutClick}
                             >
-                              루틴
-                            </HeaderComponent.MenuItem>
-                            <HeaderComponent.MenuItem
-                              active={activeHeaderMenu === "achievement"}
-                              onClick={() => {
-                                handleHeaderMenuClick("achievement");
-                                setActiveTab("achievement");
-                              }}
-                            >
-                              업적
-                            </HeaderComponent.MenuItem>
-                            <HeaderComponent.MenuItem
-                              active={activeHeaderMenu === "pose"}
-                              onClick={() => {
-                                handleHeaderMenuClick("pose");
-                                setActiveTab("pose");
-                              }}
-                            >
-                              분석
-                            </HeaderComponent.MenuItem>
-                            <HeaderComponent.MenuItem
-                              active={activeHeaderMenu === "statistics"}
-                              onClick={() =>
-                                handleHeaderMenuClick("statistics")
-                              }
-                            >
-                              통계
-                            </HeaderComponent.MenuItem>
-                            <HeaderComponent.MenuItem
-                              active={activeHeaderMenu === "social"}
-                              onClick={() => handleHeaderMenuClick("social")}
-                            >
-                              소셜
-                            </HeaderComponent.MenuItem>
-                          </HeaderComponent.Navigation>
-                          <ButtonComponent
-                            variant="outline-secondary"
-                            onClick={handleLogoutClick}
-                          >
-                            로그아웃
-                          </ButtonComponent>
-                        </HeaderComponent.Section>
-                      </HeaderComponent>
-                    )}
-                  </>
-                )}
+                              로그아웃
+                            </ButtonComponent>
+                          </HeaderComponent.Section>
+                        </HeaderComponent>
+                      )}
+                    </>
+                  )}
 
-                <main
-                  style={{
-                    marginTop: isLoggedIn ? (isMobile ? "20px" : "0") : "0",
-                    marginBottom: isLoggedIn
-                      ? isMobile
-                        ? "80px"
-                        : "20px"
-                      : "0",
-                    display: "flex",
-                    minHeight: isLoggedIn ? "auto" : "100vh",
-                  }}
-                >
-                  {renderContent()}
-                </main>
-                
-                {/* 로그인된 경우에만 하단 네비게이션과 챗봇 표시 */}
-                {isLoggedIn && (
-                   <>
-                    {/* 모바일 환경에서만 하단 네비게이션 표시 */}
-                    {isMobile && (
-                      <BottomNavigation
-                        activeTab={activeTab}
-                        onTabChange={handleTabChange}
+                  <main
+                    style={{
+                      marginTop: isLoggedIn ? (isMobile ? "20px" : "0") : "0",
+                      marginBottom: isLoggedIn
+                        ? isMobile
+                          ? "80px"
+                          : "20px"
+                        : "0",
+                      display: "flex",
+                      minHeight: isLoggedIn ? "auto" : "100vh",
+                    }}
+                  >
+                    {renderContent()}
+                  </main>
+
+                  {/* 로그인된 경우에만 하단 네비게이션과 챗봇 표시 */}
+                  {isLoggedIn && (
+                    <>
+                      {/* 모바일 환경에서만 하단 네비게이션 표시 */}
+                      {isMobile && (
+                        <BottomNavigation
+                          activeTab={activeTab}
+                          onTabChange={handleTabChange}
+                        />
+                      )}
+
+                      {/* 플로팅 챗봇 - 모든 페이지에서 사용 가능 */}
+                      <Chatbot
+                        onMessageSend={(userMessage, botResponse) => {
+                          console.log("사용자 메시지:", userMessage);
+                          console.log("봇 응답:", botResponse);
+                        }}
                       />
-                    )}
-
-                    {/* 플로팅 챗봇 - 모든 페이지에서 사용 가능 */}
-                    <Chatbot 
-                      onMessageSend={(userMessage, botResponse) => {
-                        console.log('사용자 메시지:', userMessage);
-                        console.log('봇 응답:', botResponse);
-                      }}
-                    />
-                  </>
-                )}
-              </div>
-            </SuggestProvider>
-          </RoutineProvider>
-        </RunProvider>
-       </ModalProvider>
+                    </>
+                  )}
+                </div>
+              </SuggestProvider>
+            </RoutineProvider>
+          </RunProvider>
+        </ModalProvider>
       </AuthProvider>
     </Router>
   );
