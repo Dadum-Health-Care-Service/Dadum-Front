@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import HeaderComponent from "../../common/HeaderComponent";
 import ContainerComponent from "../../common/ContainerComponent";
 import InputComponent from "../../common/InputComponent";
@@ -19,23 +19,29 @@ export default function Settings(){
     }
 
     const [errors, setErrors]=useState({});
-    const [password,setPassword] = useState({});
-    const [passwords,setPasswords]=useState({});
+    const [passwords,setPasswords]=useState({
+        existPW:'',
+        currentPW:'',
+        newPW:'',
+        newPWcheck:''
+    });
 
-    const handleChange = (field)=>(e)=>{
-        if (activeHeaderMenu === "withdrawalUser"){
-            setPasswords((prev)=>({
-                ...prev,
-                [field]:e.target.value
-            }));
-        }
-        else {
-            setPassword((prev)=>({
-                ...prev,
-                [field]:e.target.value
-            }));
-        }
-        console.log(`password:${password}\npasswords:${passwords}\nerrors:${errors}`);
+    const handleReset = ()=>{
+        setPasswords({existPW:'',currentPW:'',newPW:'',newPWcheck:''});
+        if(errors){
+            setErrors({});
+        };
+    };
+
+    const handleChange =(field)=>(e)=>{
+        setPasswords((prev)=>({
+            ...prev,
+            [field]:e.target.value
+        }));
+    
+        console.log('passwords:',passwords)
+        console.log('errors:',errors)
+
         if(errors[field]){
             setErrors((prev)=>({
                 ...prev,
@@ -46,26 +52,31 @@ export default function Settings(){
 
     const handleWithdrawalSubmit = async (e)=>{
         e.preventDefault();
-        const newErrors = {};
-        if(!passwords.currentPW) newErrors.currentPW = "현재 비밀번호를 반드시 입력해주세요.";
-        setErrors(newErrors);;
         let res1='';
+
+        const newErrors = {};
+        if(!passwords.existPW) newErrors.existPW = "현재 비밀번호를 반드시 입력해주세요.";
+        setErrors(newErrors);
+        
         if(Object.keys(newErrors).length === 0){
             try {
                 res1 = await axios.post(
                     'http://localhost:8080/api/v1/users/auth/password/check',
-                    { password: passwords.currentPW },
+                    { password: passwords.existPW },
                     { withCredentials: true, headers: { Authorization: `Bearer ${user.accessToken}` } },
                 );
                 console.log(res1)
             } catch (err1) {
                 console.log('비밀번호 확인 호출 중 오류 발생: ',err1);
+                handleReset();
                 if(err1?.status===400){
                     showBasicModal("비밀번호가 일치하지 않습니다.","비밀번호 오류");
                 }else{
                     showBasicModal("비밀번호 확인 중 오류가 발생하였습니다.","네트워크 에러")
                 }
                 return;
+            } finally {
+                handleReset();
             }
         
 
@@ -86,7 +97,9 @@ export default function Settings(){
                 } catch(err2){
                     console.log('회원 탈퇴 중 오류 발생',err2);
                     showBasicModal('회원 탈퇴에 실패하였습니다','네트워크 에러');
-                };
+                } finally{
+                    handleReset();
+                }
             };
 
             console.log(res1);
@@ -95,7 +108,63 @@ export default function Settings(){
     };
 
     const handleUpdateSubmit = async (e)=>{
+        e.preventDefault();
+        let res1='';
+        
+        const newErrors = {};
+        if(!passwords.currentPW) newErrors.currentPW = "현재 비밀번호를 반드시 입력해주세요.";
+        else if(!passwords.newPW) newErrors.newPW = "새 비밀번호를 반드시 입력해주세요.";
+        else if(passwords.newPW == passwords.currentPW) newErrors.newPW = "같은 비밀번호로는 변경할 수 없습니다";
+        else if(!passwords.newPWcheck) newErrors.newPWcheck = "새 비밀번호 확인을 반드시 입력해주세요.";
+        else if(passwords.newPW != passwords.newPWcheck) newErrors.newPWcheck = "비밀번호가 일치하지 않습니다";
+        setErrors(newErrors);
 
+        if(Object.keys(newErrors).length === 0){
+            try {
+                res1 = await axios.post(
+                    'http://localhost:8080/api/v1/users/auth/password/check',
+                    { password: passwords.currentPW },
+                    { withCredentials: true, headers: { Authorization: `Bearer ${user.accessToken}` } },
+                );
+                console.log(res1)
+            } catch (err1) {
+                console.log('비밀번호 확인 호출 중 오류 발생: ',err1);
+                handleReset();
+
+                if(err1?.status===400){
+                    showBasicModal("비밀번호가 일치하지 않습니다.","비밀번호 오류");
+                }else{
+                    showBasicModal("비밀번호 확인 중 오류가 발생하였습니다.","네트워크 에러")
+                }
+                return;
+            }
+
+            try{
+                const res2 = await axios.put(
+                    'http://localhost:8080/api/v1/users/auth/password/update',
+                    {
+                        originPassword: passwords.currentPW,
+                        newPassword: passwords.newPWcheck,
+                    },
+                    {
+                        withCredentials: true,
+                        headers: {
+                            Authorization: `Bearer ${user.accessToken}`,
+                        },
+                    },
+                );
+                console.log(res2);
+                showConfirmModal('비밀번호가 변경되었습니다. 다시 로그인 해 주세요.',
+                                '비밀번호 변경',
+                                '',
+                                ()=>{dispatch({type:'LOGOUT'});});
+            } catch (err2){
+                console.log("비밀번호 변경 오류 발생:",err2);
+                showBasicModal('비밀번호 변경에 실패하였습니다','네트워크 에러')
+            } finally{
+                handleReset();
+            }
+        };
     }
 
     const routeSettingPages = (menuId)=>{
@@ -107,9 +176,10 @@ export default function Settings(){
                                 label="현재 비밀번호"
                                 placeholder="현재 비밀번호를 입력해주세요"
                                 type="password"
-                                onChange={handleChange("currentPW")}
+                                onChange={handleChange("existPW")}
+                                value={passwords.existPW}
                                 required
-                                error={errors.currentPW}
+                                error={errors.existPW}
                                 className="mb-3"
                             />
                             <div className="d-flex justify-content-center">
@@ -135,6 +205,7 @@ export default function Settings(){
                                     placeholder="현재 비밀번호를 입력해주세요"
                                     type="password"
                                     onChange={handleChange("currentPW")}
+                                    value={passwords.currentPW}
                                     required
                                     error={errors.currentPW}
                                     className="mb-3"
@@ -147,6 +218,7 @@ export default function Settings(){
                                     placeholder="새 비밀번호를 입력해주세요"
                                     type="password"
                                     onChange={handleChange("newPW")}
+                                    value={passwords.newPW}
                                     required
                                     error={errors.newPW}
                                     className="mb-3"
@@ -156,6 +228,7 @@ export default function Settings(){
                                     placeholder="새 비밀번호를 입력해주세요"
                                     type="password"
                                     onChange={handleChange("newPWcheck")}
+                                    value={passwords.newPWcheck}
                                     required
                                     error={errors.newPWcheck}
                                     className="mb-3 py-2"
