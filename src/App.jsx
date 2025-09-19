@@ -17,6 +17,7 @@ import ContainerComponent from "./components/common/ContainerComponent";
 // Pages
 import Home from "./components/pages/Home/Home.jsx";
 import Routine from "./components/pages/Routine/Routine.jsx";
+import Social from "./components/pages/Social/Social.jsx";
 import CalorieCam from "./components/pages/Calorie/CalorieCam.jsx";
 import DailySummary from "./components/pages/Summary/DailySummary.jsx";
 import Chatbot from "./components/pages/Chatbot/Chatbot.jsx";
@@ -256,12 +257,7 @@ function App() {
           </div>
         );
       case "social":
-        return (
-          <div className="container mt-5 pt-5">
-            <h1>소셜 페이지</h1>
-            <p>소셜 기능은 개발 중입니다.</p>
-          </div>
-        );
+        return <Social />;
       case "mypage":
         return <MyPage />;
       case "admin":
