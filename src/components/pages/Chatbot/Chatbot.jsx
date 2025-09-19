@@ -166,10 +166,10 @@ const Chatbot = ({
         line = line.replace(/^\uFEFF/, '').replace(/\r$/, '');
 
         // 2) data: 본문만 캡처 (공백 포함 그대로 살림)
-        const m = line.match(/^\s*data:(.*)$/i);
+        const m = line.match(/^\s*data:\s*(.*)$/i);
         if (m) {
-          // 캡처된 본문에서 'data:'가 한 번 더 붙어 들어온 경우 제거
-          let payload = m[1].replace(/^\uFEFF/, '').replace(/^\s*data:\s*/i, '');
+          // 캡처된 본문에서 BOM만 제거하고 공백은 그대로 유지
+          let payload = m[1].replace(/^\uFEFF/, '');
           eventBuffer.push(payload);
           continue;
         }
@@ -187,9 +187,9 @@ const Chatbot = ({
         // carry 처리
         if (carry) {
           let l = carry.replace(/^\uFEFF/, '').replace(/\r$/, '');
-          const m = l.match(/^\s*data:(.*)$/i);
+          const m = l.match(/^\s*data:\s*(.*)$/i);
           if (m) {
-            let payload = m[1].replace(/^\uFEFF/, '').replace(/^\s*data:\s*/i, '');
+            let payload = m[1].replace(/^\uFEFF/, '');
             eventBuffer.push(payload);
           } else if (/^\s*$/.test(l)) { /* 경계 */ }
         }

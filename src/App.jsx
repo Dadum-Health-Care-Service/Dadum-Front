@@ -63,16 +63,19 @@ function App() {
     // });
   };
   const handleSignupClick = () => {
+    const testEmail = "test" + Date.now() + "@test.com";
+    console.log("회원가입 시도:", testEmail);
+    
     POST(
       "/users/signup",
       {
         usersName: "테스트유저",
-        email: "test@test.com",
+        email: testEmail,
         profileImg: "/img/userAvatar.png",
         nickName: "테스트닉네임",
         phoneNum: "01012345678",
         biosDto: {
-          gender: 0,
+          gender: false,
           age: 40,
           height: 180,
           weight: 90,
@@ -82,8 +85,11 @@ function App() {
         },
       },
       false
-    ).then(() => {
+    ).then((response) => {
+      console.log("회원가입 성공:", response);
       setIsLoggedIn(true);
+    }).catch((error) => {
+      console.error("회원가입 실패:", error.response?.data || error.message);
     });
   };
 
@@ -143,7 +149,7 @@ function App() {
   };
 
   useEffect(() => {
-    console.log(QR);
+    // QR 코드 상태 변경 감지 (필요시 로직 추가)
   }, [QR]);
 
   const handleLogoutClick = () => setIsLoggedIn(false);
@@ -228,7 +234,12 @@ function App() {
       case "routine":
         return <Routine />;
       case "achievement":
-        return <Gamification />;
+        return (
+          <div className="container mt-5 pt-5">
+            <h1>업적 페이지</h1>
+            <p>업적 기능은 개발 중입니다.</p>
+          </div>
+        );
       case "pose": // ← 새 탭: 자세 분석
         return <PoseAccuracyMVP />;
       case "login":
@@ -372,7 +383,7 @@ function App() {
                       />
                     )}
 
-                    {/* 플로팅 챗봇 - 모든 페이지에서 사용 가능 */}
+                    {/* 플로팅 챗봇 - 로그인한 사용자에게만 표시 */}
                     <Chatbot 
                       onMessageSend={(userMessage, botResponse) => {
                         console.log('사용자 메시지:', userMessage);
