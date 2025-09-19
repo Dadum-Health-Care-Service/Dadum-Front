@@ -1,5 +1,4 @@
-
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from 'react';
 import styles from "./InputComponent.module.css";
 
 const InputComponent = ({

@@ -23,6 +23,17 @@ import Routine from "./components/pages/Routine/Routine.jsx";
 import Chatbot from "./components/pages/Chatbot/Chatbot.jsx";
 import Gamification from "./components/pages/Gamification/Gamification.jsx";
 import MyPage from "./components/pages/MyPage/MyPage.jsx";
+import Admin from "./components/pages/Admin/Admin.jsx";
+import SamplePage from "./components/pages/SamplePage/SamplePage.jsx";
+import Chatbot from "./components/pages/Chatbot/Chatbot.jsx";
+
+//Contexts
+import { AuthProvider, AuthContext } from "./context/AuthContext.jsx";
+import { RunProvider } from "./context/RunContext.jsx";
+import { RoutineProvider } from "./context/RoutineContext.jsx";
+import { SuggestProvider } from "./context/SuggestContext.jsx";
+import { ModalProvider } from "./context/ModalContext.jsx";
+import { POST, GET } from "./utils/api/api";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -63,6 +74,8 @@ function App() {
     // });
   };
   const handleSignupClick = () => {
+    setActiveTab("login");
+
     POST(
       "/users/signup",
       {
@@ -82,8 +95,11 @@ function App() {
         },
       },
       false
-    ).then(() => {
+    ).then((response) => {
+      console.log("회원가입 성공:", response);
       setIsLoggedIn(true);
+    }).catch((error) => {
+      console.error("회원가입 실패:", error.response?.data || error.message);
     });
   };
 
@@ -143,7 +159,7 @@ function App() {
   };
 
   useEffect(() => {
-    console.log(QR);
+    // QR 코드 상태 변경 감지 (필요시 로직 추가)
   }, [QR]);
 
   const handleLogoutClick = () => setIsLoggedIn(false);
@@ -228,7 +244,12 @@ function App() {
       case "routine":
         return <Routine />;
       case "achievement":
-        return <Gamification />;
+        return (
+          <div className="container mt-5 pt-5">
+            <h1>업적 페이지</h1>
+            <p>업적 기능은 개발 중입니다.</p>
+          </div>
+        );
       case "pose": // ← 새 탭: 자세 분석
         return <PoseAccuracyMVP />;
       case "login":
@@ -362,7 +383,6 @@ function App() {
                   >
                     {renderContent()}
                   </main>
-
                   {/* 로그인된 경우에만 하단 네비게이션과 챗봇 표시 */}
                   {isLoggedIn && (
                     <>

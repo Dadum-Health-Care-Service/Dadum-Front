@@ -378,7 +378,7 @@ function Login({ setIsLoggedIn, setActiveTab }) {
           nickName: "테스트닉네임",
           phoneNum: "01012345678",
           biosDto: {
-            gender: 0,
+            gender: false,
             age: 40,
             height: 180,
             weight: 90,
