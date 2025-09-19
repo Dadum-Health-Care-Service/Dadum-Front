@@ -7,8 +7,8 @@ import Settings from "./Settings";
 import HealthData from "./HealthData";
 
 export default function MyPage(){
+    //선택한 마이페이지 헤더 탭에 따라 페이지 렌더
     const [activeHeaderMenu,setActiveHeaderMenu]=useState("profile");
-
     const handleHeaderMenuClick = (menuId)=>{
         setActiveHeaderMenu(menuId);
         console.log("선택된 마이페이지 헤더 메뉴:",menuId);
