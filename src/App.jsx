@@ -6,6 +6,12 @@ import "./App.css";
 import PoseAccuracyMVP from "./components/pages/Pose/PoseAccuracyMVP.jsx";
 import Login from "./components/pages/Login/Login.jsx";
 
+import { AuthProvider } from "./context/AuthContext.jsx";
+import { RunProvider } from "./context/RunContext.jsx";
+import { RoutineProvider } from "./context/RoutineContext.jsx";
+import { SuggestProvider } from "./context/SuggestContext.jsx";
+import { POST, GET } from "./utils/api/api";
+
 // Common Components
 import HeaderComponent from "./components/common/HeaderComponent";
 import ButtonComponent from "./components/common/ButtonComponent";

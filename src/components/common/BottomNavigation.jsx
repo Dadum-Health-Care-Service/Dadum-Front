@@ -8,6 +8,7 @@ import {
   FaComments,
   FaCamera,
   FaRobot,
+  FaTrophy 
 } from "react-icons/fa"; // ← FaRobot 추가
 import styles from "./BottomNavigation.module.css";
 
