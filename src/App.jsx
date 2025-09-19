@@ -234,12 +234,7 @@ function App() {
       case "routine":
         return <Routine />;
       case "achievement":
-        return (
-          <div className="container mt-5 pt-5">
-            <h1>업적 페이지</h1>
-            <p>업적 기능은 개발 중입니다.</p>
-          </div>
-        );
+        return <Gamification />;
       case "pose":
         return <PoseAccuracyMVP />;
       case "calorie":
@@ -317,6 +312,15 @@ function App() {
                                 }}
                               >
                                 루틴
+                              </HeaderComponent.MenuItem>
+                              <HeaderComponent.MenuItem
+                                active={activeHeaderMenu === "achievement"}
+                                onClick={() => {
+                                  handleHeaderMenuClick("achievement");
+                                  setActiveTab("achievement");
+                                }}
+                              >
+                                업적
                               </HeaderComponent.MenuItem>
                               <HeaderComponent.MenuItem
                                 active={activeHeaderMenu === "pose"}

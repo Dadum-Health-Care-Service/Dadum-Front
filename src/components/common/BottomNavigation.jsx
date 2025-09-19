@@ -19,6 +19,8 @@ const NAVIGATION_TABS = [
   { id: "routine", label: "루틴", icon: FaList },
   { id: "achievement", label: "업적", icon: FaTrophy },
   { id: "pose", label: "분석", icon: FaCamera },
+  { id: "calorie", label: "칼로리", icon: FaUtensils },
+  { id: "daily", label: "요약", icon: FaChartBar },
   { id: "statistics", label: "통계", icon: FaChartBar },
   { id: "social", label: "소셜", icon: FaComments },
   { id: "mypage", label: "마이페이지", icon: FaUser },
@@ -50,16 +52,6 @@ const NavigationTab = ({ tab, isActive, onTabChange }) => {
 
 // 메인 BottomNavigation 컴포넌트
 const BottomNavigation = ({ activeTab, onTabChange }) => {
-  const tabs = [
-    { id: "home", label: "홈", icon: FaHome },
-    { id: "routine", label: "루틴", icon: FaList },
-    { id: "pose", label: "분석", icon: FaCamera },
-    { id: "calorie", label: "칼로리", icon: FaUtensils },
-    { id: "daily", label: "요약", icon: FaChartBar },
-    { id: "statistics", label: "통계", icon: FaChartBar },
-    { id: "social", label: "소셜", icon: FaComments },
-    { id: "mypage", label: "마이페이지", icon: FaUser },
-  ];
   const renderNavigationTabs = () => {
     return NAVIGATION_TABS.map((tab) => (
       <NavigationTab
@@ -73,14 +65,7 @@ const BottomNavigation = ({ activeTab, onTabChange }) => {
 
   return (
     <Nav className={`${styles.bottomNav} bottom-nav`}>
-      {tabs.map((tab) => (
-        <NavigationTab
-          key={tab.id}
-          tab={tab}
-          isActive={activeTab === tab.id}
-          onTabChange={onTabChange}
-        />
-      ))}
+      {renderNavigationTabs()}
     </Nav>
   );
 };
