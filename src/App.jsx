@@ -4,6 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import "./App.css";
 import PoseAccuracyMVP from "./components/pages/Pose/PoseAccuracyMVP.jsx";
+import Login from "./components/pages/Login/Login.jsx";
 
 // Common Components
 import HeaderComponent from "./components/common/HeaderComponent";
@@ -11,18 +12,11 @@ import ButtonComponent from "./components/common/ButtonComponent";
 import BottomNavigation from "./components/common/BottomNavigation";
 import ContainerComponent from "./components/common/ContainerComponent";
 
+
 // Pages
 import Home from "./components/pages/Home/Home.jsx";
 import Routine from "./components/pages/Routine/Routine.jsx";
-import Login from "./components/pages/Login/Login.jsx";
-import Gamification from "./components/pages/Gamification/Gamification.jsx";
-
-//Contexts
-import { RunProvider } from "./context/RunContext.jsx";
-import { RoutineProvider } from "./context/RoutineContext.jsx";
-import { SuggestProvider } from "./context/SuggestContext.jsx";
-import { AuthProvider } from "./context/AuthContext.jsx";
-import { POST, GET } from "./utils/api/api";
+import Chatbot from "./components/pages/Chatbot/Chatbot.jsx";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -261,6 +255,11 @@ function App() {
     }
   };
 
+  // PC: /login 경로에서는 로그인 페이지만 단독 렌더링
+  if (typeof window !== 'undefined' && window.location.pathname === '/login') {
+    return <Login onLoginSuccess={() => { window.location.href = '/'; }} />;
+  }
+
   return (
     <Router>
       <AuthProvider>
@@ -285,7 +284,6 @@ function App() {
                             style={{ cursor: "pointer" }}
                           />
                         </HeaderComponent.Section>
-
                         <HeaderComponent.Section>
                           <HeaderComponent.Navigation>
                             <HeaderComponent.MenuItem
@@ -339,14 +337,6 @@ function App() {
                         </HeaderComponent.Section>
                       </HeaderComponent>
                     )}
-
-                    {/* 모바일 환경에서만 하단 네비게이션 표시 */}
-                    {isMobile && (
-                      <BottomNavigation
-                        activeTab={activeTab}
-                        onTabChange={handleTabChange}
-                      />
-                    )}
                   </>
                 )}
 
@@ -364,6 +354,27 @@ function App() {
                 >
                   {renderContent()}
                 </main>
+                
+                {/* 로그인된 경우에만 하단 네비게이션과 챗봇 표시 */}
+                {isLoggedIn && (
+                   <>
+                    {/* 모바일 환경에서만 하단 네비게이션 표시 */}
+                    {isMobile && (
+                      <BottomNavigation
+                        activeTab={activeTab}
+                        onTabChange={handleTabChange}
+                      />
+                    )}
+
+                    {/* 플로팅 챗봇 - 모든 페이지에서 사용 가능 */}
+                    <Chatbot 
+                      onMessageSend={(userMessage, botResponse) => {
+                        console.log('사용자 메시지:', userMessage);
+                        console.log('봇 응답:', botResponse);
+                      }}
+                    />
+                  </>
+                )}
               </div>
             </SuggestProvider>
           </RoutineProvider>
