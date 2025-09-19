@@ -9,6 +9,7 @@ import { useModal } from "../../../context/ModalContext";
 
 export default function Settings(){
     const { user, dispatch } = useContext(AuthContext);
+
     const { showBasicModal, showConfirmModal } = useModal();
 
     const [activeHeaderMenu,setActiveHeaderMenu]=useState("updatePassword");
@@ -18,13 +19,23 @@ export default function Settings(){
     }
 
     const [errors, setErrors]=useState({});
+    const [password,setPassword] = useState({});
     const [passwords,setPasswords]=useState({});
 
     const handleChange = (field)=>(e)=>{
-        setPasswords((prev)=>({
-            ...prev,
-            [field]:e.target.value
-        }));
+        if (activeHeaderMenu === "withdrawalUser"){
+            setPasswords((prev)=>({
+                ...prev,
+                [field]:e.target.value
+            }));
+        }
+        else {
+            setPassword((prev)=>({
+                ...prev,
+                [field]:e.target.value
+            }));
+        }
+        console.log(`password:${password}\npasswords:${passwords}\nerrors:${errors}`);
         if(errors[field]){
             setErrors((prev)=>({
                 ...prev,
@@ -33,51 +44,59 @@ export default function Settings(){
         }
     }
 
-    const handleSubmit = async (e)=>{
+    const handleWithdrawalSubmit = async (e)=>{
         e.preventDefault();
         const newErrors = {};
         if(!passwords.currentPW) newErrors.currentPW = "현재 비밀번호를 반드시 입력해주세요.";
         setErrors(newErrors);;
         let res1='';
-        try {
-            res1 = await axios.post(
-                'http://localhost:8080/api/v1/users/auth/password/check',
-                { password: passwords.currentPW },
-                { withCredentials: true, headers: { Authorization: `Bearer ${user.accessToken}` } },
-            );
-            console.log(res1)
-        } catch (err1) {
-            console.log('비밀번호 확인 호출 중 오류 발생: ',err1);
-            if(err1?.status===400){
-                showBasicModal("비밀번호가 일치하지 않습니다.","비밀번호 오류");
-            }else{
-                showBasicModal("비밀번호 확인 중 오류가 발생하였습니다.","네트워크 에러")
-            }
-            return;
-        }
-
-        const confirmWithdrawal = async ()=>{
-            try{
-                const res2 = await axios.delete(
-                    `http://localhost:8080/api/v1/users/delete/${res1.data.usersId}`,
-                    {
-                        withCredentials: true,
-                        headers: {
-                            Authorization: `Bearer ${user.accessToken}`,
-                        },
-                    },
+        if(Object.keys(newErrors).length === 0){
+            try {
+                res1 = await axios.post(
+                    'http://localhost:8080/api/v1/users/auth/password/check',
+                    { password: passwords.currentPW },
+                    { withCredentials: true, headers: { Authorization: `Bearer ${user.accessToken}` } },
                 );
-                console.log(res2)
-                showBasicModal('탈퇴되었습니다',"회원 탈퇴");
-                dispatch({type:'LOGOUT'});
-            } catch(err2){
-                console.log('회원 탈퇴 중 오류 발생',err2);
-                showBasicModal('회원 탈퇴에 실패하였습니다','네트워크 에러');
+                console.log(res1)
+            } catch (err1) {
+                console.log('비밀번호 확인 호출 중 오류 발생: ',err1);
+                if(err1?.status===400){
+                    showBasicModal("비밀번호가 일치하지 않습니다.","비밀번호 오류");
+                }else{
+                    showBasicModal("비밀번호 확인 중 오류가 발생하였습니다.","네트워크 에러")
+                }
+                return;
+            }
+        
+
+            const confirmWithdrawal = async ()=>{
+                try{
+                    const res2 = await axios.delete(
+                        `http://localhost:8080/api/v1/users/delete/${res1.data.usersId}`,
+                        {
+                            withCredentials: true,
+                            headers: {
+                                Authorization: `Bearer ${user.accessToken}`,
+                            },
+                        },
+                    );
+                    console.log(res2)
+                    showBasicModal('탈퇴되었습니다',"회원 탈퇴");
+                    dispatch({type:'LOGOUT'});
+                } catch(err2){
+                    console.log('회원 탈퇴 중 오류 발생',err2);
+                    showBasicModal('회원 탈퇴에 실패하였습니다','네트워크 에러');
+                };
             };
-        };
-        console.log(res1);
-        showConfirmModal("정말 탈퇴하시겠습니까?","회원 탈퇴","탈퇴는 취소 할 수 없습니다",confirmWithdrawal)
+
+            console.log(res1);
+            showConfirmModal("정말 탈퇴하시겠습니까?","회원 탈퇴","탈퇴는 취소 할 수 없습니다",confirmWithdrawal)
+        }
     };
+
+    const handleUpdateSubmit = async (e)=>{
+
+    }
 
     const routeSettingPages = (menuId)=>{
             switch(menuId){
@@ -97,7 +116,7 @@ export default function Settings(){
                                 <ButtonComponent 
                                     variant="secondary" 
                                     size="small"
-                                    onClick={handleSubmit}
+                                    onClick={handleWithdrawalSubmit}
                                     className="m-2 h-75"
                                 >
                                     확인
@@ -109,36 +128,79 @@ export default function Settings(){
                 }
                 default: {
                     return (
-                        <div>
-
-                        </div>
+                        <ContainerComponent variant="filled" size="small" >
+                            <div style={{padding:"3em 3em 0.5em 3em "}}>
+                                <InputComponent
+                                    label="현재 비밀번호"
+                                    placeholder="현재 비밀번호를 입력해주세요"
+                                    type="password"
+                                    onChange={handleChange("currentPW")}
+                                    required
+                                    error={errors.currentPW}
+                                    className="mb-3"
+                                />
+                            </div>
+                            <hr className="text-secondary m-3"/>
+                            <div style={{padding:"0.5em 3em 2em 3em"}}>
+                                <InputComponent
+                                    label="새 비밀번호"
+                                    placeholder="새 비밀번호를 입력해주세요"
+                                    type="password"
+                                    onChange={handleChange("newPW")}
+                                    required
+                                    error={errors.newPW}
+                                    className="mb-3"
+                                />
+                                <InputComponent
+                                    label="새 비밀번호 확인"
+                                    placeholder="새 비밀번호를 입력해주세요"
+                                    type="password"
+                                    onChange={handleChange("newPWcheck")}
+                                    required
+                                    error={errors.newPWcheck}
+                                    className="mb-3 py-2"
+                                />
+                            </div>
+                            <div className="d-flex justify-content-center">
+                                <ButtonComponent 
+                                    variant="secondary" 
+                                    size="small"
+                                    onClick={handleUpdateSubmit}
+                                    className="h-75 mb-5"
+                                >
+                                    확인
+                                </ButtonComponent>
+                            </div>
+                        </ContainerComponent>
                     )
                 }
             }
     }
 
     return <>
-        <ContainerComponent size="medium" variant="outlined">
-            <HeaderComponent variant="filled" size="small" align="center">
-                <HeaderComponent.Navigation>
-                    <HeaderComponent.MenuItem
-                        active={activeHeaderMenu === "updatePassword"}
-                        onClick={()=>handleHeaderMenuClick("updatePassword")}
-                    >
-                        비밀번호 변경
-                    </HeaderComponent.MenuItem>
-                    <HeaderComponent.MenuItem
-                        active={activeHeaderMenu === "withdrawalUser"}
-                        onClick={()=>handleHeaderMenuClick("withdrawalUser")}
-                    >
-                        회원 탈퇴
-                    </HeaderComponent.MenuItem>
-                </HeaderComponent.Navigation>
-            </HeaderComponent>
-        </ContainerComponent>
-        
-        <ContainerComponent size="medium" variant="outlined">
-            {routeSettingPages(activeHeaderMenu)}
+        <ContainerComponent variant="default" className="p-2">
+            <ContainerComponent size="medium" variant="default" className="mb-3">
+                <HeaderComponent variant="filled" size="small" align="center">
+                    <HeaderComponent.Navigation>
+                        <HeaderComponent.MenuItem
+                            active={activeHeaderMenu === "updatePassword"}
+                            onClick={()=>handleHeaderMenuClick("updatePassword")}
+                        >
+                            비밀번호 변경
+                        </HeaderComponent.MenuItem>
+                        <HeaderComponent.MenuItem
+                            active={activeHeaderMenu === "withdrawalUser"}
+                            onClick={()=>handleHeaderMenuClick("withdrawalUser")}
+                        >
+                            회원 탈퇴
+                        </HeaderComponent.MenuItem>
+                    </HeaderComponent.Navigation>
+                </HeaderComponent>
+            </ContainerComponent>
+            
+            <ContainerComponent size="medium" variant="outlined">
+                {routeSettingPages(activeHeaderMenu)}
+            </ContainerComponent>
         </ContainerComponent>
     </>
 }

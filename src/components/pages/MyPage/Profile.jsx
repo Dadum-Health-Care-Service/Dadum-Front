@@ -200,6 +200,7 @@ export default function Profile(){
                     },
                 );
                 console.log(res);
+                showBasicModal('수정 되었습니다');
                 setClickEdit(false);
             }catch(error){
                 console.log(error);
