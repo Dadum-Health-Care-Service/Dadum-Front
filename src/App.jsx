@@ -5,11 +5,6 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import "./App.css";
 import PoseAccuracyMVP from "./components/pages/Pose/PoseAccuracyMVP.jsx";
 import Login from "./components/pages/Login/Login.jsx";
-import { AuthProvider } from "./context/AuthContext.jsx";
-import { RunProvider } from "./context/RunContext.jsx";
-import { RoutineProvider } from "./context/RoutineContext.jsx";
-import { SuggestProvider } from "./context/SuggestContext.jsx";
-import { ModalProvider } from "./context/ModalContext.jsx";
 
 // Common Components
 import HeaderComponent from "./components/common/HeaderComponent";
@@ -25,7 +20,6 @@ import Gamification from "./components/pages/Gamification/Gamification.jsx";
 import MyPage from "./components/pages/MyPage/MyPage.jsx";
 import Admin from "./components/pages/Admin/Admin.jsx";
 import SamplePage from "./components/pages/SamplePage/SamplePage.jsx";
-import Chatbot from "./components/pages/Chatbot/Chatbot.jsx";
 
 //Contexts
 import { AuthProvider, AuthContext } from "./context/AuthContext.jsx";
@@ -37,9 +31,9 @@ import { POST, GET } from "./utils/api/api";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [activeTab, setActiveTab] = useState("login");
+  const [activeTab, setActiveTab] = useState("home");
   const [selectedListItem, setSelectedListItem] = useState(null);
-  const [activeHeaderMenu, setActiveHeaderMenu] = useState("login");
+  const [activeHeaderMenu, setActiveHeaderMenu] = useState("home");
   const [isMobile, setIsMobile] = useState(false);
   const [QR, setQR] = useState(null);
 
@@ -75,32 +69,6 @@ function App() {
   };
   const handleSignupClick = () => {
     setActiveTab("login");
-
-    POST(
-      "/users/signup",
-      {
-        usersName: "테스트유저",
-        email: "test@test.com",
-        profileImg: "/img/userAvatar.png",
-        nickName: "테스트닉네임",
-        phoneNum: "01012345678",
-        biosDto: {
-          gender: 0,
-          age: 40,
-          height: 180,
-          weight: 90,
-        },
-        authDto: {
-          password: "testuser",
-        },
-      },
-      false
-    ).then((response) => {
-      console.log("회원가입 성공:", response);
-      setIsLoggedIn(true);
-    }).catch((error) => {
-      console.error("회원가입 실패:", error.response?.data || error.message);
-    });
   };
 
   const handlePasswordlessSignupClick = () => {
@@ -272,6 +240,8 @@ function App() {
         );
       case "mypage":
         return <MyPage />;
+      case "admin":
+        return <Admin />;
       default:
         return <Home />;
     }
@@ -313,6 +283,7 @@ function App() {
                               style={{ cursor: "pointer" }}
                             />
                           </HeaderComponent.Section>
+
                           <HeaderComponent.Section>
                             <HeaderComponent.Navigation>
                               <HeaderComponent.MenuItem
@@ -323,15 +294,6 @@ function App() {
                                 }}
                               >
                                 루틴
-                              </HeaderComponent.MenuItem>
-                              <HeaderComponent.MenuItem
-                                active={activeHeaderMenu === "achievement"}
-                                onClick={() => {
-                                  handleHeaderMenuClick("achievement");
-                                  setActiveTab("achievement");
-                                }}
-                              >
-                                업적
                               </HeaderComponent.MenuItem>
                               <HeaderComponent.MenuItem
                                 active={activeHeaderMenu === "pose"}
@@ -352,11 +314,23 @@ function App() {
                               </HeaderComponent.MenuItem>
                               <HeaderComponent.MenuItem
                                 active={activeHeaderMenu === "social"}
-                                onClick={() => handleHeaderMenuClick("social")}
+                                onClick={() => {
+                                  handleHeaderMenuClick("social");
+                                }}
                               >
                                 소셜
                               </HeaderComponent.MenuItem>
+                              <HeaderComponent.MenuItem
+                                active={activeHeaderMenu === "mypage"}
+                                onClick={() => {
+                                  handleHeaderMenuClick("mypage");
+                                  setActiveTab("mypage");
+                                }}
+                              >
+                                마이페이지
+                              </HeaderComponent.MenuItem>
                             </HeaderComponent.Navigation>
+
                             <ButtonComponent
                               variant="outline-secondary"
                               onClick={handleLogoutClick}
@@ -393,7 +367,6 @@ function App() {
                           onTabChange={handleTabChange}
                         />
                       )}
-
                       {/* 플로팅 챗봇 - 모든 페이지에서 사용 가능 */}
                       <Chatbot
                         onMessageSend={(userMessage, botResponse) => {

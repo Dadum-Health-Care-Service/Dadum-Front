@@ -9,7 +9,6 @@ import {
   FaCamera,
   FaTrophy,
   FaRobot,
-  FaTrophy 
 } from "react-icons/fa"; // ← FaRobot 추가
 import styles from "./BottomNavigation.module.css";
 
@@ -71,7 +70,7 @@ const BottomNavigation = ({ activeTab, onTabChange }) => {
 
   return (
     <Nav className={`${styles.bottomNav} bottom-nav`}>
-      {tabs.map(tab => (
+      {tabs.map((tab) => (
         <NavigationTab
           key={tab.id}
           tab={tab}
