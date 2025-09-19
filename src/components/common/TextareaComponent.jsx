@@ -1,308 +1,217 @@
-import React from 'react';
-import './TextareaComponent.css';
+import React, { useState } from "react";
+import styles from "./TextareaComponent.module.css";
 
+// 메인 TextareaComponent
 const TextareaComponent = ({
-  label = '',
-  value,
+  id,
+  name,
+  value = "",
   onChange,
-  placeholder = '',
-  variant = 'outlined', // outlined, filled, standard
-  size = 'medium', // small, medium, large
-  disabled = false,
+  placeholder = "",
+  label,
   required = false,
   error = false,
-  helperText = '',
-  className = '',
+  helperText = "",
+  disabled = false,
   rows = 4,
-  cols,
   maxLength,
-  resize = 'vertical', // none, both, horizontal, vertical
-  autoFocus = false,
-  readOnly = false,
+  className = "",
   ...props
 }) => {
-  const getVariantClass = () => {
-    switch (variant) {
-      case 'filled':
-        return 'textarea--filled';
-      case 'standard':
-        return 'textarea--standard';
-      default:
-        return 'textarea--outlined';
+  const [isFocused, setIsFocused] = useState(false);
+
+  // 텍스트영역 클래스명 생성
+  const getTextareaClassName = () => {
+    const baseClass = styles["textarea-component"];
+    const focusedClass = isFocused ? styles["focused"] : "";
+    const errorClass = error ? styles["error"] : "";
+    const disabledClass = disabled ? styles["disabled"] : "";
+    const customClass = className;
+
+    return [baseClass, focusedClass, errorClass, disabledClass, customClass]
+      .filter(Boolean)
+      .join(" ");
+  };
+
+  // 입력 변경 핸들러
+  const handleChange = (e) => {
+    if (onChange) {
+      onChange(e);
     }
   };
 
-  const getSizeClass = () => {
-    switch (size) {
-      case 'small':
-        return 'textarea--small';
-      case 'large':
-        return 'textarea--large';
-      default:
-        return 'textarea--medium';
-    }
+  // 포커스 핸들러
+  const handleFocus = () => {
+    setIsFocused(true);
   };
 
-  const getResizeClass = () => {
-    switch (resize) {
-      case 'none':
-        return 'textarea--resize-none';
-      case 'both':
-        return 'textarea--resize-both';
-      case 'horizontal':
-        return 'textarea--resize-horizontal';
-      default:
-        return 'textarea--resize-vertical';
-    }
+  // 블러 핸들러
+  const handleBlur = () => {
+    setIsFocused(false);
   };
 
-  const textareaClasses = [
-    'textarea__field',
-    getVariantClass(),
-    getSizeClass(),
-    getResizeClass(),
-    error ? 'textarea--error' : '',
-    disabled ? 'textarea--disabled' : '',
-    readOnly ? 'textarea--readonly' : ''
-  ].filter(Boolean).join(' ');
+  // 라벨 렌더링
+  const renderLabel = () => {
+    if (!label) return null;
 
-  return (
-    <div className={`textarea-wrapper ${className}`}>
-      {label && (
-        <label htmlFor={label} className="textarea__label">
-          {label} {required && <span className="textarea__required">*</span>}
-        </label>
-      )}
-      
-      <textarea
-        id={label}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        disabled={disabled}
-        required={required}
-        readOnly={readOnly}
-        autoFocus={autoFocus}
-        rows={rows}
-        cols={cols}
-        maxLength={maxLength}
-        className={textareaClasses}
-        aria-invalid={error ? 'true' : 'false'}
-        aria-describedby={helperText ? `${label}-helper-text` : undefined}
-        {...props}
-      />
-      
-      <div className="textarea__info">
-        {maxLength && (
-          <span className="textarea__char-count">
-            {value ? value.length : 0}/{maxLength}
-          </span>
+    return (
+      <label className={styles["textarea-label"]}>
+        {label}
+        {required && <span className={styles["textarea-required"]}>*</span>}
+      </label>
+    );
+  };
+
+  // 문자 수 카운트 렌더링
+  const renderCharCount = () => {
+    if (!maxLength) return null;
+
+    const currentLength = value.length;
+    const remaining = maxLength - currentLength;
+
+    return (
+      <div className={styles["textarea-char-count"]}>
+        {currentLength}/{maxLength}
+      </div>
+    );
+  };
+
+  // 도움말 텍스트 렌더링
+  const renderHelperText = () => {
+    if (!error && !helperText) return null;
+
+    return (
+      <div className={styles["textarea-helper"]}>
+        {error && <span className={styles["textarea-error"]}>{error}</span>}
+        {helperText && !error && (
+          <span className={styles["textarea-text"]}>{helperText}</span>
         )}
       </div>
-      
-      {helperText && (
-        <p id={`${label}-helper-text`} className={`textarea__helper-text ${error ? 'textarea__helper-text--error' : ''}`}>
-          {helperText}
-        </p>
-      )}
+    );
+  };
+
+  return (
+    <div className={getTextareaClassName()}>
+      {renderLabel()}
+      <textarea
+        id={id}
+        name={name}
+        value={value}
+        onChange={handleChange}
+        placeholder={placeholder}
+        rows={rows}
+        maxLength={maxLength}
+        disabled={disabled}
+        required={required}
+        className={styles["textarea-field"]}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        {...props}
+      />
+      {renderCharCount()}
+      {renderHelperText()}
     </div>
   );
 };
 
 // 사용 예시 컴포넌트
 const TextareaExample = () => {
-  const [description, setDescription] = React.useState('');
-  const [feedback, setFeedback] = React.useState('');
-  const [notes, setNotes] = React.useState('');
-  const [review, setReview] = React.useState('');
+  const [formData, setFormData] = React.useState({
+    description: "",
+    feedback: "",
+    notes: "",
+  });
 
-  const handleDescriptionChange = (e) => {
-    setDescription(e.target.value);
+  // 입력 변경 핸들러
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleFeedbackChange = (e) => {
-    setFeedback(e.target.value);
-  };
-
-  const handleNotesChange = (e) => {
-    setNotes(e.target.value);
-  };
-
-  const handleReviewChange = (e) => {
-    setReview(e.target.value);
-  };
-
-  return (
-    <div style={{ padding: '20px', maxWidth: '800px' }}>
-      <h2>TextareaComponent 사용 예시</h2>
-      
-      <h3>1. 기본 Textarea</h3>
-      <div style={{ display: 'grid', gap: '20px', marginBottom: '30px' }}>
+  // 기본 텍스트영역 렌더링
+  const renderBasicTextarea = () => (
+    <div style={{ marginBottom: "30px" }}>
+      <h3>기본 텍스트영역</h3>
+      <div style={{ display: "grid", gap: "20px" }}>
         <TextareaComponent
           label="설명"
-          value={description}
-          onChange={handleDescriptionChange}
-          placeholder="내용을 입력해주세요..."
-          helperText="루틴에 대한 자세한 설명을 작성해주세요"
-          rows={4}
-          required
+          name="description"
+          value={formData.description}
+          onChange={handleInputChange}
+          placeholder="설명을 입력하세요"
+          rows={3}
         />
-        
-        <p>입력된 내용: {description || '없음'}</p>
+        <TextareaComponent
+          label="피드백"
+          name="feedback"
+          value={formData.feedback}
+          onChange={handleInputChange}
+          placeholder="피드백을 입력하세요"
+          rows={5}
+        />
       </div>
+    </div>
+  );
 
-      <h3>2. Variant별 Textarea</h3>
-      <div style={{ display: 'grid', gap: '20px', marginBottom: '30px' }}>
-        <TextareaComponent
-          label="Outlined Textarea"
-          variant="outlined"
-          value={feedback}
-          onChange={handleFeedbackChange}
-          placeholder="피드백을 입력해주세요..."
-          rows={3}
-        />
-        
-        <TextareaComponent
-          label="Filled Textarea"
-          variant="filled"
-          value={feedback}
-          onChange={handleFeedbackChange}
-          placeholder="피드백을 입력해주세요..."
-          rows={3}
-        />
-        
-        <TextareaComponent
-          label="Standard Textarea"
-          variant="standard"
-          value={feedback}
-          onChange={handleFeedbackChange}
-          placeholder="피드백을 입력해주세요..."
-          rows={3}
-        />
-      </div>
+  // 에러 상태 텍스트영역 렌더링
+  const renderErrorTextarea = () => (
+    <div style={{ marginBottom: "30px" }}>
+      <h3>에러 상태 텍스트영역</h3>
+      <TextareaComponent
+        label="에러가 있는 텍스트영역"
+        error="이 필드는 필수입니다"
+        placeholder="에러 상태 예시"
+      />
+    </div>
+  );
 
-      <h3>3. 크기별 Textarea</h3>
-      <div style={{ display: 'grid', gap: '20px', marginBottom: '30px' }}>
-        <TextareaComponent
-          label="Small Textarea"
-          size="small"
-          value={notes}
-          onChange={handleNotesChange}
-          placeholder="간단한 메모..."
-          rows={2}
-        />
-        
-        <TextareaComponent
-          label="Medium Textarea"
-          size="medium"
-          value={notes}
-          onChange={handleNotesChange}
-          placeholder="일반적인 내용..."
-          rows={3}
-        />
-        
-        <TextareaComponent
-          label="Large Textarea"
-          size="large"
-          value={notes}
-          onChange={handleNotesChange}
-          placeholder="상세한 내용..."
-          rows={4}
-        />
-      </div>
+  // 비활성화된 텍스트영역 렌더링
+  const renderDisabledTextarea = () => (
+    <div style={{ marginBottom: "30px" }}>
+      <h3>비활성화된 텍스트영역</h3>
+      <TextareaComponent
+        label="비활성화된 텍스트영역"
+        value="수정할 수 없는 내용입니다"
+        disabled
+        helperText="이 필드는 수정할 수 없습니다"
+      />
+    </div>
+  );
 
-      <h3>4. 리사이즈 옵션</h3>
-      <div style={{ display: 'grid', gap: '20px', marginBottom: '30px' }}>
-        <TextareaComponent
-          label="리사이즈 불가"
-          resize="none"
-          value={review}
-          onChange={handleReviewChange}
-          placeholder="크기 조절이 불가능합니다..."
-          rows={3}
-          helperText="사용자가 크기를 조절할 수 없습니다"
-        />
-        
-        <TextareaComponent
-          label="세로로만 리사이즈"
-          resize="vertical"
-          value={review}
-          onChange={handleReviewChange}
-          placeholder="세로로만 크기 조절이 가능합니다..."
-          rows={3}
-          helperText="세로 방향으로만 크기를 조절할 수 있습니다"
-        />
-        
-        <TextareaComponent
-          label="가로로만 리사이즈"
-          resize="horizontal"
-          value={review}
-          onChange={handleReviewChange}
-          placeholder="가로로만 크기 조절이 가능합니다..."
-          rows={3}
-          helperText="가로 방향으로만 크기를 조절할 수 있습니다"
-        />
-        
-        <TextareaComponent
-          label="양방향 리사이즈"
-          resize="both"
-          value={review}
-          onChange={handleReviewChange}
-          placeholder="양방향으로 크기 조절이 가능합니다..."
-          rows={3}
-          helperText="가로, 세로 양방향으로 크기를 조절할 수 있습니다"
-        />
-      </div>
+  // 최대 길이 제한 텍스트영역 렌더링
+  const renderMaxLengthTextarea = () => (
+    <div style={{ marginBottom: "30px" }}>
+      <h3>최대 길이 제한 텍스트영역</h3>
+      <TextareaComponent
+        label="메모 (최대 100자)"
+        name="notes"
+        value={formData.notes}
+        onChange={handleInputChange}
+        placeholder="100자 이내로 메모를 입력하세요"
+        maxLength={100}
+        rows={3}
+      />
+    </div>
+  );
 
-      <h3>5. 글자 수 제한과 특별한 상태</h3>
-      <div style={{ display: 'grid', gap: '20px', marginBottom: '30px' }}>
-        <TextareaComponent
-          label="글자 수 제한 (최대 100자)"
-          value={description}
-          onChange={handleDescriptionChange}
-          placeholder="최대 100자까지 입력 가능합니다..."
-          maxLength={100}
-          rows={4}
-          helperText="제품에 대한 간단한 설명을 작성해주세요"
-        />
-        
-        <TextareaComponent
-          label="에러 상태 Textarea"
-          error
-          value=""
-          placeholder="필수 입력 항목입니다..."
-          helperText="이 필드는 필수입니다. 내용을 입력해주세요."
-          required
-          rows={3}
-        />
-        
-        <TextareaComponent
-          label="비활성화된 Textarea"
-          disabled
-          value="이 내용은 수정할 수 없습니다."
-          helperText="현재 편집이 불가능한 상태입니다"
-          rows={3}
-        />
-        
-        <TextareaComponent
-          label="읽기 전용 Textarea"
-          readOnly
-          value="이 내용은 읽기만 가능합니다. 수정할 수 없습니다."
-          helperText="읽기 전용 모드입니다"
-          rows={3}
-        />
-      </div>
+  // 제출 버튼 렌더링
+  const renderSubmitButton = () => (
+    <div style={{ marginTop: "20px" }}>
+      <button type="submit" style={{ padding: "12px 24px", fontSize: "16px" }}>
+        제출
+      </button>
+    </div>
+  );
 
-      <h3>6. 자동 포커스</h3>
-      <div style={{ display: 'grid', gap: '20px', marginBottom: '30px' }}>
-        <TextareaComponent
-          label="자동 포커스 Textarea"
-          autoFocus
-          placeholder="페이지 로드 시 자동으로 포커스됩니다..."
-          helperText="이 필드는 페이지 로드 시 자동으로 포커스됩니다"
-          rows={3}
-        />
-      </div>
+  return (
+    <div style={{ padding: "20px", maxWidth: "600px" }}>
+      <h2>TextareaComponent 사용 예시</h2>
+
+      {renderBasicTextarea()}
+      {renderErrorTextarea()}
+      {renderDisabledTextarea()}
+      {renderMaxLengthTextarea()}
+      {renderSubmitButton()}
     </div>
   );
 };

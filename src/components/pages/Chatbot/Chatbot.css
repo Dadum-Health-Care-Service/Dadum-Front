@@ -1,0 +1,14 @@
+.floating-chatbot {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .floating-chatbot {
+    bottom: 80px; /* 하단 네비게이션 위에 위치 */
+    right: 15px;
+  }
+}
