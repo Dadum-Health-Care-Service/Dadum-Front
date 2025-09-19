@@ -7,8 +7,8 @@ import {
   FaUser,
   FaComments,
   FaCamera,
-  FaTrophy,
-} from "react-icons/fa";
+  FaRobot,
+} from "react-icons/fa"; // ← FaRobot 추가
 import styles from "./BottomNavigation.module.css";
 
 // 탭 설정을 상수로 분리
@@ -48,16 +48,14 @@ const NavigationTab = ({ tab, isActive, onTabChange }) => {
 
 // 메인 BottomNavigation 컴포넌트
 const BottomNavigation = ({ activeTab, onTabChange }) => {
-  const renderNavigationTabs = () => {
-    return NAVIGATION_TABS.map((tab) => (
-      <NavigationTab
-        key={tab.id}
-        tab={tab}
-        isActive={activeTab === tab.id}
-        onTabChange={onTabChange}
-      />
-    ));
-  };
+  const tabs = [
+    { id: "home", label: "홈", icon: FaHome },
+    { id: "routine", label: "루틴", icon: FaList },
+    { id: "pose", label: "분석", icon: FaCamera },
+    { id: "statistics", label: "통계", icon: FaChartBar },
+    { id: "social", label: "소셜", icon: FaComments },
+    { id: "mypage", label: "마이페이지", icon: FaUser },
+  ];
 
   return (
     <Nav className={`${styles.bottomNav} bottom-nav`}>

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useEffect, useState } from "react";
 import styles from "./InputComponent.module.css";
 
 const InputComponent = ({
@@ -17,6 +18,10 @@ const InputComponent = ({
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [internalValue, setInternalValue] = useState(value);
+
+  useEffect(()=>{
+    setInternalValue(value);
+  },[value]);
 
   const handleChange = (e) => {
     const newValue = e.target.value;
