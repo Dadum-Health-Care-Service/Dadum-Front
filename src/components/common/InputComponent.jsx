@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import './InputComponent.css';
+
+import React, { useEffect, useState } from "react";
+import styles from "./InputComponent.module.css";
 
 const InputComponent = ({
   label,
@@ -18,10 +19,9 @@ const InputComponent = ({
   const [isFocused, setIsFocused] = useState(false);
   const [internalValue, setInternalValue] = useState(value);
 
-  // value prop이 변경될 때 internalValue 동기화
-  useEffect(() => {
+  useEffect(()=>{
     setInternalValue(value);
-  }, [value]);
+  },[value]);
 
   const handleChange = (e) => {
     const newValue = e.target.value;
