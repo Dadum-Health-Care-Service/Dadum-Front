@@ -7,17 +7,18 @@ import {
   FaUser,
   FaComments,
   FaCamera,
-} from "react-icons/fa"; // ← FaCamera 추가
+  FaUtensils,
+} from "react-icons/fa";
 import styles from "./BottomNavigation.module.css";
 
 const BottomNavigation = ({ activeTab, onTabChange }) => {
   const tabs = [
     { id: "home", label: "홈", icon: FaHome },
     { id: "routine", label: "루틴", icon: FaList },
-    { id: "pose", label: "분석", icon: FaCamera }, // ← 새 탭 추가(자세 분석)
-    { id: "statistics", label: "통계", icon: FaChartBar },
+    { id: "pose", label: "분석", icon: FaCamera },
+    { id: "calorie", label: "칼로리", icon: FaUtensils },
+    { id: "daily", label: "요약", icon: FaChartBar },
     { id: "social", label: "소셜", icon: FaComments },
-    { id: "mypage", label: "마이페이지", icon: FaUser },
   ];
 
   return (

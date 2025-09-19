@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { BrowserRouter as Router } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
@@ -9,10 +10,15 @@ import PoseAccuracyMVP from "./components/pages/Pose/PoseAccuracyMVP.jsx";
 import HeaderComponent from "./components/common/HeaderComponent";
 import ButtonComponent from "./components/common/ButtonComponent";
 import BottomNavigation from "./components/common/BottomNavigation";
+import ErrorBoundary from "./components/common/ErrorBoundary";
 
 // Pages
 import Home from "./components/pages/Home/Home.jsx";
 import Routine from "./components/pages/Routine/Routine.jsx";
+import CalorieCam from "./components/pages/Calorie/CalorieCam.jsx";
+
+// DailySummary 
+import DailySummary from "./components/pages/Summary/DailySummary.jsx";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -21,19 +27,12 @@ function App() {
   const [activeHeaderMenu, setActiveHeaderMenu] = useState("home");
   const [isMobile, setIsMobile] = useState(false);
 
-  // 반응형 디자인을 위한 화면 크기 감지
   useEffect(() => {
     const checkIsMobile = () => {
       setIsMobile(window.innerWidth <= 768);
     };
-
-    // 초기 체크
     checkIsMobile();
-
-    // 리사이즈 이벤트 리스너
     window.addEventListener("resize", checkIsMobile);
-
-    // 클린업
     return () => window.removeEventListener("resize", checkIsMobile);
   }, []);
 
@@ -43,16 +42,39 @@ function App() {
   const handleTabChange = (tabId) => setActiveTab(tabId);
   const handleHeaderMenuClick = (menuId) => setActiveHeaderMenu(menuId);
 
+  // 로그인 후 자동으로 usersId를 콘솔에 출력 (axios .then 스타일)
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    const savedEmail =
+      localStorage.getItem("usersEmail") || localStorage.getItem("email");
+    if (!savedEmail) {
+      console.log("[usersId] 이메일이 저장되어 있지 않습니다. 로그인 저장 로직을 확인하세요.");
+      return;
+    }
+    axios
+      .get(`/api/v1/users/email/${encodeURIComponent(savedEmail)}`)
+      .then((res) => {
+        console.log("[usersId] axios res:", res);
+        console.log("[usersId] axios res.data:", res?.data);
+        const id = res?.data?.usersId ?? res?.data?.id;
+        console.log("[usersId] value:", id);
+        if (id) localStorage.setItem("usersId", String(id));
+      })
+      .catch((e) => {
+        console.warn(
+          "[usersId] 조회 실패:",
+          e?.response?.data || e.message
+        );
+      });
+  }, [isLoggedIn]);
+
   const renderContent = () => {
-    // 로그인되지 않은 경우 로그인 화면 표시
     if (!isLoggedIn) {
       return (
         <div className="login-container">
           <div className="login-header">
             <h1 className="login-title">🎯 다듬</h1>
-            <p className="login-subtitle">
-              루틴을 관리하고 자세를 분석해보세요
-            </p>
+            <p className="login-subtitle">루틴을 관리하고 자세를 분석해보세요</p>
           </div>
           <div className="login-form">
             <ButtonComponent
@@ -76,14 +98,20 @@ function App() {
       );
     }
 
-    // 로그인된 경우 기존 페이지들 표시
     switch (activeTab) {
       case "home":
         return <Home />;
       case "routine":
         return <Routine />;
-      case "pose": // ← 새 탭: 자세 분석
+      case "pose":
         return <PoseAccuracyMVP />;
+      case "calorie":
+        return <CalorieCam />;
+
+      // ✅ 추가: 일일 요약 탭
+      case "daily":
+        return <DailySummary />;
+
       case "statistics":
         return (
           <div className="container mt-5 pt-5">
@@ -113,10 +141,8 @@ function App() {
   return (
     <Router>
       <div className="App">
-        {/* 로그인된 경우에만 헤더와 네비게이션 표시 */}
         {isLoggedIn && (
           <>
-            {/* 웹 환경에서만 헤더 표시 */}
             {!isMobile && (
               <HeaderComponent variant="elevated" size="large" sticky>
                 <HeaderComponent.Section>
@@ -142,6 +168,7 @@ function App() {
                     >
                       루틴
                     </HeaderComponent.MenuItem>
+
                     <HeaderComponent.MenuItem
                       active={activeHeaderMenu === "pose"}
                       onClick={() => {
@@ -151,12 +178,36 @@ function App() {
                     >
                       분석
                     </HeaderComponent.MenuItem>
+
+                    {/* 칼로리 */}
+                    <HeaderComponent.MenuItem
+                      active={activeHeaderMenu === "calorie"}
+                      onClick={() => {
+                        handleHeaderMenuClick("calorie");
+                        setActiveTab("calorie");
+                      }}
+                    >
+                      칼로리
+                    </HeaderComponent.MenuItem>
+
+                    {/* ✅ 추가: 일일 요약 메뉴 */}
+                    <HeaderComponent.MenuItem
+                      active={activeHeaderMenu === "daily"}
+                      onClick={() => {
+                        handleHeaderMenuClick("daily");
+                        setActiveTab("daily");
+                      }}
+                    >
+                      일일 요약
+                    </HeaderComponent.MenuItem>
+
                     <HeaderComponent.MenuItem
                       active={activeHeaderMenu === "statistics"}
                       onClick={() => handleHeaderMenuClick("statistics")}
                     >
                       통계
                     </HeaderComponent.MenuItem>
+
                     <HeaderComponent.MenuItem
                       active={activeHeaderMenu === "social"}
                       onClick={() => handleHeaderMenuClick("social")}
@@ -164,6 +215,7 @@ function App() {
                       소셜
                     </HeaderComponent.MenuItem>
                   </HeaderComponent.Navigation>
+
                   <ButtonComponent
                     variant="outline-secondary"
                     onClick={handleLogoutClick}
@@ -174,7 +226,6 @@ function App() {
               </HeaderComponent>
             )}
 
-            {/* 모바일 환경에서만 하단 네비게이션 표시 */}
             {isMobile && (
               <BottomNavigation
                 activeTab={activeTab}
@@ -192,7 +243,9 @@ function App() {
             minHeight: isLoggedIn ? "auto" : "100vh",
           }}
         >
-          {renderContent()}
+          <ErrorBoundary>
+            {renderContent()}
+          </ErrorBoundary>
         </main>
       </div>
     </Router>
