@@ -26,7 +26,7 @@ import { POST, GET } from "./utils/api/api";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [activeTab, setActiveTab] = useState("home");
+  const [activeTab, setActiveTab] = useState("login");
   const [selectedListItem, setSelectedListItem] = useState(null);
   const [activeHeaderMenu, setActiveHeaderMenu] = useState("home");
   const [isMobile, setIsMobile] = useState(false);
@@ -63,28 +63,7 @@ function App() {
     // });
   };
   const handleSignupClick = () => {
-    POST(
-      "/users/signup",
-      {
-        usersName: "테스트유저",
-        email: "test@test.com",
-        profileImg: "/img/userAvatar.png",
-        nickName: "테스트닉네임",
-        phoneNum: "01012345678",
-        biosDto: {
-          gender: 0,
-          age: 40,
-          height: 180,
-          weight: 90,
-        },
-        authDto: {
-          password: "testuser",
-        },
-      },
-      false
-    ).then(() => {
-      setIsLoggedIn(true);
-    });
+    setActiveTab("login");
   };
 
   const handlePasswordlessSignupClick = () => {
