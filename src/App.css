@@ -1,6 +1,9 @@
 .App {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 /* Global styles */
@@ -13,39 +16,42 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* 커스텀 SelectComponent는 별도 CSS 파일에서 관리 */
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #f0f8ff;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #4facfe;
+  background: #2563eb;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #00f2fe;
+  background: #3d8bfd;
 }
 
 /* Utility classes */
 .text-gradient {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #4facfe 100%);
+
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .shadow-custom {
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px rgba(79, 172, 254, 0.2);
 }
 
 .shadow-custom:hover {
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 25px rgba(79, 172, 254, 0.3);
 }
 
 /* Animation classes */
@@ -100,7 +106,6 @@ body {
 
   /* 모바일에서 메인 컨테이너 패딩 조정 */
   .App main {
-    padding: 0 15px;
     max-width: 100%;
   }
 }
@@ -121,10 +126,114 @@ body {
 .header,
 .App main {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1320px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* 메인 컨테이너 상단 여백 제거 */
+.App main {
+  margin-top: 0 !important;
+}
+
+/* HeaderComponent 스타일 통일 */
+.HeaderComponent,
+.header,
+.header-content,
+header {
+  width: 100%;
+  max-width: 1360px;
   margin: 0 auto;
   padding: 0 20px;
   box-sizing: border-box;
+}
+
+/* 로그인 화면 전체 화면 차지 */
+.App main:has(.container) {
+  max-width: 100%;
+  margin: 0;
+}
+
+/* 로그인 화면 스타일 */
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100vw;
+  height: 100vh;
+  background: white;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 2rem;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.login-title {
+  font-size: 4rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, #2563eb 0%, #4facfe 100%);
+
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.login-subtitle {
+  font-size: 1.4rem;
+  color: #000000;
+  margin: 0;
+  line-height: 1.6;
+  opacity: 0.8;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.login-button,
+.signup-button {
+  padding: 1.2rem 3rem !important;
+  font-size: 1.2rem !important;
+  font-weight: 600 !important;
+  border-radius: 15px !important;
+  transition: all 0.3s ease !important;
+  min-width: 200px;
+  border-color: #2563eb !important;
+}
+
+/* 반응형 로그인 화면 */
+@media (max-width: 768px) {
+  .login-container {
+    padding: 1rem;
+  }
+
+  .login-title {
+    font-size: 2.5rem;
+  }
+
+  .login-subtitle {
+    font-size: 1.1rem;
+  }
+
+  .login-button,
+  .signup-button {
+    padding: 1rem 2rem !important;
+    font-size: 1.1rem !important;
+    min-width: 180px;
+  }
 }
 
 /* 하단 네비게이션 전체 너비 사용 */

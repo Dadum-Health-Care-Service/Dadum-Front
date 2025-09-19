@@ -1,0 +1,343 @@
+/* 모달 오버레이 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+  box-sizing: border-box;
+  pointer-events: auto;
+}
+
+/* 모달 자체는 포인터 이벤트를 허용하되, 오버레이 클릭은 처리 */
+.modal {
+  pointer-events: auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* 모달 내부 요소들도 포인터 이벤트 허용 */
+.modal * {
+  pointer-events: auto;
+}
+
+/* 모달 내부 클릭 시 이벤트 전파 방지 */
+.modal-header,
+.modal-content,
+.modal-actions {
+  pointer-events: auto;
+}
+
+/* 기본 모달 스타일 */
+.modal {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", sans-serif;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+  animation: modalSlideIn 0.3s ease-out;
+  box-sizing: border-box;
+  /* 모달 내부 레이아웃 개선 */
+  max-height: 90vh;
+}
+
+/* 모달 애니메이션 */
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Variant별 스타일 */
+.default {
+  border: 2px solid transparent;
+}
+
+.elevated {
+  border: 2px solid transparent;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+.outlined {
+  border: 2px solid #e3f2fd;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.filled {
+  background: #f8fafc;
+  border: 2px solid transparent;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* 크기별 스타일 */
+.small {
+  width: calc(100vw - 48px);
+  height: auto;
+  min-height: 200px;
+  max-width: 400px;
+  max-height: 90vh;
+}
+
+.medium {
+  width: calc(100vw - 48px);
+  height: auto;
+  min-height: 300px;
+  max-width: 600px;
+  max-height: 90vh;
+}
+
+.large {
+  width: calc(100vw - 48px);
+  height: auto;
+  min-height: 400px;
+  max-width: 800px;
+  max-height: 90vh;
+}
+
+/* 모달 헤더 */
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 24px 24px 16px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  gap: 16px;
+}
+
+.modal-header-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.modal-title {
+  margin: 0 0 8px 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.2;
+}
+
+.modal-subtitle {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+/* 닫기 버튼 */
+.modal-close-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  color: #6b7280;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.modal-close-button:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #374151;
+}
+
+.modal-close-button:focus-visible {
+  outline: 2px solid #4facfe;
+  outline-offset: 2px;
+}
+
+/* 모달 콘텐츠 */
+.modal-content {
+  flex: 1;
+  padding: 16px 24px 24px 24px;
+  overflow-y: auto;
+  max-height: calc(100% - 120px);
+  min-height: 0;
+  flex-shrink: 1;
+  /* 스크롤바 스타일링 및 스크롤 동작 개선 */
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+  /* 스크롤 시 하단 여백 추가 */
+  padding-bottom: 80px;
+}
+
+/* 웹킷 스크롤바 스타일링 */
+.modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* 모달 섹션 */
+.modal-section {
+  margin-bottom: 20px;
+}
+
+.modal-section:last-child {
+  margin-bottom: 0;
+}
+
+/* 모달 액션 */
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  padding: 24px 24px 16px 24px;
+  border-top: 1px solid #e5e7eb;
+  background: #ffffff;
+  flex-shrink: 0;
+  /* 액션 영역을 하단에 고정 */
+  position: sticky;
+  bottom: 0;
+  margin-top: auto;
+  /* 액션 영역을 더 명확하게 구분 */
+  /*box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);*/
+  z-index: 10;
+  /* Header와 동일한 너비와 높이 설정 */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 모달 푸터 */
+.modal-footer {
+  flex-shrink: 0;
+  border-top: 1px solid #e5e7eb;
+  background: #ffffff;
+  /* Footer 영역을 더 명확하게 구분 */
+  /*box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);*/
+  z-index: 10;
+  /* Header와 동일한 너비와 높이 설정 */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.modal-actions--left {
+  justify-content: flex-start;
+}
+
+.modal-actions--center {
+  justify-content: center;
+}
+
+.modal-actions--right {
+  justify-content: flex-end;
+}
+
+/* 반응형 디자인 - 모든 화면에서 동일한 스타일 */
+.modal-overlay {
+  padding: 16px;
+}
+
+.modal-header {
+  padding: 20px 20px 12px 20px;
+}
+
+.modal-content {
+  padding: 12px 20px 20px 20px;
+}
+
+.modal-actions {
+  padding: 20px 20px 12px 20px;
+}
+
+.modal-title {
+  font-size: 1.25rem;
+}
+
+/* 모바일에서 액션 버튼 세로 배치 */
+@media (max-width: 480px) {
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .modal-actions > * {
+    width: 100%;
+  }
+}
+
+/* 접근성을 위한 고대비 모드 지원 */
+@media (prefers-contrast: high) {
+  .outlined {
+    border-width: 3px;
+  }
+
+  .modal-close-button:focus-visible {
+    outline-width: 3px;
+  }
+}
+
+/* 다크 모드 지원 */
+@media (prefers-color-scheme: dark) {
+  .modal {
+    background: #1f2937;
+    color: #f9fafb;
+  }
+
+  .outlined {
+    border-color: #4b5563;
+  }
+
+  .filled {
+    background: #374151;
+  }
+
+  .modal-header {
+    border-bottom-color: #4b5563;
+  }
+
+  .modal-title {
+    color: #f9fafb;
+  }
+
+  .modal-subtitle {
+    color: #d1d5db;
+  }
+
+  .modal-actions {
+    border-top-color: #4b5563;
+    background: #374151;
+  }
+
+  .modal-close-button {
+    color: #d1d5db;
+  }
+
+  .modal-close-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #f9fafb;
+  }
+}

@@ -12,7 +12,9 @@ import CardComponent from "../../common/CardComponent";
 import ButtonComponent from "../../common/ButtonComponent";
 import InputComponent from "../../common/InputComponent";
 import SelectComponent from "../../common/SelectComponent";
+import ContainerComponent from "../../common/ContainerComponent";
 import styles from "./Routine.module.css";
+import ModalExample from "../../common/ModalExample";
 
 const Routine = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -89,7 +91,8 @@ const Routine = () => {
   };
 
   return (
-    <Container className={styles.routine}>
+    <ContainerComponent className={`${styles.routine}`}>
+      <ModalExample />
       {/* Header */}
       <div className={styles.header}>
         <h1 className={styles.title}>루틴 관리</h1>
@@ -99,32 +102,29 @@ const Routine = () => {
       </div>
 
       {/* Search and Filter */}
-      <Row className={styles.searchFilter}>
-        <Col md={8}>
-          <InputGroup>
-            <InputGroup.Text>
-              <FaSearch />
-            </InputGroup.Text>
+      <div className={styles.searchFilter}>
+        <div className={styles.searchRow}>
+          <div className={styles.searchInput}>
             <InputComponent
               placeholder="루틴 검색..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-          </InputGroup>
-        </Col>
-        <Col md={4}>
-          <SelectComponent
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-          >
-            {categories.map((category) => (
-              <SelectComponent.Option key={category.id} value={category.id}>
-                {category.label}
-              </SelectComponent.Option>
-            ))}
-          </SelectComponent>
-        </Col>
-      </Row>
+          </div>
+          <div className={styles.filterSelect}>
+            <SelectComponent
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+            >
+              {categories.map((category) => (
+                <SelectComponent.Option key={category.id} value={category.id}>
+                  {category.label}
+                </SelectComponent.Option>
+              ))}
+            </SelectComponent>
+          </div>
+        </div>
+      </div>
 
       {/* Categories */}
       <div className={styles.categories}>
@@ -142,11 +142,12 @@ const Routine = () => {
       </div>
 
       {/* Routines Grid */}
-      <Row className={styles.routinesGrid}>
+      <div className={styles.routinesGrid}>
         {filteredRoutines.map((routine) => (
-          <Col key={routine.id} lg={6} className="mb-4">
+          <div key={routine.id} className={styles.routineCard}>
             <CardComponent
               variant={routine.completed ? "success" : "primary"}
+              title={routine.title}
               className={styles.routineCardComponent}
               badge={routine.completed ? "완료" : "진행중"}
             >
@@ -205,10 +206,10 @@ const Routine = () => {
                 </ButtonComponent>
               </div>
             </CardComponent>
-          </Col>
+          </div>
         ))}
-      </Row>
-    </Container>
+      </div>
+    </ContainerComponent>
   );
 };
 

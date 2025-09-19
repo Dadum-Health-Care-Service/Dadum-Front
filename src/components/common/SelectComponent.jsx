@@ -1,85 +1,180 @@
-import React from 'react';
-import './SelectComponent.css';
+import React, { useState, useRef, useEffect } from "react";
+import styles from "./SelectComponent.module.css";
 
+// 메인 SelectComponent
 const SelectComponent = ({
   children,
-  label = '',
+  label = "",
   value,
   onChange,
-  placeholder = '선택해주세요',
-  variant = 'outlined', // outlined, filled, standard
-  size = 'medium', // small, medium, large
-  disabled = false,
+  placeholder = "선택해주세요",
   required = false,
   error = false,
-  helperText = '',
-  className = '',
-  multiple = false,
+  helperText = "",
+  disabled = false,
+  className = "",
   ...props
 }) => {
-  const getVariantClass = () => {
-    switch (variant) {
-      case 'filled':
-        return 'select--filled';
-      case 'standard':
-        return 'select--standard';
-      default:
-        return 'select--outlined';
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedLabel, setSelectedLabel] = useState("");
+  const dropdownRef = useRef(null);
+
+  // Select 클래스명 생성
+  const getSelectClassName = () => {
+    const baseClass = styles["select__field"];
+    const errorClass = error ? styles["select--error"] : "";
+    const disabledClass = disabled ? styles["select--disabled"] : "";
+    const openClass = isOpen ? styles["select--open"] : "";
+    const customClass = className;
+
+    return [baseClass, errorClass, disabledClass, openClass, customClass]
+      .filter(Boolean)
+      .join(" ");
+  };
+
+  // 선택된 옵션의 라벨 찾기
+  useEffect(() => {
+    if (children) {
+      const options = Array.isArray(children) ? children : [children];
+      const selectedOption = options.find(
+        (option) => option.props.value === value
+      );
+      if (selectedOption) {
+        setSelectedLabel(selectedOption.props.children);
+      } else {
+        setSelectedLabel("");
+      }
+    }
+  }, [value, children]);
+
+  // 외부 클릭 시 드롭다운 닫기
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  // 키보드 이벤트 처리
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      setIsOpen(!isOpen);
+    } else if (event.key === "Escape") {
+      setIsOpen(false);
     }
   };
 
-  const getSizeClass = () => {
-    switch (size) {
-      case 'small':
-        return 'select--small';
-      case 'large':
-        return 'select--large';
-      default:
-        return 'select--medium';
+  // 옵션 클릭 핸들러
+  const handleOptionClick = (optionValue, optionLabel) => {
+    onChange({ target: { value: optionValue } });
+    setSelectedLabel(optionLabel);
+    setIsOpen(false);
+  };
+
+  // 드롭다운 토글
+  const toggleDropdown = () => {
+    if (!disabled) {
+      setIsOpen(!isOpen);
     }
   };
 
-  const selectClasses = [
-    'select__field',
-    getVariantClass(),
-    getSizeClass(),
-    error ? 'select--error' : '',
-    disabled ? 'select--disabled' : ''
-  ].filter(Boolean).join(' ');
+  // 라벨 렌더링
+  const renderLabel = () => {
+    if (!label) return null;
+
+    return (
+      <label htmlFor={label} className={styles["select__label"]}>
+        {label}{" "}
+        {required && <span className={styles["select__required"]}>*</span>}
+      </label>
+    );
+  };
+
+  // 선택된 텍스트 렌더링
+  const renderSelectedText = () => (
+    <span className={styles["select__selected-text"]}>
+      {selectedLabel || placeholder}
+    </span>
+  );
+
+  // 화살표 아이콘 렌더링
+  const renderArrow = () => <span className={styles["select__arrow"]}>▼</span>;
+
+  // 드롭다운 옵션들 렌더링
+  const renderDropdownOptions = () => (
+    <div className={styles["select__dropdown-content"]}>
+      {React.Children.map(children, (child) => {
+        if (React.isValidElement(child)) {
+          return React.cloneElement(child, {
+            onClick: handleOptionClick,
+            selected: child.props.value === value,
+          });
+        }
+        return child;
+      })}
+    </div>
+  );
+
+  // 드롭다운 렌더링
+  const renderDropdown = () => {
+    if (!isOpen) return null;
+
+    return (
+      <div className={styles["select__dropdown"]}>
+        {renderDropdownOptions()}
+      </div>
+    );
+  };
+
+  // 도움말 텍스트 렌더링
+  const renderHelperText = () => {
+    if (!helperText) return null;
+
+    return (
+      <p
+        id={`${label}-helper-text`}
+        className={`${styles["select__helper-text"]} ${
+          error ? styles["select__helper-text--error"] : ""
+        }`}
+      >
+        {helperText}
+      </p>
+    );
+  };
 
   return (
-    <div className={`select-wrapper ${className}`}>
-      {label && (
-        <label htmlFor={label} className="select__label">
-          {label} {required && <span className="select__required">*</span>}
-        </label>
-      )}
-      
-      <select
-        id={label}
-        value={value}
-        onChange={onChange}
-        disabled={disabled}
-        required={required}
-        multiple={multiple}
-        className={selectClasses}
-        aria-invalid={error ? 'true' : 'false'}
-        aria-describedby={helperText ? `${label}-helper-text` : undefined}
-        {...props}
-      >
-        {!multiple && placeholder && (
-          <option value="" disabled>
-            {placeholder}
-          </option>
-        )}
-        {children}
-      </select>
-      
-      {helperText && (
-        <p id={`${label}-helper-text`} className={`select__helper-text ${error ? 'select__helper-text--error' : ''}`}>
-          {helperText}
-        </p>
-      )}
+    <div
+      className={`${styles["select-wrapper"]} ${className}`}
+      ref={dropdownRef}
+    >
+      {renderLabel()}
+
+      <div className={styles["select__custom-wrapper"]}>
+        <div
+          className={getSelectClassName()}
+          onClick={toggleDropdown}
+          onKeyDown={handleKeyDown}
+          tabIndex={disabled ? -1 : 0}
+          role="combobox"
+          aria-expanded={isOpen}
+          aria-haspopup="listbox"
+          aria-label={label || "선택"}
+        >
+          {renderSelectedText()}
+          {renderArrow()}
+        </div>
+
+        {renderDropdown()}
+      </div>
+
+      {renderHelperText()}
     </div>
   );
 };
@@ -90,47 +185,57 @@ const OptionComponent = ({
   value,
   disabled = false,
   selected = false,
-  className = '',
+  className = "",
+  onClick,
   ...props
 }) => {
+  // 옵션 클릭 핸들러
+  const handleClick = () => {
+    if (!disabled && onClick) {
+      onClick(value, children);
+    }
+  };
+
+  // 옵션 클래스명 생성
+  const getOptionClassName = () => {
+    const baseClass = styles["select__option"];
+    const selectedClass = selected ? styles["select__option--selected"] : "";
+    const disabledClass = disabled ? styles["select__option--disabled"] : "";
+    const customClass = className;
+
+    return [baseClass, selectedClass, disabledClass, customClass]
+      .filter(Boolean)
+      .join(" ");
+  };
+
   return (
-    <option
-      value={value}
-      disabled={disabled}
-      selected={selected}
-      className={`select__option ${className}`}
+    <div
+      className={getOptionClassName()}
+      onClick={handleClick}
+      role="option"
+      aria-selected={selected}
+      tabIndex={disabled ? -1 : 0}
       {...props}
     >
       {children}
-    </option>
+    </div>
   );
 };
 
 // 사용 예시 컴포넌트
 const SelectExample = () => {
-  const [selectedCategory, setSelectedCategory] = React.useState('');
-  const [selectedTags, setSelectedTags] = React.useState([]);
-  const [selectedSize, setSelectedSize] = React.useState('medium');
+  const [selectedCategory, setSelectedCategory] = React.useState("");
 
+  // 카테고리 변경 핸들러
   const handleCategoryChange = (e) => {
     setSelectedCategory(e.target.value);
   };
 
-  const handleTagsChange = (e) => {
-    const values = Array.from(e.target.selectedOptions, option => option.value);
-    setSelectedTags(values);
-  };
-
-  const handleSizeChange = (e) => {
-    setSelectedSize(e.target.value);
-  };
-
-  return (
-    <div style={{ padding: '20px', maxWidth: '800px' }}>
-      <h2>SelectComponent 사용 예시</h2>
-      
-      <h3>1. 기본 Select</h3>
-      <div style={{ display: 'grid', gap: '20px', marginBottom: '30px' }}>
+  // 기본 Select 렌더링
+  const renderBasicSelect = () => (
+    <div style={{ marginBottom: "30px" }}>
+      <h3>기본 Select</h3>
+      <div style={{ display: "grid", gap: "20px" }}>
         <SelectComponent
           label="카테고리 선택"
           value={selectedCategory}
@@ -144,105 +249,17 @@ const SelectExample = () => {
           <OptionComponent value="기록">기록</OptionComponent>
           <OptionComponent value="레벨 및 업적">레벨 및 업적</OptionComponent>
         </SelectComponent>
-        
-        <p>선택된 카테고리: {selectedCategory || '없음'}</p>
-      </div>
 
-      <h3>2. Variant별 Select</h3>
-      <div style={{ display: 'grid', gap: '20px', marginBottom: '30px' }}>
-        <SelectComponent
-          label="Outlined Select"
-          variant="outlined"
-          value={selectedSize}
-          onChange={handleSizeChange}
-        >
-          <OptionComponent value="small">Small</OptionComponent>
-          <OptionComponent value="medium">Medium</OptionComponent>
-          <OptionComponent value="large">Large</OptionComponent>
-        </SelectComponent>
-        
-        <SelectComponent
-          label="Filled Select"
-          variant="filled"
-          value={selectedSize}
-          onChange={handleSizeChange}
-        >
-          <OptionComponent value="small">Small</OptionComponent>
-          <OptionComponent value="medium">Medium</OptionComponent>
-          <OptionComponent value="large">Large</OptionComponent>
-        </SelectComponent>
-        
-        <SelectComponent
-          label="Standard Select"
-          variant="standard"
-          value={selectedSize}
-          onChange={handleSizeChange}
-        >
-          <OptionComponent value="small">Small</OptionComponent>
-          <OptionComponent value="medium">Medium</OptionComponent>
-          <OptionComponent value="large">Large</OptionComponent>
-        </SelectComponent>
+        <p>선택된 카테고리: {selectedCategory || "없음"}</p>
       </div>
+    </div>
+  );
 
-      <h3>3. 크기별 Select</h3>
-      <div style={{ display: 'grid', gap: '20px', marginBottom: '30px' }}>
-        <SelectComponent
-          label="Small Select"
-          size="small"
-          value={selectedSize}
-          onChange={handleSizeChange}
-        >
-          <OptionComponent value="option1">옵션 1</OptionComponent>
-          <OptionComponent value="option2">옵션 2</OptionComponent>
-          <OptionComponent value="option3">옵션 3</OptionComponent>
-        </SelectComponent>
-        
-        <SelectComponent
-          label="Medium Select"
-          size="medium"
-          value={selectedSize}
-          onChange={handleSizeChange}
-        >
-          <OptionComponent value="option1">옵션 1</OptionComponent>
-          <OptionComponent value="option2">옵션 2</OptionComponent>
-          <OptionComponent value="option3">옵션 3</OptionComponent>
-        </SelectComponent>
-        
-        <SelectComponent
-          label="Large Select"
-          size="large"
-          value={selectedSize}
-          onChange={handleSizeChange}
-        >
-          <OptionComponent value="option1">옵션 1</OptionComponent>
-          <OptionComponent value="option2">옵션 2</OptionComponent>
-          <OptionComponent value="option3">옵션 3</OptionComponent>
-        </SelectComponent>
-      </div>
-
-      <h3>4. 다중 선택 Select</h3>
-      <div style={{ display: 'grid', gap: '20px', marginBottom: '30px' }}>
-        <SelectComponent
-          label="태그 선택 (다중)"
-          multiple
-          value={selectedTags}
-          onChange={handleTagsChange}
-          helperText="Ctrl/Cmd를 누른 채로 여러 항목을 선택할 수 있습니다"
-          size="large"
-        >
-          <OptionComponent value="react">React</OptionComponent>
-          <OptionComponent value="vue">Vue</OptionComponent>
-          <OptionComponent value="angular">Angular</OptionComponent>
-          <OptionComponent value="svelte">Svelte</OptionComponent>
-          <OptionComponent value="next">Next.js</OptionComponent>
-          <OptionComponent value="nuxt">Nuxt.js</OptionComponent>
-        </SelectComponent>
-        
-        <p>선택된 태그: {selectedTags.join(', ') || '없음'}</p>
-      </div>
-
-      <h3>5. 에러 상태와 비활성화</h3>
-      <div style={{ display: 'grid', gap: '20px', marginBottom: '30px' }}>
+  // 에러 상태와 비활성화 Select 렌더링
+  const renderErrorAndDisabledSelects = () => (
+    <div style={{ marginBottom: "30px" }}>
+      <h3>에러 상태와 비활성화</h3>
+      <div style={{ display: "grid", gap: "20px" }}>
         <SelectComponent
           label="에러 상태 Select"
           error
@@ -252,7 +269,7 @@ const SelectExample = () => {
           <OptionComponent value="option1">옵션 1</OptionComponent>
           <OptionComponent value="option2">옵션 2</OptionComponent>
         </SelectComponent>
-        
+
         <SelectComponent
           label="비활성화된 Select"
           disabled
@@ -262,6 +279,15 @@ const SelectExample = () => {
           <OptionComponent value="option2">옵션 2</OptionComponent>
         </SelectComponent>
       </div>
+    </div>
+  );
+
+  return (
+    <div style={{ padding: "20px", maxWidth: "600px" }}>
+      <h2>SelectComponent 사용 예시</h2>
+
+      {renderBasicSelect()}
+      {renderErrorAndDisabledSelects()}
     </div>
   );
 };

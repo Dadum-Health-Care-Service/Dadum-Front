@@ -1,6 +1,5 @@
 .home {
-  padding-top: 2rem;
-  padding-bottom: 6rem;
+  padding: 2rem;
 }
 
 .welcomeSection {
@@ -84,6 +83,7 @@
   min-height: 200px;
   display: flex;
   flex-direction: column;
+  justify-content: space-around;
 }
 
 .routineHeader {

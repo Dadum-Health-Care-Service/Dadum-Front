@@ -7,37 +7,79 @@ import {
   FaUser,
   FaComments,
   FaCamera,
-} from "react-icons/fa"; // ← FaCamera 추가
+  FaUtensils,
+  FaTrophy,
+  FaRobot,
+} from "react-icons/fa"; // ← FaRobot 추가
 import styles from "./BottomNavigation.module.css";
 
+// 탭 설정을 상수로 분리
+const NAVIGATION_TABS = [
+  { id: "home", label: "홈", icon: FaHome },
+  { id: "routine", label: "루틴", icon: FaList },
+  { id: "achievement", label: "업적", icon: FaTrophy },
+  { id: "pose", label: "분석", icon: FaCamera },
+  { id: "statistics", label: "통계", icon: FaChartBar },
+  { id: "social", label: "소셜", icon: FaComments },
+  { id: "mypage", label: "마이페이지", icon: FaUser },
+];
+
+// 개별 탭 아이템 컴포넌트
+const NavigationTab = ({ tab, isActive, onTabChange }) => {
+  const IconComponent = tab.icon;
+
+  const handleClick = () => {
+    onTabChange(tab.id);
+  };
+
+  const getNavLinkClassName = () => {
+    const baseClass = styles.navLink;
+    const activeClass = isActive ? styles.active : "";
+    return `${baseClass} ${activeClass}`.trim();
+  };
+
+  return (
+    <Nav.Item className={styles.navItem}>
+      <Nav.Link className={getNavLinkClassName()} onClick={handleClick}>
+        <IconComponent className={styles.icon} />
+        <span className={styles.label}>{tab.label}</span>
+      </Nav.Link>
+    </Nav.Item>
+  );
+};
+
+// 메인 BottomNavigation 컴포넌트
 const BottomNavigation = ({ activeTab, onTabChange }) => {
   const tabs = [
     { id: "home", label: "홈", icon: FaHome },
     { id: "routine", label: "루틴", icon: FaList },
-    { id: "pose", label: "분석", icon: FaCamera }, // ← 새 탭 추가(자세 분석)
+    { id: "pose", label: "분석", icon: FaCamera },
+    { id: "calorie", label: "칼로리", icon: FaUtensils },
+    { id: "daily", label: "요약", icon: FaChartBar },
     { id: "statistics", label: "통계", icon: FaChartBar },
     { id: "social", label: "소셜", icon: FaComments },
-    { id: "mypage", label: "마이페이지", icon: FaUser },
   ];
+  const renderNavigationTabs = () => {
+    return NAVIGATION_TABS.map((tab) => (
+      <NavigationTab
+        key={tab.id}
+        tab={tab}
+        isActive={activeTab === tab.id}
+        onTabChange={onTabChange}
+      />
+    ));
+  };
 
   return (
     <Nav className={`${styles.bottomNav} bottom-nav`}>
-      {tabs.map((tab) => {
-        const IconComponent = tab.icon;
-        return (
-          <Nav.Item key={tab.id} className={styles.navItem}>
-            <Nav.Link
-              className={`${styles.navLink} ${
-                activeTab === tab.id ? styles.active : ""
-              }`}
-              onClick={() => onTabChange(tab.id)}
-            >
-              <IconComponent className={styles.icon} />
-              <span className={styles.label}>{tab.label}</span>
-            </Nav.Link>
-          </Nav.Item>
-        );
-      })}
+      {tabs.map((tab) => (
+        <NavigationTab
+          key={tab.id}
+          tab={tab}
+          isActive={activeTab === tab.id}
+          onTabChange={onTabChange}
+        />
+      ))}
     </Nav>
   );
 };
