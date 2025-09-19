@@ -124,23 +124,7 @@ body {
 .header,
 .App main {
   width: 100%;
-  max-width: 1320px;
-  margin: 0 auto;
-  box-sizing: border-box;
-}
-
-/* 메인 컨테이너 상단 여백 제거 */
-.App main {
-  margin-top: 0 !important;
-}
-
-/* HeaderComponent 스타일 통일 */
-.HeaderComponent,
-.header,
-.header-content,
-header {
-  width: 100%;
-  max-width: 1360px;
+  max-width: 1200px; /* 전역 모바일 폭 해제 */
   margin: 0 auto;
   padding: 0 20px;
   box-sizing: border-box;

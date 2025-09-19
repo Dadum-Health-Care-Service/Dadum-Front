@@ -1,5 +1,5 @@
-import React, { useState,useEffect  } from "react";
-import styles from "./InputComponent.module.css";
+import React, { useState, useEffect } from 'react';
+import './InputComponent.css';
 
 const InputComponent = ({
   label,

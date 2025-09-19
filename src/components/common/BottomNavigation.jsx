@@ -7,10 +7,8 @@ import {
   FaUser,
   FaComments,
   FaCamera,
-  FaTrophy,
   FaRobot,
-} from "react-icons/fa";
-
+} from "react-icons/fa"; // ← FaRobot 추가
 import styles from "./BottomNavigation.module.css";
 
 // 탭 설정을 상수로 분리
