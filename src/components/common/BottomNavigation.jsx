@@ -7,6 +7,7 @@ import {
   FaUser,
   FaComments,
   FaCamera,
+  FaUtensils,
   FaTrophy,
   FaRobot,
 } from "react-icons/fa"; // ← FaRobot 추가
@@ -53,9 +54,10 @@ const BottomNavigation = ({ activeTab, onTabChange }) => {
     { id: "home", label: "홈", icon: FaHome },
     { id: "routine", label: "루틴", icon: FaList },
     { id: "pose", label: "분석", icon: FaCamera },
+    { id: "calorie", label: "칼로리", icon: FaUtensils },
+    { id: "daily", label: "요약", icon: FaChartBar },
     { id: "statistics", label: "통계", icon: FaChartBar },
     { id: "social", label: "소셜", icon: FaComments },
-    { id: "mypage", label: "마이페이지", icon: FaUser },
   ];
   const renderNavigationTabs = () => {
     return NAVIGATION_TABS.map((tab) => (
