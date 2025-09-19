@@ -58,6 +58,7 @@ const BottomNavigation = ({ activeTab, onTabChange }) => {
     { id: "daily", label: "요약", icon: FaChartBar },
     { id: "statistics", label: "통계", icon: FaChartBar },
     { id: "social", label: "소셜", icon: FaComments },
+    { id: "mypage", label: "마이페이지", icon: FaUser },
   ];
   const renderNavigationTabs = () => {
     return NAVIGATION_TABS.map((tab) => (

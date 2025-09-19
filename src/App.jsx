@@ -138,7 +138,9 @@ function App() {
     const savedEmail =
       localStorage.getItem("usersEmail") || localStorage.getItem("email");
     if (!savedEmail) {
-      console.log("[usersId] 이메일이 저장되어 있지 않습니다. 로그인 저장 로직을 확인하세요.");
+      console.log(
+        "[usersId] 이메일이 저장되어 있지 않습니다. 로그인 저장 로직을 확인하세요."
+      );
       return;
     }
     axios
@@ -151,10 +153,7 @@ function App() {
         if (id) localStorage.setItem("usersId", String(id));
       })
       .catch((e) => {
-        console.warn(
-          "[usersId] 조회 실패:",
-          e?.response?.data || e.message
-        );
+        console.warn("[usersId] 조회 실패:", e?.response?.data || e.message);
       });
   }, [isLoggedIn]);
 
@@ -173,7 +172,9 @@ function App() {
         <div className="login-container">
           <div className="login-header">
             <h1 className="login-title">🎯 다듬</h1>
-            <p className="login-subtitle">루틴을 관리하고 자세를 분석해보세요</p>
+            <p className="login-subtitle">
+              루틴을 관리하고 자세를 분석해보세요
+            </p>
           </div>
           <div className="login-form">
             <ButtonComponent
@@ -262,6 +263,8 @@ function App() {
         return <MyPage />;
       case "admin":
         return <Admin />;
+      case "mypage":
+        return <MyPage />;
       default:
         return <Home />;
     }
@@ -324,7 +327,7 @@ function App() {
                               >
                                 분석
                               </HeaderComponent.MenuItem>
-                               {/* 칼로리 */}
+                              {/* 칼로리 */}
                               <HeaderComponent.MenuItem
                                 active={activeHeaderMenu === "calorie"}
                                 onClick={() => {
@@ -396,9 +399,7 @@ function App() {
                       minHeight: isLoggedIn ? "auto" : "100vh",
                     }}
                   >
-                    <ErrorBoundary>
-                      {renderContent()}
-                    </ErrorBoundary>
+                    <ErrorBoundary>{renderContent()}</ErrorBoundary>
                   </main>
                   {/* 로그인된 경우에만 하단 네비게이션과 챗봇 표시 */}
                   {isLoggedIn && (
