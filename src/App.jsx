@@ -24,6 +24,9 @@ import { RoutineProvider } from "./context/RoutineContext.jsx";
 import { SuggestProvider } from "./context/SuggestContext.jsx";
 import { AuthProvider, AuthContext } from "./context/AuthContext.jsx";
 import { POST } from "./utils/api/api";
+import MyPage from "./components/pages/MyPage/MyPage.jsx";
+import SamplePage from "./components/pages/SamplePage/SamplePage.jsx";
+import { ModalProvider } from "./context/ModalContext.jsx";
 import Chatbot from "./components/pages/Chatbot/Chatbot.jsx";
 
 function App() {
@@ -251,17 +254,15 @@ function App() {
         );
       case "social":
         return (
-          <div className="container mt-5 pt-5">
-            <h1>소셜 페이지</h1>
-            <p>소셜 기능은 개발 중입니다.</p>
-          </div>
+          <SamplePage />
+          //<div className="container mt-5 pt-5">
+          //  <h1>소셜 페이지</h1>
+          //  <p>소셜 기능은 개발 중입니다.</p>
+          //</div>
         );
       case "mypage":
         return (
-          <div className="container mt-5 pt-5">
-            <h1>마이페이지</h1>
-            <p>마이페이지 기능은 개발 중입니다.</p>
-          </div>
+          <MyPage />
         );
       case "admin":
         return <Admin />;
@@ -278,6 +279,7 @@ function App() {
   return (
     <Router>
       <AuthProvider>
+        <ModalProvider>
         <RunProvider>
           <RoutineProvider>
             <SuggestProvider>
@@ -304,9 +306,60 @@ function App() {
                             <HeaderComponent.MenuItem
                               active={activeHeaderMenu === "routine"}
                               onClick={() => {
-                                handleHeaderMenuClick("routine");
-                                setActiveTab("routine");
+                                setActiveTab("home");
+                                setActiveHeaderMenu("home");
                               }}
+                              style={{ cursor: "pointer" }}
+                            />
+                          </HeaderComponent.Section>
+
+                          <HeaderComponent.Section>
+                            <HeaderComponent.Navigation>
+                              <HeaderComponent.MenuItem
+                                active={activeHeaderMenu === "routine"}
+                                onClick={() => {
+                                  handleHeaderMenuClick("routine");
+                                  setActiveTab("routine");
+                                }}
+                              >
+                                루틴
+                              </HeaderComponent.MenuItem>
+                              <HeaderComponent.MenuItem
+                                active={activeHeaderMenu === "pose"}
+                                onClick={() => {
+                                  handleHeaderMenuClick("pose");
+                                  setActiveTab("pose");
+                                }}
+                              >
+                                분석
+                              </HeaderComponent.MenuItem>
+                              <HeaderComponent.MenuItem
+                                active={activeHeaderMenu === "statistics"}
+                                onClick={() =>
+                                  handleHeaderMenuClick("statistics")
+                                }
+                              >
+                                통계
+                              </HeaderComponent.MenuItem>
+                              <HeaderComponent.MenuItem
+                                active={activeHeaderMenu === "social"}
+                                onClick={() => {handleHeaderMenuClick("social")}}
+                              >
+                                소셜
+                              </HeaderComponent.MenuItem>
+                              <HeaderComponent.MenuItem
+                                active={activeHeaderMenu === "mypage"}
+                                onClick={() => {
+                                  handleHeaderMenuClick("mypage");
+                                  setActiveTab("mypage")
+                                }}
+                              >
+                                마이페이지
+                              </HeaderComponent.MenuItem>
+                            </HeaderComponent.Navigation>
+                            <ButtonComponent
+                              variant="outline-secondary"
+                              onClick={handleLogoutClick}
                             >
                               루틴
                             </HeaderComponent.MenuItem>
@@ -394,6 +447,7 @@ function App() {
             </SuggestProvider>
           </RoutineProvider>
         </RunProvider>
+       </ModalProvider>
       </AuthProvider>
     </Router>
   );
