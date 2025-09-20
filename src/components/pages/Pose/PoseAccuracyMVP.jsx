@@ -9,17 +9,23 @@ import * as poseDetection from "@tensorflow-models/pose-detection";
 import "./PoseAccuracyMVP.css";
 
 /* ===== 설정 ===== */
-const WIN = 60;
-const REF_N = 100;
-const LIVE_TARGET_FPS = 20;
+const WIN = 60;                 // 최근 프레임 윈도우(약 2s@30fps)
+const REF_N = 100;              // 비교용 고정길이
+const LIVE_TARGET_FPS = 20;     // 추론 호출 주기 제한
 
 const ANGLE_RANGE = { knee:{min:60,max:180}, hip:{min:50,max:180}, trunk:{min:0,max:45} };
 const W_CH = { knee:0.4, hip:0.35, trunk:0.25 };
 
+/* ===== 튜닝 상수 (추가) ===== */
+const USE_THUNDER = true;       // 가능하면 MoveNet THUNDER로 정확도 ↑ (느리면 false)
+const DTW_BAND = 12;            // DTW 사코에-치바 밴드 폭(±12)
+const SCORE_ALPHA = 8;          // 로지스틱 스케일(급경사)
+const SCORE_BETA  = 0.12;       // 로지스틱 중앙 RMSE(정규화 단위)
+
 /* ===== 유틸 ===== */
 const clamp = (x,a,b)=>Math.max(a,Math.min(b,x));
 const once = (el,ev)=>new Promise(res=>{
-  const h=()=>{el.removeEventListener(ev,h);res();};
+  const h=()=>{ try{ el.removeEventListener(ev,h); }catch{}; res(); };
   el.addEventListener(ev,h,{once:true});
 });
 const isSecureHost = () => {
@@ -32,6 +38,19 @@ const isSecureHost = () => {
   } catch { return false; }
 };
 const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
+
+/* RVFC(webkit) 유틸 */
+const requestVFC = (video, cb) => {
+  if (!video) return null;
+  if (typeof video.requestVideoFrameCallback === "function") return video.requestVideoFrameCallback(cb);
+  if (typeof video.webkitRequestVideoFrameCallback === "function") return video.webkitRequestVideoFrameCallback(cb);
+  return null;
+};
+const cancelVFC = (video, id) => {
+  if (!video || id == null) return;
+  if (typeof video.cancelVideoFrameCallback === "function") video.cancelVideoFrameCallback(id);
+  else if (typeof video.webkitCancelVideoFrameCallback === "function") video.webkitCancelVideoFrameCallback(id);
+};
 
 function angle(a,b,c){
   const v1=[a.x-b.x,a.y-b.y], v2=[c.x-b.x,c.y-b.y];
@@ -73,6 +92,8 @@ function normAngles(seq){
     (clamp(t,ANGLE_RANGE.trunk.min,ANGLE_RANGE.trunk.max)-ANGLE_RANGE.trunk.min)/(ANGLE_RANGE.trunk.max-ANGLE_RANGE.trunk.min),
   ]);
 }
+
+/* (기존 RMSE; DTW 도입 후에는 사용 안 해도 무방) */
 function weightedRMSE(A,B, frameW=null){
   if(A.length!==B.length||A.length===0) return Infinity;
   let seK=0,seH=0,seT=0,ws=0;
@@ -85,13 +106,19 @@ function weightedRMSE(A,B, frameW=null){
   const rK=Math.sqrt(seK/ws), rH=Math.sqrt(seH/ws), rT=Math.sqrt(seT/ws);
   return W_CH.knee*rK + W_CH.hip*rH + W_CH.trunk*rT;
 }
-const rmseToScore = rmse => clamp(Math.round(100*(1 - rmse/0.5)), 0, 100);
+
+/* 로지스틱 점수 매핑 (교체) */
+const rmseToScore = (rmse) => {
+  const s = 100 / (1 + Math.exp(SCORE_ALPHA*(rmse - SCORE_BETA)));
+  return clamp(Math.round(s), 0, 100);
+};
 
 function ensureCanvasHiDPI(canvas){
+  if(!canvas) return;
   const dpr = window.devicePixelRatio || 1;
   const rect = canvas.getBoundingClientRect?.();
-  const cssW = Math.max(1, rect?.width || canvas.clientWidth || canvas.width);
-  const cssH = Math.max(1, rect?.height || canvas.clientHeight || canvas.height);
+  const cssW = Math.max(1, rect?.width || canvas.clientWidth || canvas.width || 1);
+  const cssH = Math.max(1, rect?.height || canvas.clientHeight || canvas.height || 1);
   const cw = Math.round(cssW * dpr);
   const ch = Math.round(cssH * dpr);
   if (canvas.width !== cw || canvas.height !== ch) {
@@ -108,23 +135,33 @@ function waitForFirstFrame(video, timeout = 4000) {
     let done = false;
     const finish = () => { if (done) return; done = true; resolve(); };
     const to = setTimeout(finish, timeout);
-    if (typeof video.requestVideoFrameCallback === 'function') {
-      video.requestVideoFrameCallback(() => { clearTimeout(to); finish(); });
+    if (typeof video?.requestVideoFrameCallback === 'function' ||
+        typeof video?.webkitRequestVideoFrameCallback === 'function') {
+      requestVFC(video, () => { clearTimeout(to); finish(); });
       return;
     }
-    const off = () => { ["canplay","loadeddata","playing","timeupdate"].forEach(ev=>video.removeEventListener(ev,on)); clearTimeout(to); finish(); };
+    const off = () => {
+      ["canplay","loadeddata","playing","timeupdate"].forEach(ev=>{
+        try{ video.removeEventListener(ev,on); }catch{}
+      });
+      clearTimeout(to); finish();
+    };
     const on = () => off();
     ["canplay","loadeddata","playing","timeupdate"].forEach(ev=>video.addEventListener(ev,on,{once:true}));
   });
 }
 
-/* ===== detector 준비 보장 ===== */
+/* ===== detector 준비 보장 (교체) ===== */
 async function ensureDetector(detectorRef){
   if (detectorRef.current) return detectorRef.current;
   await tf.ready();
-  const det=await poseDetection.createDetector(
+  const modelType = USE_THUNDER
+    ? poseDetection.movenet.modelType.SINGLEPOSE_THUNDER
+    : poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING;
+
+  const det = await poseDetection.createDetector(
     poseDetection.SupportedModels.MoveNet,
-    { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING }
+    { modelType }
   );
   detectorRef.current = det;
   return det;
@@ -151,8 +188,7 @@ async function getCameraStreamWithRetry(retry=3){
       return await getCameraStreamOnce();
     }catch(e){
       lastErr = e;
-      // 이전 세션 점유/해제 지연 대응(특히 iOS/Safari의 NotReadableError)
-      await sleep(150 * (i+1));
+      await sleep(150 * (i+1)); // iOS/Safari NotReadableError 등 점유 해제 대기
     }
   }
   throw lastErr;
@@ -166,17 +202,57 @@ const EDGES=[["left_shoulder","right_shoulder"],["left_hip","right_hip"],
   ["right_hip","right_knee"],["right_knee","right_ankle"],
   ["left_shoulder","left_hip"],["right_shoulder","right_hip"]];
 function drawSkeleton(ctx,kps){
+  if(!ctx || !kps) return;
   ctx.save(); ctx.lineWidth=3; ctx.strokeStyle="rgba(95,212,255,.85)"; ctx.fillStyle="#5fd4ff";
   EDGES.forEach(([a,b])=>{
     const A=kps.find(k=>k.name===a), B=kps.find(k=>k.name===b);
     if(!A||!B) return; ctx.beginPath(); ctx.moveTo(A.x,A.y); ctx.lineTo(B.x,B.y); ctx.stroke();
   });
-  kps.forEach(k=>{ ctx.beginPath(); ctx.arc(k.x,k.y,4,0,Math.PI*2); ctx.fill(); });
+  kps.forEach(k=>{ if(k?.x!=null&&k?.y!=null){ ctx.beginPath(); ctx.arc(k.x,k.y,4,0,Math.PI*2); ctx.fill(); }});
   ctx.restore();
+}
+
+/* ===== One-Euro 필터로 키포인트 지터 억제 (추가) ===== */
+function alphaFromCutoff(cutoff, dt){
+  const tau = 1/(2*Math.PI*cutoff);
+  return 1/(1 + tau/dt);
+}
+class OneEuro{
+  constructor({minCutoff=1.0, beta=0.007, dCutoff=1.0}={}) {
+    this.minCutoff=minCutoff; this.beta=beta; this.dCutoff=dCutoff;
+    this.xPrev=null; this.dxPrev=0; this.tPrev=null;
+  }
+  filter(x, t){
+    if(this.tPrev==null){ this.tPrev=t; this.xPrev=x; return x; }
+    const dt = Math.max(1/120, (t - this.tPrev)/1000);
+    const dx = (x - this.xPrev)/dt;
+    const aD = alphaFromCutoff(this.dCutoff, dt);
+    this.dxPrev = aD*dx + (1-aD)*this.dxPrev;
+    const cutoff = this.minCutoff + this.beta*Math.abs(this.dxPrev);
+    const a = alphaFromCutoff(cutoff, dt);
+    const xHat = a*x + (1-a)*this.xPrev;
+    this.xPrev = xHat; this.tPrev = t;
+    return xHat;
+  }
+}
+const kpFilterRef = { current: {} };
+function smoothKeypoints(kps, t){
+  const store = kpFilterRef.current;
+  return kps.map(k=>{
+    if(k?.x==null || k?.y==null) return k;
+    const key = k.name || `kp_${k.index}`;
+    if(!store[key]) store[key] = { fx:new OneEuro(), fy:new OneEuro() };
+    return {
+      ...k,
+      x: store[key].fx.filter(k.x, t),
+      y: store[key].fy.filter(k.y, t),
+    };
+  });
 }
 
 /* HUD */
 function drawAccuracyHUD(ctx, score, hasRef, canvas){
+  if(!ctx || !canvas) return;
   const dpr=window.devicePixelRatio||1, x=8*dpr, y=8*dpr;
   const w=Math.min(220*dpr, canvas.width-16*dpr), h=26*dpr, r=12*dpr, pad=10*dpr;
   ctx.save(); ctx.globalAlpha=.88; ctx.fillStyle="rgba(0,12,28,.55)";
@@ -193,16 +269,61 @@ function drawAccuracyHUD(ctx, score, hasRef, canvas){
   ctx.restore();
 }
 
-/* 키포인트 → 각도/가중치 */
+/* 키포인트 → 각도/가중치: 좌/우 자동 선택 (교체) */
+function anglesForSide(by, side){ // side: 'left' | 'right'
+  const s = side;
+  const shoulder = by[`${s}_shoulder`], hip = by[`${s}_hip`], knee = by[`${s}_knee`], ankle = by[`${s}_ankle`];
+
+  const kneeA = angle(hip, knee, ankle);
+  const hipA  = angle(shoulder, hip, knee);
+  const trunkA= trunkFlex(by["left_shoulder"], by["right_shoulder"], by["left_hip"], by["right_hip"]);
+
+  const confK = Math.min(hip?.score??1, knee?.score??1, ankle?.score??1);
+  const confH = Math.min(shoulder?.score??1, hip?.score??1, knee?.score??1);
+  const confT = Math.min(by["left_shoulder"]?.score??1, by["right_shoulder"]?.score??1, by["left_hip"]?.score??1, by["right_hip"]?.score??1);
+  return { angles:[kneeA, hipA, trunkA], conf:(confK+confH+confT)/3 };
+}
 function anglesAndWeightFromKP(kp){
   const by=Object.fromEntries(kp.map(k=>[k.name,k]));
-  const kneeA = angle(by["right_hip"], by["right_knee"], by["right_ankle"]);
-  const hipA  = angle(by["right_shoulder"], by["right_hip"], by["right_knee"]);
-  const trunkA= trunkFlex(by["left_shoulder"], by["right_shoulder"], by["left_hip"], by["right_hip"]);
-  const confK = Math.min(by["right_hip"]?.score??1, by["right_knee"]?.score??1, by["right_ankle"]?.score??1);
-  const confH = Math.min(by["right_shoulder"]?.score??1, by["right_hip"]?.score??1, by["right_knee"]?.score??1);
-  const confT = Math.min(by["left_shoulder"]?.score??1, by["right_shoulder"]?.score??1, by["left_hip"]?.score??1, by["right_hip"]?.score??1);
-  return { angles:[kneeA,hipA,trunkA], w:(confK+confH+confT)/3 };
+  const L = anglesForSide(by,'left');
+  const R = anglesForSide(by,'right');
+  return (R.conf >= L.conf) ? { angles:R.angles, w:R.conf } : { angles:L.angles, w:L.conf };
+}
+
+/* 단계(phase) 가중치: 바텀/탑 근처를 더 중요하게 (추가) */
+function phaseWeights(nA){
+  return nA.map(([k,h,t])=>{
+    const eK = (2*Math.abs(k-0.5))**2;  // 0~1, 극단에 가까울수록 ↑
+    const eH = (2*Math.abs(h-0.5))**2;
+    const e  = Math.max(eK, eH);
+    return clamp(0.5 + 0.5*e, 0.3, 1.4); // 0.3~1.4 범위
+  });
+}
+
+/* DTW with band, 가중 RMSE (추가) */
+function dtwWeightedRMSE(A, B, W, band=12, wLive=null, wRef=null, wPhase=null){
+  const N=A.length, M=B.length, INF=1e15;
+  const D = Array.from({length:N+1},()=>Array(M+1).fill(INF));
+  const L = Array.from({length:N+1},()=>Array(M+1).fill(1e9));
+  D[0][0]=0; L[0][0]=0;
+
+  for(let i=1;i<=N;i++){
+    const j0=Math.max(1, i-band), j1=Math.min(M, i+band);
+    for(let j=j0;j<=j1;j++){
+      const [ak,ah,at]=A[i-1], [bk,bh,bt]=B[j-1];
+      const wf = (wLive ? wLive[i-1] : 1) * (wRef ? wRef[j-1] : 1) * (wPhase ? wPhase[j-1] : 1);
+      const c = wf * ( W.knee*(ak-bk)*(ak-bk) + W.hip*(ah-bh)*(ah-bh) + W.trunk*(at-bt)*(at-bt) );
+
+      let best = D[i-1][j-1], steps=L[i-1][j-1]+1;
+      if(D[i-1][j] < best){ best=D[i-1][j]; steps=L[i-1][j]+1; }
+      if(D[i][j-1] < best){ best=D[i][j-1]; steps=L[i][j-1]+1; }
+
+      D[i][j] = best + c;
+      L[i][j] = steps;
+    }
+  }
+  const pathLen = Math.max(1, L[N][M]);
+  return Math.sqrt(D[N][M] / pathLen);
 }
 
 export default function PoseAccuracyMVP(){
@@ -216,6 +337,7 @@ export default function PoseAccuracyMVP(){
   const [status,setStatus]=useState("대기 중");
   const [score,setScore]=useState(null);
   const [camOk, setCamOk] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   const refSigRef     = useRef(null);
   const ring          = useRef(Array.from({length:WIN},()=>[0,0,0]));
@@ -231,29 +353,24 @@ export default function PoseAccuracyMVP(){
   const lastScoreRef  = useRef(null);
   const lastTapRef    = useRef(0);
 
-  /* 모델 초기화 & 정리 */
+  /* 모델 초기화 & 정리 (ensureDetector 사용으로 단일화) */
   useEffect(()=>{
-    isLiveRef.current = false;               // 라우팅 복귀시 잔여 상태 초기화
+    isLiveRef.current = false;
     unmountedRef.current = false;
     let mounted=true;
     (async()=>{
       try{
         await tf.setBackend("webgl").catch(async()=>{ await tf.setBackend("cpu"); });
         await tf.ready();
-        const det=await poseDetection.createDetector(
-          poseDetection.SupportedModels.MoveNet,
-          { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING }
-        );
+        const det = await ensureDetector(detectorRef);
         if(!mounted) return;
-        detectorRef.current=det; setReady(true); setStatus("모델 준비 완료");
+        detectorRef.current=det; setReady(true); setStatus(`모델 준비 완료 (${USE_THUNDER?'THUNDER':'LIGHTNING'})`);
       }catch(e){ console.error(e); setStatus("모델 초기화 실패"); }
     })();
 
-    // bfcache/pagehide 대응: 떠날 때 완전 정리, 돌아오면 DPI 동기화
     const onPageHide = () => { try{ stopLive(); }catch{} };
     const onPageShow = (e) => {
-      // bfcache에서 복원되면 이전 스트림이 죽어있을 수 있으니 상태 리셋
-      if (e.persisted) {
+      if (e.persisted) { // bfcache 복원
         isLiveRef.current = false;
         setCamOk(false);
         const v = liveVideoRef.current; if (v) v.srcObject=null;
@@ -266,10 +383,8 @@ export default function PoseAccuracyMVP(){
     return ()=>{
       mounted=false; unmountedRef.current=true; isLiveRef.current=false;
       if(liveRafRef.current) cancelAnimationFrame(liveRafRef.current);
-      if(liveRVFCRef.current && typeof liveVideoRef.current?.cancelVideoFrameCallback==="function"){
-        try{ liveVideoRef.current.cancelVideoFrameCallback(liveRVFCRef.current);}catch{}
-      }
-      const s=liveStreamRef.current; if(s?.getTracks) s.getTracks().forEach(t=>t.stop());
+      cancelVFC(liveVideoRef.current, liveRVFCRef.current); liveRVFCRef.current=null;
+      const s=liveStreamRef.current; if(s?.getTracks) s.getTracks().forEach(t=>t.stop()); liveStreamRef.current=null;
       try{ detectorRef.current?.dispose?.(); }catch{}
       window.removeEventListener('pagehide', onPageHide);
       window.removeEventListener('pageshow', onPageShow);
@@ -283,23 +398,55 @@ export default function PoseAccuracyMVP(){
     const det = await ensureDetector(detectorRef);
     if(!det){ alert("포즈 모델 준비 전입니다"); return; }
     setStatus("레퍼런스 처리 중...");
+    setProgress(0);
+
     const url=URL.createObjectURL(file);
-    const v=refVideoRef.current, c=refCanvasRef.current, cctx=c.getContext("2d");
-    v.src=url; v.muted=true; v.playsInline=true; await v.play(); v.pause();
+    const v=refVideoRef.current, c=refCanvasRef.current;
+    if(!v||!c){ setStatus("레퍼런스 캔버스 초기화 실패"); return; }
+    const cctx=c.getContext("2d"); if(!cctx){ setStatus("레퍼런스 컨텍스트 실패"); return; }
+
+    v.src=url; v.muted=true; v.playsInline=true; v.preload="auto";
+    try{ await v.play(); }catch{}; v.pause();
     await once(v,"loadedmetadata");
 
-    const dt=1/15, seq=[], ws=[]; const duration=v.duration||0; let t=0; v.currentTime=0;
-    while(t<=duration && !unmountedRef.current){
-      await once(v,"seeked");
+    const dur = Number.isFinite(v.duration) ? v.duration : 0;
+    if (dur <= 0){
+      setStatus("영상 길이 확인 실패(코덱/파일 손상 가능)");
+      v.removeAttribute("src"); v.load(); URL.revokeObjectURL(url);
+      return;
+    }
+    const endSafe = Math.max(0, dur - 0.001);  // 끝단 안전 여유
+
+    const dt=1/5; // 5fps
+    const seq=[], ws=[];
+    const total = Math.max(1, Math.ceil(endSafe/dt)+1);
+    let count = 0;
+
+    // 첫 프레임 프라임
+    v.currentTime = 0;
+    await once(v, "seeked");
+
+    for (let t=0; t<=endSafe && !unmountedRef.current; t+=dt){
+      ensureCanvasHiDPI(c);
       cctx.drawImage(v,0,0,c.width,c.height);
       const poses=await det.estimatePoses(v,{flipHorizontal:false});
-      if(poses?.[0]?.keypoints){ const {angles,w}=anglesAndWeightFromKP(poses[0].keypoints); seq.push(angles); ws.push(w); }
-      t+=dt; v.currentTime=Math.min(duration,t);
+      if(poses?.[0]?.keypoints){
+        const {angles,w}=anglesAndWeightFromKP(poses[0].keypoints); seq.push(angles); ws.push(w);
+      }
+      count++; setProgress(Math.min(100, Math.round((count/total)*100)));
+
+      const nextT = t + dt;
+      if (nextT > endSafe) break;
+      v.currentTime = Math.min(endSafe, nextT);
+      await once(v,"seeked");
     }
+
     const s1=emaSmooth(seq,0.3), s2=resampleSeq(s1,REF_N), nA=normAngles(s2);
     const w2=resampleSeq(ws.map(w=>[w,0,0]),REF_N).map(x=>x[0]);
-    const sig={seq:nA,w:w2}; refSigRef.current=sig;
+    const pW = phaseWeights(nA);                       // 추가
+    refSigRef.current={seq:nA,w:w2,phase:pW};         // phase 포함
     setStatus(`레퍼런스 준비 완료 (프레임:${seq.length}→${REF_N})`);
+    setProgress(100);
 
     v.pause(); v.removeAttribute("src"); v.load(); URL.revokeObjectURL(url);
   }
@@ -312,33 +459,28 @@ export default function PoseAccuracyMVP(){
       console.warn("Insecure context: getUserMedia blocked", location.href);
       return;
     }
-
     try{
-      // 모델 보장(초기화 중이라도 여기서 대기 후 진행)
       const det = await ensureDetector(detectorRef);
       if (!det) { setStatus("모델 준비 실패"); return; }
 
-      // 이전 srcObject 강제 해제 (라우팅 복귀/새로고침 잔여물 방지)
       const oldV = liveVideoRef.current;
       if (oldV) { try{ oldV.pause(); }catch{} oldV.srcObject = null; }
 
-      // 스트림 요청 (재시도 포함)
       const stream = await getCameraStreamWithRetry(4);
       liveStreamRef.current = stream;
 
       const v = liveVideoRef.current;
+      if(!v){ setStatus("비디오 요소 없음"); return; }
       v.srcObject = stream;
       v.muted = true; v.setAttribute('muted','');
       v.playsInline = true; v.setAttribute('playsinline','');
       v.setAttribute('autoplay','');
 
-      // 사용자 제스처 내 재생 시도 + 첫 프레임 보장
-      await v.play().catch(()=>{});
+      try{ await v.play(); }catch{}
       if (v.readyState < 2 || !v.videoWidth) await once(v, "loadedmetadata");
       await Promise.race([once(v,"playing"), once(v,"loadeddata"), sleep(200)]);
       await waitForFirstFrame(v);
 
-      // 레이아웃/캔버스 동기화
       const host = liveStageRef.current;
       if (host) host.style.setProperty("--live-ar", `${v.videoWidth||16}/${v.videoHeight||9}`);
       await afterNextPaint();
@@ -361,10 +503,7 @@ export default function PoseAccuracyMVP(){
     isLiveRef.current = false;
 
     if (liveRafRef.current) { cancelAnimationFrame(liveRafRef.current); liveRafRef.current = null; }
-    if (liveRVFCRef.current && typeof liveVideoRef.current?.cancelVideoFrameCallback === 'function') {
-      try { liveVideoRef.current.cancelVideoFrameCallback(liveRVFCRef.current); } catch {}
-      liveRVFCRef.current = null;
-    }
+    cancelVFC(liveVideoRef.current, liveRVFCRef.current); liveRVFCRef.current = null;
 
     const s = liveStreamRef.current;
     if (s && s.getTracks) { s.getTracks().forEach(t => t.stop()); liveStreamRef.current = null; }
@@ -376,11 +515,11 @@ export default function PoseAccuracyMVP(){
     const c = liveCanvasRef.current; if (c) { const ctx = c.getContext('2d'); ctx && ctx.clearRect(0,0,c.width,c.height); }
   },[]);
 
-  /* 메인 루프 (RVFC 우선, rAF 폴백) */
+  /* 메인 루프 */
   function runLiveLoop(){
     const v = liveVideoRef.current, c = liveCanvasRef.current;
     if (!v || !c) return;
-    const ctx = c.getContext("2d");
+    const ctx = c.getContext("2d"); if(!ctx) return;
 
     const inferAllowed = () => {
       const now = performance.now();
@@ -394,7 +533,7 @@ export default function PoseAccuracyMVP(){
       ensureCanvasHiDPI(c);
       ctx.clearRect(0, 0, c.width, c.height);
 
-      // object-fit: cover + 좌우반전(중심 기준)
+      // object-fit: cover + 좌우반전
       if (v.readyState >= 2 && v.videoWidth && v.videoHeight) {
         const vw = v.videoWidth, vh = v.videoHeight;
         const cw = c.width,      ch = c.height;
@@ -411,9 +550,12 @@ export default function PoseAccuracyMVP(){
       if (inferAllowed() && detectorRef.current) {
         try {
           const poses = await detectorRef.current.estimatePoses(v, { flipHorizontal: true });
-          const kp = poses?.[0]?.keypoints;
-          if (kp) {
+          let kp = poses?.[0]?.keypoints;
+          if (kp?.length) {
+            const tNow = performance.now();
+            kp = smoothKeypoints(kp, tNow);       // ★ 지터 억제
             drawSkeleton(ctx, kp);
+
             const { angles, w } = anglesAndWeightFromKP(kp);
             ring.current[ptr.current] = angles;
             ringW.current[ptr.current] = w;
@@ -429,7 +571,9 @@ export default function PoseAccuracyMVP(){
             const nA    = normAngles(s2);
             const wLive = resampleSeq(ws.map(x => [x, 0, 0]), REF_N).map(x => x[0]);
             const wComb = wLive.map((wl, i) => Math.min(wl, (ref.w && ref.w[i] != null) ? ref.w[i] : 1));
-            const rmse = weightedRMSE(nA, ref.seq, wComb);
+
+            // ★ DTW + phase 가중치
+            const rmse = dtwWeightedRMSE(nA, ref.seq, W_CH, DTW_BAND, wComb, ref.w, ref.phase);
             const sc   = rmseToScore(rmse);
             lastScoreRef.current = sc;
             setScore(sc);
@@ -445,10 +589,11 @@ export default function PoseAccuracyMVP(){
 
     const scheduleNext = () => {
       if (!isLiveRef.current || unmountedRef.current) return;
-      if (typeof v.requestVideoFrameCallback === 'function') {
-        liveRVFCRef.current = v.requestVideoFrameCallback(() => { step(); });
-      } else {
+      const id = requestVFC(v, () => { step(); });
+      if (id == null) {
         liveRafRef.current = requestAnimationFrame(step);
+      } else {
+        liveRVFCRef.current = id;
       }
     };
 
@@ -484,7 +629,7 @@ export default function PoseAccuracyMVP(){
   const toggleFullscreen=()=>{ isFullscreen()? exitFullscreen(): enterFullscreen(); };
   const onTouchEnd=(e)=>{ const now=Date.now(); if(now-lastTapRef.current<300){ e.preventDefault(); toggleFullscreen(); } lastTapRef.current=now; };
 
-  /* 페이지 가시성/리사이즈 복구(사파리 등) */
+  /* 페이지 가시성/리사이즈 복구 */
   useEffect(()=>{
     const onVis = () => {
       if (document.visibilityState === 'visible' && isLiveRef.current) {
@@ -521,7 +666,7 @@ export default function PoseAccuracyMVP(){
           {/* ▼ 비율을 관리하는 뷰포트 */}
           <div className="live-viewport">
             {/* 비디오 = 프레임 공급(감춤) */}
-            <video  ref={liveVideoRef} playsInline muted className="live-video" />
+            <video ref={liveVideoRef} playsInline muted className="live-video" />
             {/* 캔버스 = 표시층 */}
             <canvas ref={liveCanvasRef} className="live-canvas" />
           </div>
@@ -546,9 +691,12 @@ export default function PoseAccuracyMVP(){
              onDrop={(e)=>{ e.preventDefault(); if(e.dataTransfer.files?.[0]) handleLoadReferenceFile(e); }}>
           <input id="refFile" type="file" accept="video/mp4,video/webm" onChange={handleLoadReferenceFile} hidden />
           <label htmlFor="refFile">여기로 드래그 또는 탭하여 업로드</label>
-          <video ref={refVideoRef} playsInline muted style={{display:"none"}} />
+          <video ref={refVideoRef} playsInline muted preload="auto" style={{display:"none"}} />
           <canvas ref={refCanvasRef} width={360} height={180} style={{display:"none"}} />
         </div>
+        {status.includes("레퍼런스 처리 중") && (
+          <div style={{margin:"8px 0", color:"#245cff"}}>처리 중... {progress}%</div>
+        )}
       </section>
 
       <div className="cta-wrap">

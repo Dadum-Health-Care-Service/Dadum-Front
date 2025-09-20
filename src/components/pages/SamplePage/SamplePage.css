@@ -142,7 +142,7 @@
 }
 
 /* 선택된 카드 스타일 */
-.card--selected {
+.selected {
   border-color: #3b82f6 !important;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3) !important;
 }
@@ -152,20 +152,20 @@
   .main-page {
     padding: 10px;
   }
-  
+
   .main-header {
     padding: 30px 20px;
     margin-bottom: 20px;
   }
-  
+
   .main-header h1 {
     font-size: 2rem;
   }
-  
+
   .main-header p {
     font-size: 1rem;
   }
-  
+
   .tab-section,
   .card-section,
   .action-section,
@@ -173,11 +173,11 @@
     padding: 20px;
     margin-bottom: 20px;
   }
-  
+
   .tab-container {
     gap: 8px;
   }
-  
+
   .container-section,
   .form-section,
   .select-section,
@@ -187,47 +187,47 @@
     padding: 20px;
     margin-bottom: 20px;
   }
-  
+
   .container-grid,
   .select-grid,
   .list-grid,
   .header-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .textarea-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .form-actions {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .form-actions button {
     width: 100%;
   }
-  
+
   .tab-button {
     min-width: 80px;
     font-size: 0.9rem;
   }
-  
+
   .action-buttons {
     gap: 12px;
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .action-buttons .button {
     width: 100%;
   }
-  
+
   .form-actions {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .form-actions .button {
     width: 100%;
   }
@@ -440,11 +440,11 @@
   .card-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .tab-container {
     justify-content: center;
   }
-  
+
   .container-grid {
     grid-template-columns: 1fr;
   }

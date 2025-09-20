@@ -1,13 +1,13 @@
 import React, { useState } from "react";
-import ButtonComponent from "../components/ButtonComponent";
-import Card from "../components/CardComponent";
-import InputComponent from "../components/InputComponent";
-import ContainerComponent from "../components/ContainerComponent";
-import FormComponent from "../components/FormComponent";
-import SelectComponent from "../components/SelectComponent";
-import TextareaComponent from "../components/TextareaComponent";
-import ListComponent from "../components/ListComponent";
-import HeaderComponent from "../components/HeaderComponent";
+import ButtonComponent from "../../common/ButtonComponent";
+import Card from "../../common/CardComponent";
+import InputComponent from "../../common/InputComponent";
+import ContainerComponent from "../../common/ContainerComponent";
+import FormComponent from "../../common/FormComponent";
+import SelectComponent from "../../common/SelectComponent";
+import TextareaComponent from "../../common/TextareaComponent";
+import ListComponent from "../../common/ListComponent";
+import HeaderComponent from "../../common/HeaderComponent";
 import "./SamplePage.css";
 
 const SamplePage = () => {
@@ -190,7 +190,7 @@ const SamplePage = () => {
               details={routine.details}
               buttonText={routine.buttonText}
               onClick={() => handleCardClick(routine.id)}
-              className={selectedCard === routine.id ? "card--selected" : ""}
+              className={selectedCard === routine.id ? "selected" : ""}
             />
           ))}
         </div>
@@ -691,4 +691,4 @@ const SamplePage = () => {
   );
 };
 
-export default MainPage;
+export default SamplePage;
