@@ -7,13 +7,17 @@ import InputComponent from "../../common/InputComponent";
 import { useModal } from "../../../context/ModalContext";
 
 export default function Profile(){
-    
+    //유저정보,로딩상태,에러상태를 저장하는 state
     const { user } = useContext(AuthContext);
     const [loading,setLoading]=useState(true);
     const [error,setError]=useState(null);
+    //프로필 수정 버튼 제어용
     const [clickEdit,setClickEdit]=useState(false);
+    //유효성 체크용
     const [errors, setErrors]=useState({});
     const { showBasicModal, showConfirmModal } = useModal();
+
+    const imgRef = useRef();
 
     // 초기 프로필 데이터 설정
     const [profile, setProfile] = useState({
@@ -43,17 +47,24 @@ export default function Profile(){
 
     //최초렌더링 및 userId가 변하는 경우에 따라 user정보 네트워크로부터 읽어오기
     useEffect(() => {
+        //페이지 렌더 다시 할때마다 스크롤 맨 위로 올리기
+        window.scrollTo(0,0);
         
+        //저장된 user정보가 없을때 알림 모달 띄우고 에러 페이지 렌더
         if (!user || !user.usersId) {
             setError('사용자 정보를 찾을 수 없습니다.');
             showBasicModal("사용자 정보를 찾을 수 없습니다", "네트워크 에러")
+            //로딩상태x
             setLoading(false);
             return;
         }
 
+        //프로필 읽어오는 메소드
         const fetchProfile = async () => {
             try {
+                //읽어오는 동안 로딩상태 띄우기
                 setLoading(true);
+                //에러상태 초기화
                 setError(null);
                 
                 const res = await axios.get(`http://localhost:8080/api/v1/users/${user.usersId}`);
@@ -74,7 +85,12 @@ export default function Profile(){
                     weight: getBio?.weight || 0,
                     regDate: getUser.regDate ? getUser.regDate.substring(0, 10) : '',
                 }));
+
+                //저장된 프로필 state로 프로필 수정 인풋 저장용 state 설정 -> 
+                // 1. 프로필 수정 페이지에 이미 입력된 유저의 프로필 정보 띄워주기 위함
+                // 2. 저장된 인풋 정보로 프로필 수정을 요청할때 사용자가 수정하지 않은 정보가 nullable할때 같이 전달해주기 위함 
                 setInputs(prev=>({
+                    ...prev,
                     name: profile.name,
                     nickName: profile.nickName,
                     phoneNum: profile.phoneNum,
@@ -86,36 +102,38 @@ export default function Profile(){
                     weight: profile.weight,
                 }));
             } catch (e) {
+                //에러 발생시 에러상태 저장 및 확인 모달 띄우기
                 console.log(e.response?.data, e);
                 setError('프로필을 읽어오는 중 오류가 발생하였습니다');
                 showBasicModal("프로필을 읽어오는 중 오류가 발생하였습니다","네트워크 에러")
             } finally {
+                //조회 성공 여부와 관계없이 로딩상태 없애기
                 setLoading(false);
             }
         };
         
         fetchProfile();
-    }, [user?.usersId,clickEdit]);
+    }, [user?.usersId,clickEdit]); //usersId 및 수정 페이지 렌더 여부에 따라 프로필 정보 다시 조회
 
     // 로딩 중일 때
     if (loading) {
         return (
-        <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
-            <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
+            <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
+                <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                </div>
             </div>
-        </div>
         );
     }
 
     // 에러가 있을 때
     if (error) {
         return (
-        <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
-            <div className="alert alert-danger" role="alert">
-            {error}
+            <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
+                <div className="alert alert-danger" role="alert">
+                    {error}
+                </div>
             </div>
-        </div>
         );
     }
 
@@ -126,16 +144,16 @@ export default function Profile(){
             const reader = new FileReader();
             reader.onloadend = () =>{
                 console.log('image changed');
-                setInputs(prev=>{
-                    return { ...prev, profileImg: reader.result};
-                }); //base64문자열 저장
+                setInputs((prev)=>({ ...prev, profileImg: reader.result})); //base64문자열 저장
             };
             reader.readAsDataURL(file);
         }
+        console.log(e);
     };
 
-    
+    //프로필 수정 인풋 폼 제어용 함수
     const handleInputChange = (field) => (e) =>{
+        //성별 라디오 버튼 클릭시 str -> boolean으로 변환해서 저장
         if(field==='gender'){
             if(e.target.value==='true') {
                 setInputs((prev)=>({
@@ -156,7 +174,9 @@ export default function Profile(){
                 [field]: e.target.value,
             }));
         }
+        console.log(inputs);
 
+        //유효성 체크 에러 메세지 초기화
         if(errors[field]){
             setErrors((prev)=>({
                 ...prev,
@@ -165,20 +185,25 @@ export default function Profile(){
         }
     };
 
+    //프로필 수정 저장 버튼 제어용
     const handleSubmit = async () =>{
+        //유효성 체크
         const newErrors = {};
         if(!inputs.name) newErrors.name = "이름은 필수 입력값입니다.";
         if(!inputs.nickName) newErrors.nickName = "닉네임은 필수 입력값입니다.";
         if(!inputs.phoneNum) newErrors.phoneNum = "전화번호는 필수 입력값입니다.";
 
         setErrors(newErrors);
+
+        //유효성 체크 통과했을때 서버에 user정보 수정 요청
         if(Object.keys(newErrors).length === 0){
             try{
+                //로딩상태 띄우고 에러상태 초기화
                 setLoading(true);
                 setError(null);
                 const res = await axios.put(
                     `http://localhost:8080/api/v1/users/update/${user.usersId}`,
-                    {
+                    {//변경할 수 없는 데이터인 role 및 profileImg는 profile정보 그대로 쓰기
                         usersName: inputs.name,
                         nickName: inputs.nickName,
                         email: profile.email,
@@ -199,21 +224,24 @@ export default function Profile(){
                         },
                     },
                 );
-                console.log(res);
+                //수정완료 모달 띄우고 프로필 페이지 렌더
                 showBasicModal('수정 되었습니다','프로필 수정');
                 setClickEdit(false);
             }catch(error){
+                //오류 모달 띄우고 프로필 페이지 렌더
                 console.log(error);
                 setError('프로필 수정 중 오류가 발생하였습니다');
                 showConfirmModal('프로필 수정 중 오류가 발생하였습니다',"네트워크 에러","",()=>{setClickEdit(false)})
             }finally {
+                //로딩 상태 없애기
                 setLoading(false);
             };
         };
     };
 
     return<>
-        { !clickEdit ?
+        {//clickEdit상태에 따라 프로필/프로필 수정 페이지 렌더링
+        !clickEdit ?
             (<ContainerComponent variant="filled" className="p-4">
                 <ContainerComponent variant="outlined" className="profile-head mb-3">
                     <div className="d-flex flex-column align-items-center text-center px-4">
@@ -327,7 +355,8 @@ export default function Profile(){
                     </ButtonComponent>
                 </div>
             </ContainerComponent>)
-        :
+        :   
+            //프로필 수정 페이지 렌더링 -> 파일 선택 인풋 value 제어를 위해 InputComponent대신 input 사용, style로 스타일 통일
             (<ContainerComponent variant="filled" className="p-4">
                 <ContainerComponent variant="outlined" className="profile-head mb-3">
                     <div className="d-flex flex-column align-items-center text-center px-4">
@@ -336,25 +365,46 @@ export default function Profile(){
                             width="150px"
                             src={inputs.profileImg}
                         />
-                        <div className="d-flex align-items-end">
-                            <InputComponent
-                                label="프로필 사진"
+                    </div>
+                    <div className="d-flex align-items-end justify-content-center px-3">
+                        <div className="d-flex flex-column align-items-start w-100">
+                            <label style={{
+                                fontSize:"12px",
+                                fontWeight:"500",
+                                color:"#374151",
+                                marginBottom:"4px",
+                                gap:"4px"
+                            }}>프로필 사진</label>
+                            <input
                                 type="file"
                                 accept="image/*"
                                 size="small"
                                 onChange={handleImageChange}
-                            />
-                            <ButtonComponent 
-                                variant="secondary" 
-                                size="small"
-                                onClick={()=>{
-                                    setInputs(prev=>{
-                                        return { ...prev, profileImg: profile.profileImg};
-                                    });
+                                className="myFile"
+                                ref={imgRef}
+                                style={{
+                                    width:"100%",
+                                    border:"2px solid #d1d5db",
+                                    borderRadius:"8px",
+                                    fontSize:"12px",
+                                    fontFamily:"inherit",
+                                    outline:"none",
+                                    background:"#ffffff",
+                                    color:"#1f2937",
+                                    padding:"9px 12px",
+                                    minHeight:"32px"
                                 }}
-                                className="m-2 h-75"
-                            >x</ButtonComponent>
+                            />
                         </div>
+                        <ButtonComponent 
+                            variant="secondary" 
+                            size="small"
+                            onClick={(prev)=>{
+                                setInputs({...prev,profileImg:profile.profileImg});
+                                imgRef.current.value='';
+                            }}
+                            className="m-2 h-75"
+                        >x</ButtonComponent>
                     </div>
                     <div className="d-flex flex-column p-3">    
                         <InputComponent
