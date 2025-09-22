@@ -17,7 +17,6 @@ import styles from "./BottomNavigation.module.css";
 const NAVIGATION_TABS = [
   { id: "home", label: "홈", icon: FaHome },
   { id: "routine", label: "루틴", icon: FaList },
-  { id: "achievement", label: "업적", icon: FaTrophy },
   { id: "pose", label: "분석", icon: FaCamera },
   { id: "calorie", label: "칼로리", icon: FaUtensils },
   { id: "daily", label: "요약", icon: FaChartBar },
