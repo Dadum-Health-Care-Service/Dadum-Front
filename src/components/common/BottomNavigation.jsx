@@ -10,7 +10,8 @@ import {
   FaUtensils,
   FaTrophy,
   FaRobot,
-} from "react-icons/fa"; // ← FaRobot 추가
+  FaShoppingBag,
+} from "react-icons/fa"; // ← FaShoppingBag 추가
 import styles from "./BottomNavigation.module.css";
 
 // 탭 설정을 상수로 분리
@@ -18,6 +19,7 @@ const NAVIGATION_TABS = [
   { id: "home", label: "홈", icon: FaHome },
   { id: "routine", label: "루틴", icon: FaList },
   { id: "achievement", label: "업적", icon: FaTrophy },
+  { id: "shop", label: "쇼핑", icon: FaShoppingBag },
   { id: "pose", label: "분석", icon: FaCamera },
   { id: "calorie", label: "칼로리", icon: FaUtensils },
   { id: "daily", label: "요약", icon: FaChartBar },

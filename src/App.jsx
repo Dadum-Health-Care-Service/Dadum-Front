@@ -25,6 +25,10 @@ import Gamification from "./components/pages/Gamification/Gamification.jsx";
 import MyPage from "./components/pages/MyPage/MyPage.jsx";
 import Admin from "./components/pages/Admin/Admin.jsx";
 import SamplePage from "./components/pages/SamplePage/SamplePage.jsx";
+import Shop from "./components/pages/Payments/Shop/Shop.jsx";
+import ProductDetail from "./components/pages/Payments/Shop/ProductDetail.jsx";
+import OrderPage from "./components/pages/Payments/Shop/OrderPage.jsx";
+import OrderHistory from "./components/pages/Payments/Shop/OrderHistory.jsx";
 
 //Contexts
 import { AuthProvider, AuthContext } from "./context/AuthContext.jsx";
@@ -33,6 +37,7 @@ import { RoutineProvider } from "./context/RoutineContext.jsx";
 import { SuggestProvider } from "./context/SuggestContext.jsx";
 import { ModalProvider } from "./context/ModalContext.jsx";
 import { POST, GET } from "./utils/api/api";
+
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -132,6 +137,7 @@ function App() {
   const handleTabChange = (tabId) => setActiveTab(tabId);
   const handleHeaderMenuClick = (menuId) => setActiveHeaderMenu(menuId);
 
+ 
   // 로그인 후 자동으로 usersId를 콘솔에 출력 (axios .then 스타일)
   useEffect(() => {
     if (!isLoggedIn) return;
@@ -156,6 +162,21 @@ function App() {
         console.warn("[usersId] 조회 실패:", e?.response?.data || e.message);
       });
   }, [isLoggedIn]);
+
+  // 커스텀 이벤트 리스너 추가 (탭 변경용)
+  useEffect(() => {
+    const handleTabChange = (event) => {
+      const newTab = event.detail;
+      setActiveTab(newTab);
+      setActiveHeaderMenu(newTab);
+    };
+
+    window.addEventListener('tabChange', handleTabChange);
+    
+    return () => {
+      window.removeEventListener('tabChange', handleTabChange);
+    };
+  }, []);
 
   const renderContent = () => {
     // 로그인되지 않은 경우
@@ -235,6 +256,8 @@ function App() {
         return <Routine />;
       case "achievement":
         return <Gamification />;
+      case "shop":
+        return <Shop />;
       case "pose":
         return <PoseAccuracyMVP />;
       case "calorie":
@@ -258,8 +281,10 @@ function App() {
         return <MyPage />;
       case "admin":
         return <Admin />;
-      case "mypage":
-        return <MyPage />;
+      case "order":
+        return <OrderPage />;
+      case "orders":
+        return <OrderHistory />;
       default:
         return <Home />;
     }
@@ -321,6 +346,15 @@ function App() {
                                 }}
                               >
                                 업적
+                              </HeaderComponent.MenuItem>
+                              <HeaderComponent.MenuItem
+                                active={activeHeaderMenu === "shop"}
+                                onClick={() => {
+                                  handleHeaderMenuClick("shop");
+                                  setActiveTab("shop");
+                                }}
+                              >
+                                쇼핑
                               </HeaderComponent.MenuItem>
                               <HeaderComponent.MenuItem
                                 active={activeHeaderMenu === "pose"}
