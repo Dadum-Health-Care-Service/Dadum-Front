@@ -377,6 +377,15 @@ function App() {
                               >
                                 마이페이지
                               </HeaderComponent.MenuItem>
+                              <HeaderComponent.MenuItem
+                                active={activeHeaderMenu === "admin"}
+                                onClick={() => {
+                                  handleHeaderMenuClick("admin");
+                                  setActiveTab("admin");
+                                }}
+                              >
+                                관리자
+                              </HeaderComponent.MenuItem>
                             </HeaderComponent.Navigation>
 
                             <ButtonComponent
