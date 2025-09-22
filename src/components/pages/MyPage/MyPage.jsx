@@ -5,6 +5,7 @@ import Profile from "./Profile";
 import MySocial from "./MySocial";
 import Settings from "./Settings";
 import HealthData from "./HealthData";
+import Gamification from "../Gamification/Gamification";
 
 export default function MyPage(){
     //선택한 마이페이지 헤더 탭에 따라 페이지 렌더
@@ -17,6 +18,7 @@ export default function MyPage(){
     const routeMyPage = (menuId)=>{
         switch(menuId){
             case "healthdata": return <HealthData />
+            case "achievements": return <Gamification />
             case "mysocial": return <MySocial />
             case "settings": return <Settings />
             default: return <Profile />
@@ -50,6 +52,12 @@ export default function MyPage(){
                                 onClick={()=>handleHeaderMenuClick("healthdata")}
                             >
                                 나의 기록
+                            </HeaderComponent.MenuItem>
+                            <HeaderComponent.MenuItem
+                                active={activeHeaderMenu === "achievements"}
+                                onClick={()=>handleHeaderMenuClick("achievements")}
+                            >
+                                업적
                             </HeaderComponent.MenuItem>
                             <HeaderComponent.MenuItem
                                 active={activeHeaderMenu === "mysocial"}

@@ -21,7 +21,6 @@ import Social from "./components/pages/Social/Social.jsx";
 import CalorieCam from "./components/pages/Calorie/CalorieCam.jsx";
 import DailySummary from "./components/pages/Summary/DailySummary.jsx";
 import Chatbot from "./components/pages/Chatbot/Chatbot.jsx";
-import Gamification from "./components/pages/Gamification/Gamification.jsx";
 import MyPage from "./components/pages/MyPage/MyPage.jsx";
 import Admin from "./components/pages/Admin/Admin.jsx";
 import SamplePage from "./components/pages/SamplePage/SamplePage.jsx";
@@ -233,8 +232,6 @@ function App() {
         return <Home />;
       case "routine":
         return <Routine />;
-      case "achievement":
-        return <Gamification />;
       case "pose":
         return <PoseAccuracyMVP />;
       case "calorie":
@@ -283,7 +280,7 @@ function App() {
           <RunProvider>
             <RoutineProvider>
               <SuggestProvider>
-                <div className="App">
+                  <div className="App">
                   {/* 로그인된 경우에만 헤더와 네비게이션 표시 */}
                   {isLoggedIn && (
                     <>
@@ -312,15 +309,6 @@ function App() {
                                 }}
                               >
                                 루틴
-                              </HeaderComponent.MenuItem>
-                              <HeaderComponent.MenuItem
-                                active={activeHeaderMenu === "achievement"}
-                                onClick={() => {
-                                  handleHeaderMenuClick("achievement");
-                                  setActiveTab("achievement");
-                                }}
-                              >
-                                업적
                               </HeaderComponent.MenuItem>
                               <HeaderComponent.MenuItem
                                 active={activeHeaderMenu === "pose"}
@@ -424,7 +412,7 @@ function App() {
                       />
                     </>
                   )}
-                </div>
+                  </div>
               </SuggestProvider>
             </RoutineProvider>
           </RunProvider>
