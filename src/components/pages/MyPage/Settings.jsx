@@ -264,7 +264,7 @@ export default function Settings(){
     }
 
     return <>
-        <ContainerComponent variant="default" className="p-2">
+        <ContainerComponent variant="default" className="p-3 mb-5">
             <ContainerComponent size="medium" variant="default" className="mb-3">
                 <HeaderComponent variant="filled" size="small" align="center">
                     <HeaderComponent.Navigation>

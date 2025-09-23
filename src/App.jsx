@@ -19,6 +19,7 @@ import Gamification from "./components/pages/Gamification/Gamification.jsx";
 import MyPage from "./components/pages/MyPage/MyPage.jsx";
 import Admin from "./components/pages/Admin/Admin.jsx";
 import PoseAccuracyMVP from "./components/pages/Pose/PoseAccuracyMVP.jsx";
+import SamplePage from "./components/pages/SamplePage/SamplePage.jsx"
 
 //Contexts
 import { AuthProvider, AuthContext } from "./context/AuthContext.jsx";
@@ -52,6 +53,7 @@ function AppContent(){
           <Route path="/" element={user ? <Home/> : <MainView/>}></Route>
           <Route path="/login" element={<Login/>}></Route>
           <Route path="/signup" element={<SignUp/>}></Route>
+          <Route path="/sample" element={<SamplePage />}></Route>
 
           {user ? (
             <>
