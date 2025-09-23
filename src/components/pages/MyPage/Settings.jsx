@@ -196,7 +196,7 @@ export default function Settings(){
                             />
                             <div className="d-flex justify-content-center">
                                 <ButtonComponent 
-                                    variant="secondary" 
+                                    variant="primary" 
                                     size="small"
                                     onClick={handleWithdrawalSubmit}
                                     className="m-2 h-75"
@@ -249,7 +249,7 @@ export default function Settings(){
                             </div>
                             <div className="d-flex justify-content-center">
                                 <ButtonComponent 
-                                    variant="secondary" 
+                                    variant="primary" 
                                     size="small"
                                     onClick={handleUpdateSubmit}
                                     className="h-75 mb-5"
