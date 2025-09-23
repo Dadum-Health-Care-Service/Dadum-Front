@@ -8,11 +8,14 @@ const SelectComponent = ({
   value,
   onChange,
   placeholder = "선택해주세요",
+  variant = "outlined", // outlined, filled, standard
+  size = "medium", // small, medium, large
+  disabled = false,
   required = false,
   error = false,
   helperText = "",
-  disabled = false,
   className = "",
+  multiple = false,
   ...props
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,13 +24,23 @@ const SelectComponent = ({
 
   // Select 클래스명 생성
   const getSelectClassName = () => {
-    const baseClass = styles["select__field"];
-    const errorClass = error ? styles["select--error"] : "";
-    const disabledClass = disabled ? styles["select--disabled"] : "";
-    const openClass = isOpen ? styles["select--open"] : "";
+    const baseClass = styles["select-field"];
+    const variantClass = styles[variant] || styles["outlined"];
+    const sizeClass = styles[size] || styles["medium"];
+    const errorClass = error ? styles["error"] : "";
+    const disabledClass = disabled ? styles["disabled"] : "";
+    const openClass = isOpen ? styles["open"] : "";
     const customClass = className;
 
-    return [baseClass, errorClass, disabledClass, openClass, customClass]
+    return [
+      baseClass,
+      variantClass,
+      sizeClass,
+      errorClass,
+      disabledClass,
+      openClass,
+      customClass,
+    ]
       .filter(Boolean)
       .join(" ");
   };
@@ -36,16 +49,27 @@ const SelectComponent = ({
   useEffect(() => {
     if (children) {
       const options = Array.isArray(children) ? children : [children];
-      const selectedOption = options.find(
-        (option) => option.props.value === value
-      );
-      if (selectedOption) {
-        setSelectedLabel(selectedOption.props.children);
+
+      if (multiple && Array.isArray(value)) {
+        // Multiple 선택인 경우
+        const selectedOptions = options.filter((option) =>
+          value.includes(option.props.value)
+        );
+        const labels = selectedOptions.map((option) => option.props.children);
+        setSelectedLabel(labels.join(", "));
       } else {
-        setSelectedLabel("");
+        // Single 선택인 경우
+        const selectedOption = options.find(
+          (option) => option.props.value === value
+        );
+        if (selectedOption) {
+          setSelectedLabel(selectedOption.props.children);
+        } else {
+          setSelectedLabel("");
+        }
       }
     }
-  }, [value, children]);
+  }, [value, children, multiple]);
 
   // 외부 클릭 시 드롭다운 닫기
   useEffect(() => {
@@ -73,9 +97,21 @@ const SelectComponent = ({
 
   // 옵션 클릭 핸들러
   const handleOptionClick = (optionValue, optionLabel) => {
-    onChange({ target: { value: optionValue } });
-    setSelectedLabel(optionLabel);
-    setIsOpen(false);
+    if (multiple) {
+      // Multiple 선택인 경우
+      const currentValues = Array.isArray(value) ? value : [];
+      const newValues = currentValues.includes(optionValue)
+        ? currentValues.filter((v) => v !== optionValue) // 이미 선택된 경우 제거
+        : [...currentValues, optionValue]; // 새로운 선택 추가
+
+      onChange({ target: { value: newValues } });
+      // Multiple 선택에서는 드롭다운을 닫지 않음
+    } else {
+      // Single 선택인 경우
+      onChange({ target: { value: optionValue } });
+      setSelectedLabel(optionLabel);
+      setIsOpen(false);
+    }
   };
 
   // 드롭다운 토글
@@ -90,31 +126,36 @@ const SelectComponent = ({
     if (!label) return null;
 
     return (
-      <label htmlFor={label} className={styles["select__label"]}>
+      <label htmlFor={label} className={styles["select-label"]}>
         {label}{" "}
-        {required && <span className={styles["select__required"]}>*</span>}
+        {required && <span className={styles["select-required"]}>*</span>}
       </label>
     );
   };
 
   // 선택된 텍스트 렌더링
   const renderSelectedText = () => (
-    <span className={styles["select__selected-text"]}>
+    <span className={styles["select-selected-text"]}>
       {selectedLabel || placeholder}
     </span>
   );
 
   // 화살표 아이콘 렌더링
-  const renderArrow = () => <span className={styles["select__arrow"]}>▼</span>;
+  const renderArrow = () => <span className={styles["select-arrow"]}>▼</span>;
 
   // 드롭다운 옵션들 렌더링
   const renderDropdownOptions = () => (
-    <div className={styles["select__dropdown-content"]}>
+    <div className={styles["select-dropdown-content"]}>
       {React.Children.map(children, (child) => {
         if (React.isValidElement(child)) {
+          const isSelected = multiple
+            ? Array.isArray(value) && value.includes(child.props.value)
+            : child.props.value === value;
+
           return React.cloneElement(child, {
             onClick: handleOptionClick,
-            selected: child.props.value === value,
+            selected: isSelected,
+            multiple: multiple,
           });
         }
         return child;
@@ -127,9 +168,7 @@ const SelectComponent = ({
     if (!isOpen) return null;
 
     return (
-      <div className={styles["select__dropdown"]}>
-        {renderDropdownOptions()}
-      </div>
+      <div className={styles["select-dropdown"]}>{renderDropdownOptions()}</div>
     );
   };
 
@@ -140,8 +179,8 @@ const SelectComponent = ({
     return (
       <p
         id={`${label}-helper-text`}
-        className={`${styles["select__helper-text"]} ${
-          error ? styles["select__helper-text--error"] : ""
+        className={`${styles["select-helper-text"]} ${
+          error ? styles["select-helper-text--error"] : ""
         }`}
       >
         {helperText}
@@ -156,7 +195,7 @@ const SelectComponent = ({
     >
       {renderLabel()}
 
-      <div className={styles["select__custom-wrapper"]}>
+      <div className={styles["select-custom-wrapper"]}>
         <div
           className={getSelectClassName()}
           onClick={toggleDropdown}
@@ -198,9 +237,9 @@ const OptionComponent = ({
 
   // 옵션 클래스명 생성
   const getOptionClassName = () => {
-    const baseClass = styles["select__option"];
-    const selectedClass = selected ? styles["select__option--selected"] : "";
-    const disabledClass = disabled ? styles["select__option--disabled"] : "";
+    const baseClass = styles["select-option"];
+    const selectedClass = selected ? styles["select-option--selected"] : "";
+    const disabledClass = disabled ? styles["select-option--disabled"] : "";
     const customClass = className;
 
     return [baseClass, selectedClass, disabledClass, customClass]

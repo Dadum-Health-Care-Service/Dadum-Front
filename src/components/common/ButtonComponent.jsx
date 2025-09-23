@@ -4,6 +4,7 @@ import styles from "./ButtonComponent.module.css";
 // 메인 ButtonComponent
 const ButtonComponent = ({
   children,
+  label,
   variant = "primary",
   size = "medium",
   disabled = false,
@@ -11,6 +12,7 @@ const ButtonComponent = ({
   onClick,
   type = "button",
   className = "",
+  required = false,
   ...props
 }) => {
   // 버튼 클래스명 생성
@@ -42,15 +44,23 @@ const ButtonComponent = ({
   };
 
   return (
-    <button
-      type={type}
-      className={getButtonClassName()}
-      onClick={handleClick}
-      disabled={disabled}
-      {...props}
-    >
-      {children}
-    </button>
+    <>
+      {label && (
+        <label className={styles["button-label"]}>
+          {label}
+          {required && <span className={styles["button-required"]}>*</span>}
+        </label>
+      )}
+      <button
+        type={type}
+        className={getButtonClassName()}
+        onClick={handleClick}
+        disabled={disabled}
+        {...props}
+      >
+        {children}
+      </button>
+    </>
   );
 };
 
