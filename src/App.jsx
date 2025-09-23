@@ -44,28 +44,30 @@ function AppContent(){
 
   return (
     <>
-      {user && <GNB isMobile={isMobile}/> }
-      <Routes>
-        <Route path="/" element={user ? <Home/> : <MainView/>}></Route>
-        <Route path="/login" element={<Login/>}></Route>
-        <Route path="/signup" element={<SignUp/>}></Route>
+      <main style={{paddingBottom:'100px'}}>
+        {user && <GNB isMobile={isMobile}/> }
+        <Routes>
+          <Route path="/" element={user ? <Home/> : <MainView/>}></Route>
+          <Route path="/login" element={<Login/>}></Route>
+          <Route path="/signup" element={<SignUp/>}></Route>
 
-        {user ? (
-          <>
-            <Route path="/routine" element={<Routine/>}></Route>
-            <Route path="/achievement" element={<Gamification/>}></Route>
-            <Route path="/pose" element={<PoseAccuracyMVP/>}></Route>
-            <Route path="/calorie" element={<CalorieCam/>}></Route>
-            <Route path="/daily" element={<DailySummary/>}></Route>
-            <Route path="/statistics" element={<div><h1>통계페이지는 개발 중 입니다.</h1></div>}></Route>
-            <Route path="/social" element={<Social/>}></Route>
-            <Route path="/mypage/*" element={<MyPage/>}></Route>
-            <Route path="/admin" element={<Admin/>}></Route>
-          </>
-        ) : (
-          <Route path="*" element={<Navigate to="/" replace />} />
-        )}
-      </Routes>
+          {user ? (
+            <>
+              <Route path="/routine" element={<Routine/>}></Route>
+              <Route path="/achievement" element={<Gamification/>}></Route>
+              <Route path="/pose" element={<PoseAccuracyMVP/>}></Route>
+              <Route path="/calorie" element={<CalorieCam/>}></Route>
+              <Route path="/daily" element={<DailySummary/>}></Route>
+              <Route path="/statistics" element={<div><h1>통계페이지는 개발 중 입니다.</h1></div>}></Route>
+              <Route path="/social" element={<Social/>}></Route>
+              <Route path="/mypage/*" element={<MyPage/>}></Route>
+              <Route path="/admin" element={<Admin/>}></Route>
+            </>
+          ) : (
+            <Route path="*" element={<Navigate to="/" replace />} />
+          )}
+        </Routes>
+      </main>
     </>
   );
 
