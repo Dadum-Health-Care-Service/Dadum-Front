@@ -9,9 +9,14 @@ import { POST } from "../../../utils/api/api";
 import { AuthContext } from "../../../context/AuthContext";
 
 import styles from "./Login.module.css";
+import { useNavigate } from "react-router-dom";
+import { useModal } from "../../../context/ModalContext";
 
-function Login({ setIsLoggedIn, setActiveTab }) {
-  // 현재 보여줄 뷰를 관리하는 상태 ('login', 'register', 'passwordless')
+function Login() {
+  const navigate = useNavigate();
+  const {showBasicModal}=useModal();
+
+  // 현재 보여줄 뷰를 관리하는 상태 ('login', 'passwordless')
   const [view, setView] = useState("login");
   const { dispatch } = useContext(AuthContext);
   // 로그인 타입 라디오 버튼 상태
@@ -20,11 +25,6 @@ function Login({ setIsLoggedIn, setActiveTab }) {
   // 로그인 폼 입력 상태
   const [loginId, setLoginId] = useState("");
   const [loginPw, setLoginPw] = useState("");
-
-  // 회원가입 폼 입력 상태
-  const [signupId, setSignupId] = useState("");
-  const [signupPw, setSignupPw] = useState("");
-  const [signupPwConfirm, setSignupPwConfirm] = useState("");
 
   // PushConnector 연결
   const [pushConnectorUrl, setPushConnectorUrl] = useState("");
@@ -116,7 +116,7 @@ function Login({ setIsLoggedIn, setActiveTab }) {
           setPushConnectorToken(qrData.pushConnectorToken);
         } catch (error) {
           console.error("QR 코드 정보 가져오기 오류:", error);
-          alert(error.message);
+          showBasicModal(error.message);
           setView("login"); // 실패 시 로그인 화면으로
         } finally {
           setIsQrLoading(false);
@@ -147,7 +147,7 @@ function Login({ setIsLoggedIn, setActiveTab }) {
             if (res.data.result === "OK") {
               setIsQrRegistered(true);
               setIsLoggedIn(true);
-              setActiveTab("home");
+              navigate('/');
             }
           });
         }
@@ -203,7 +203,7 @@ function Login({ setIsLoggedIn, setActiveTab }) {
                     console.log(res.data);
                     dispatch({ type: "LOGIN", user: res.data });
                     setIsLoggedIn(true);
-                    setActiveTab("home");
+                    navigate('/');
                   });
                 } else {
                   await POST(
@@ -215,7 +215,7 @@ function Login({ setIsLoggedIn, setActiveTab }) {
                     false,
                     "passwordless"
                   ).then((res) => {
-                    alert("사용자에 의한 연결 취소");
+                    showBasicModal("사용자에 의한 연결 취소");
                     setCurrentTerm(0);
                     setServicePassword("");
                   });
@@ -234,7 +234,7 @@ function Login({ setIsLoggedIn, setActiveTab }) {
     e.preventDefault(); // 폼 기본 제출 동작 방지
 
     if (!loginId) {
-      alert("아이디를 입력해주세요.");
+      showBasicModal("아이디를 입력해주세요.");
       return;
     }
 
@@ -243,7 +243,7 @@ function Login({ setIsLoggedIn, setActiveTab }) {
 
     if (loginType === "password") {
       if (!loginPw) {
-        alert("비밀번호를 입력해주세요.");
+        showBasicModal("비밀번호를 입력해주세요.");
         return;
       }
       console.log("로그인 방식: 비밀번호");
@@ -259,18 +259,15 @@ function Login({ setIsLoggedIn, setActiveTab }) {
       )
         .then((res) => {
           dispatch({ type: "LOGIN", user: res.data });
-          setIsLoggedIn(true);
-          setActiveTab("home");
+          navigate("/");
         })
         .catch((error) => {
           console.error("로그인 오류:", error);
-          if (error.response?.status === 403) {
-            console.log(error.response.data);
-            alert(error.response.data);
-          } else if (error.response?.status === 404) {
-            alert(error.response.data);
-          } else {
-            alert(error.response.data);
+          if (typeof error.response?.data === 'string'){
+            const msg = error.response.data;
+            showBasicModal(msg.substring(msg.indexOf(':')+1),'로그인 실패');
+          }else {
+            showBasicModal('로그인에 실패하였습니다.','네트워크 에러');
           }
         });
 
@@ -354,50 +351,7 @@ function Login({ setIsLoggedIn, setActiveTab }) {
 
     return interval;
   };
-  // 회원가입 처리 핸들러
-  const handleSignup = async (e) => {
-    e.preventDefault();
-
-    if (!signupId || !signupPw || !signupPwConfirm) {
-      alert("모든 항목을 입력해주세요.");
-      return;
-    }
-    if (signupPw !== signupPwConfirm) {
-      alert("비밀번호가 일치하지 않습니다.");
-      return;
-    }
-
-    try {
-      //메인서버 가입
-      await POST(
-        "/users/signup",
-        {
-          usersName: "테스트유저",
-          email: signupId,
-          profileImg: "/img/userAvatar.png",
-          nickName: "테스트닉네임",
-          phoneNum: "01012345678",
-          biosDto: {
-            gender: false,
-            age: 40,
-            height: 180,
-            weight: 90,
-          },
-          authDto: {
-            password: signupPw,
-          },
-        },
-        false
-      );
-
-      alert("회원가입이 완료되었습니다! 로그인 페이지로 이동합니다.");
-      setView("login"); // 성공 시 로그인 뷰로 전환
-    } catch (error) {
-      console.error("회원가입 통신 오류:", error);
-      alert("서버와 통신 중 오류가 발생했습니다.");
-    }
-  };
-
+  
   const handlePasswordlessRegister = async () => {
     await POST(
       "/join",
@@ -423,7 +377,6 @@ function Login({ setIsLoggedIn, setActiveTab }) {
           title="로그인"
           subtitle="다듬에 오신 것을 환영합니다."
           onSubmit={handleLogin}
-          showActions={false}
           variant="elevated"
           size="large"
           layout="vertical"
@@ -503,83 +456,13 @@ function Login({ setIsLoggedIn, setActiveTab }) {
             <ButtonComponent
               variant="outline-primary"
               size="large"
-              onClick={() => setView("register")}
+              onClick={()=>navigate('/signup')}
               fullWidth
             >
               계정이 없으신가요? 회원가입
             </ButtonComponent>
           </div>
         </FormComponent>
-      )}
-
-      {/* 회원가입 뷰 */}
-      {view === "register" && (
-        <div className={styles["register-container"]}>
-          <FormComponent
-            title="회원가입"
-            subtitle="몇 가지 정보만 입력하면 바로 시작할 수 있어요."
-            onSubmit={handleSignup}
-            showActions={false}
-            variant="elevated"
-            size="large"
-            layout="vertical"
-          >
-            <FormComponent.Field label="아이디" required>
-              <InputComponent
-                placeholder="사용할 아이디를 입력하세요"
-                value={signupId}
-                onChange={(e) => setSignupId(e.target.value)}
-                required
-                variant="outlined"
-                size="medium"
-              />
-            </FormComponent.Field>
-
-            <FormComponent.Field label="비밀번호" required>
-              <InputComponent
-                type="password"
-                placeholder="비밀번호를 입력하세요"
-                value={signupPw}
-                onChange={(e) => setSignupPw(e.target.value)}
-                required
-                variant="outlined"
-                size="medium"
-              />
-            </FormComponent.Field>
-
-            <FormComponent.Field label="비밀번호 확인" required>
-              <InputComponent
-                type="password"
-                placeholder="비밀번호를 다시 한번 입력하세요"
-                value={signupPwConfirm}
-                onChange={(e) => setSignupPwConfirm(e.target.value)}
-                required
-                variant="outlined"
-                size="medium"
-              />
-            </FormComponent.Field>
-
-            <div className={styles["button-group"]}>
-              <ButtonComponent
-                type="submit"
-                variant="primary"
-                size="large"
-                onClick={handleSignup}
-                fullWidth
-              >
-                가입하기
-              </ButtonComponent>
-              <ButtonComponent
-                variant="outline-primary"
-                size="large"
-                onClick={() => setView("login")}
-                fullWidth
-              >
-                이미 계정이 있으신가요? 로그인
-              </ButtonComponent>
-            </div>
-          </FormComponent>
-        </div>
       )}
 
       {/* 패스워드리스 등록 뷰 */}
@@ -640,7 +523,6 @@ function Login({ setIsLoggedIn, setActiveTab }) {
           title="로그인"
           subtitle="다듬에 오신 것을 환영합니다."
           onSubmit={handleLogin}
-          showActions={false}
           variant="elevated"
           size="large"
           layout="vertical"
@@ -655,8 +537,7 @@ function Login({ setIsLoggedIn, setActiveTab }) {
               variant="outline-primary"
               size="large"
               onClick={() => {
-                // App.jsx의 setIsLoggedIn을 호출하여 메인 앱으로 이동
-                window.location.reload(); // 임시로 페이지 새로고침
+                navigate('/');
               }}
               fullWidth
             >
@@ -669,14 +550,6 @@ function Login({ setIsLoggedIn, setActiveTab }) {
               fullWidth
             >
               패스워드리스 등록
-            </ButtonComponent>
-            <ButtonComponent
-              variant="outline-primary"
-              size="large"
-              onClick={() => setView("login")}
-              fullWidth
-            >
-              다시 로그인
             </ButtonComponent>
           </div>
         </FormComponent>
