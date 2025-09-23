@@ -42,9 +42,11 @@ function AppContent(){
 
   }, []);
 
+  const pagePadding = user ? "100px" : "0px"
+
   return (
     <>
-      <main style={{paddingBottom:'100px'}}>
+      <main style={{paddingBottom:pagePadding}}>
         {user && <GNB isMobile={isMobile}/> }
         <Routes>
           <Route path="/" element={user ? <Home/> : <MainView/>}></Route>
@@ -64,7 +66,7 @@ function AppContent(){
               <Route path="/admin" element={<Admin/>}></Route>
             </>
           ) : (
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="/*" element={<Navigate to="/" replace />} />
           )}
         </Routes>
       </main>

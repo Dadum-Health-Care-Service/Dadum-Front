@@ -5,12 +5,16 @@ import Profile from "./Profile";
 import MySocial from "./MySocial";
 import Settings from "./Settings";
 import HealthData from "./HealthData";
+import { useNavigate } from "react-router-dom";
 
 export default function MyPage(){
+    const navigate = useNavigate();
+
     //선택한 마이페이지 헤더 탭에 따라 페이지 렌더
     const [activeHeaderMenu,setActiveHeaderMenu]=useState("profile");
     const handleHeaderMenuClick = (menuId)=>{
         setActiveHeaderMenu(menuId);
+        navigate(`/mypage/${menuId}`);
         console.log("선택된 마이페이지 헤더 메뉴:",menuId);
     }
 
