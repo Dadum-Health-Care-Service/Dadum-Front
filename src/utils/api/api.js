@@ -78,7 +78,7 @@ function PUT(URL, data={}, accessToken, isAuth = true, source = "main") {
 
 function DELETE(URL, data={}, accessToken,  isAuth = true, source = "main") {
   try {
-    return axios.delete(host[source] + URL, data, {
+    return axios.delete(host[source] + URL, {
       data: data,
       headers: {
         Authorization: isAuth
