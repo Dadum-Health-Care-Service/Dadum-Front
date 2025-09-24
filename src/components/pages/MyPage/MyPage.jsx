@@ -1,16 +1,25 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import HeaderComponent from "../../common/HeaderComponent";
 import ContainerComponent from "../../common/ContainerComponent";
 import Profile from "./Profile";
 import MySocial from "./MySocial";
 import Settings from "./Settings";
 import HealthData from "./HealthData";
+import { useNavigate } from "react-router-dom";
+import ButtonComponent from "../../common/ButtonComponent";
+import { AuthContext } from "../../../context/AuthContext";
+import { useModal } from "../../../context/ModalContext";
 
 export default function MyPage(){
+    const navigate = useNavigate();
+    const {dispatch}=useContext(AuthContext);
+    const {showConfirmModal}=useModal();
+
     //선택한 마이페이지 헤더 탭에 따라 페이지 렌더
     const [activeHeaderMenu,setActiveHeaderMenu]=useState("profile");
     const handleHeaderMenuClick = (menuId)=>{
         setActiveHeaderMenu(menuId);
+        navigate(`/mypage/${menuId}`);
         console.log("선택된 마이페이지 헤더 메뉴:",menuId);
     }
 
@@ -21,6 +30,10 @@ export default function MyPage(){
             case "settings": return <Settings />
             default: return <Profile />
         }
+    }
+
+    const handleLogout = ()=>{
+        showConfirmModal("정말로 로그아웃 하시겠습니까?","로그아웃","",()=>{dispatch({type:"LOGOUT"})});
     }
 
     return <>
@@ -64,16 +77,19 @@ export default function MyPage(){
                                 설정
                             </HeaderComponent.MenuItem>
                         </HeaderComponent.Navigation>
+                        <ButtonComponent
+                            className="mb-2"
+                            size="small"
+                            onClick={handleLogout}
+                        >
+                            로그아웃
+                        </ButtonComponent>
                     </HeaderComponent>
                 </div>
             </ContainerComponent>
-            <ContainerComponent size="large">
-                <div>
-                    <HeaderComponent.Section>
-                        {routeMyPage(activeHeaderMenu)}
-                    </HeaderComponent.Section>
-                </div>
-            </ContainerComponent>
+            <div>
+                {routeMyPage(activeHeaderMenu)}
+            </div>
         </div>
     
     </>
