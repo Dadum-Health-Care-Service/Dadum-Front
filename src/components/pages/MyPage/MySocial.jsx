@@ -18,8 +18,11 @@ export default function MySocial(){
     const [commentData,setCommentData]=useState([]);
     const [selectedType,setSelectedType]=useState(null);
     const navigate = useNavigate();
+    const [loading, setLoding]=useState(false);
 
     useEffect(()=>{
+        if(!user || !user.usersId) return;
+
         axios.get(`http://localhost:8080/api/v1/users/${user.usersId}`)
             .then(res=>{
                 setUserData(prev=>({
@@ -33,54 +36,63 @@ export default function MySocial(){
                 console.log(e);
                 showBasicModal("사용자 정보를 가져오는 중 오류가 발생하였습니다.","네트워크 에러");
             });
-    },[user.usersId]);
+    },[user]);
+
+    useEffect(()=>{
+        if(!selectedType || !user || !user.accessToken) return;
+
+        const fetchData = async ()=>{
+            setLoding(true);
+            if(selectedType === "posts"){
+                try{
+                    const res = await axios
+                    .get('http://localhost:8080/api/v1/posts',{
+                        headers: {
+                            Authorization: `Bearer ${user.accessToken}`,
+                        },
+                    });
+                    setPostData(res.data);
+                } catch (err){
+                    console.log(err);
+                    showBasicModal("내가 작성한 게시글 조회에 실패하였습니다","네트워크 에러");
+                }
+            } else if (selectedType === "comments"){
+                try{
+                    const cData = await axios.get('http://localhost:8080/api/v1/comments/list',{
+                        headers: {
+                            Authorization: `Bearer ${user.accessToken}`,
+                        },
+                    });
+                    const comments = cData.data;
+                    const commentsWithPostTitle = await Promise.all(
+                        comments.map(async comment =>{
+                            const postRes = await axios.get(`http://localhost:8080/api/v1/posts/${comment.postId}`,{
+                                headers: { Authorization: `Bearer ${user.accessToken}` },
+                            });
+                            return {...comment,postTitle:postRes.data.postTitle};
+                        }),
+                    );
+                    setCommentData(commentsWithPostTitle);
+                } catch (err){
+                    console.log(err);
+                    showBasicModal("내가 작성한 댓글 조회에 실패하였습니다","네트워크 에러");
+                }
+            }
+            setLoding(false);
+        };
+        fetchData();
+    },[selectedType,user]);
 
     const handleSelectedType = (type)=>{
         setSelectedType(type);
         console.log("선택된 항목:", type);
     }
 
-    const fetchPosts = async ()=>{
-        const data = await axios
-            .get('http://localhost:8080/api/v1/posts',{
-                headers: {
-                    Authorization: `Bearer ${user.accessToken}`,
-                },
-            })
-            .then(res=>{
-                setPostData(res.data);
-            })
-            .catch(err=>{
-                console.log(err);
-                showBasicModal("내가 작성한 게시글 조회에 실패하였습니다","네트워크 에러");
-            });
-    };
-
-    const fetchComments = async ()=>{
-        const cData = await axios.get('http://localhost:8080/api/v1/comments/list',{
-            headers: {
-                Authorization: `Bearer ${user.accessToken}`,
-            },
-        });
-        const comments = cData.data;
-        const commentsWithPostTitle = await Promise.all(
-            comments.map(async comment =>{
-                const postRes = await axios.get(`http://localhost:8080/api/v1/posts/${comment.postId}`,{
-                    headers: { Authorization: `Bearer ${user.accessToken}` },
-                });
-                return {...comment,postTitle:postRes.data.postTitle};
-            }),
-        );
-        setCommentData(commentsWithPostTitle);
-    }
-
-    useEffect(()=>{
-        fetchPosts();
-        fetchComments();
-    },[]);
-
-    const renderPosts = (type)=>{
-        switch(type){
+    const renderContent = () =>{
+        if(loading){
+            return <div>로딩 중 ...</div>;
+        }
+        switch(selectedType){
             case "posts":{
                 return (
                     <ListComponent variant="elevated">
@@ -100,6 +112,7 @@ export default function MySocial(){
                                 <div>등록일</div>
                             </div>
                         </ListGroup.Item>
+                        <hr className="text-secondary"/>
                         {postData.length > 0 ? (
                             postData.map((post,i)=>{
                                 return (
@@ -108,7 +121,11 @@ export default function MySocial(){
                                         action
                                         onClick={()=>navigate('/')}
                                     >
-                                        <div>
+                                        <div style={{
+                                            display:'grid',
+                                            gridTemplateColumns:'0.2fr 0.5fr 1fr 0.5fr',
+                                            fontSize:'0.9rem'
+                                        }}>
                                             <React.Fragment>
                                                 <div>{post.postId}</div>
                                                 <div>{post.postTitle}</div>
@@ -120,7 +137,7 @@ export default function MySocial(){
                                 );
                             })
                         ):(
-                            <div>작성한 글이 없습니다</div>
+                            <div className="p-3">작성한 글이 없습니다</div>
                         )}
                     </ListComponent>
                 )
@@ -130,27 +147,33 @@ export default function MySocial(){
                     <ListComponent variant="elevated">
                         <ListComponent.Header>나의 댓글</ListComponent.Header>
                         <div className="list-group list-group-flush border-bottom scrollarea">
-                            <Link
-                                to={"/"}
-                                className="list-group-item list-group-item-action py-3 lh-tight"
-                            >
-                                <div className="d-flex w-100 align-items-center justify-content-between">
-                                    <strong className="mb-1">댓글</strong>
-                                </div>
-                                <div className="col-10 mb-1 small text-uppercase">글 제목1</div>
-                            </Link>
+                            {commentData.length > 0 ? (
+                                commentData.map(comment=>{
+                                    return (
+                                        <Link
+                                            to={`/post/${comment.postId}`}
+                                            className="list-group-item list-group-item-action py-3 lh-tight"
+                                        >
+                                            <div className="d-flex w-100 align-items-center justify-content-between">
+                                                <strong className="mb-1">{comment.content}</strong>
+                                            </div>
+                                            <div className="col-10 mb-1 small text-uppercase">{comment.postTitle}</div>
+                                        </Link>
+                                    );
+                                })
+                            ) : (
+                                <div className="p-3">작성한 댓글이 없습니다</div>
+                            )}
                         </div>
                     </ListComponent>
                 )
             }
             default :{
-                return<>
-                
-                </>
+                return<></>
             }
         }
     }
-
+    
     return <>
         <div>
             <div>
@@ -164,11 +187,11 @@ export default function MySocial(){
                         <div className="d-flex flex-row justify-content-around mt-4">
                             <div className="d-flex flex-column align-items-center">
                                 <small className="text-muted">나의 글</small>
-                                <h6>0</h6>
+                                <h6>{postData.length}</h6>
                             </div>
                             <div className="d-flex flex-column align-items-center">
                                 <small className="text-muted">나의 댓글</small>
-                                <h6>0</h6>
+                                <h6>{commentData.length}</h6>
                             </div>
                         </div>
                     </Card>
@@ -194,7 +217,7 @@ export default function MySocial(){
                     </div>
                 </div>
                 <div className="pt-3">
-                    {renderPosts(selectedType)}
+                    {renderContent()}
                 </div>
             </div>
         </div>
