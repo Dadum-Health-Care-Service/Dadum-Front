@@ -16,7 +16,6 @@
   box-shadow: 0 4px 20px rgba(79, 172, 254, 0.4);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1000;
-  overflow: hidden;
 }
 
 .floating-chat-icon:hover {
@@ -30,7 +29,8 @@
 
 .floating-chat-icon:focus {
   outline: none;
-  box-shadow: 0 4px 20px rgba(79, 172, 254, 0.4), 0 0 0 3px rgba(79, 172, 254, 0.2);
+  box-shadow: 0 4px 20px rgba(79, 172, 254, 0.4),
+    0 0 0 3px rgba(79, 172, 254, 0.2);
 }
 
 /* 크기별 스타일 */
@@ -66,7 +66,8 @@
 }
 
 .floating-icon--open:focus {
-  box-shadow: 0 4px 20px rgba(255, 107, 107, 0.4), 0 0 0 3px rgba(255, 107, 107, 0.2);
+  box-shadow: 0 4px 20px rgba(255, 107, 107, 0.4),
+    0 0 0 3px rgba(255, 107, 107, 0.2);
 }
 
 /* 아이콘 내용 */
@@ -146,17 +147,17 @@
     bottom: 90px; /* 모바일에서 하단 네비게이션과의 간격 조정 */
     right: 16px;
   }
-  
+
   .floating-icon--small {
     bottom: 80px;
     right: 12px;
   }
-  
+
   .floating-icon--medium {
     bottom: 85px;
     right: 14px;
   }
-  
+
   .floating-icon--large {
     bottom: 90px;
     right: 16px;
@@ -168,10 +169,10 @@
   .floating-chat-icon {
     width: 56px;
     height: 56px;
-    bottom: 85px;
+    bottom: 120px;
     right: 12px;
   }
-  
+
   .floating-icon__svg {
     width: 22px;
     height: 22px;
@@ -183,7 +184,7 @@
   .floating-chat-icon {
     transition: none;
   }
-  
+
   .floating-icon__badge {
     animation: none;
   }
@@ -194,9 +195,8 @@
   .floating-chat-icon {
     box-shadow: 0 4px 20px rgba(79, 172, 254, 0.6);
   }
-  
+
   .floating-chat-icon:hover {
     box-shadow: 0 8px 30px rgba(79, 172, 254, 0.8);
   }
 }
-

@@ -76,7 +76,7 @@ export default function SignUp(){
                 setFormData((prev)=>({...prev,email:""}));
             }catch(error){
                 console.log(error);
-                if(error?.status===400) {
+                if(error?.response?.status===400) {
                     showBasicModal('사용 가능한 이메일 입니다','이메일 중복 확인');
                     setCheckEmail(true);
                 }
@@ -103,6 +103,8 @@ export default function SignUp(){
     };
 
     const handleSignup =async (e) =>{
+        e.preventDefault();
+
         const newErrors = {};
         if(!formData.email) newErrors.email = "이메일은 필수 입력값입니다";
         else if(!checkEmail) {
@@ -158,7 +160,7 @@ export default function SignUp(){
                     <h1 className="login-title">🎯 다듬</h1>
                     <p className="login-subtitle">루틴을 관리하고 자세를 분석해보세요</p>
                 </div>
-            <div style={{padding:"0 8rem"}}>
+            <div style={{padding:"0 4rem"}}>
                 <FormComponent
                     title="회원가입"
                     subtitle="몇 가지 정보만 입력하면 바로 시작할 수 있어요."
@@ -333,7 +335,6 @@ export default function SignUp(){
                             type="submit"
                             variant="primary"
                             size="large"
-                            onClick={handleSignup}
                             fullWidth
                         >
                             가입하기

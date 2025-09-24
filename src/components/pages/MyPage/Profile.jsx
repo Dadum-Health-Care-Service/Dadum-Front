@@ -242,284 +242,288 @@ export default function Profile(){
     return<>
         {//clickEdit상태에 따라 프로필/프로필 수정 페이지 렌더링
         !clickEdit ?
-            (<ContainerComponent variant="filled" className="p-4">
-                <ContainerComponent variant="outlined" className="profile-head mb-3">
-                    <div className="d-flex flex-column align-items-center text-center px-4">
-                        <img
-                            className="rounded-circle mt-5 mb-3"
-                            width="150px"
-                            src={profile.profileImg || "/img/userAvatar.png"}
-                        />
-                    </div>
-                    <div className="d-flex flex-column p-3">    
-                        <div>이름</div>
-                        <div className="font-weight-bold fs-1 mb-3 text-center" style={{
-                            background: "#f8fafc",
-                            borderRadius: "15px"
-                        }}>{profile.name || '이름 없음'}</div>
-                        <div>닉네임</div>
-                        <div className="font-weight-bold fs-3 mb-3 text-center" style={{
-                            background: "#f8fafc",
-                            borderRadius: "15px"
-                        }}>{profile.nickName || '닉네임 없음'}</div>
-                        <div>아이디</div>
-                        <div className="text-muted fs-5 mb-3 text-center" style={{
-                            background: "#f8fafc",
-                            borderRadius: "15px",
-                            height: "30px"
-                        }}>{profile.email || '이메일 없음'}</div>
-                    </div>
-                </ContainerComponent>
-                <ContainerComponent variant="outlined" className="profile-info mb-3">
-                    <div className="d-flex flex-column p-3">    
-                        <div>전화번호</div>
-                        {
-                            profile.phoneNum && profile.phoneNum.trim().length === 11 ? (
-                                <div className="text-muted fs-5 mb-3 text-center" style={{
-                                    background: "#f8fafc",
-                                    borderRadius: "15px",
-                                    height: "30px"
-                                }}>{profile.phoneNum.substring(0, 3)}-{profile.phoneNum.substring(3, 7)}-
-                                    {profile.phoneNum.substring(7, profile.phoneNum.length)}
-                                </div>
-                            ) : (
-                                <div className="text-muted fs-5 mb-3 text-center" style={{
-                                    background: "#f8fafc",
-                                    borderRadius: "15px",
-                                    height: "30px"
-                                }}>{profile.phoneNum || '전화번호 정보가 없습니다'}
-                                </div>
-                            )
-                        }
-                        <div>가입일</div>
-                        <div className="text-muted fs-5 mb-3 text-center" style={{
-                            background: "#f8fafc",
-                            borderRadius: "15px",
-                            height: "30px"
-                        }}>{profile.regDate || '가입일 정보가 없습니다'}</div>
-                    </div>
-                </ContainerComponent>
-                <ContainerComponent variant="outlined" className="body-info">
-                    <div className="d-flex flex-column p-3">    
-                        <div>나이</div>
-                        <div className="text-muted fs-5 mb-3 text-center" style={{
-                            background: "#f8fafc",
-                            borderRadius: "15px",
-                            height: "30px"
-                        }}>
+            (<ContainerComponent variant="default" className="mb-5">
+                <ContainerComponent variant="filled" className="p-4">
+                    <ContainerComponent variant="outlined" className="profile-head mb-3">
+                        <div className="d-flex flex-column align-items-center text-center px-4">
+                            <img
+                                className="rounded-circle mt-5 mb-3"
+                                width="150px"
+                                src={profile.profileImg || "/img/userAvatar.png"}
+                            />
+                        </div>
+                        <div className="d-flex flex-column p-3">    
+                            <div>이름</div>
+                            <div className="font-weight-bold fs-1 mb-3 text-center" style={{
+                                background: "#f8fafc",
+                                borderRadius: "15px"
+                            }}>{profile.name || '이름 없음'}</div>
+                            <div>닉네임</div>
+                            <div className="font-weight-bold fs-3 mb-3 text-center" style={{
+                                background: "#f8fafc",
+                                borderRadius: "15px"
+                            }}>{profile.nickName || '닉네임 없음'}</div>
+                            <div>아이디</div>
+                            <div className="text-muted fs-5 mb-3 text-center" style={{
+                                background: "#f8fafc",
+                                borderRadius: "15px",
+                                height: "30px"
+                            }}>{profile.email || '이메일 없음'}</div>
+                        </div>
+                    </ContainerComponent>
+                    <ContainerComponent variant="outlined" className="profile-info mb-3">
+                        <div className="d-flex flex-column p-3">    
+                            <div>전화번호</div>
                             {
-                                //선택정보가 없는 경우 정보가 없다고 표시
-                                profile.age && profile.age !== 0 ? (
-                                    <span>{profile.age}세</span>
+                                profile.phoneNum && profile.phoneNum.trim().length === 11 ? (
+                                    <div className="text-muted fs-5 mb-3 text-center" style={{
+                                        background: "#f8fafc",
+                                        borderRadius: "15px",
+                                        height: "30px"
+                                    }}>{profile.phoneNum.substring(0, 3)}-{profile.phoneNum.substring(3, 7)}-
+                                        {profile.phoneNum.substring(7, profile.phoneNum.length)}
+                                    </div>
                                 ) : (
-                                    <span>나이 정보가 없습니다.</span>
+                                    <div className="text-muted fs-5 mb-3 text-center" style={{
+                                        background: "#f8fafc",
+                                        borderRadius: "15px",
+                                        height: "30px"
+                                    }}>{profile.phoneNum || '전화번호 정보가 없습니다'}
+                                    </div>
                                 )
                             }
+                            <div>가입일</div>
+                            <div className="text-muted fs-5 mb-3 text-center" style={{
+                                background: "#f8fafc",
+                                borderRadius: "15px",
+                                height: "30px"
+                            }}>{profile.regDate || '가입일 정보가 없습니다'}</div>
                         </div>
-                        <div>성별</div>
-                        <div className="text-muted fs-5 mb-3 text-center" style={{
-                            background: "#f8fafc",
-                            borderRadius: "15px",
-                            height: "30px"
-                        }}>{profile.gender === false ? '남자' : profile.gender === true ? '여자' : '성별 정보가 없습니다'}
+                    </ContainerComponent>
+                    <ContainerComponent variant="outlined" className="body-info">
+                        <div className="d-flex flex-column p-3">    
+                            <div>나이</div>
+                            <div className="text-muted fs-5 mb-3 text-center" style={{
+                                background: "#f8fafc",
+                                borderRadius: "15px",
+                                height: "30px"
+                            }}>
+                                {
+                                    //선택정보가 없는 경우 정보가 없다고 표시
+                                    profile.age && profile.age !== 0 ? (
+                                        <span>{profile.age}세</span>
+                                    ) : (
+                                        <span>나이 정보가 없습니다.</span>
+                                    )
+                                }
+                            </div>
+                            <div>성별</div>
+                            <div className="text-muted fs-5 mb-3 text-center" style={{
+                                background: "#f8fafc",
+                                borderRadius: "15px",
+                                height: "30px"
+                            }}>{profile.gender === false ? '남자' : profile.gender === true ? '여자' : '성별 정보가 없습니다'}
+                            </div>
+                            <div>키</div>
+                            <div className="text-muted fs-5 mb-3 text-center" style={{
+                                background: "#f8fafc",
+                                borderRadius: "15px",
+                                height: "30px"
+                            }}>
+                                {profile.height && profile.height !== 0 ? (
+                                    <span>{profile.height}cm</span>
+                                    ) : (
+                                    <span>키 정보가 없습니다.</span>
+                                )}
+                            </div>
+                            <div>몸무게</div>
+                            <div className="text-muted fs-5 mb-3 text-center" style={{
+                                background: "#f8fafc",
+                                borderRadius: "15px",
+                                height: "30px"
+                            }}>
+                                {profile.weight && profile.weight !== 0 ? (
+                                    <span>{profile.weight}kg</span>
+                                    ) : (
+                                    <span>몸무게 정보가 없습니다.</span>
+                                )}
+                            </div>
                         </div>
-                        <div>키</div>
-                        <div className="text-muted fs-5 mb-3 text-center" style={{
-                            background: "#f8fafc",
-                            borderRadius: "15px",
-                            height: "30px"
-                        }}>
-                            {profile.height && profile.height !== 0 ? (
-                                <span>{profile.height}cm</span>
-                                ) : (
-                                <span>키 정보가 없습니다.</span>
-                            )}
-                        </div>
-                        <div>몸무게</div>
-                        <div className="text-muted fs-5 mb-3 text-center" style={{
-                            background: "#f8fafc",
-                            borderRadius: "15px",
-                            height: "30px"
-                        }}>
-                            {profile.weight && profile.weight !== 0 ? (
-                                <span>{profile.weight}kg</span>
-                                ) : (
-                                <span>몸무게 정보가 없습니다.</span>
-                            )}
-                        </div>
+                    </ContainerComponent>
+                    <div className="d-flex pt-3 justify-content-center">
+                        <ButtonComponent variant="primary" size="medium" className="fs-6" onClick={()=>setClickEdit(true)}>
+                            수정
+                        </ButtonComponent>
                     </div>
                 </ContainerComponent>
-                <div className="d-flex pt-3 justify-content-center">
-                    <ButtonComponent variant="primary" size="medium" className="fs-6" onClick={()=>setClickEdit(true)}>
-                        수정
-                    </ButtonComponent>
-                </div>
             </ContainerComponent>)
         :   
             //프로필 수정 페이지 렌더링 -> 파일 선택 인풋 value 제어를 위해 InputComponent대신 input 사용, style로 스타일 통일
-            (<ContainerComponent variant="filled" className="p-4">
-                <ContainerComponent variant="outlined" className="profile-head mb-3">
-                    <div className="d-flex flex-column align-items-center text-center px-4">
-                        <img
-                            className="rounded-circle mt-5 mb-3"
-                            width="150px"
-                            src={inputs.profileImg}
-                        />
-                    </div>
-                    <div className="d-flex align-items-end justify-content-center px-3">
-                        <div className="d-flex flex-column align-items-start w-100">
-                            <label style={{
-                                fontSize:"12px",
-                                fontWeight:"500",
-                                color:"#374151",
-                                marginBottom:"4px",
-                                gap:"4px"
-                            }}>프로필 사진</label>
-                            <input
-                                type="file"
-                                accept="image/*"
-                                size="small"
-                                onChange={handleImageChange}
-                                className="myFile"
-                                ref={imgRef}
-                                style={{
-                                    width:"100%",
-                                    border:"2px solid #d1d5db",
-                                    borderRadius:"8px",
-                                    fontSize:"12px",
-                                    fontFamily:"inherit",
-                                    outline:"none",
-                                    background:"#ffffff",
-                                    color:"#1f2937",
-                                    padding:"9px 12px",
-                                    minHeight:"32px"
-                                }}
+            (<ContainerComponent variant="default" className="mb-5">
+                <ContainerComponent variant="filled" className="p-4">
+                    <ContainerComponent variant="outlined" className="profile-head mb-3">
+                        <div className="d-flex flex-column align-items-center text-center px-4">
+                            <img
+                                className="rounded-circle mt-5 mb-3"
+                                width="150px"
+                                src={inputs.profileImg}
                             />
                         </div>
-                        <ButtonComponent 
-                            variant="secondary" 
-                            size="small"
-                            onClick={(prev)=>{
-                                setInputs({...prev,profileImg:profile.profileImg});
-                                imgRef.current.value='';
-                            }}
-                            className="m-2 h-75"
-                        >x</ButtonComponent>
-                    </div>
-                    <div className="d-flex flex-column p-3">    
-                        <InputComponent
-                            label="이름"
-                            placeholder="이름을 입력하세요"
-                            value={profile.name}
-                            onChange={handleInputChange("name")}
-                            required
-                            error={errors.name}
-                            className="mb-3"
-                        />
-                        <InputComponent
-                            label="닉네임"
-                            placeholder="닉네임을 입력하세요"
-                            value={profile.nickName}
-                            onChange={handleInputChange("nickName")}
-                            required
-                            error={errors.nickName}
-                            className="mb-3"
-                        />
-                        <InputComponent
-                            label="아이디"
-                            placeholder="아이디를 입력하세요"
-                            value={profile.email}
-                            required
-                            disabled
-                            className="mb-3"
-                            helperText="아이디는 수정할 수 없습니다"
-                        />
-                    </div>
-                </ContainerComponent>
-                <ContainerComponent variant="outlined" className="profile-info mb-3">
-                    <div className="d-flex flex-column p-3">    
-                        <InputComponent
-                            label="전화번호"
-                            placeholder="전화번호를 입력하세요"
-                            value={profile.phoneNum}
-                            onChange={handleInputChange("phoneNum")}
-                            className="mb-3"
-                            required
-                            error={errors.phoneNum}
-                            helperText="전화번호는 숫자만 입력해주세요"
-                        />
-                        <InputComponent
-                            label="가입일"
-                            placeholder="가입일을 입력하세요"
-                            value={profile.regDate}
-                            disabled
-                            required
-                            className="mb-3"
-                            helperText="가입일은 수정할 수 없습니다"
-                        />
-                    </div>
-                </ContainerComponent>
-                <ContainerComponent variant="outlined" className="body-info">
-                    <div className="d-flex flex-column p-3"> 
-                        <InputComponent
-                            label="나이"
-                            placeholder="나이를 입력하세요"
-                            value={profile.age}
-                            onChange={handleInputChange("age")}
-                            className="mb-3"
-                        />
-                        <label className="labels">성별</label>
-                        <div className="d-flex justify-content-around">
-                            <div className="form-check">
+                        <div className="d-flex align-items-end justify-content-center px-3">
+                            <div className="d-flex flex-column align-items-start w-100">
+                                <label style={{
+                                    fontSize:"12px",
+                                    fontWeight:"500",
+                                    color:"#374151",
+                                    marginBottom:"4px",
+                                    gap:"4px"
+                                }}>프로필 사진</label>
                                 <input
-                                    className="form-check-input"
-                                    type="radio"
-                                    name="gender"
-                                    id="male"
-                                    value="false"
-                                    checked={inputs.gender === false}
-                                    onChange={handleInputChange("gender")}
+                                    type="file"
+                                    accept="image/*"
+                                    size="small"
+                                    onChange={handleImageChange}
+                                    className="myFile"
+                                    ref={imgRef}
+                                    style={{
+                                        width:"100%",
+                                        border:"2px solid #d1d5db",
+                                        borderRadius:"8px",
+                                        fontSize:"12px",
+                                        fontFamily:"inherit",
+                                        outline:"none",
+                                        background:"#ffffff",
+                                        color:"#1f2937",
+                                        padding:"9px 12px",
+                                        minHeight:"32px"
+                                    }}
                                 />
-                                <label className="form-check-label" htmlFor="male">
-                                    남자
-                                </label>
                             </div>
-                            <div className="form-check">
-                                <input
-                                    className="form-check-input"
-                                    type="radio"
-                                    name="gender"
-                                    id="female"
-                                    value="true"
-                                    checked={inputs.gender === true}
-                                    onChange={handleInputChange("gender")}
-                                />
-                                <label className="form-check-label" htmlFor="female">
-                                    여자
-                                </label>
-                            </div>
+                            <ButtonComponent 
+                                variant="secondary" 
+                                size="small"
+                                onClick={(prev)=>{
+                                    setInputs({...prev,profileImg:profile.profileImg});
+                                    imgRef.current.value='';
+                                }}
+                                className="m-2 h-75"
+                            >x</ButtonComponent>
                         </div>
-                        <InputComponent
-                            label="키"
-                            placeholder="키를 입력하세요"
-                            value={profile.height}
-                            onChange={handleInputChange("height")}
-                            className="mb-3"
-                        />
-                        <InputComponent
-                            label="몸무게"
-                            placeholder="몸무게를 입력하세요"
-                            value={profile.weight}
-                            onChange={handleInputChange("weight")}
-                            className="mb-3"
-                        />
+                        <div className="d-flex flex-column p-3">    
+                            <InputComponent
+                                label="이름"
+                                placeholder="이름을 입력하세요"
+                                value={profile.name}
+                                onChange={handleInputChange("name")}
+                                required
+                                error={errors.name}
+                                className="mb-3"
+                            />
+                            <InputComponent
+                                label="닉네임"
+                                placeholder="닉네임을 입력하세요"
+                                value={profile.nickName}
+                                onChange={handleInputChange("nickName")}
+                                required
+                                error={errors.nickName}
+                                className="mb-3"
+                            />
+                            <InputComponent
+                                label="아이디"
+                                placeholder="아이디를 입력하세요"
+                                value={profile.email}
+                                required
+                                disabled
+                                className="mb-3"
+                                helperText="아이디는 수정할 수 없습니다"
+                            />
+                        </div>
+                    </ContainerComponent>
+                    <ContainerComponent variant="outlined" className="profile-info mb-3">
+                        <div className="d-flex flex-column p-3">    
+                            <InputComponent
+                                label="전화번호"
+                                placeholder="전화번호를 입력하세요"
+                                value={profile.phoneNum}
+                                onChange={handleInputChange("phoneNum")}
+                                className="mb-3"
+                                required
+                                error={errors.phoneNum}
+                                helperText="전화번호는 숫자만 입력해주세요"
+                            />
+                            <InputComponent
+                                label="가입일"
+                                placeholder="가입일을 입력하세요"
+                                value={profile.regDate}
+                                disabled
+                                required
+                                className="mb-3"
+                                helperText="가입일은 수정할 수 없습니다"
+                            />
+                        </div>
+                    </ContainerComponent>
+                    <ContainerComponent variant="outlined" className="body-info">
+                        <div className="d-flex flex-column p-3"> 
+                            <InputComponent
+                                label="나이"
+                                placeholder="나이를 입력하세요"
+                                value={profile.age}
+                                onChange={handleInputChange("age")}
+                                className="mb-3"
+                            />
+                            <label className="labels">성별</label>
+                            <div className="d-flex justify-content-around">
+                                <div className="form-check">
+                                    <input
+                                        className="form-check-input"
+                                        type="radio"
+                                        name="gender"
+                                        id="male"
+                                        value="false"
+                                        checked={inputs.gender === false}
+                                        onChange={handleInputChange("gender")}
+                                    />
+                                    <label className="form-check-label" htmlFor="male">
+                                        남자
+                                    </label>
+                                </div>
+                                <div className="form-check">
+                                    <input
+                                        className="form-check-input"
+                                        type="radio"
+                                        name="gender"
+                                        id="female"
+                                        value="true"
+                                        checked={inputs.gender === true}
+                                        onChange={handleInputChange("gender")}
+                                    />
+                                    <label className="form-check-label" htmlFor="female">
+                                        여자
+                                    </label>
+                                </div>
+                            </div>
+                            <InputComponent
+                                label="키"
+                                placeholder="키를 입력하세요"
+                                value={profile.height}
+                                onChange={handleInputChange("height")}
+                                className="mb-3"
+                            />
+                            <InputComponent
+                                label="몸무게"
+                                placeholder="몸무게를 입력하세요"
+                                value={profile.weight}
+                                onChange={handleInputChange("weight")}
+                                className="mb-3"
+                            />
+                        </div>
+                    </ContainerComponent>
+                    <div className="d-flex pt-3 justify-content-center">
+                        <ButtonComponent variant="primary" size="medium" className="fs-6" onClick={()=>handleSubmit()}>
+                            저장
+                        </ButtonComponent>
                     </div>
                 </ContainerComponent>
-                <div className="d-flex pt-3 justify-content-center">
-                    <ButtonComponent variant="primary" size="medium" className="fs-6" onClick={()=>handleSubmit()}>
-                        저장
-                    </ButtonComponent>
-                </div>
             </ContainerComponent>)
         }
     </>

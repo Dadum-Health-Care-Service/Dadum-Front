@@ -18,6 +18,7 @@ import Chatbot from "./components/pages/Chatbot/Chatbot.jsx";
 import MyPage from "./components/pages/MyPage/MyPage.jsx";
 import Admin from "./components/pages/Admin/Admin.jsx";
 import PoseAccuracyMVP from "./components/pages/Pose/PoseAccuracyMVP.jsx";
+import SamplePage from "./components/pages/SamplePage/SamplePage.jsx"
 
 //Contexts
 import { AuthProvider, AuthContext } from "./context/AuthContext.jsx";
@@ -41,14 +42,17 @@ function AppContent(){
 
   }, []);
 
+  const pagePadding = user ? "100px" : "0px"
+
   return (
     <>
-      <main style={{paddingBottom:'100px'}}>
+      <main style={{paddingBottom:pagePadding}}>
         {user && <GNB isMobile={isMobile}/> }
         <Routes>
           <Route path="/" element={user ? <Home/> : <MainView/>}></Route>
           <Route path="/login" element={<Login/>}></Route>
           <Route path="/signup" element={<SignUp/>}></Route>
+          <Route path="/sample" element={<SamplePage />}></Route>
 
           {user ? (
             <>
@@ -62,7 +66,7 @@ function AppContent(){
               <Route path="/admin" element={<Admin/>}></Route>
             </>
           ) : (
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="/*" element={<Navigate to="/" replace />} />
           )}
         </Routes>
       </main>
