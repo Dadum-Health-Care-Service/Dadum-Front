@@ -47,6 +47,9 @@ function Login() {
   const [currentTerm, setCurrentTerm] = useState(0);
   const [termLength, setTermLength] = useState(0);
 
+  // 최초렌더링 시 user가 있다면 
+
+
   // view 상태가 'passwordless'로 변경될 때 QR 코드를 생성하는 로직 (Side Effect)
   useEffect(() => {
     const fetchQrCodeData = async () => {
@@ -374,7 +377,7 @@ function Login() {
       </div>
 
       {/* 로그인 뷰 */}
-      {view === "login" && (
+      {(view === "login" && !user) && (
         <FormComponent
           title="로그인"
           subtitle="다듬에 오신 것을 환영합니다."
@@ -537,7 +540,7 @@ function Login() {
       )}
 
       {/* 로그인 성공 화면 */}
-      {view === "loggedIn" && (
+      {(view === "loggedIn" || user) && (
         <FormComponent
           title="로그인"
           subtitle="다듬에 오신 것을 환영합니다."
@@ -548,7 +551,7 @@ function Login() {
           className={styles["logged-in-container"]}
         >
           <h2>로그인 성공!</h2>
-          <p>환영합니다, {loginId}님!</p>
+          <p>환영합니다, {user.email}님!</p>
           <p>다듬 서비스를 이용하실 수 있습니다.</p>
 
           <div className={styles["button-group"]}>

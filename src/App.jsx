@@ -65,7 +65,7 @@ function AppContent() {
         {showGNB && <GNB isMobile={isMobile} />}
         <Routes>
           <Route path="/" element={user ? <Home /> : <MainView />}></Route>
-          <Route path="/login" element={user ? <Navigate to="/" replace/> : <Login />}></Route>
+          <Route path="/login" element={<Login />}></Route>
           <Route path="/signup" element={user ? <Navigate to="/" replace/> : <SignUp />}></Route>
           <Route path="/findid" element={user ? <Navigate to="/" replace/> : <FindId />}></Route>
           <Route path="/findpw" element={user ? <Navigate to="/" replace/> : <FindPw />}></Route>
