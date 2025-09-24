@@ -12,25 +12,31 @@ import {
   FaRobot,
 } from "react-icons/fa"; // ← FaRobot 추가
 import styles from "./BottomNavigation.module.css";
+import { useLocation, useNavigate } from "react-router-dom";
 
 // 탭 설정을 상수로 분리
 const NAVIGATION_TABS = [
-  { id: "home", label: "홈", icon: FaHome },
-  { id: "routine", label: "루틴", icon: FaList },
-  { id: "pose", label: "분석", icon: FaCamera },
-  { id: "calorie", label: "칼로리", icon: FaUtensils },
-  { id: "daily", label: "요약", icon: FaChartBar },
-  { id: "statistics", label: "통계", icon: FaChartBar },
-  { id: "social", label: "소셜", icon: FaComments },
-  { id: "mypage", label: "마이페이지", icon: FaUser },
+  { to: "/", label: "홈", icon: FaHome },
+  { to: "/routine", label: "루틴", icon: FaList },
+  { to: "/pose", label: "분석", icon: FaCamera },
+  { to: "/calorie", label: "칼로리", icon: FaUtensils },
+  { to: "/daily", label: "요약", icon: FaChartBar },
+  { to: "/statistics", label: "통계", icon: FaChartBar },
+  { to: "/social", label: "소셜", icon: FaComments },
+  { to: "/mypage", label: "마이페이지", icon: FaUser },
 ];
 
 // 개별 탭 아이템 컴포넌트
-const NavigationTab = ({ tab, isActive, onTabChange }) => {
+const NavigationTab = ({ tab }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const IconComponent = tab.icon;
 
+  const isActive = location.pathname===tab.to;
+
   const handleClick = () => {
-    onTabChange(tab.id);
+    navigate(tab.to);
   };
 
   const getNavLinkClassName = () => {
@@ -50,14 +56,12 @@ const NavigationTab = ({ tab, isActive, onTabChange }) => {
 };
 
 // 메인 BottomNavigation 컴포넌트
-const BottomNavigation = ({ activeTab, onTabChange }) => {
+const BottomNavigation = () => {
   const renderNavigationTabs = () => {
     return NAVIGATION_TABS.map((tab) => (
       <NavigationTab
-        key={tab.id}
+        key={tab.to}
         tab={tab}
-        isActive={activeTab === tab.id}
-        onTabChange={onTabChange}
       />
     ));
   };
