@@ -72,7 +72,7 @@ export default function SignUp(){
 
         if(!errors.email){
             try{
-                const res = await GET(`/users/eamil/${formData.email}`,{},false)
+                const res = await GET(`/users/email/${formData.email}`,{},false)
                 showBasicModal('이미 존재하는 이메일 입니다','이메일 중복 확인');
                 setFormData((prev)=>({...prev,email:""}));
             }catch(error){
@@ -127,7 +127,7 @@ export default function SignUp(){
                     '/users/signup',{
                         usersName: formData.name,
                         email:formData.email,
-                        profileImg: '/img/usersAvatar.png',
+                        profileImg: '/img/userAvatar.png',
                         nickName: formData.nickName,
                         phoneNum:formData.phoneNum,
                         biosDto:{
