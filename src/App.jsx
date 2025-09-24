@@ -39,6 +39,7 @@ import { ModalProvider } from "./context/ModalContext.jsx";
 function AppContent() {
   const { user } = useContext(AuthContext);
   const [isMobile, setIsMobile] = useState(false);
+  
 
   useEffect(() => {
     const checkIsMobile = () => {

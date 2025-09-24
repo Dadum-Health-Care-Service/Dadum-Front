@@ -1,24 +1,24 @@
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import ContainerComponent from "../../common/ContainerComponent";
 import FormComponent from "../../common/FormComponent";
 import InputComponent from "../../common/InputComponent";
-import SelectComponent from "../../common/SelectComponent";
 import ButtonComponent from "../../common/ButtonComponent";
 import ListComponent from "../../common/ListComponent";
-import { POST } from "../../../utils/api/api";
 import { AuthContext } from "../../../context/AuthContext";
 
 import styles from "./Login.module.css";
-import { replace, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useModal } from "../../../context/ModalContext";
+import { useApi } from "../../../utils/api/useApi";
 
 function Login() {
+  const { POST } = useApi();
   const navigate = useNavigate();
   const {showBasicModal}=useModal();
 
   // 현재 보여줄 뷰를 관리하는 상태 ('login', 'passwordless','loggedIn')
   const [view, setView] = useState("login");
-  const { dispatch } = useContext(AuthContext);
+  const { user, dispatch } = useContext(AuthContext);
   // 로그인 타입 라디오 버튼 상태
   const [loginType, setLoginType] = useState("password");
 
@@ -133,6 +133,7 @@ function Login() {
       await POST(
         "/users/auth/passwordless/register",
         { passwordlessToken: pushConnectorToken },
+        user.accessToken,
         true
       ).then(async (res) => {
         console.log(res.data);
@@ -265,7 +266,8 @@ function Login() {
           console.error("로그인 오류:", error);
           if (typeof error.response?.data === 'string'){
             const msg = error.response.data;
-            showBasicModal(msg.substring(msg.indexOf(':')+1),'로그인 실패');
+            if(msg.length > 0) showBasicModal(msg.substring(msg.indexOf(':')+1),'로그인 실패');
+            else showBasicModal('로그인에 실패하였습니다','로그인 실패');
           }else {
             showBasicModal('로그인에 실패하였습니다.','네트워크 에러');
           }

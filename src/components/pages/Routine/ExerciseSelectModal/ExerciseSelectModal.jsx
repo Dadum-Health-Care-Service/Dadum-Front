@@ -5,7 +5,7 @@ import ButtonComponent from "../../../common/ButtonComponent";
 import ListComponent from "../../../common/ListComponent";
 import ModalComponent from "../../../common/ModalComponent";
 import { engKorDict, instructionKorDict } from "../../../data/translation";
-import { POST } from "../../../../utils/api/api";
+import { useApi } from "../../../../utils/api/useApi";
 
 // 탭별 세부 옵션 드롭다운 컴포넌트
 const TabDetailDropdown = ({
@@ -158,6 +158,7 @@ const ModalFooter = ({ setIsModalOpen }) => {
 };
 
 export default function ExerciseSelectModal({ isModalOpen, setIsModalOpen }) {
+  const { POST } = useApi();
   const [selectedExercise, setSelectedExercise] = useState(null);
   const [expandedExercise, setExpandedExercise] = useState(null);
   const [exercises, setExercises] = useState([]);
