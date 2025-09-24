@@ -50,7 +50,7 @@ function AppContent() {
     return () => window.removeEventListener("resize", checkIsMobile);
   }, []);
 
-  const pagePadding = user ? "100px" : "0px";
+  const pagePadding = user ? "90px" : "0px";
 
   return (
     <>
@@ -71,14 +71,6 @@ function AppContent() {
               <Route path="/shop" element={<Shop />}></Route>
               <Route path="/order" element={<OrderPage />}></Route>
               <Route path="/orders" element={<OrderHistory />}></Route>
-              <Route
-                path="/statistics"
-                element={
-                  <div>
-                    <h1>통계페이지는 개발 중 입니다.</h1>
-                  </div>
-                }
-              ></Route>
               <Route path="/social" element={<Social />}></Route>
               <Route path="/mypage/*" element={<MyPage />}></Route>
               <Route path="/admin" element={<Admin />}></Route>
