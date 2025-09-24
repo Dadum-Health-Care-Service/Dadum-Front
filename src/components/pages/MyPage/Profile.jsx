@@ -219,8 +219,8 @@ export default function Profile(){
             }catch(error){
                 //오류 모달 띄우고 프로필 페이지 렌더
                 console.log(error);
-                setError('프로필 수정 중 오류가 발생하였습니다');
                 showConfirmModal('프로필 수정 중 오류가 발생하였습니다',"네트워크 에러","",()=>{setClickEdit(false)})
+                setError('프로필 수정 중 오류가 발생하였습니다');//confirm모달에서 취소 선택시 오류 화면 띄우기
             }finally {
                 //로딩 상태 없애기
                 setLoading(false);
