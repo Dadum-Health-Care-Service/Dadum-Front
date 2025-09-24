@@ -1,0 +1,359 @@
+/* OrderHistory 페이지 스타일 */
+.orderHistoryContainer {
+  min-height: 100vh;
+  background: #f8f9fa;
+  padding: 0;
+  width: 100%;
+}
+
+.orderHistoryHeader {
+  text-align: center;
+  margin-bottom: 30px;
+  padding: 30px 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  margin: 20px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.orderHistoryTitle {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.orderHistorySubtitle {
+  font-size: 1.1rem;
+  color: #7f8c8d;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.debugButton {
+  background: #6c757d;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 12px;
+}
+
+.debugButton:hover {
+  background: #5a6268;
+  transform: translateY(-1px);
+}
+
+.ordersGrid {
+  margin: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 24px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.orderCard {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.orderCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.orderCardHeader {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.orderNumber {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.orderCardBody {
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.productTitle {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.productCategory {
+  color: #7f8c8d;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+
+.priceInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.quantity {
+  color: #5a6c7d;
+  font-size: 0.9rem;
+}
+
+.totalAmount {
+  font-weight: 700;
+  color: #e74c3c;
+  font-size: 1.1rem;
+}
+
+.orderStatus {
+  margin-bottom: 16px;
+}
+
+.statusLabel {
+  color: #5a6c7d;
+  font-size: 0.9rem;
+  margin-right: 8px;
+}
+
+.statusBadge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.statusPending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.statusConfirmed {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.statusShipped {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.statusDelivered {
+  background: #d4edda;
+  color: #155724;
+}
+
+.statusCancelled {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.orderDetails {
+  color: #7f8c8d;
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+}
+
+.orderDetailItem {
+  margin-bottom: 4px;
+}
+
+.orderCardFooter {
+  padding: 16px 20px;
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+}
+
+.orderActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.actionButton {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.actionButton:hover {
+  transform: translateY(-1px);
+}
+
+.shippingButton {
+  background: #17a2b8;
+  color: white;
+}
+
+.shippingButton:hover {
+  background: #138496;
+}
+
+.cancelButton {
+  background: #dc3545;
+  color: white;
+}
+
+.cancelButton:hover {
+  background: #c82333;
+}
+
+.refundButton {
+  background: #ffc107;
+  color: #212529;
+}
+
+.refundButton:hover {
+  background: #e0a800;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 12px;
+  margin: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.emptyStateTitle {
+  font-size: 1.5rem;
+  color: #7f8c8d;
+  margin-bottom: 12px;
+}
+
+.emptyStateText {
+  font-size: 1rem;
+  color: #bdc3c7;
+  margin-bottom: 24px;
+}
+
+.shopButton {
+  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+  border: none;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.shopButton:hover {
+  background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(243, 156, 18, 0.4);
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  margin: 20px;
+}
+
+.errorContainer {
+  text-align: center;
+  padding: 60px 30px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  margin: 20px;
+}
+
+.errorTitle {
+  font-size: 1.8rem;
+  color: #e74c3c;
+  margin-bottom: 16px;
+}
+
+.errorText {
+  font-size: 1.1rem;
+  color: #7f8c8d;
+  margin-bottom: 24px;
+}
+
+.retryButton {
+  background: #dc3545;
+  border: none;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.retryButton:hover {
+  background: #c82333;
+  transform: translateY(-1px);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .orderHistoryTitle {
+    font-size: 2rem;
+  }
+  
+  .orderHistorySubtitle {
+    font-size: 1rem;
+  }
+  
+  .ordersGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin: 10px;
+  }
+  
+  .orderHistoryHeader {
+    margin: 10px;
+    padding: 30px 15px;
+  }
+  
+  .orderCardBody {
+    padding: 16px;
+  }
+  
+  .orderCardFooter {
+    padding: 12px 16px;
+  }
+}

@@ -10,7 +10,8 @@ import {
   FaUtensils,
   FaTrophy,
   FaRobot,
-} from "react-icons/fa"; // ← FaRobot 추가
+  FaShoppingBag,
+} from "react-icons/fa"; // ← FaShoppingBag 추가
 import styles from "./BottomNavigation.module.css";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -18,6 +19,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 const NAVIGATION_TABS = [
   { to: "/", label: "홈", icon: FaHome },
   { to: "/routine", label: "루틴", icon: FaList },
+  { id: "/shop", label: "쇼핑", icon: FaShoppingBag },
   { to: "/pose", label: "분석", icon: FaCamera },
   { to: "/calorie", label: "칼로리", icon: FaUtensils },
   { to: "/daily", label: "요약", icon: FaChartBar },
