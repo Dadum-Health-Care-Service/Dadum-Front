@@ -122,7 +122,6 @@ export default function SignUp(){
 
         if(Object.keys(newErrors).length===0){
             try{
-                console.log(formData);
                 const res = await POST(
                     '/users/signup',{
                         usersName: formData.name,
@@ -140,7 +139,6 @@ export default function SignUp(){
                             password:formData.checkPassword
                         },
                     },false);
-                console.log(res);
                 showBasicModal('회원가입이 완료 되었습니다. 로그인 페이지로 이동합니다','회원가입');
                 navigate('/login');
             }catch(error){
@@ -156,9 +154,9 @@ export default function SignUp(){
     return <>
         <div className="py-5" style={{backgroundColor:"#ffffff"}}>
             <div className="login-header">
-                    <h1 className="login-title">🎯 다듬</h1>
-                    <p className="login-subtitle">루틴을 관리하고 자세를 분석해보세요</p>
-                </div>
+                <h1 className="login-title">🎯 다듬</h1>
+                <p className="login-subtitle">루틴을 관리하고 자세를 분석해보세요</p>
+            </div>
             <div style={{padding:"0 4rem"}}>
                 <FormComponent
                     title="회원가입"

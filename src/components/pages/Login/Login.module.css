@@ -21,6 +21,19 @@
 .button-group button {
   min-width: 280px;
 }
+
+.button-find{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.button-find button {
+  margin-top: 30px;
+  min-width: 130px;
+}
+
 .logged-in-container {
   display: flex;
   flex-direction: column;

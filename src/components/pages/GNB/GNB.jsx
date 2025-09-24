@@ -53,7 +53,7 @@ export default function GNB({ isMobile }) {
                 >
                   분석
                 </HeaderComponent.MenuItem>
-                {/* 칼로리 */}
+
                 <HeaderComponent.MenuItem
                   active={isActive("/calorie")}
                   onClick={() => navigate("/calorie")}
@@ -61,25 +61,20 @@ export default function GNB({ isMobile }) {
                   칼로리
                 </HeaderComponent.MenuItem>
 
-                {/* ✅ 추가: 일일 요약 메뉴 */}
                 <HeaderComponent.MenuItem
                   active={isActive("/daily")}
                   onClick={() => navigate("/daily")}
                 >
                   일일 요약
                 </HeaderComponent.MenuItem>
-                <HeaderComponent.MenuItem
-                  active={isActive("/statistics")}
-                  onClick={() => navigate("/statistics")}
-                >
-                  통계
-                </HeaderComponent.MenuItem>
+
                 <HeaderComponent.MenuItem
                   active={isActive("/social")}
                   onClick={() => navigate("/social")}
                 >
                   소셜
                 </HeaderComponent.MenuItem>
+
                 <HeaderComponent.MenuItem
                   active={isActive("/mypage")}
                   onClick={() => navigate("/mypage")}

@@ -4,6 +4,7 @@ import {
   Route,
   BrowserRouter as Router,
   Routes,
+  useLocation,
 } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
@@ -13,6 +14,8 @@ import "./App.css";
 import Home from "./components/pages/Home/Home.jsx";
 import Login from "./components/pages/Login/Login.jsx";
 import SignUp from "./components/pages/Login/SignUp.jsx";
+import FindId from "./components/pages/Login/FindId.jsx";
+import FindPw from "./components/pages/Login/FindPw.jsx";
 import MainView from "./components/pages/MainView/MainView.jsx";
 import GNB from "./components/pages/GNB/GNB.jsx";
 import Routine from "./components/pages/Routine/Routine.jsx";
@@ -36,10 +39,11 @@ import { RoutineProvider } from "./context/RoutineContext.jsx";
 import { SuggestProvider } from "./context/SuggestContext.jsx";
 import { ModalProvider } from "./context/ModalContext.jsx";
 
+
 function AppContent() {
   const { user } = useContext(AuthContext);
   const [isMobile, setIsMobile] = useState(false);
-  
+  const location = useLocation();
 
   useEffect(() => {
     const checkIsMobile = () => {
@@ -50,16 +54,21 @@ function AppContent() {
     return () => window.removeEventListener("resize", checkIsMobile);
   }, []);
 
-  const pagePadding = user ? "100px" : "0px";
+  const noGNBpaths = ['/login','/signup','/findid','/findpw'];
+  const showGNB = user && !noGNBpaths.includes(location.pathname);
+
+  const pagePadding = user ? "90px" : "0px";
 
   return (
     <>
       <main style={{ paddingBottom: pagePadding }}>
-        {user && <GNB isMobile={isMobile} />}
+        {showGNB && <GNB isMobile={isMobile} />}
         <Routes>
           <Route path="/" element={user ? <Home /> : <MainView />}></Route>
           <Route path="/login" element={<Login />}></Route>
-          <Route path="/signup" element={<SignUp />}></Route>
+          <Route path="/signup" element={user ? <Navigate to="/" replace/> : <SignUp />}></Route>
+          <Route path="/findid" element={user ? <Navigate to="/" replace/> : <FindId />}></Route>
+          <Route path="/findpw" element={user ? <Navigate to="/" replace/> : <FindPw />}></Route>
           <Route path="/sample" element={<SamplePage />}></Route>
 
           {user ? (
@@ -71,14 +80,6 @@ function AppContent() {
               <Route path="/shop" element={<Shop />}></Route>
               <Route path="/order" element={<OrderPage />}></Route>
               <Route path="/orders" element={<OrderHistory />}></Route>
-              <Route
-                path="/statistics"
-                element={
-                  <div>
-                    <h1>통계페이지는 개발 중 입니다.</h1>
-                  </div>
-                }
-              ></Route>
               <Route path="/social" element={<Social />}></Route>
               <Route path="/mypage/*" element={<MyPage />}></Route>
               <Route path="/admin" element={<Admin />}></Route>

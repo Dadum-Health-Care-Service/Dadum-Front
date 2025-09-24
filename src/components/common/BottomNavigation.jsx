@@ -8,8 +8,6 @@ import {
   FaComments,
   FaCamera,
   FaUtensils,
-  FaTrophy,
-  FaRobot,
   FaShoppingBag,
 } from "react-icons/fa"; // ← FaShoppingBag 추가
 import styles from "./BottomNavigation.module.css";
@@ -23,7 +21,6 @@ const NAVIGATION_TABS = [
   { to: "/pose", label: "분석", icon: FaCamera },
   { to: "/calorie", label: "칼로리", icon: FaUtensils },
   { to: "/daily", label: "요약", icon: FaChartBar },
-  { to: "/statistics", label: "통계", icon: FaChartBar },
   { to: "/social", label: "소셜", icon: FaComments },
   { to: "/mypage", label: "마이페이지", icon: FaUser },
 ];

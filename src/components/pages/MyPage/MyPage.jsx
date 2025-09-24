@@ -1,32 +1,40 @@
 import { useContext, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+
 import HeaderComponent from "../../common/HeaderComponent";
 import ContainerComponent from "../../common/ContainerComponent";
+import ButtonComponent from "../../common/ButtonComponent";
+
 import Profile from "./Profile";
 import MySocial from "./MySocial";
 import Settings from "./Settings";
-import HealthData from "./HealthData";
+import Statistics from "./Statistics";
 import Gamification from "../Gamification/Gamification";
-import { useNavigate } from "react-router-dom";
-import ButtonComponent from "../../common/ButtonComponent";
+
 import { AuthContext } from "../../../context/AuthContext";
 import { useModal } from "../../../context/ModalContext";
+
 
 export default function MyPage(){
     const navigate = useNavigate();
     const {dispatch}=useContext(AuthContext);
     const {showConfirmModal}=useModal();
+    const location = useLocation();
 
-    //선택한 마이페이지 헤더 탭에 따라 페이지 렌더
-    const [activeHeaderMenu,setActiveHeaderMenu]=useState("profile");
+    const pathSegments = location.pathname.split('/');
+    const pathname = pathSegments[pathSegments.length-1];
+    const activeHeaderMenu = pathname === 'mypage' || pathname === '' ? "profile" : pathname;
+
     const handleHeaderMenuClick = (menuId)=>{
-        setActiveHeaderMenu(menuId);
-        navigate(`/mypage/${menuId}`);
+        if(menuId === 'profile'){
+            navigate('/mypage');
+        }else navigate(`/mypage/${menuId}`);
         console.log("선택된 마이페이지 헤더 메뉴:",menuId);
     }
 
     const routeMyPage = (menuId)=>{
         switch(menuId){
-            case "healthdata": return <HealthData />
+            case "statistics": return <Statistics />
             case "achievements": return <Gamification />
             case "mysocial": return <MySocial />
             case "settings": return <Settings />
@@ -61,8 +69,8 @@ export default function MyPage(){
                                 프로필
                             </HeaderComponent.MenuItem>
                             <HeaderComponent.MenuItem
-                                active={activeHeaderMenu === "healthdata"}
-                                onClick={()=>handleHeaderMenuClick("healthdata")}
+                                active={activeHeaderMenu === "statistics"}
+                                onClick={()=>handleHeaderMenuClick("statistics")}
                             >
                                 나의 기록
                             </HeaderComponent.MenuItem>
