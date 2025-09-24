@@ -122,7 +122,6 @@ export default function SignUp(){
 
         if(Object.keys(newErrors).length===0){
             try{
-                console.log(formData);
                 const res = await POST(
                     '/users/signup',{
                         usersName: formData.name,
@@ -140,7 +139,6 @@ export default function SignUp(){
                             password:formData.checkPassword
                         },
                     },false);
-                console.log(res);
                 showBasicModal('회원가입이 완료 되었습니다. 로그인 페이지로 이동합니다','회원가입');
                 navigate('/login');
             }catch(error){

@@ -146,7 +146,6 @@ export default function Profile(){
             };
             reader.readAsDataURL(file);
         }
-        console.log(e);
     };
 
     //프로필 수정 인풋 폼 제어용 함수
@@ -172,7 +171,6 @@ export default function Profile(){
                 [field]: e.target.value,
             }));
         }
-        console.log(inputs);
 
         //유효성 체크 에러 메세지 초기화
         if(errors[field]){
