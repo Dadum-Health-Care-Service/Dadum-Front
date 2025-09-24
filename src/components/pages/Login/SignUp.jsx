@@ -4,9 +4,10 @@ import { useState } from "react";
 import FormComponent from "../../common/FormComponent";
 import InputComponent from "../../common/InputComponent";
 import ButtonComponent from "../../common/ButtonComponent";
-import axios from "axios";
+import { useApi } from "../../../utils/api/useApi";
 
 export default function SignUp(){
+    const { GET, POST }=useApi();
     const {showBasicModal}=useModal();
     const navigate = useNavigate();
     const [formData,setFormData]=useState({
@@ -71,7 +72,7 @@ export default function SignUp(){
 
         if(!errors.email){
             try{
-                const res = await axios.get(`http://localhost:8080/api/v1/users/email/${formData.email}`);
+                const res = await GET(`/users/eamil/${formData.email}`,{},false)
                 showBasicModal('이미 존재하는 이메일 입니다','이메일 중복 확인');
                 setFormData((prev)=>({...prev,email:""}));
             }catch(error){
@@ -122,8 +123,8 @@ export default function SignUp(){
         if(Object.keys(newErrors).length===0){
             try{
                 console.log(formData);
-                const res = await axios.post(
-                    'http://localhost:8080/api/v1/users/signup',{
+                const res = await POST(
+                    '/users/signup',{
                         usersName: formData.name,
                         email:formData.email,
                         profileImg: '/img/usersAvatar.png',
@@ -139,8 +140,7 @@ export default function SignUp(){
                         authDto:{
                             password:formData.checkPassword
                         },
-                    }
-                );
+                    },false);
                 console.log(res);
                 showBasicModal('회원가입이 완료 되었습니다. 로그인 페이지로 이동합니다','회원가입');
                 navigate('/login');

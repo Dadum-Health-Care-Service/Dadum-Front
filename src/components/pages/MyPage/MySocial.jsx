@@ -3,10 +3,11 @@ import { Card, ListGroup, ListGroupItem } from "react-bootstrap";
 import { AuthContext } from "../../../context/AuthContext";
 import ListComponent from "../../common/ListComponent";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 import { useModal } from "../../../context/ModalContext";
+import { useApi } from "../../../utils/api/useApi";
 
 export default function MySocial(){
+    const { GET } = useApi();
     const {user}=useContext(AuthContext);
     const {showBasicModal}=useModal();
     const [userData,setUserData]=useState({
@@ -22,20 +23,21 @@ export default function MySocial(){
 
     useEffect(()=>{
         if(!user || !user.usersId) return;
-
-        axios.get(`http://localhost:8080/api/v1/users/${user.usersId}`)
-            .then(res=>{
-                setUserData(prev=>({
+        const fetchUser = async () => {
+            try{
+                const res = await GET(`/users/${user.usersId}`,{},false);
+                setUserData((prev)=>({
                     ...prev,
                     nickName:res.data.nickName,
                     email:res.data.email,
                     profileImg:res.data.profileImg,
                 }));
-            })
-            .catch(e=>{
-                console.log(e);
+            } catch (err){
+                console.log(err);
                 showBasicModal("사용자 정보를 가져오는 중 오류가 발생하였습니다.","네트워크 에러");
-            });
+            };
+        };
+        fetchUser();
     },[user]);
 
     useEffect(()=>{
@@ -45,12 +47,7 @@ export default function MySocial(){
             setLoding(true);
             if(selectedType === "posts"){
                 try{
-                    const res = await axios
-                    .get('http://localhost:8080/api/v1/posts',{
-                        headers: {
-                            Authorization: `Bearer ${user.accessToken}`,
-                        },
-                    });
+                    const res = await GET('/posts');
                     setPostData(res.data);
                 } catch (err){
                     console.log(err);
@@ -58,17 +55,11 @@ export default function MySocial(){
                 }
             } else if (selectedType === "comments"){
                 try{
-                    const cData = await axios.get('http://localhost:8080/api/v1/comments/list',{
-                        headers: {
-                            Authorization: `Bearer ${user.accessToken}`,
-                        },
-                    });
+                    const cData = await GET('/comments/list');
                     const comments = cData.data;
                     const commentsWithPostTitle = await Promise.all(
                         comments.map(async comment =>{
-                            const postRes = await axios.get(`http://localhost:8080/api/v1/posts/${comment.postId}`,{
-                                headers: { Authorization: `Bearer ${user.accessToken}` },
-                            });
+                            const postRes = await GET(`/posts/${comment.postId}`);
                             return {...comment,postTitle:postRes.data.postTitle};
                         }),
                     );

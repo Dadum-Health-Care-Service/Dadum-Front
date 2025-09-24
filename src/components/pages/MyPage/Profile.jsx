@@ -2,11 +2,12 @@ import { useContext, useEffect, useRef, useState } from "react";
 import ButtonComponent from "../../common/ButtonComponent";
 import ContainerComponent from "../../common/ContainerComponent";
 import { AuthContext } from "../../../context/AuthContext";
-import axios from "axios";
 import InputComponent from "../../common/InputComponent";
 import { useModal } from "../../../context/ModalContext";
+import { useApi } from "../../../utils/api/useApi";
 
 export default function Profile(){
+    const { GET, PUT } = useApi();
     //유저정보,로딩상태,에러상태를 저장하는 state
     const { user } = useContext(AuthContext);
     const [loading,setLoading]=useState(true);
@@ -67,7 +68,7 @@ export default function Profile(){
                 //에러상태 초기화
                 setError(null);
                 
-                const res = await axios.get(`http://localhost:8080/api/v1/users/${user.usersId}`);
+                const res = await GET(`/users/${user.usersId}`,{},false);
                 const getUser = res.data;
                 const getBio = res.data.biosDto;
                 
@@ -201,8 +202,8 @@ export default function Profile(){
                 //로딩상태 띄우고 에러상태 초기화
                 setLoading(true);
                 setError(null);
-                const res = await axios.put(
-                    `http://localhost:8080/api/v1/users/update/${user.usersId}`,
+                const res = await PUT(
+                    `/users/update/${user.usersId}`,
                     {//변경할 수 없는 데이터인 role 및 profileImg는 profile정보 그대로 쓰기
                         usersName: inputs.name,
                         nickName: inputs.nickName,
@@ -216,13 +217,7 @@ export default function Profile(){
                             height: inputs.height,
                             weight: inputs.weight,
                         },
-                    },
-                    {
-                        withCredentials: true,
-                        headers: {
-                            Authorization: `Bearer ${user.accessToken}`,
-                        },
-                    },
+                    }
                 );
                 //수정완료 모달 띄우고 프로필 페이지 렌더
                 showBasicModal('수정 되었습니다','프로필 수정');

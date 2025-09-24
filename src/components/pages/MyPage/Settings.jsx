@@ -3,11 +3,12 @@ import HeaderComponent from "../../common/HeaderComponent";
 import ContainerComponent from "../../common/ContainerComponent";
 import InputComponent from "../../common/InputComponent";
 import ButtonComponent from "../../common/ButtonComponent";
-import axios from "axios";
 import { AuthContext } from "../../../context/AuthContext";
 import { useModal } from "../../../context/ModalContext";
+import { useApi } from "../../../utils/api/useApi";
 
 export default function Settings(){
+    const { DELETE, POST, PUT }=useApi();
     //유저 정보 읽어오기
     const { user, dispatch } = useContext(AuthContext);
     //전역모달 사용
@@ -66,10 +67,9 @@ export default function Settings(){
         if(Object.keys(newErrors).length === 0){
             //입력한 비밀번호가 맞는지 확인
             try {
-                res1 = await axios.post(
-                    'http://localhost:8080/api/v1/users/auth/password/check',
-                    { password: passwords.existPW },
-                    { withCredentials: true, headers: { Authorization: `Bearer ${user.accessToken}` } },
+                res1 = await POST(
+                    '/users/auth/password/check',
+                    { password: passwords.existPW }
                 );
             } catch (err1) { 
                 //오류 발생 시 모달 띄우기
@@ -90,15 +90,7 @@ export default function Settings(){
             //회원 탈퇴하는 메소드
             const confirmWithdrawal = async ()=>{
                 try{
-                    const res2 = await axios.delete(
-                        `http://localhost:8080/api/v1/users/delete/${res1.data.usersId}`,
-                        {
-                            withCredentials: true,
-                            headers: {
-                                Authorization: `Bearer ${user.accessToken}`,
-                            },
-                        },
-                    );
+                    const res2 = await DELETE(`/users/delete/${res1.data.usersId}`);
                     //탈퇴 확인 모달 띄우고 로그아웃 처리
                     showBasicModal('탈퇴되었습니다',"회원 탈퇴");
                     dispatch({type:'LOGOUT'});
@@ -131,11 +123,7 @@ export default function Settings(){
         if(Object.keys(newErrors).length === 0){
             //입력한 현재 비밀번호가 맞는지 확인
             try {
-                res1 = await axios.post(
-                    'http://localhost:8080/api/v1/users/auth/password/check',
-                    { password: passwords.currentPW },
-                    { withCredentials: true, headers: { Authorization: `Bearer ${user.accessToken}` } },
-                );
+                res1 = await POST('/users/auth/password/check',{ password: passwords.currentPW });
                 console.log(res1)
             } catch (err1) {
                 console.log('비밀번호 확인 호출 중 오류 발생: ',err1);
@@ -151,18 +139,12 @@ export default function Settings(){
             }
             //비밀번호가 맞다면 변경 진행
             try{
-                const res2 = await axios.put(
-                    'http://localhost:8080/api/v1/users/auth/password/update',
+                const res2 = await PUT(
+                    '/users/auth/password/update',
                     {
                         originPassword: passwords.currentPW,
                         newPassword: passwords.newPWcheck,
-                    },
-                    {
-                        withCredentials: true,
-                        headers: {
-                            Authorization: `Bearer ${user.accessToken}`,
-                        },
-                    },
+                    }
                 );
                 //알림모달 띄우고 로그아웃 처리
                 showBasicModal('비밀번호가 변경되었습니다. 다시 로그인 해 주세요.','비밀번호 변경');

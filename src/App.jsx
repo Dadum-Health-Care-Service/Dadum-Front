@@ -32,6 +32,7 @@ function AppContent(){
   
   const { user }=useContext(AuthContext);
   const [isMobile, setIsMobile] = useState(false);
+  
 
   useEffect(() => {
     const checkIsMobile = () => {
