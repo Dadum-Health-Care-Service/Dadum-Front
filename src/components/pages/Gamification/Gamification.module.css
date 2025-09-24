@@ -35,9 +35,9 @@
   
   /* 웹에서는 업적 컨테이너의 너비를 고정하여 일정한 레이아웃 유지 */
   .achievementsContainer {
-    width: 700px; /* 고정 너비로 설정 */
-    min-width: 700px;
-    max-width: 700px;
+    width: 600px; /* 고정 너비로 설정 */
+    min-width: 600px;
+    max-width: 600px;
   }
   
   /* 웹에서는 카테고리 간격을 더 줄임 */

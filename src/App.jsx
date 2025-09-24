@@ -15,7 +15,6 @@ import Social from "./components/pages/Social/Social.jsx";
 import CalorieCam from "./components/pages/Calorie/CalorieCam.jsx";
 import DailySummary from "./components/pages/Summary/DailySummary.jsx";
 import Chatbot from "./components/pages/Chatbot/Chatbot.jsx";
-import Gamification from "./components/pages/Gamification/Gamification.jsx";
 import MyPage from "./components/pages/MyPage/MyPage.jsx";
 import Admin from "./components/pages/Admin/Admin.jsx";
 import SamplePage from "./components/pages/SamplePage/SamplePage.jsx";
@@ -24,6 +23,7 @@ import ProductDetail from "./components/pages/Payments/Shop/ProductDetail.jsx";
 import OrderPage from "./components/pages/Payments/Shop/OrderPage.jsx";
 import OrderHistory from "./components/pages/Payments/Shop/OrderHistory.jsx";
 import PoseAccuracyMVP from "./components/pages/Pose/PoseAccuracyMVP.jsx";
+import SamplePage from "./components/pages/SamplePage/SamplePage.jsx"
 
 //Contexts
 import { AuthProvider, AuthContext } from "./context/AuthContext.jsx";
@@ -47,19 +47,21 @@ function AppContent(){
     return () => window.removeEventListener("resize", checkIsMobile);
   }, []);
 
+  const pagePadding = user ? "100px" : "0px"
+
   return (
     <>
-      <main style={{paddingBottom:'100px'}}>
+      <main style={{paddingBottom:pagePadding}}>
         {user && <GNB isMobile={isMobile}/> }
         <Routes>
           <Route path="/" element={user ? <Home/> : <MainView/>}></Route>
           <Route path="/login" element={<Login/>}></Route>
           <Route path="/signup" element={<SignUp/>}></Route>
+          <Route path="/sample" element={<SamplePage />}></Route>
 
           {user ? (
             <>
               <Route path="/routine" element={<Routine/>}></Route>
-              <Route path="/achievement" element={<Gamification/>}></Route>
               <Route path="/pose" element={<PoseAccuracyMVP/>}></Route>
               <Route path="/calorie" element={<CalorieCam/>}></Route>
               <Route path="/daily" element={<DailySummary/>}></Route>
@@ -72,7 +74,7 @@ function AppContent(){
               <Route path="/admin" element={<Admin/>}></Route>
             </>
           ) : (
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="/*" element={<Navigate to="/" replace />} />
           )}
         </Routes>
       </main>

@@ -9,14 +9,14 @@ import { POST } from "../../../utils/api/api";
 import { AuthContext } from "../../../context/AuthContext";
 
 import styles from "./Login.module.css";
-import { useNavigate } from "react-router-dom";
+import { replace, useNavigate } from "react-router-dom";
 import { useModal } from "../../../context/ModalContext";
 
 function Login() {
   const navigate = useNavigate();
   const {showBasicModal}=useModal();
 
-  // 현재 보여줄 뷰를 관리하는 상태 ('login', 'passwordless')
+  // 현재 보여줄 뷰를 관리하는 상태 ('login', 'passwordless','loggedIn')
   const [view, setView] = useState("login");
   const { dispatch } = useContext(AuthContext);
   // 로그인 타입 라디오 버튼 상태
@@ -259,7 +259,7 @@ function Login() {
       )
         .then((res) => {
           dispatch({ type: "LOGIN", user: res.data });
-          navigate("/");
+          navigate('/');
         })
         .catch((error) => {
           console.error("로그인 오류:", error);
