@@ -15,7 +15,6 @@ import Social from "./components/pages/Social/Social.jsx";
 import CalorieCam from "./components/pages/Calorie/CalorieCam.jsx";
 import DailySummary from "./components/pages/Summary/DailySummary.jsx";
 import Chatbot from "./components/pages/Chatbot/Chatbot.jsx";
-import Gamification from "./components/pages/Gamification/Gamification.jsx";
 import MyPage from "./components/pages/MyPage/MyPage.jsx";
 import Admin from "./components/pages/Admin/Admin.jsx";
 import PoseAccuracyMVP from "./components/pages/Pose/PoseAccuracyMVP.jsx";
@@ -58,7 +57,6 @@ function AppContent(){
           {user ? (
             <>
               <Route path="/routine" element={<Routine/>}></Route>
-              <Route path="/achievement" element={<Gamification/>}></Route>
               <Route path="/pose" element={<PoseAccuracyMVP/>}></Route>
               <Route path="/calorie" element={<CalorieCam/>}></Route>
               <Route path="/daily" element={<DailySummary/>}></Route>
@@ -76,7 +74,6 @@ function AppContent(){
   );
 
 }
-
 
 function App() {
 

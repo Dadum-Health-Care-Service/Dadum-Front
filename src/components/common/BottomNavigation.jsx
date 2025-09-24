@@ -18,7 +18,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 const NAVIGATION_TABS = [
   { to: "/", label: "홈", icon: FaHome },
   { to: "/routine", label: "루틴", icon: FaList },
-  { to: "/achievement", label: "업적", icon: FaTrophy },
   { to: "/pose", label: "분석", icon: FaCamera },
   { to: "/calorie", label: "칼로리", icon: FaUtensils },
   { to: "/daily", label: "요약", icon: FaChartBar },
