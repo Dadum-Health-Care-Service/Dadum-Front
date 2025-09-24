@@ -19,7 +19,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 const NAVIGATION_TABS = [
   { to: "/", label: "홈", icon: FaHome },
   { to: "/routine", label: "루틴", icon: FaList },
-  { id: "/shop", label: "쇼핑", icon: FaShoppingBag },
+  { to: "/shop", label: "쇼핑", icon: FaShoppingBag },
   { to: "/pose", label: "분석", icon: FaCamera },
   { to: "/calorie", label: "칼로리", icon: FaUtensils },
   { to: "/daily", label: "요약", icon: FaChartBar },
@@ -35,7 +35,7 @@ const NavigationTab = ({ tab }) => {
 
   const IconComponent = tab.icon;
 
-  const isActive = location.pathname===tab.to;
+  const isActive = location.pathname === tab.to;
 
   const handleClick = () => {
     navigate(tab.to);
@@ -61,10 +61,7 @@ const NavigationTab = ({ tab }) => {
 const BottomNavigation = () => {
   const renderNavigationTabs = () => {
     return NAVIGATION_TABS.map((tab) => (
-      <NavigationTab
-        key={tab.to}
-        tab={tab}
-      />
+      <NavigationTab key={tab.to} tab={tab} />
     ));
   };
 
