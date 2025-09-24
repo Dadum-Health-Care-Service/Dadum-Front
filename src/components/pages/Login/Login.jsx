@@ -260,7 +260,7 @@ function Login() {
       )
         .then((res) => {
           dispatch({ type: "LOGIN", user: res.data });
-          navigate('/');
+          setView("loggedIn");
         })
         .catch((error) => {
           console.error("로그인 오류:", error);
@@ -464,6 +464,23 @@ function Login() {
               계정이 없으신가요? 회원가입
             </ButtonComponent>
           </div>
+          
+          <div className={styles["button-find"]}>
+            <ButtonComponent
+              variant="outline-primary"
+              size="large"
+              onClick={()=>navigate('/findid')}
+            >
+              아이디 찾기
+            </ButtonComponent>
+            <ButtonComponent
+              variant="outline-primary"
+              size="large"
+              onClick={()=>navigate('/findpw')}
+            >
+              비밀번호 찾기
+            </ButtonComponent>
+          </div>
         </FormComponent>
       )}
 
@@ -539,7 +556,7 @@ function Login() {
               variant="outline-primary"
               size="large"
               onClick={() => {
-                navigate('/');
+                navigate('/',{replace:true});
               }}
               fullWidth
             >

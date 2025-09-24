@@ -154,9 +154,9 @@ export default function SignUp(){
     return <>
         <div className="py-5" style={{backgroundColor:"#ffffff"}}>
             <div className="login-header">
-                    <h1 className="login-title">🎯 다듬</h1>
-                    <p className="login-subtitle">루틴을 관리하고 자세를 분석해보세요</p>
-                </div>
+                <h1 className="login-title">🎯 다듬</h1>
+                <p className="login-subtitle">루틴을 관리하고 자세를 분석해보세요</p>
+            </div>
             <div style={{padding:"0 4rem"}}>
                 <FormComponent
                     title="회원가입"
