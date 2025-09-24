@@ -98,7 +98,6 @@ const Routine = () => {
         isModalOpen={isCreateModalOpen}
         setIsModalOpen={setIsCreateModalOpen}
       />
-      <ModalExample />
       {/* Header */}
       <div className={styles.header}>
         <h1 className={styles.title}>루틴 관리</h1>

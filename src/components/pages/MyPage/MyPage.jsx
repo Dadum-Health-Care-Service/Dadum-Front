@@ -5,6 +5,7 @@ import Profile from "./Profile";
 import MySocial from "./MySocial";
 import Settings from "./Settings";
 import HealthData from "./HealthData";
+import Gamification from "../Gamification/Gamification";
 import { useNavigate } from "react-router-dom";
 import ButtonComponent from "../../common/ButtonComponent";
 import { AuthContext } from "../../../context/AuthContext";
@@ -26,6 +27,7 @@ export default function MyPage(){
     const routeMyPage = (menuId)=>{
         switch(menuId){
             case "healthdata": return <HealthData />
+            case "achievements": return <Gamification />
             case "mysocial": return <MySocial />
             case "settings": return <Settings />
             default: return <Profile />
@@ -63,6 +65,12 @@ export default function MyPage(){
                                 onClick={()=>handleHeaderMenuClick("healthdata")}
                             >
                                 나의 기록
+                            </HeaderComponent.MenuItem>
+                            <HeaderComponent.MenuItem
+                                active={activeHeaderMenu === "achievements"}
+                                onClick={()=>handleHeaderMenuClick("achievements")}
+                            >
+                                업적
                             </HeaderComponent.MenuItem>
                             <HeaderComponent.MenuItem
                                 active={activeHeaderMenu === "mysocial"}
