@@ -130,7 +130,6 @@ export default function SignUp(){
                         profileImg: '/img/usersAvatar.png',
                         nickName: formData.nickName,
                         phoneNum:formData.phoneNum,
-                        role: "USER",
                         biosDto:{
                             gender:formData.gender,
                             age:formData.age,

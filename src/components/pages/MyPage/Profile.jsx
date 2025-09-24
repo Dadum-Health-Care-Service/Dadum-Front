@@ -27,7 +27,6 @@ export default function Profile(){
         email: user?.email || '',
         profileImg: '/img/userAvatar.png', //초기데이터 기본 프로필이미지로 설정
         phoneNum: '',
-        role: 'USER', //초기 역할상태 USER로 설정
         age: '',
         gender: '',
         height: '',
@@ -79,7 +78,6 @@ export default function Profile(){
                     nickName: getUser.nickName || '',
                     profileImg: getUser.profileImg || '/img/userAvatar.png',
                     phoneNum: getUser.phoneNum || '',
-                    role: getUser.role || 'USER',
                     age: getBio?.age || 0,
                     gender: getBio?.gender !== undefined ? getBio.gender : null,
                     height: getBio?.height || 0,
@@ -95,7 +93,6 @@ export default function Profile(){
                     name: profile.name,
                     nickName: profile.nickName,
                     phoneNum: profile.phoneNum,
-                    role: profile.role,
                     profileImg: profile.profileImg,
                     age: profile.age,
                     gender: profile.gender,
@@ -204,13 +201,12 @@ export default function Profile(){
                 setError(null);
                 const res = await PUT(
                     `/users/update/${user.usersId}`,
-                    {//변경할 수 없는 데이터인 role 및 profileImg는 profile정보 그대로 쓰기
+                    {//변경할 수 없는 데이터인 profileImg는 profile정보 그대로 쓰기
                         usersName: inputs.name,
                         nickName: inputs.nickName,
                         email: profile.email,
                         profileImg: inputs.profileImg,
                         phoneNum: inputs.phoneNum,
-                        role: profile.role,
                         biosDto: {
                             gender: inputs.gender,
                             age: inputs.age,
