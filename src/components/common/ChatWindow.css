@@ -336,11 +336,15 @@
   .chat-window {
     width: 100%;
     max-width: 100%;
-    height: 100vh;
-    max-height: 100vh;
+    height: calc(100vh - 120px); /* 하단 네비게이션 높이 + 여백 */
+    max-height: calc(100vh - 120px);
     margin: 0;
     border-radius: 0;
     transform: translateY(100%);
+    position: fixed;
+    bottom: 100px; /* 하단에서 100px 위에 위치 (더 위로) */
+    left: 0;
+    right: 0;
   }
   
   .chat-window--open .chat-window {
