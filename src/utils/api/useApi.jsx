@@ -11,7 +11,6 @@ export const useApi = () =>{
 
     const {user}=useContext(AuthContext);
     const accessToken = user?.accessToken || null;
-    console.log(accessToken);
 
     const authGET = (URL,data={},isAuth=true,source='main')=>{
         return GET(URL,data,accessToken,isAuth,source);
