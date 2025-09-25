@@ -1,4 +1,4 @@
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import ButtonComponent from "../../common/ButtonComponent";
 
 export default function MainView(){

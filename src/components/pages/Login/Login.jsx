@@ -551,7 +551,7 @@ function Login() {
           className={styles["logged-in-container"]}
         >
           <h2>로그인 성공!</h2>
-          <p>환영합니다, {user.email}님!</p>
+          <p>환영합니다, <span style={{color:"#2563eb"}}>{user.email}</span>님!</p>
           <p>다듬 서비스를 이용하실 수 있습니다.</p>
 
           <div className={styles["button-group"]}>
