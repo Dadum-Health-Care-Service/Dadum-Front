@@ -7,7 +7,7 @@ import BottomNavigation from "../../common/BottomNavigation";
 import Chatbot from "../Chatbot/Chatbot";
 
 export default function GNB({ isMobile }) {
-  const { dispatch } = useContext(AuthContext);
+  const { user, dispatch } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -74,13 +74,21 @@ export default function GNB({ isMobile }) {
                 >
                   소셜
                 </HeaderComponent.MenuItem>
-
-                <HeaderComponent.MenuItem
-                  active={isActive("/mypage")}
-                  onClick={() => navigate("/mypage")}
-                >
-                  마이페이지
-                </HeaderComponent.MenuItem>
+                {user.role === "SUPER_ADMIN" ? (
+                  <HeaderComponent.MenuItem
+                    active={isActive("/admin")}
+                    onClick={() => navigate("/admin")}
+                  >
+                    관리자
+                  </HeaderComponent.MenuItem>
+                ) : (
+                  <HeaderComponent.MenuItem
+                    active={isActive("/mypage")}
+                    onClick={() => navigate("/mypage")}
+                  >
+                    마이페이지
+                  </HeaderComponent.MenuItem>
+                )}
               </HeaderComponent.Navigation>
 
               <ButtonComponent
