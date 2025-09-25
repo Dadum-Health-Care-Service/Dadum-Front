@@ -297,14 +297,12 @@ export default function SignUp(){
                                     required
                                 />
                             </div>
-                            <div className="mb-3">
-                                <div className={styles["input-helper"]}>
-                                    {(errors.phoneNum1 || errors.phoneNum2 || errors.phoneNum3) ? (
-                                        <span className={styles["input-error-text"]}>전화번호는 필수 입력값입니다</span>
-                                    ) : (
-                                        <span className={styles["input-helper-text"]}>전화번호는 숫자만 입력해주세요</span>
-                                    )}
-                                </div>
+                            <div className={styles["input-helper"]}>
+                                {(errors.phoneNum1 || errors.phoneNum2 || errors.phoneNum3) ? (
+                                    <span className={styles["input-error-text"]}>전화번호는 필수 입력값입니다</span>
+                                ) : (
+                                    <span className={styles["input-helper-text"]}>전화번호는 숫자만 입력해주세요</span>
+                                )}
                             </div>
                         </div>
                     </FormComponent.Field>
