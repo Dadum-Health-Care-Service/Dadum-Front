@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { Container, Row, Col, Badge } from "react-bootstrap";
 import ContainerComponent from "../../common/ContainerComponent";
 import { FaPlay, FaClock, FaStar, FaFire } from "react-icons/fa";
@@ -7,17 +8,77 @@ import CardComponent from "../../common/CardComponent";
 import ButtonComponent from "../../common/ButtonComponent";
 
 const Home = () => {
-  const quickRoutines = [
-    { id: 1, title: "아침 루틴", time: "15분", difficulty: "쉬움", icon: "🌅" },
-    { id: 2, title: "운동 루틴", time: "30분", difficulty: "보통", icon: "💪" },
-    { id: 3, title: "저녁 루틴", time: "20분", difficulty: "쉬움", icon: "🌙" },
-  ];
+  const navigate = useNavigate();
+  const [userStats, setUserStats] = useState({
+    consecutiveDays: 0,
+    totalRoutines: 0,
+    totalTime: "0시간",
+  });
+  const [userRoutines, setUserRoutines] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchUserData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const statsRes = await fetch("/api/v1/users/stats");
+      if (statsRes.ok) {
+        const statsData = await statsRes.json();
+        setUserStats(statsData);
+      }
+
+      const routinesRes = await fetch("/api/v1/users/routines");
+      if (routinesRes.ok) {
+        const routinesData = await routinesRes.json();
+        setUserRoutines(Array.isArray(routinesData) ? routinesData : []);
+      } else {
+        setUserRoutines([]);
+      }
+    } catch (e) {
+      console.warn("사용자 데이터 로딩 실패. 더미 데이터 사용", e);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUserData();
+  }, [fetchUserData]);
+
+  // 화면으로 돌아오거나 탭이 활성화될 때 자동 새로고침
+  useEffect(() => {
+    const handleFocus = () => fetchUserData();
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") fetchUserData();
+    };
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [fetchUserData]);
+
+  const startRoutine = async (routineId) => {
+    try {
+      const res = await fetch(`/api/v1/routine/${routineId}/start`, { method: "POST" });
+      if (!res.ok) throw new Error("루틴 시작 실패");
+      setUserRoutines((prev) =>
+        prev.map((r) => (r.id === routineId ? { ...r, completed: true } : r))
+      );
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const stats = [
-    { label: "연속 달성", value: "7일", icon: FaFire, color: "#ff6b6b" },
-    { label: "총 루틴", value: "12개", icon: FaStar, color: "#ffd93d" },
-    { label: "총 시간", value: "8.5시간", icon: FaClock, color: "#6c5ce7" },
+    { label: "연속 달성", value: `${userStats?.consecutiveDays ?? 9}일`, icon: FaFire, color: "#ff6b6b" },
+    { label: "총 루틴", value: `${userStats?.totalRoutines ?? 0}개`, icon: FaStar, color: "#ffd93d" },
+    { label: "총 시간", value: userStats?.totalTime ?? "0시간", icon: FaClock, color: "#6c5ce7" },
   ];
+
+  const completedCount = userRoutines.filter((r) => r.completed).length;
+  const totalCount = userRoutines.length;
+  const progressPercent = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
   return (
     <ContainerComponent className={styles.home}>
@@ -29,6 +90,7 @@ const Home = () => {
           variant="primary"
           size="lg"
           className={styles.startButton}
+          onClick={() => navigate('/routine')}
         >
           <FaPlay className={styles.buttonIcon} />
           루틴 시작하기
@@ -58,27 +120,51 @@ const Home = () => {
       <div className={styles.quickRoutines}>
         <h3 className={styles.sectionTitle}>빠른 루틴</h3>
         <Row>
-          {quickRoutines.map((routine) => (
+          {totalCount === 0 && !loading && (
+            <Col xs={12} className="mb-3">
+              <CardComponent
+                title="등록된 루틴이 없습니다"
+                details=""
+                className={styles.routineCard}
+                buttonText="등록"
+                onClick={() => navigate("/routine")}
+              />
+            </Col>
+          )}
+          {userRoutines.map((routine) => (
             <Col key={routine.id} lg={4} md={6} className="mb-3">
               <CardComponent
-                variant="primary"
                 title={routine.title}
+                details={routine.time || ""}
                 className={styles.routineCard}
-                onClick={() => console.log(`루틴 ${routine.id} 클릭`)}
+                onClick={() => startRoutine(routine.id)}
               >
                 <div className={styles.routineHeader}>
-                  <span className={styles.routineIcon}>{routine.icon}</span>
+                  {routine.icon && <span className={styles.routineIcon}>{routine.icon}</span>}
                   <Badge
-                    bg={routine.difficulty === "쉬움" ? "success" : "warning"}
+                    bg={routine.completed ? "success" : routine.difficulty === "쉬움" ? "success" : "warning"}
                     className={styles.difficultyBadge}
                   >
-                    {routine.difficulty}
+                    {routine.completed ? "완료" : routine.difficulty || "진행"}
                   </Badge>
                 </div>
                 <h5 className={styles.routineTitle}>{routine.title}</h5>
                 <div className={styles.routineTime}>
                   <FaClock className={styles.timeIcon} />
-                  {routine.time}
+                  {routine.time || "시간 정보 없음"}
+                </div>
+                <div className="mt-3">
+                  <ButtonComponent
+                    variant={routine.completed ? "success" : "primary"}
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      startRoutine(routine.id);
+                    }}
+                    disabled={routine.completed}
+                  >
+                    {routine.completed ? "완료됨" : "시작하기"}
+                  </ButtonComponent>
                 </div>
               </CardComponent>
             </Col>
@@ -87,15 +173,14 @@ const Home = () => {
       </div>
 
       {/* Today's Goal */}
-      <CardComponent variant="success" className={styles.todayGoal}>
-        <h4>오늘의 목표</h4>
-        <div className={styles.goalProgress}>
-          <div className={styles.progressBar}>
-            <div className={styles.progressFill} style={{ width: "75%" }}></div>
-          </div>
-          <span className={styles.progressText}>3/4 루틴 완료</span>
-        </div>
-      </CardComponent>
+      {totalCount > 0 && (
+        <CardComponent
+          className={styles.todayGoal}
+          title="오늘의 목표"
+          details={`${completedCount}/${totalCount} 루틴 완료`}
+          buttonText=""
+        />
+      )}
     </ContainerComponent>
   );
 };
