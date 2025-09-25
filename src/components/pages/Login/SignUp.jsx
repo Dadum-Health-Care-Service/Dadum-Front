@@ -5,6 +5,7 @@ import FormComponent from "../../common/FormComponent";
 import InputComponent from "../../common/InputComponent";
 import ButtonComponent from "../../common/ButtonComponent";
 import { useApi } from "../../../utils/api/useApi";
+import styles from "./SignUp.module.css";
 
 export default function SignUp(){
     const { GET, POST }=useApi();
@@ -24,6 +25,7 @@ export default function SignUp(){
     })
     const [errors, setErrors]=useState({});
     const [checkEmail,setCheckEmail]=useState(false);
+    const [phoneNum, setPhoneNum]=useState({});
 
     const handleReset =()=>{
         setFormData({
@@ -41,6 +43,29 @@ export default function SignUp(){
         if(errors){
             setErrors({});
         }
+    };
+
+    const inputClasses = [
+        styles["input-component"],
+        styles["medium"],
+        styles["outlined"],
+        (errors.phoneNum1 || errors.phoneNum2 || errors.phoneNum3) ? styles["error"] : "",
+    ]
+        .filter(Boolean)
+        .join(" ");
+
+    const handlePhoneNumChange = (field)=>(e)=>{
+        setPhoneNum((prev)=>({
+            ...prev,
+            [field]:e.target.value,
+        }));
+
+        if(errors[field]){
+            setErrors((prev)=>({
+                ...prev,
+                [field]:"",
+            }));
+        };
     };
 
     const handleChange =(field)=> (e)=>{
@@ -105,6 +130,10 @@ export default function SignUp(){
 
     const handleSignup =async (e) =>{
         e.preventDefault();
+
+        if(phoneNum.phoneNum1 && phoneNum.phoneNum2 && phoneNum.phoneNum3){
+            setFormData((prev)=>({...prev,phoneNum:phoneNum.phoneNum1+phoneNum.phoneNum2+phoneNum.phoneNum3}));
+        };
 
         const newErrors = {};
         if(!formData.email) newErrors.email = "이메일은 필수 입력값입니다";
@@ -239,17 +268,45 @@ export default function SignUp(){
                     </FormComponent.Field>
 
                     <FormComponent.Field label="전화번호" required className="mb-3">
-                        <InputComponent
-                            type="number"
-                            placeholder="전화번호를 입력하세요"
-                            value={formData.phoneNum}
-                            onChange={handleChange("phoneNum")}
-                            required
-                            variant="outlined"
-                            size="medium"
-                            error={errors.phoneNum}
-                            helperText="전화번호는 숫자만 입력해주세요"
-                        />
+                        <div className={inputClasses}>
+                            <div className={styles["input-wrapper"]}>    
+                                <input 
+                                    type="number"
+                                    className={styles["input-field"]}
+                                    placeholder="010"
+                                    value={phoneNum.phoneNum1}
+                                    onChange={handlePhoneNumChange("phoneNum1")}
+                                    required
+                                />
+                                <span>-</span>
+                                <input 
+                                    type="number"
+                                    className={styles["input-field"]}
+                                    placeholder="전화번호를"
+                                    value={phoneNum.phoneNum2}
+                                    onChange={handlePhoneNumChange("phoneNum2")}
+                                    required
+                                />
+                                <span>-</span>
+                                <input 
+                                    type="number"
+                                    className={styles["input-field"]}
+                                    placeholder="입력하세요"
+                                    value={phoneNum.phoneNum3}
+                                    onChange={handlePhoneNumChange("phoneNum3")}
+                                    required
+                                />
+                            </div>
+                            <div className="mb-3">
+                                <div className={styles["input-helper"]}>
+                                    {(errors.phoneNum1 || errors.phoneNum2 || errors.phoneNum3) ? (
+                                        <span className={styles["input-error-text"]}>전화번호는 필수 입력값입니다</span>
+                                    ) : (
+                                        <span className={styles["input-helper-text"]}>전화번호는 숫자만 입력해주세요</span>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
                     </FormComponent.Field>
 
                     <FormComponent.Section title="선택 정보" className="my-5">
