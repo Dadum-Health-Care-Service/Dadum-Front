@@ -265,7 +265,14 @@
     padding: 12px;
   }
 }
-
+.section {
+  display: flex;
+  background-color: white;
+  flex-grow: 1;
+}
+.section:hover {
+  background-color: white;
+}
 /* 작은 화면에서 더 컴팩트하게 */
 @media (max-width: 480px) {
   .sets-header,
