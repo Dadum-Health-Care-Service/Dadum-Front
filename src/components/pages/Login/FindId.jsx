@@ -5,7 +5,6 @@ import ButtonComponent from "../../common/ButtonComponent";
 import { useNavigate } from "react-router-dom";
 import { useModal } from "../../../context/ModalContext";
 import { useApi } from "../../../utils/api/useApi";
-import axios from "axios";
 
 export default function FindId(){
     const navigate = useNavigate();
@@ -88,6 +87,7 @@ export default function FindId(){
                             onChange={handleChange("usersName")}
                             required
                             variant="outlined"
+                            error={errors.usersName}
                             size="medium"
                         />
                     </FormComponent.Field>
@@ -95,10 +95,12 @@ export default function FindId(){
                     <FormComponent.Field label="전화번호" required className="mb-5">
                         <InputComponent 
                             placeholder="가입한 전화번호를 입력해주세요"
+                            type="number"
                             value={formData.phoneNum}
                             onChange={handleChange("phoneNum")}
                             required
                             variant="outlined"
+                            error={errors.phoneNum}
                             size="medium"
                         />
                     </FormComponent.Field>
