@@ -129,7 +129,6 @@
 }
 
 .filled:hover:not(.disabled) {
-  background: #f1f5f9;
 }
 
 /* 클릭 가능한 컨테이너 */

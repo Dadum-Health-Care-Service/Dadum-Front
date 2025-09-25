@@ -44,6 +44,7 @@ function AppContent() {
   const [isMobile, setIsMobile] = useState(false);
   const location = useLocation();
 
+
   useEffect(() => {
     const checkIsMobile = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -57,6 +58,7 @@ function AppContent() {
   const showGNB = user && !noGNBpaths.includes(location.pathname);
   const pagePadding = isMobile ? "90px" : "0px";
 
+
   return (
     <>
       <main
@@ -65,6 +67,7 @@ function AppContent() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+
         }}
       >
         {user && <GNB isMobile={isMobile} />}
