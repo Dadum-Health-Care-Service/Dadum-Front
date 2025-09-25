@@ -7,6 +7,7 @@ import TextareaComponent from "../../common/TextareaComponent";
 import ContainerComponent from "../../common/ContainerComponent";
 import styles from "./Admin.module.css";
 import Users from "./Section/Users/Users";
+import ToggleComponent from "../../common/ToggleComponent";
 
 // 모달 타입별 설정을 객체로 분리하여 관리
 const MODAL_CONFIGS = {
@@ -663,8 +664,11 @@ const Admin = ({ isMobile }) => {
               borderRadius="none"
               className={styles.section}
             >
-              <Users />
+              <ToggleComponent content={["사용자 목록", "권한 요청"]}>
+                {[<Users />, <div>권한 요청</div>]}
+              </ToggleComponent>
             </ContainerComponent>
+            
           </>
         );
       case "contents":

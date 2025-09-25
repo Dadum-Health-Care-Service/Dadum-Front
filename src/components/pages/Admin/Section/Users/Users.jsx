@@ -1,13 +1,26 @@
 import { useState, useEffect } from "react";
-import { GET } from "../../../../../utils/api/api";
 import ListComponent from "../../../../common/ListComponent";
 import ContainerComponent from "../../../../common/ContainerComponent";
+import Pagination from "../../../../common/Pagination";
+import styles from "./Users.module.css";
+import { useApi } from "../../../../../utils/api/useApi";
 
 export default function Users() {
+  const [currentPage, setCurrentPage] = useState(1);
   const [users, setUsers] = useState([]);
+  const { GET } = useApi();
   useEffect(() => {
     GET("/users/list").then((res) => {
-      setUsers(res.data.filter((user) => user.role === "USER"));
+      console.log(
+        res.data.filter((user) => {
+          return user.roleAssignmentDto.rolesDto.roleName === "USER";
+        })
+      );
+      setUsers(
+        res.data.filter(
+          (user) => user.roleAssignmentDto.rolesDto.roleName === "USER"
+        )
+      );
     });
   }, []);
   return (
@@ -29,61 +42,73 @@ export default function Users() {
                 backgroundColor: "#fefefe",
                 boxShadow: "0px 2px 2px 0px #e5e7eb",
                 height: "100%",
+                padding: "0",
               }}
             >
               <div
                 style={{
                   display: "grid",
                   gridTemplateColumns: "0.4fr 1fr 1fr 1fr 1fr",
+                  justifyItems: "center",
                 }}
               >
-                <span>번호</span>
-                <span>고유 ID</span>
-                <span>이름</span>
-                <span>이메일</span>
-                <span>권한</span>
+                <span className={styles.span}>번호</span>
+                <span className={styles.span}>이름</span>
+                <span className={styles.span}>이메일</span>
+                <span className={styles.span}>권한</span>
+                <span className={styles.span}>상태</span>
               </div>
             </ListComponent.Item>
-            {users.map((user, i) => (
-              <>
-                <ListComponent.Item
-                  key={i}
-                  variant="bordered"
-                  onClick={() => {
-                    navigate(`/admin/user/${user.id}`);
-                  }}
-                >
-                  <div
+            {users
+              .slice((currentPage - 1) * 10, currentPage * 10)
+              .map((user, i) => (
+                <>
+                  <ListComponent.Item
+                    key={i}
+                    variant="bordered"
+                    onClick={() => {
+                      navigate(`/admin/user/${user.id}`);
+                    }}
                     style={{
-                      display: "grid",
-                      gridTemplateColumns: "0.4fr 1fr 1fr 1fr 1fr",
+                      padding: "0",
                     }}
                   >
-                    <span>{i + 1}</span>
-                    <span>{user.usersId}</span>
-                    <span>{user.usersName}</span>
-                    <span>{user.email}</span>
-                    <span>
-                      {user.role === "USER" ? "일반 사용자" : "관리자"}
-                    </span>
-                  </div>
-                </ListComponent.Item>
-              </>
-            ))}
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "0.4fr 1fr 1fr 1fr 1fr",
+                        justifyItems: "center",
+                      }}
+                    >
+                      <span className={styles.span}>
+                        {i + 1 + (currentPage - 1) * 10}
+                      </span>
+                      <span className={styles.span}>{user.usersName}</span>
+                      <span className={styles.span}>{user.email}</span>
+                      <span className={styles.span}>
+                        {user.roleAssignmentDto.rolesDto.roleName === "USER"
+                          ? "일반 사용자"
+                          : "관리자"}
+                      </span>
+                      <span className={styles.span}>
+                        {user.roleAssignmentDto.isActive ? "허용됨" : "대기중"}
+                      </span>
+                    </div>
+                  </ListComponent.Item>
+                </>
+              ))}
           </>
         </ListComponent>
-      </div>
-      <div style={{ borderLeft: "1px solid #e5e7eb" }}>
-      <ListComponent.Header>권한 변경 요청</ListComponent.Header>
-        <ListComponent>
-          {users.map((user) => (
-            <ListComponent.Item
-              variant="bordered"
-              primary={user.usersName}
-              secondary={user.email}
-            />
-          ))}
-        </ListComponent>
+        <Pagination
+          currentPage={currentPage}
+          totalPage={Math.ceil(users.length / 10)}
+          nextPage={() => {
+            setCurrentPage(currentPage + 1);
+          }}
+          previousPage={() => {
+            setCurrentPage(currentPage - 1);
+          }}
+        />
       </div>
     </div>
   );

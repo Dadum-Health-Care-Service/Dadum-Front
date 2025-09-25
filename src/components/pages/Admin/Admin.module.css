@@ -268,7 +268,7 @@
 .section {
   display: flex;
   background-color: white;
-  flex-grow: 1;
+  height: 100%;
 }
 .section:hover {
   background-color: white;
