@@ -6,7 +6,7 @@ import { FaPlay, FaClock, FaStar, FaFire } from "react-icons/fa";
 import styles from "./Home.module.css";
 import CardComponent from "../../common/CardComponent";
 import ButtonComponent from "../../common/ButtonComponent";
-
+import { POST } from "../../../utils/api/api";
 const Home = () => {
   const navigate = useNavigate();
   const [userStats, setUserStats] = useState({
@@ -60,7 +60,9 @@ const Home = () => {
 
   const startRoutine = async (routineId) => {
     try {
-      const res = await fetch(`/api/v1/routine/${routineId}/start`, { method: "POST" });
+      const res = await fetch(`/api/v1/routine/${routineId}/start`, {
+        method: "POST",
+      });
       if (!res.ok) throw new Error("루틴 시작 실패");
       setUserRoutines((prev) =>
         prev.map((r) => (r.id === routineId ? { ...r, completed: true } : r))
@@ -71,14 +73,30 @@ const Home = () => {
   };
 
   const stats = [
-    { label: "연속 달성", value: `${userStats?.consecutiveDays ?? 9}일`, icon: FaFire, color: "#ff6b6b" },
-    { label: "총 루틴", value: `${userStats?.totalRoutines ?? 0}개`, icon: FaStar, color: "#ffd93d" },
-    { label: "총 시간", value: userStats?.totalTime ?? "0시간", icon: FaClock, color: "#6c5ce7" },
+    {
+      label: "연속 달성",
+      value: `${userStats?.consecutiveDays ?? 9}일`,
+      icon: FaFire,
+      color: "#ff6b6b",
+    },
+    {
+      label: "총 루틴",
+      value: `${userStats?.totalRoutines ?? 0}개`,
+      icon: FaStar,
+      color: "#ffd93d",
+    },
+    {
+      label: "총 시간",
+      value: userStats?.totalTime ?? "0시간",
+      icon: FaClock,
+      color: "#6c5ce7",
+    },
   ];
 
   const completedCount = userRoutines.filter((r) => r.completed).length;
   const totalCount = userRoutines.length;
-  const progressPercent = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+  const progressPercent =
+    totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
   return (
     <ContainerComponent className={styles.home}>
@@ -90,7 +108,7 @@ const Home = () => {
           variant="primary"
           size="lg"
           className={styles.startButton}
-          onClick={() => navigate('/routine')}
+          onClick={() => navigate("/routine")}
         >
           <FaPlay className={styles.buttonIcon} />
           루틴 시작하기
@@ -140,9 +158,17 @@ const Home = () => {
                 onClick={() => startRoutine(routine.id)}
               >
                 <div className={styles.routineHeader}>
-                  {routine.icon && <span className={styles.routineIcon}>{routine.icon}</span>}
+                  {routine.icon && (
+                    <span className={styles.routineIcon}>{routine.icon}</span>
+                  )}
                   <Badge
-                    bg={routine.completed ? "success" : routine.difficulty === "쉬움" ? "success" : "warning"}
+                    bg={
+                      routine.completed
+                        ? "success"
+                        : routine.difficulty === "쉬움"
+                        ? "success"
+                        : "warning"
+                    }
                     className={styles.difficultyBadge}
                   >
                     {routine.completed ? "완료" : routine.difficulty || "진행"}

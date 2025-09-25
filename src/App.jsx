@@ -39,7 +39,6 @@ import { RoutineProvider } from "./context/RoutineContext.jsx";
 import { SuggestProvider } from "./context/SuggestContext.jsx";
 import { ModalProvider } from "./context/ModalContext.jsx";
 
-
 function AppContent() {
   const { user } = useContext(AuthContext);
   const [isMobile, setIsMobile] = useState(false);
@@ -54,40 +53,57 @@ function AppContent() {
     return () => window.removeEventListener("resize", checkIsMobile);
   }, []);
 
-  const noGNBpaths = ['/login','/signup','/findid','/findpw'];
+  const noGNBpaths = ["/login", "/signup", "/findid", "/findpw"];
   const showGNB = user && !noGNBpaths.includes(location.pathname);
-
-  const pagePadding = user ? "90px" : "0px";
+  const pagePadding = isMobile ? "90px" : "0px";
 
   return (
     <>
-      <main style={{ paddingBottom: pagePadding }}>
-        {showGNB && <GNB isMobile={isMobile} />}
-        <Routes>
-          <Route path="/" element={user ? <Home /> : <MainView />}></Route>
-          <Route path="/login" element={<Login />}></Route>
-          <Route path="/signup" element={user ? <Navigate to="/" replace/> : <SignUp />}></Route>
-          <Route path="/findid" element={user ? <Navigate to="/" replace/> : <FindId />}></Route>
-          <Route path="/findpw" element={user ? <Navigate to="/" replace/> : <FindPw />}></Route>
-          <Route path="/sample" element={<SamplePage />}></Route>
+      <main
+        style={{
+          paddingBottom: pagePadding,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        {user && <GNB isMobile={isMobile} />}
+        <div style={{ width: "100%", maxWidth: "1360px" }}>
+          <Routes>
+            <Route path="/" element={user ? <Home /> : <MainView />}></Route>
+            <Route path="/login" element={<Login />}></Route>
+            <Route path="/signup" element={<SignUp />}></Route>
+            <Route path="/sample" element={<SamplePage />}></Route>
 
-          {user ? (
-            <>
-              <Route path="/routine" element={<Routine />}></Route>
-              <Route path="/pose" element={<PoseAccuracyMVP />}></Route>
-              <Route path="/calorie" element={<CalorieCam />}></Route>
-              <Route path="/daily" element={<DailySummary />}></Route>
-              <Route path="/shop" element={<Shop />}></Route>
-              <Route path="/order" element={<OrderPage />}></Route>
-              <Route path="/orders" element={<OrderHistory />}></Route>
-              <Route path="/social" element={<Social />}></Route>
-              <Route path="/mypage/*" element={<MyPage />}></Route>
-              <Route path="/admin" element={<Admin />}></Route>
-            </>
-          ) : (
-            <Route path="/*" element={<Navigate to="/" replace />} />
-          )}
-        </Routes>
+            {user ? (
+              <>
+                <Route path="/routine" element={<Routine />}></Route>
+                <Route path="/pose" element={<PoseAccuracyMVP />}></Route>
+                <Route path="/calorie" element={<CalorieCam />}></Route>
+                <Route path="/daily" element={<DailySummary />}></Route>
+                <Route path="/shop" element={<Shop />}></Route>
+                <Route path="/order" element={<OrderPage />}></Route>
+                <Route path="/orders" element={<OrderHistory />}></Route>
+                <Route
+                  path="/statistics"
+                  element={
+                    <div>
+                      <h1>통계페이지는 개발 중 입니다.</h1>
+                    </div>
+                  }
+                ></Route>
+                <Route path="/social" element={<Social />}></Route>
+                <Route path="/mypage/*" element={<MyPage />}></Route>
+                <Route
+                  path="/admin"
+                  element={<Admin isMobile={isMobile} />}
+                ></Route>
+              </>
+            ) : (
+              <Route path="/*" element={<Navigate to="/" replace />} />
+            )}
+          </Routes>
+        </div>
       </main>
     </>
   );
