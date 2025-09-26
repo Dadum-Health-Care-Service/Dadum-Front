@@ -25,7 +25,11 @@ export default function SignUp(){
     })
     const [errors, setErrors]=useState({});
     const [checkEmail,setCheckEmail]=useState(false);
-    const [phoneNum, setPhoneNum]=useState({});
+    const [phoneNum, setPhoneNum]=useState({
+        phoneNum1:"",
+        phoneNum2:"",
+        phoneNum3:""
+    });
 
     const handleReset =()=>{
         setFormData({
@@ -39,7 +43,14 @@ export default function SignUp(){
             age:"",
             height:"",
             weight:""
-        })
+        });
+
+        setPhoneNum({
+            phoneNum1:"",
+            phoneNum2:"",
+            phoneNum3:"",
+        });
+        
         if(errors){
             setErrors({});
         }
@@ -69,18 +80,11 @@ export default function SignUp(){
     };
 
     const handleChange =(field)=> (e)=>{
-        if(field==='checkPassword'){
-            if(formData.password){
-                if(formData.password!=e.target.value) setErrors((prev)=>({...prev,checkPassword:"비밀번호가 일치하지 않습니다"}));
-                else setFormData((prev)=>({...prev,checkPassword:e.target.value}));
-            }
-        }
-        else {
-            setFormData((prev)=>({
-                ...prev,
-                [field]:e.target.value,
-            }));
-        }
+        
+        setFormData((prev)=>({
+            ...prev,
+            [field]:e.target.value,
+        }));
 
         //유효성 체크 메세지 초기화
         if(errors[field]){
@@ -93,7 +97,10 @@ export default function SignUp(){
 
     const handleEmailCheck =async (e) =>{
         e.preventDefault();
-        if(!formData.email) setErrors((prev)=>({...prev,email:"이메일 입력 후 중복확인을 눌러주세요"}));
+        if(!formData.email) {
+            setErrors((prev)=>({...prev,email:"이메일 입력 후 중복확인을 눌러주세요"}));
+            return;
+        }
 
         if(!errors.email){
             try{
@@ -126,14 +133,11 @@ export default function SignUp(){
                 gender:false,
             }));
         }
+
     };
 
     const handleSignup =async (e) =>{
         e.preventDefault();
-
-        if(phoneNum.phoneNum1 && phoneNum.phoneNum2 && phoneNum.phoneNum3){
-            setFormData((prev)=>({...prev,phoneNum:phoneNum.phoneNum1+phoneNum.phoneNum2+phoneNum.phoneNum3}));
-        };
 
         const newErrors = {};
         if(!formData.email) newErrors.email = "이메일은 필수 입력값입니다";
@@ -141,12 +145,15 @@ export default function SignUp(){
             newErrors.email = "이메일 중복여부를 확인해주세요";
             setFormData((prev)=>({...prev,email:""}));
         }
-        else if(!formData.password) newErrors.password = "비밀번호는 필수 입력값입니다";
-        else if(!formData.checkPassword) newErrors.checkPassword = "비밀번호 확인은 필수 입력값입니다";
+        if(!formData.password) newErrors.password = "비밀번호는 필수 입력값입니다";
+        if(!formData.checkPassword) newErrors.checkPassword = "비밀번호 확인은 필수 입력값입니다";
         else if(formData.password != formData.checkPassword) newErrors.checkPassword = "비밀번호가 일치하지 않습니다";
-        else if(!formData.name) newErrors.name='이름은 필수 입력값입니다';
-        else if(!formData.nickName) newErrors.nickName='닉네임은 필수 입력값입니다';
-        else if(!formData.phoneNum) newErrors.phoneNum='전화번호는 필수 입력값입니다';
+        if(!formData.name) newErrors.name='이름은 필수 입력값입니다';
+        if(!formData.nickName) newErrors.nickName='닉네임은 필수 입력값입니다';
+        if(!phoneNum.phoneNum1) newErrors.phoneNum1='전화번호는 필수 입력값입니다';
+        else if(!phoneNum.phoneNum2) newErrors.phoneNum2='전화번호를 전부 입력해주세요';
+        else if(!phoneNum.phoneNum3) newErrors.phoneNum3='전화번호를 전부 입력해주세요';
+
         setErrors(newErrors);
 
         if(Object.keys(newErrors).length===0){
@@ -157,7 +164,7 @@ export default function SignUp(){
                         email:formData.email,
                         profileImg: '/img/userAvatar.png',
                         nickName: formData.nickName,
-                        phoneNum:formData.phoneNum,
+                        phoneNum:phoneNum.phoneNum1+phoneNum.phoneNum2+phoneNum.phoneNum3,
                         biosDto:{
                             gender:formData.gender,
                             age:formData.age,
@@ -176,6 +183,8 @@ export default function SignUp(){
             }finally{
                 handleReset();
             }
+        }else{
+            window.scrollTo(0,0);
         }
     }
 
@@ -191,6 +200,7 @@ export default function SignUp(){
                     title="회원가입"
                     subtitle="몇 가지 정보만 입력하면 바로 시작할 수 있어요."
                     onSubmit={handleSignup}
+                    onReset={handleReset}
                     variant="elevated"
                     size="large"
                     layout="vertical"
