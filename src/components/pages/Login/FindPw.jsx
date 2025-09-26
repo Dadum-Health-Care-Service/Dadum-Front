@@ -149,11 +149,11 @@ export default function FindPw(){
                     <ButtonComponent
                         variant="outline-primary"
                         size="large"
-                        onClick={()=>navigate('/login')}
+                        onClick={()=>navigate('/signup')}
                         fullWidth
                         className="my-1"
                     >
-                        로그인 페이지로 이동
+                        회원가입으로 이동
                     </ButtonComponent>
                 </div>
             </FormComponent>
