@@ -190,6 +190,12 @@ const Chatbot = ({ className = "", onMessageSend }) => {
         if (m) {
           // 캡처된 본문에서 BOM만 제거하고 공백은 그대로 유지
           let payload = m[1].replace(/^\uFEFF/, "");
+          
+          // data:data: 중복 제거
+          if (payload.startsWith("data: ")) {
+            payload = payload.substring(6);
+          }
+          
           eventBuffer.push(payload);
           continue;
         }
