@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../../context/AuthContext";
 import HeaderComponent from "../../common/HeaderComponent";
@@ -17,6 +17,10 @@ export default function GNB({ isMobile }) {
     e.preventDefault();
     dispatch({ type: "LOGOUT" });
   };
+
+  useEffect(()=>{
+    window.scrollTo(0,0);
+  },[location.pathname])
 
   return (
     <>
