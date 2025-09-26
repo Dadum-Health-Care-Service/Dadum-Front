@@ -5,7 +5,7 @@ import ButtonComponent from "../../common/ButtonComponent";
 
 /**
  *  전역 axios 설정
- * - 스프링 세션/쿠키 인증을 쓰는 경우 필요한 옵션
+ * - 스프링 루틴/쿠키 인증을 쓰는 경우 필요한 옵션
  * - 필요 없으면 이 줄 삭제해도 됩니다.
  */
 axios.defaults.withCredentials = true;

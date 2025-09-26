@@ -1,16 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { FaFire, FaTrophy, FaMedal, FaStar, FaCalendar, FaClock, FaDumbbell, FaHeart, FaSun, FaMoon, FaCheck, FaBolt, FaChartBar, FaChartLine, FaSync, FaPalette, FaBullseye } from 'react-icons/fa';
 import ContainerComponent from '../../common/ContainerComponent';
 import HeaderComponent from '../../common/HeaderComponent';
 import styles from './Gamification.module.css';
 import AchievementService from './achievementService';
 import achievementConfig from './achievements.json';
+import GamificationService from '../../../services/gamificationService';
+import { useAuth } from '../../../context/AuthContext';
+import { GET, POST } from '../../../utils/api/api';
 
 export default function Gamification() {
-  const [achievementService] = useState(() => new AchievementService(achievementConfig));
+  const { user } = useAuth();
+  const [gamificationService] = useState(() => new GamificationService({ GET, POST }));
+  const [achievementService] = useState(() => new AchievementService(achievementConfig, gamificationService));
   const [achievements, setAchievements] = useState(achievementConfig.achievements);
-  const [userSessions, setUserSessions] = useState([]); // 실제 운동 데이터로 교체
+  const [userSessions, setUserSessions] = useState([]); // 백엔드에서 가져온 실제 운동 데이터
   const [expandedCategories, setExpandedCategories] = useState({}); // 펼쳐진 카테고리 상태
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [totalStats, setTotalStats] = useState({
     totalSessions: 0,
     totalDuration: 0,
@@ -18,8 +25,34 @@ export default function Gamification() {
     completionRate: 0
   });
 
+  // 백엔드에서 사용자 세션 데이터 로드
+  useEffect(() => {
+    const loadUserData = async () => {
+      if (!user?.accessToken) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const sessions = await achievementService.loadUserSessions(user.accessToken);
+        setUserSessions(sessions);
+      } catch (err) {
+        setError(`데이터를 불러오는 중 오류가 발생했습니다. (${err.response?.status || 'Unknown'})`);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUserData();
+  }, [user?.accessToken, achievementService]);
+
   // 업적 달성 상태 업데이트
   useEffect(() => {
+    if (userSessions.length === 0) return;
+
     const unlockedAchievements = achievementService.checkAllAchievements(achievements, userSessions);
     const unlockedCount = unlockedAchievements.length;
     const completionRate = Math.round((unlockedCount / achievements.length) * 100);
@@ -31,6 +64,34 @@ export default function Gamification() {
       completionRate
     });
   }, [userSessions, achievements, achievementService]);
+
+  // 데이터 새로고침 함수
+  const refreshData = async () => {
+    if (!user?.accessToken) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const sessions = await achievementService.loadUserSessions(user.accessToken);
+      setUserSessions(sessions);
+    } catch (err) {
+      setError('데이터를 새로고침하는 중 오류가 발생했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 주기적으로 데이터 새로고침 (5분마다)
+  useEffect(() => {
+    if (!user?.accessToken) return;
+
+    const interval = setInterval(() => {
+      refreshData();
+    }, 5 * 60 * 1000); // 5분
+
+    return () => clearInterval(interval);
+  }, [user?.accessToken]);
 
   // 업적 카테고리별 그룹화
   const groupedAchievements = achievements.reduce((groups, achievement) => {
@@ -48,8 +109,8 @@ export default function Gamification() {
     'Milestone': '마일스톤',
     'Streak': '스트릭(연속일)',
     'Weekly': '주간 리듬',
-    'Session': '세션 구성',
-    'Session Pattern': '세션 패턴',
+    'Session': '루틴 구성',
+    'Session Pattern': '루틴 패턴',
     'Monthly Volume': '볼륨(월간)',
     'Variety': '다양성',
     'Expertise': '전문성',
@@ -99,15 +160,74 @@ export default function Gamification() {
     }));
   };
 
-  // 업적 상태 표시 (실제 구현 시 서버에서 가져온 데이터 사용)
+  // 업적 상태 표시 (백엔드 데이터 기반)
   const getAchievementStatus = (achievement) => {
-    const isUnlocked = achievementService.checkAchievementUnlock(achievement, userSessions);
+    if (userSessions.length === 0) {
+      return {
+        unlocked: false,
+        progress: 0,
+        currentValue: 0,
+        targetValue: 0,
+        lastUnlocked: null
+      };
+    }
+
+    const status = achievementService.getAchievementStatusWithProgress(achievement, userSessions);
     return {
-      unlocked: isUnlocked,
-      progress: 0, // 진행률 계산 로직 추가 필요
-      lastUnlocked: null // 마지막 해금 시간
+      unlocked: status.unlocked,
+      progress: status.progress,
+      currentValue: status.currentValue,
+      targetValue: status.targetValue,
+      lastUnlocked: null // 마지막 해금 시간 (추후 구현)
     };
   };
+
+  // 로딩 상태 렌더링
+  if (loading) {
+    return (
+      <div className={styles.gamificationContainer}>
+        <div className={styles.mobileTitle}>
+          <HeaderComponent 
+            title="🏆 업적" 
+            variant="elevated" 
+            size="large" 
+            align="center"
+            className={styles.pageTitle}
+          />
+        </div>
+        <div className={styles.loadingContainer}>
+          <div className={styles.loadingSpinner}></div>
+          <p>업적 데이터를 불러오는 중...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 에러 상태 렌더링
+  if (error) {
+    return (
+      <div className={styles.gamificationContainer}>
+        <div className={styles.mobileTitle}>
+          <HeaderComponent 
+            title="🏆 업적" 
+            variant="elevated" 
+            size="large" 
+            align="center"
+            className={styles.pageTitle}
+          />
+        </div>
+        <div className={styles.errorContainer}>
+          <p className={styles.errorMessage}>{error}</p>
+          <button 
+            className={styles.retryButton}
+            onClick={() => window.location.reload()}
+          >
+            다시 시도
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.gamificationContainer}>
@@ -120,6 +240,14 @@ export default function Gamification() {
           align="center"
           className={styles.pageTitle}
         />
+        <button 
+          className={styles.refreshButton}
+          onClick={refreshData}
+          disabled={loading}
+          title="데이터 새로고침"
+        >
+          🔄
+        </button>
       </div>
       
       {/* 좌측: 전체 통계 */}
@@ -235,9 +363,27 @@ export default function Gamification() {
                             </div>
                             
                             <div className={styles.achievementFooter}>
-                              <span className={`${styles.statusBadge} ${status.unlocked ? styles.unlocked : styles.locked}`}>
-                                {status.unlocked ? "해금됨" : "잠김"}
-                              </span>
+                              <div className={styles.progressInfo}>
+                                {!status.unlocked && status.targetValue > 0 && (
+                                  <div className={styles.progressBar}>
+                                    <div 
+                                      className={styles.progressFill}
+                                      style={{ width: `${status.progress}%` }}
+                                    ></div>
+                                  </div>
+                                )}
+                                <div className={styles.progressText}>
+                                  {status.unlocked ? (
+                                    <span className={`${styles.statusBadge} ${styles.unlocked}`}>
+                                      해금됨
+                                    </span>
+                                  ) : (
+                                    <span className={`${styles.statusBadge} ${styles.locked}`}>
+                                      {status.targetValue > 0 ? `${status.currentValue}/${status.targetValue}` : "잠김"}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
                             </div>
                           </div>
                         );
