@@ -23,7 +23,7 @@ export default function ToggleComponent({
   return (
     <div className={`${styles.toggleComponent}`}>
       <div className={`${styles.toggleComponentContent}`}>
-        <h5>{content[active]}</h5>
+        {children ? <h5>{content[active]}</h5> : null}
         <div className={`${styles.toggleComponentButtons}`}>
           {content.map((item, index) => (
             <button
@@ -38,7 +38,7 @@ export default function ToggleComponent({
           ))}
         </div>
       </div>
-      {children[active]}
+      {children ? children[active] : null}
     </div>
   );
 }
