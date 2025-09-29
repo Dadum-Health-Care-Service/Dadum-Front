@@ -15,7 +15,6 @@
   background: #ffffff;
   color: #3b82f6;
   border: 1px solid #3b82f6;
-  border-radius: 8px 0 0px 8px;
   padding: 4px 8px;
   font-size: 14px;
   font-weight: 500;
@@ -28,6 +27,9 @@
 .toggleComponentButton.active {
   background: #3b82f6;
   color: #ffffff;
+}
+.toggleComponentButton:first-child {
+  border-radius: 8px 0 0px 8px;
 }
 .toggleComponentButton:last-child {
   border-radius: 0 8px 8px 0;

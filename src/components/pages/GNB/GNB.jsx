@@ -74,7 +74,7 @@ export default function GNB({ isMobile }) {
                 >
                   소셜
                 </HeaderComponent.MenuItem>
-                {user.role === "SUPER_ADMIN" ? (
+                {user.roles.includes("SUPER_ADMIN") ? (
                   <HeaderComponent.MenuItem
                     active={isActive("/admin")}
                     onClick={() => navigate("/admin")}
