@@ -13,9 +13,11 @@ export default function Users({ type = "user" }) {
   const [users, setUsers] = useState([]);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
   const [detailUser, setDetailUser] = useState(null);
 
-  const { GET, PUT } = useApi();
+  const { GET, PUT, DELETE } = useApi();
 
   const roleMapper = {
     USER: "사용자",
@@ -25,6 +27,9 @@ export default function Users({ type = "user" }) {
   const confirmPermission = (user) => {
     setIsConfirmModalOpen(true);
   };
+  const rejectPermission = () => {
+    setIsRejectModalOpen(true);
+  };
   const permitRole = () => {
     PUT(`/users/role/update/${detailUser.usersId}`, {
       assignmentId: detailUser.roleAssignments[0].assignmentId,
@@ -33,8 +38,27 @@ export default function Users({ type = "user" }) {
       setIsDetailModalOpen(false);
       GET("/users/role/request/list").then((res) => {
         setUsers(res.data);
+        setIsCompleteModalOpen(true);
       });
     });
+  };
+  const rejectRole = () => {
+    DELETE(`/users/role/delete/${detailUser.usersId}`, {
+      assignmentId: detailUser.roleAssignments[0].assignmentId,
+    }).then((res) => {
+      setIsRejectModalOpen(false);
+      setIsDetailModalOpen(false);
+      GET("/users/role/request/list").then((res) => {
+        setUsers(res.data);
+        setIsCompleteModalOpen(true);
+      });
+    });
+  };
+  const closeRejectModal = () => {
+    setIsRejectModalOpen(false);
+  };
+  const closeCompleteModal = () => {
+    setIsCompleteModalOpen(false);
   };
   const closeDetailModal = () => {
     setIsDetailModalOpen(false);
@@ -77,6 +101,9 @@ export default function Users({ type = "user" }) {
         <ButtonComponent variant="primary" onClick={confirmPermission}>
           허용
         </ButtonComponent>
+        <ButtonComponent variant="outline" onClick={rejectPermission}>
+          거부
+        </ButtonComponent>
         <ButtonComponent variant="secondary" onClick={closeDetailModal}>
           닫기
         </ButtonComponent>
@@ -91,6 +118,27 @@ export default function Users({ type = "user" }) {
         </ButtonComponent>
         <ButtonComponent variant="secondary" onClick={closeConfirmModal}>
           취소
+        </ButtonComponent>
+      </ModalComponent.Actions>
+    );
+  };
+  const rejectModalFooter = () => {
+    return (
+      <ModalComponent.Actions>
+        <ButtonComponent variant="primary" onClick={rejectRole}>
+          확인
+        </ButtonComponent>
+        <ButtonComponent variant="secondary" onClick={closeRejectModal}>
+          취소
+        </ButtonComponent>
+      </ModalComponent.Actions>
+    );
+  };
+  const completeModalFooter = () => {
+    return (
+      <ModalComponent.Actions>
+        <ButtonComponent variant="primary" onClick={closeCompleteModal}>
+          확인
         </ButtonComponent>
       </ModalComponent.Actions>
     );
@@ -143,6 +191,24 @@ export default function Users({ type = "user" }) {
         footer={confirmModalFooter()}
       >
         <div>권한 허용을 하시겠습니까?</div>
+      </ModalComponent>
+      <ModalComponent
+        isOpen={isRejectModalOpen}
+        onClose={closeRejectModal}
+        title="권한 거부"
+        size="small"
+        footer={rejectModalFooter()}
+      >
+        <div>권한 거부를 하시겠습니까?</div>
+      </ModalComponent>
+      <ModalComponent
+        isOpen={isCompleteModalOpen}
+        onClose={closeCompleteModal}
+        title="권한 변경 완료"
+        size="small"
+        footer={completeModalFooter()}
+      >
+        <div>권한 변경이 완료되었습니다.</div>
       </ModalComponent>
       <div style={{ width: "100%", height: "100%" }}>
         <ListComponent>
