@@ -4,7 +4,10 @@ import ButtonComponent from "../../common/ButtonComponent";
 import InputComponent from "../../common/InputComponent";
 import SelectComponent from "../../common/SelectComponent";
 import TextareaComponent from "../../common/TextareaComponent";
+import ContainerComponent from "../../common/ContainerComponent";
 import styles from "./Admin.module.css";
+import Users from "./Section/Users/Users";
+import ToggleComponent from "../../common/ToggleComponent";
 
 // 모달 타입별 설정을 객체로 분리하여 관리
 const MODAL_CONFIGS = {
@@ -654,7 +657,18 @@ const Admin = ({ isMobile }) => {
               title="사용자 관리"
               description="사용자 목록과 권한을 관리합니다"
             />
-            <Placeholder label="사용자 관리" />
+
+            <ContainerComponent
+              variant="filled"
+              shadow="none"
+              borderRadius="none"
+              className={styles.section}
+            >
+              <ToggleComponent content={["사용자 목록", "권한 요청"]}>
+                {[<Users />, <div>권한 요청</div>]}
+              </ToggleComponent>
+            </ContainerComponent>
+            
           </>
         );
       case "contents":
