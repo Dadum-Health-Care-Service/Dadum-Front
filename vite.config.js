@@ -35,6 +35,11 @@ export default defineConfig(({ mode }) => {
           secure: false,
           ws: true,
         },
+        '/ml': {
+        target: 'http://127.0.0.1:8000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/ml/, ''), // ★ /ml 접두어 제거해서 /analyze-coach로 전달
+        },
       },
     },
 
@@ -43,3 +48,4 @@ export default defineConfig(({ mode }) => {
     },
   };
 });
+
