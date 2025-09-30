@@ -5,11 +5,6 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import "./App.css";
 import PoseAccuracyMVP from "./components/pages/Pose/PoseAccuracyMVP.jsx";
 import Login from "./components/pages/Login/Login.jsx";
-import { AuthProvider } from "./context/AuthContext.jsx";
-import { RunProvider } from "./context/RunContext.jsx";
-import { RoutineProvider } from "./context/RoutineContext.jsx";
-import { SuggestProvider } from "./context/SuggestContext.jsx";
-import { ModalProvider } from "./context/ModalContext.jsx";
 
 // Common Components
 import HeaderComponent from "./components/common/HeaderComponent";
@@ -23,9 +18,6 @@ import Routine from "./components/pages/Routine/Routine.jsx";
 import Chatbot from "./components/pages/Chatbot/Chatbot.jsx";
 import Gamification from "./components/pages/Gamification/Gamification.jsx";
 import MyPage from "./components/pages/MyPage/MyPage.jsx";
-import Admin from "./components/pages/Admin/Admin.jsx";
-import SamplePage from "./components/pages/SamplePage/SamplePage.jsx";
-import Chatbot from "./components/pages/Chatbot/Chatbot.jsx";
 
 //Contexts
 import { AuthProvider, AuthContext } from "./context/AuthContext.jsx";
@@ -243,14 +235,7 @@ function App() {
         return <Home />;
       case "routine":
         return <Routine />;
-      case "achievement":
-        return (
-          <div className="container mt-5 pt-5">
-            <h1>업적 페이지</h1>
-            <p>업적 기능은 개발 중입니다.</p>
-          </div>
-        );
-      case "pose": // ← 새 탭: 자세 분석
+
         return <PoseAccuracyMVP />;
       case "login":
         return (
