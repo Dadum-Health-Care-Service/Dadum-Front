@@ -1,0 +1,80 @@
+.dashboardCard {
+    transition: transform 0.2s ease-in-out;
+}
+
+.dashboardCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.statCard {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+}
+
+.statCard .text-primary {
+    color: #fff !important;
+}
+
+.statCard .text-success {
+    color: #4ade80 !important;
+}
+
+.statCard .text-warning {
+    color: #fbbf24 !important;
+}
+
+.statCard .text-info {
+    color: #60a5fa !important;
+}
+
+.quickActionCard {
+    border: 2px solid #e5e7eb;
+    transition: all 0.3s ease;
+}
+
+.quickActionCard:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.orderTable {
+    font-size: 0.9rem;
+}
+
+.orderTable th {
+    background-color: #f8fafc;
+    border-bottom: 2px solid #e5e7eb;
+    font-weight: 600;
+}
+
+.orderTable td {
+    vertical-align: middle;
+}
+
+.statusBadge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.loadingSpinner {
+    width: 3rem;
+    height: 3rem;
+    border-width: 0.3rem;
+}
+
+@media (max-width: 768px) {
+    .dashboardCard {
+        margin-bottom: 1rem;
+    }
+    
+    .orderTable {
+        font-size: 0.8rem;
+    }
+    
+    .orderTable th,
+    .orderTable td {
+        padding: 0.5rem 0.25rem;
+    }
+}

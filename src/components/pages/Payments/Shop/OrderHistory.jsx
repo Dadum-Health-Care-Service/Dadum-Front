@@ -314,7 +314,7 @@ export default function OrderHistory() {
             <p className={styles.emptyStateText}>첫 번째 주문을 시작해보세요!</p>
             <ButtonComponent 
               variant="primary" 
-              onClick={() => window.dispatchEvent(new CustomEvent('tabChange', { detail: 'shop' }))}
+              onClick={() => navigate('/shop')}
               className={styles.shopButton}
             >
               쇼핑하러 가기

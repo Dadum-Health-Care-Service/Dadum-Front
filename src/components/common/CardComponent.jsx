@@ -9,6 +9,8 @@ const CardComponent = ({
   onClick,
   className = "",
   disabled = false,
+  variant = "default",
+  children,
 }) => {
   const handleClick = () => {
     if (!disabled && onClick) {
@@ -16,6 +18,16 @@ const CardComponent = ({
     }
   };
 
+  // children이 있으면 컨테이너로 사용
+  if (children) {
+    return (
+      <div className={`${styles.card} ${className} ${disabled ? styles.disabled : ""}`}>
+        {children}
+      </div>
+    );
+  }
+
+  // children이 없으면 루틴 카드로 사용
   return (
     <div
       className={`${styles.card} ${className} ${disabled ? styles.disabled : ""}`}

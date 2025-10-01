@@ -31,6 +31,7 @@ import ProductDetail from "./components/pages/Payments/Shop/ProductDetail.jsx";
 import OrderPage from "./components/pages/Payments/Shop/OrderPage.jsx";
 import OrderHistory from "./components/pages/Payments/Shop/OrderHistory.jsx";
 import PoseAccuracyMVP from "./components/pages/Pose/PoseAccuracyMVP.jsx";
+import SellerMain from "./components/pages/Payments/Seller/SellerMain.jsx";
 
 //Contexts
 import { AuthProvider, AuthContext } from "./context/AuthContext.jsx";
@@ -97,6 +98,7 @@ function AppContent() {
                 ></Route>
                 <Route path="/social" element={<Social />}></Route>
                 <Route path="/mypage/*" element={<MyPage />}></Route>
+                <Route path="/seller/*" element={<SellerMain />}></Route>
                 <Route
                   path="/admin"
                   element={<Admin isMobile={isMobile} />}

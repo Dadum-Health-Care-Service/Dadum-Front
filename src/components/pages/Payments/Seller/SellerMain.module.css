@@ -1,0 +1,89 @@
+.sellerMain {
+    min-height: 100vh;
+    background-color: #f8fafc;
+}
+
+.sellerSidebar {
+    background-color: white;
+    border-right: 1px solid #e5e7eb;
+    min-height: 100vh;
+    position: sticky;
+    top: 0;
+}
+
+.sellerSidebar .nav-link {
+    color: #6b7280;
+    padding: 0.75rem 1rem;
+    border: none;
+    background: none;
+    text-align: left;
+    width: 100%;
+    transition: all 0.2s ease;
+    border-radius: 0;
+}
+
+.sellerSidebar .nav-link:hover {
+    background-color: #f3f4f6;
+    color: #374151;
+}
+
+.sellerSidebar .nav-link.active {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+    border-right: 3px solid #3b82f6;
+    font-weight: 500;
+}
+
+.sellerSidebar .nav-link .me-2 {
+    font-size: 1.1rem;
+}
+
+.sellerContent {
+    background-color: #f8fafc;
+    min-height: 100vh;
+}
+
+.sidebarHeader {
+    background-color: #3b82f6;
+    color: white;
+    padding: 1rem;
+    margin: -1px -1px 0 -1px;
+}
+
+.sidebarHeader h5 {
+    margin: 0;
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .sellerSidebar {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: 250px;
+        height: 100vh;
+        z-index: 1000;
+        transition: left 0.3s ease;
+    }
+    
+    .sellerSidebar.show {
+        left: 0;
+    }
+    
+    .sellerContent {
+        margin-left: 0;
+    }
+    
+    .mobileMenuButton {
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        z-index: 1001;
+        background-color: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 0.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+}
