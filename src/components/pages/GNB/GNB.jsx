@@ -65,7 +65,7 @@ export default function GNB({ isMobile }) {
                   active={isActive("/daily")}
                   onClick={() => navigate("/daily")}
                 >
-                  일일 요약
+                  종합건강
                 </HeaderComponent.MenuItem>
 
                 <HeaderComponent.MenuItem
@@ -74,7 +74,7 @@ export default function GNB({ isMobile }) {
                 >
                   소셜
                 </HeaderComponent.MenuItem>
-                {user.roles.includes("SUPER_ADMIN") ? (
+                {user?.roles?.includes("SUPER_ADMIN") ? (
                   <HeaderComponent.MenuItem
                     active={isActive("/admin")}
                     onClick={() => navigate("/admin")}
