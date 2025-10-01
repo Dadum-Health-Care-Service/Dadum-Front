@@ -185,6 +185,7 @@
 
 .routineActions {
   display: flex;
+  flex-direction: row;
   gap: 0.5rem;
   justify-content: flex-end;
   margin-top: auto;
@@ -196,7 +197,7 @@
 
 /* 모바일 기준 스타일 */
 .routineActions {
-  flex-direction: column;
+  flex-direction: row;
   gap: 0.5rem;
 }
 
