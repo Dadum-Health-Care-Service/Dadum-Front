@@ -44,7 +44,6 @@ function AppContent() {
   const [isMobile, setIsMobile] = useState(false);
   const location = useLocation();
 
-
   useEffect(() => {
     const checkIsMobile = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -58,7 +57,6 @@ function AppContent() {
   const showGNB = user && !noGNBpaths.includes(location.pathname);
   const pagePadding = isMobile ? "90px" : "0px";
 
-
   return (
     <>
       <main
@@ -67,7 +65,6 @@ function AppContent() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-
         }}
       >
         {user && <GNB isMobile={isMobile} />}
@@ -75,6 +72,8 @@ function AppContent() {
           <Routes>
             <Route path="/" element={user ? <Home /> : <MainView />}></Route>
             <Route path="/login" element={<Login />}></Route>
+            <Route path="/findid" element={<FindId />}></Route>
+            <Route path="/findpw" element={<FindPw />}></Route>
             <Route path="/signup" element={<SignUp />}></Route>
             <Route path="/sample" element={<SamplePage />}></Route>
 
