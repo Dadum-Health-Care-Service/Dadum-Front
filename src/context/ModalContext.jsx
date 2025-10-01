@@ -45,7 +45,10 @@ import ButtonComponent from "../components/common/ButtonComponent";
  *       ※로딩모달은 메세지 및에 로딩상태가 렌더링된다
  *       모달제목은 지정하지 않으면 "로딩", 부제목은 "로딩이 끝나면 자동으로 닫힙니다"기 기본
  *       모달을 닫는 x버튼은 존재하지 않고, esc 및 모달 바깥을 클릭해서 모달을 끌 수는 없다
- *
+ *       ※해당 모달을 닫기 위해서는 반드시 closeModal을 같이 가져와 
+ *         로딩모달이 닫혔으면 하는 곳에서 closeModal()을 실행해야한다!!
+ * 
+
  * - <<closeModal>>
  * 1. 사용하고자 하는 페이지에 const {closeModal}=useModal();로 context 가져오기
  * 2. closeModal()로 모달을 닫는 클린업 함수 사용 가능

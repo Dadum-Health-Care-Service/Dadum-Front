@@ -345,10 +345,9 @@ const Admin = ({ isMobile }) => {
               className={styles.section}
             >
               <ToggleComponent content={["사용자 목록", "권한 요청"]}>
-                {[<Users />, <div>권한 요청</div>]}
+                {[<Users type="user" />, <Users type="roleRequest" />]}
               </ToggleComponent>
             </ContainerComponent>
-            
           </>
         );
       case "contents":
