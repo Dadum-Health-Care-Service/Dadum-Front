@@ -1,4 +1,5 @@
 import React from "react";
+import { useEffect } from "react";
 import styles from "./HeaderComponent.module.css";
 
 // Header variant별 클래스명 매핑
@@ -159,7 +160,6 @@ const HeaderMenuItem = ({
       onClick(e);
     }
   };
-
   // 링크가 있는 경우 렌더링
   if (href) {
     return (
@@ -170,6 +170,7 @@ const HeaderMenuItem = ({
         {...props}
       >
         {children}
+        {isNotify && <div className={styles["header-menu-item-notify"]}></div>}
       </a>
     );
   }

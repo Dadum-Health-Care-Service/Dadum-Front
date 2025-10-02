@@ -14,6 +14,7 @@ import styles from "./BottomNavigation.module.css";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
+import NotificationDot from "./NotificationDot";
 
 // 탭 설정을 상수로 분리
 const NAVIGATION_TABS = [
@@ -29,7 +30,7 @@ const NAVIGATION_TABS = [
 ];
 
 // 개별 탭 아이템 컴포넌트
-const NavigationTab = ({ tab }) => {
+const NavigationTab = ({ tab, isNotify }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -58,7 +59,7 @@ const NavigationTab = ({ tab }) => {
 };
 
 // 메인 BottomNavigation 컴포넌트
-const BottomNavigation = () => {
+const BottomNavigation = ({ isNotify }) => {
   const { user } = useContext(AuthContext);
   const renderNavigationTabs = () => {
     return NAVIGATION_TABS.filter((tab) => {
@@ -68,7 +69,12 @@ const BottomNavigation = () => {
         return tab.to !== "/admin";
       }
       return true;
-    }).map((tab) => <NavigationTab key={tab.to} tab={tab} />);
+    }).map((tab, i) => (
+      <React.Fragment key={i}>
+        <NavigationTab key={tab.to} tab={tab} />
+        {isNotify === "REQUEST_ROLE" && <NotificationDot />}
+      </React.Fragment>
+    ));
   };
 
   return (

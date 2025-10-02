@@ -1,16 +1,17 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../../context/AuthContext";
 import HeaderComponent from "../../common/HeaderComponent";
 import ButtonComponent from "../../common/ButtonComponent";
 import BottomNavigation from "../../common/BottomNavigation";
+import NotificationDot from "../../common/NotificationDot";
 import Chatbot from "../Chatbot/Chatbot";
 
-export default function GNB({ isMobile }) {
+export default function GNB({ isMobile, isNotify }) {
   const { user, dispatch } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
-
+  console.log("isNotify", isNotify, isNotify === "REQUEST_ROLE");
   const isActive = (pathname) => location.pathname === pathname;
 
   const handleLogoutClick = (e) => {
@@ -77,9 +78,13 @@ export default function GNB({ isMobile }) {
                 {user?.roles?.includes("SUPER_ADMIN") ? (
                   <HeaderComponent.MenuItem
                     active={isActive("/admin")}
-                    onClick={() => navigate("/admin")}
+                    onClick={() => {
+                      navigate("/admin");
+                      markAllAsRead(); // 관리자 페이지 진입 시 알림 읽음 처리
+                    }}
+                    style={{ position: "relative" }}
                   >
-                    관리자
+                    관리자{isNotify && <NotificationDot />}
                   </HeaderComponent.MenuItem>
                 ) : (
                   <HeaderComponent.MenuItem
@@ -102,7 +107,7 @@ export default function GNB({ isMobile }) {
         )}
 
         {/* 모바일 환경에서만 하단 네비게이션 표시 */}
-        {isMobile && <BottomNavigation />}
+        {isMobile && <BottomNavigation isNotify={isNotify} />}
 
         {/* 플로팅 챗봇 - 모든 페이지에서 사용 가능 */}
         <Chatbot

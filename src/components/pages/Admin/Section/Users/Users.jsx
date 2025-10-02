@@ -8,7 +8,7 @@ import styles from "./Users.module.css";
 import { useApi } from "../../../../../utils/api/useApi";
 import { useModal } from "../../../../../context/ModalContext";
 
-export default function Users({ type = "user" }) {
+export default function Users({ type = "user", isNotify = null }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [users, setUsers] = useState([]);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -66,6 +66,11 @@ export default function Users({ type = "user" }) {
   const closeConfirmModal = () => {
     setIsConfirmModalOpen(false);
   };
+  const fetchRoleRequest = () => {
+    GET("/users/role/request/list").then((res) => {
+      setUsers(res.data);
+    });
+  };
 
   useEffect(() => {
     if (type === "user") {
@@ -89,11 +94,12 @@ export default function Users({ type = "user" }) {
         );
       });
     } else {
-      GET("/users/role/request/list").then((res) => {
-        setUsers(res.data);
-      });
+      fetchRoleRequest();
     }
   }, [type]);
+  useEffect(() => {
+    fetchRoleRequest();
+  }, [isNotify]);
 
   const detailModalFooter = () => {
     return (
