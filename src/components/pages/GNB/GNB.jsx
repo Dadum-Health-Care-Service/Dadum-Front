@@ -19,9 +19,9 @@ export default function GNB({ isMobile, isNotify }) {
     dispatch({ type: "LOGOUT" });
   };
 
-  useEffect(()=>{
-    window.scrollTo(0,0);
-  },[location.pathname])
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   return (
     <>
@@ -84,7 +84,6 @@ export default function GNB({ isMobile, isNotify }) {
                     active={isActive("/admin")}
                     onClick={() => {
                       navigate("/admin");
-                      markAllAsRead(); // 관리자 페이지 진입 시 알림 읽음 처리
                     }}
                     style={{ position: "relative" }}
                   >
