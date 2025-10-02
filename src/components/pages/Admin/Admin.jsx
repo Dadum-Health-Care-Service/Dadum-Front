@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ModalComponent from "../../common/ModalComponent";
 import ButtonComponent from "../../common/ButtonComponent";
 import InputComponent from "../../common/InputComponent";
@@ -12,7 +12,7 @@ import ToggleComponent from "../../common/ToggleComponent";
 
 
 // 메인 Admin 컴포넌트
-const Admin = ({ isMobile }) => {
+const Admin = ({ isMobile, isNotify, setIsNotify }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -344,8 +344,16 @@ const Admin = ({ isMobile }) => {
               borderRadius="none"
               className={styles.section}
             >
-              <ToggleComponent content={["사용자 목록", "권한 요청"]}>
-                {[<Users type="user" />, <Users type="roleRequest" />]}
+              <ToggleComponent
+                content={["사용자 목록", "권한 요청"]}
+                isNotify={isNotify}
+                viewNotify={setIsNotify}
+                notifyIndex={1}
+              >
+                {[
+                  <Users type="user" />,
+                  <Users type="roleRequest" isNotify={isNotify} />,
+                ]}
               </ToggleComponent>
             </ContainerComponent>
           </>
