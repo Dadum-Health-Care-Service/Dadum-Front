@@ -99,11 +99,11 @@ export default function Shop() {
   const handleBuyNow = (product) => {
     // ProductDetail에서 구매하기 버튼을 눌렀을 때의 처리
     console.log("구매하기:", product);
-    // OrderPage로 이동하기 위해 상품 정보를 저장하고 탭 변경
+    // OrderPage로 이동하기 위해 상품 정보를 저장하고 navigate 사용
     // 상품 정보를 localStorage에 저장하여 OrderPage에서 사용할 수 있도록 함
     localStorage.setItem("selectedProduct", JSON.stringify(product));
-    // OrderPage 탭으로 이동
-    window.dispatchEvent(new CustomEvent("tabChange", { detail: "order" }));
+    // OrderPage로 이동
+    navigate("/order");
   };
 
   return (
@@ -117,11 +117,10 @@ export default function Shop() {
         <div className={styles.shopActions}>
           <ButtonComponent
             variant="outline"
-            onClick={() =>
-              window.dispatchEvent(
-                new CustomEvent("tabChange", { detail: "orders" })
-              )
-            }
+            onClick={() => {
+              console.log("주문내역 버튼 클릭됨");
+              navigate("/orders");
+            }}
           >
             📋 주문 내역
           </ButtonComponent>

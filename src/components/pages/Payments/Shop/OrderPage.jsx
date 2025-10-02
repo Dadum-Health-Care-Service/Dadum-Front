@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { Container, Row, Col, Card, Button, Form, Alert, Badge, Table } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import PaymentModal from '../PaymentModal';
 import AddressSearch from '../AddressSearch';
 import { AuthContext } from '../../../../context/AuthContext';
@@ -7,6 +8,7 @@ import { AuthContext } from '../../../../context/AuthContext';
 
 export default function OrderPage() {
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -258,8 +260,8 @@ export default function OrderPage() {
   };
 
   const handleBackToProduct = () => {
-    // Shop 탭으로 이동
-    window.dispatchEvent(new CustomEvent('tabChange', { detail: 'shop' }));
+    // Shop 페이지로 이동
+    navigate('/shop');
   };
 
   if (loading) {
