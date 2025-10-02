@@ -39,7 +39,7 @@ function Login() {
   //QR 등록 여부
   const [isQrRegistered, setIsQrRegistered] = useState(false);
 
-  //세션 ID 설정
+  //루틴 ID 설정
   const [sessionId, setSessionId] = useState("");
 
   //서비스 패스워드 설정
