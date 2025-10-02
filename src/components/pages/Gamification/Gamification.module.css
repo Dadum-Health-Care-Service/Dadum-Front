@@ -3,11 +3,13 @@
   padding: 24px;
   max-width: 1200px;
   margin: 0 auto;
+  margin-bottom: 24px;
   background-color: #ffffff;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   gap: 24px;
+  border-radius: 1rem;
 }
 
 /* 웹 환경에서 2열 레이아웃 */

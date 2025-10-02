@@ -1,0 +1,19 @@
+.span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.detail ul {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}

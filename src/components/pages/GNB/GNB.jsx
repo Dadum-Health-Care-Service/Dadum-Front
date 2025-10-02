@@ -7,7 +7,7 @@ import BottomNavigation from "../../common/BottomNavigation";
 import Chatbot from "../Chatbot/Chatbot";
 
 export default function GNB({ isMobile }) {
-  const { dispatch } = useContext(AuthContext);
+  const { user, dispatch } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -53,7 +53,7 @@ export default function GNB({ isMobile }) {
                 >
                   분석
                 </HeaderComponent.MenuItem>
-                {/* 칼로리 */}
+
                 <HeaderComponent.MenuItem
                   active={isActive("/calorie")}
                   onClick={() => navigate("/calorie")}
@@ -61,31 +61,34 @@ export default function GNB({ isMobile }) {
                   칼로리
                 </HeaderComponent.MenuItem>
 
-                {/* ✅ 추가: 일일 요약 메뉴 */}
                 <HeaderComponent.MenuItem
                   active={isActive("/daily")}
                   onClick={() => navigate("/daily")}
                 >
-                  일일 요약
+                  종합건강
                 </HeaderComponent.MenuItem>
-                <HeaderComponent.MenuItem
-                  active={isActive("/statistics")}
-                  onClick={() => navigate("/statistics")}
-                >
-                  통계
-                </HeaderComponent.MenuItem>
+
                 <HeaderComponent.MenuItem
                   active={isActive("/social")}
                   onClick={() => navigate("/social")}
                 >
                   소셜
                 </HeaderComponent.MenuItem>
-                <HeaderComponent.MenuItem
-                  active={isActive("/mypage")}
-                  onClick={() => navigate("/mypage")}
-                >
-                  마이페이지
-                </HeaderComponent.MenuItem>
+                {user?.roles?.includes("SUPER_ADMIN") ? (
+                  <HeaderComponent.MenuItem
+                    active={isActive("/admin")}
+                    onClick={() => navigate("/admin")}
+                  >
+                    관리자
+                  </HeaderComponent.MenuItem>
+                ) : (
+                  <HeaderComponent.MenuItem
+                    active={isActive("/mypage")}
+                    onClick={() => navigate("/mypage")}
+                  >
+                    마이페이지
+                  </HeaderComponent.MenuItem>
+                )}
               </HeaderComponent.Navigation>
 
               <ButtonComponent

@@ -124,7 +124,6 @@ export default function Settings(){
             //입력한 현재 비밀번호가 맞는지 확인
             try {
                 res1 = await POST('/users/auth/password/check',{ password: passwords.currentPW });
-                console.log(res1)
             } catch (err1) {
                 console.log('비밀번호 확인 호출 중 오류 발생: ',err1);
                 //비밀번호 확인 중 오류가 발생하면 저장된 입력값 초기화

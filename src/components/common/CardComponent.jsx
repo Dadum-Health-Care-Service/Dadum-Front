@@ -18,9 +18,7 @@ const CardComponent = ({
 
   return (
     <div
-      className={`${styles.card} ${className} ${
-        disabled ? styles["card--disabled"] : ""
-      }`}
+      className={`${styles.card} ${className} ${disabled ? styles.disabled : ""}`}
       onClick={handleClick}
       role="button"
       tabIndex={disabled ? -1 : 0}
@@ -31,15 +29,17 @@ const CardComponent = ({
         }
       }}
     >
-      <div className={styles["card__content"]}>
-        <h3 className={styles["card__title"]}>{title}</h3>
-        <p className={styles["card__details"]}>{details}</p>
+      <div className={styles["card-content"]}>
+        <h3 className={styles["card-title"]}>{title}</h3>
+        <p className={styles["card-details"]}>{details}</p>
       </div>
-      <div className={styles["card__button-container"]} onClick={handleClick}>
-        <ButtonComponent variant="outline" onClick={onClick} size="medium">
-          {buttonText}
-        </ButtonComponent>
-      </div>
+      {buttonText && !disabled && (
+        <div className={styles["card-button-container"]} onClick={handleClick}>
+          <ButtonComponent variant="outline" onClick={onClick} size="medium">
+            {buttonText}
+          </ButtonComponent>
+        </div>
+      )}
     </div>
   );
 };

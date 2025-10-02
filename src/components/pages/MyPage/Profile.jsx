@@ -5,6 +5,7 @@ import { AuthContext } from "../../../context/AuthContext";
 import InputComponent from "../../common/InputComponent";
 import { useModal } from "../../../context/ModalContext";
 import { useApi } from "../../../utils/api/useApi";
+import styles from './Profile.module.css';
 
 export default function Profile(){
     const { GET, PUT } = useApi();
@@ -36,14 +37,7 @@ export default function Profile(){
 
     //프로필 수정 시 저장 버튼을 누르기 전에 임시로 데이터 저장
     const [inputs, setInputs] = useState({});
-
-    // 업적 데이터 (임시)
-    const [unlockedAchievements] = useState([
-        { id: 1, name: '첫 운동', icon: '🥇' },
-        { id: 2, name: '연속 7일', icon: '🔥' },
-        { id: 3, name: '근력 향상', icon: '💪' },
-        { id: 4, name: '목표 달성', icon: '🎯' },
-    ]);
+    const [phoneNum, setPhoneNum]=useState({});
 
     //최초렌더링 및 userId가 변하는 경우에 따라 user정보 네트워크로부터 읽어오기
     useEffect(() => {
@@ -92,13 +86,19 @@ export default function Profile(){
                     ...prev,
                     name: profile.name,
                     nickName: profile.nickName,
-                    phoneNum: profile.phoneNum,
                     profileImg: profile.profileImg,
                     age: profile.age,
                     gender: profile.gender,
                     height: profile.height,
                     weight: profile.weight,
                 }));
+
+                setPhoneNum(prev=>({
+                    ...prev,
+                    phoneNum1: profile.phoneNum.slice(0,3),
+                    phoneNum2: profile.phoneNum.slice(3,7),
+                    phoneNum3: profile.phoneNum.slice(7),
+                }))
             } catch (e) {
                 //에러 발생시 에러상태 저장 및 확인 모달 띄우기
                 console.log(e.response?.data, e);
@@ -135,6 +135,15 @@ export default function Profile(){
         );
     }
 
+    const inputClasses = [
+        styles["input-component"],
+        styles["medium"],
+        styles["outlined"],
+        (errors.phoneNum1 || errors.phoneNum2 || errors.phoneNum3) ? styles["error"] : "",
+      ]
+        .filter(Boolean)
+        .join(" ");
+
     //이미지 인풋폼을 통해서 업로드 제어
     const handleImageChange = e =>{
         const file = e.target.files[0];
@@ -146,7 +155,20 @@ export default function Profile(){
             };
             reader.readAsDataURL(file);
         }
-        console.log(e);
+    };
+
+    const handlePhoneNumChange = (field)=>(e)=>{
+        setPhoneNum((prev)=>({
+            ...prev,
+            [field]:e.target.value,
+        }));
+
+        if(errors[field]){
+            setErrors((prev)=>({
+                ...prev,
+                [field]:"",
+            }));
+        };
     };
 
     //프로필 수정 인풋 폼 제어용 함수
@@ -172,7 +194,6 @@ export default function Profile(){
                 [field]: e.target.value,
             }));
         }
-        console.log(inputs);
 
         //유효성 체크 에러 메세지 초기화
         if(errors[field]){
@@ -189,7 +210,9 @@ export default function Profile(){
         const newErrors = {};
         if(!inputs.name) newErrors.name = "이름은 필수 입력값입니다.";
         if(!inputs.nickName) newErrors.nickName = "닉네임은 필수 입력값입니다.";
-        if(!inputs.phoneNum) newErrors.phoneNum = "전화번호는 필수 입력값입니다.";
+        if(!phoneNum.phoneNum1) newErrors.phoneNum1 = "전화번호는 필수 입력값입니다.";
+        if(!phoneNum.phoneNum2) newErrors.phoneNum2 = "전화번호는 필수 입력값입니다.";
+        if(!phoneNum.phoneNum3) newErrors.phoneNum3 = "전화번호는 필수 입력값입니다.";
 
         setErrors(newErrors);
 
@@ -206,7 +229,7 @@ export default function Profile(){
                         nickName: inputs.nickName,
                         email: profile.email,
                         profileImg: inputs.profileImg,
-                        phoneNum: inputs.phoneNum,
+                        phoneNum: phoneNum.phoneNum1+phoneNum.phoneNum2+phoneNum.phoneNum3,
                         biosDto: {
                             gender: inputs.gender,
                             age: inputs.age,
@@ -221,8 +244,8 @@ export default function Profile(){
             }catch(error){
                 //오류 모달 띄우고 프로필 페이지 렌더
                 console.log(error);
-                setError('프로필 수정 중 오류가 발생하였습니다');
                 showConfirmModal('프로필 수정 중 오류가 발생하였습니다',"네트워크 에러","",()=>{setClickEdit(false)})
+                setError('프로필 수정 중 오류가 발생하였습니다');//confirm모달에서 취소 선택시 오류 화면 띄우기
             }finally {
                 //로딩 상태 없애기
                 setLoading(false);
@@ -431,17 +454,52 @@ export default function Profile(){
                         </div>
                     </ContainerComponent>
                     <ContainerComponent variant="outlined" className="profile-info mb-3">
-                        <div className="d-flex flex-column p-3">    
-                            <InputComponent
-                                label="전화번호"
-                                placeholder="전화번호를 입력하세요"
-                                value={profile.phoneNum}
-                                onChange={handleInputChange("phoneNum")}
-                                className="mb-3"
-                                required
-                                error={errors.phoneNum}
-                                helperText="전화번호는 숫자만 입력해주세요"
-                            />
+                        <div className="d-flex flex-column p-3">
+                            <div className={inputClasses}>
+                                <label className={styles["input-label"]}>
+                                    전화번호
+                                    <span className={styles["input-required"]}>
+                                        *
+                                    </span>
+                                </label>
+                                <div className={styles["input-wrapper"]}>    
+                                    <input 
+                                        type="number"
+                                        className={styles["input-field"]}
+                                        placeholder="010"
+                                        value={phoneNum.phoneNum1}
+                                        onChange={handlePhoneNumChange("phoneNum1")}
+                                        required
+                                    />
+                                    <span>-</span>
+                                    <input 
+                                        type="number"
+                                        className={styles["input-field"]}
+                                        placeholder="전화번호를"
+                                        value={phoneNum.phoneNum2}
+                                        onChange={handlePhoneNumChange("phoneNum2")}
+                                        required
+                                    />
+                                    <span>-</span>
+                                    <input 
+                                        type="number"
+                                        className={styles["input-field"]}
+                                        placeholder="입력하세요"
+                                        value={phoneNum.phoneNum3}
+                                        onChange={handlePhoneNumChange("phoneNum3")}
+                                        required
+                                    />
+                                </div>
+                                <div className="mb-3">
+                                    <div className={styles["input-helper"]}>
+                                        {(errors.phoneNum1 || errors.phoneNum2 || errors.phoneNum3) ? (
+                                            <span className={styles["input-error-text"]}>전화번호는 필수 입력값입니다</span>
+                                        ) : (
+                                            <span className={styles["input-helper-text"]}>전화번호는 숫자만 입력해주세요</span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
                             <InputComponent
                                 label="가입일"
                                 placeholder="가입일을 입력하세요"

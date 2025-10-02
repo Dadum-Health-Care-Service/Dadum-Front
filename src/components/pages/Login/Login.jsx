@@ -14,7 +14,7 @@ import { useApi } from "../../../utils/api/useApi";
 function Login() {
   const { POST } = useApi();
   const navigate = useNavigate();
-  const {showBasicModal}=useModal();
+  const { showBasicModal } = useModal();
 
   // 현재 보여줄 뷰를 관리하는 상태 ('login', 'passwordless','loggedIn')
   const [view, setView] = useState("login");
@@ -46,6 +46,8 @@ function Login() {
   const [servicePassword, setServicePassword] = useState("");
   const [currentTerm, setCurrentTerm] = useState(0);
   const [termLength, setTermLength] = useState(0);
+
+  // 최초렌더링 시 user가 있다면
 
   // view 상태가 'passwordless'로 변경될 때 QR 코드를 생성하는 로직 (Side Effect)
   useEffect(() => {
@@ -148,7 +150,7 @@ function Login() {
             if (res.data.result === "OK") {
               setIsQrRegistered(true);
               setIsLoggedIn(true);
-              navigate('/');
+              navigate("/");
             }
           });
         }
@@ -204,7 +206,7 @@ function Login() {
                     console.log(res.data);
                     dispatch({ type: "LOGIN", user: res.data });
                     setIsLoggedIn(true);
-                    navigate('/');
+                    navigate("/");
                   });
                 } else {
                   await POST(
@@ -260,16 +262,20 @@ function Login() {
       )
         .then((res) => {
           dispatch({ type: "LOGIN", user: res.data });
-          navigate('/');
+          setView("loggedIn");
         })
         .catch((error) => {
           console.error("로그인 오류:", error);
-          if (typeof error.response?.data === 'string'){
+          if (typeof error.response?.data === "string") {
             const msg = error.response.data;
-            if(msg.length > 0) showBasicModal(msg.substring(msg.indexOf(':')+1),'로그인 실패');
-            else showBasicModal('로그인에 실패하였습니다','로그인 실패');
-          }else {
-            showBasicModal('로그인에 실패하였습니다.','네트워크 에러');
+            if (msg.length > 0)
+              showBasicModal(
+                msg.substring(msg.indexOf(":") + 1),
+                "로그인 실패"
+              );
+            else showBasicModal("로그인에 실패하였습니다", "로그인 실패");
+          } else {
+            showBasicModal("로그인에 실패하였습니다.", "네트워크 에러");
           }
         });
 
@@ -353,7 +359,7 @@ function Login() {
 
     return interval;
   };
-  
+
   const handlePasswordlessRegister = async () => {
     await POST(
       "/join",
@@ -374,7 +380,7 @@ function Login() {
       </div>
 
       {/* 로그인 뷰 */}
-      {view === "login" && (
+      {view === "login" && !user && (
         <FormComponent
           title="로그인"
           subtitle="다듬에 오신 것을 환영합니다."
@@ -458,10 +464,27 @@ function Login() {
             <ButtonComponent
               variant="outline-primary"
               size="large"
-              onClick={()=>navigate('/signup')}
+              onClick={() => navigate("/signup")}
               fullWidth
             >
               계정이 없으신가요? 회원가입
+            </ButtonComponent>
+          </div>
+
+          <div className={styles["button-find"]}>
+            <ButtonComponent
+              variant="outline-primary"
+              size="large"
+              onClick={() => navigate("/findid")}
+            >
+              아이디 찾기
+            </ButtonComponent>
+            <ButtonComponent
+              variant="outline-primary"
+              size="large"
+              onClick={() => navigate("/findpw")}
+            >
+              비밀번호 찾기
             </ButtonComponent>
           </div>
         </FormComponent>
@@ -520,7 +543,7 @@ function Login() {
       )}
 
       {/* 로그인 성공 화면 */}
-      {view === "loggedIn" && (
+      {(view === "loggedIn" || user) && (
         <FormComponent
           title="로그인"
           subtitle="다듬에 오신 것을 환영합니다."
@@ -531,7 +554,7 @@ function Login() {
           className={styles["logged-in-container"]}
         >
           <h2>로그인 성공!</h2>
-          <p>환영합니다, {loginId}님!</p>
+          <p>환영합니다, <span style={{color:"#2563eb"}}>{user.email}</span>님!</p>
           <p>다듬 서비스를 이용하실 수 있습니다.</p>
 
           <div className={styles["button-group"]}>
@@ -539,7 +562,7 @@ function Login() {
               variant="outline-primary"
               size="large"
               onClick={() => {
-                navigate('/');
+                navigate("/", { replace: true });
               }}
               fullWidth
             >
