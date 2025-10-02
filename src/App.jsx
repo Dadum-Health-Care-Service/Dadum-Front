@@ -31,6 +31,7 @@ import ProductDetail from "./components/pages/Payments/Shop/ProductDetail.jsx";
 import OrderPage from "./components/pages/Payments/Shop/OrderPage.jsx";
 import OrderHistory from "./components/pages/Payments/Shop/OrderHistory.jsx";
 import PoseAccuracyMVP from "./components/pages/Pose/PoseAccuracyMVP.jsx";
+import MapPage from "./components/pages/Map/MapPage.jsx";
 
 //Contexts
 import { AuthProvider, AuthContext } from "./context/AuthContext.jsx";
@@ -77,7 +78,6 @@ function AppContent() {
             <Route path="/login" element={<Login />}></Route>
             <Route path="/signup" element={<SignUp />}></Route>
             <Route path="/sample" element={<SamplePage />}></Route>
-
             {user ? (
               <>
                 <Route path="/routine" element={<Routine />}></Route>
