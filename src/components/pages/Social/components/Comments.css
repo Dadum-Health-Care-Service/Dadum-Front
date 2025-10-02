@@ -1,0 +1,135 @@
+/* src/components/Comments.css */
+
+.comments {
+  margin-top: 8px;
+}
+
+.cmt-toggle {
+  background: transparent;
+  border: none;
+  color: var(--muted, #64748b);
+  font-size: 14px;
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+
+.cmt-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cmt-empty {
+  color: var(--muted, #64748b);
+  font-size: 14px;
+  padding: 8px 2px;
+}
+
+.cmt-item {
+  border: 1px solid var(--border, #e5e7eb);
+  background: #fff;
+  border-radius: var(--radius, 12px);
+  padding: 10px 12px;
+}
+
+.cmt-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cmt-who {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted, #64748b);
+  font-size: 13px;
+}
+
+.cmt-avatar {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--border, #e5e7eb);
+  display: inline-block;
+}
+
+.cmt-nick {
+  color: var(--text, #0f172a);
+  font-weight: 600;
+}
+
+.cmt-id {
+  opacity: 0.8;
+}
+
+.cmt-dot {
+  opacity: 0.6;
+}
+
+.cmt-actions {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.cmt-body {
+  margin-top: 8px;
+}
+
+.cmt-text {
+  margin: 0;
+  color: var(--text, #0f172a);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.cmt-edit {
+  width: 100%;
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 14px;
+  outline: none;
+}
+
+.cmt-write {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.cmt-input {
+  flex: 1;
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 12px;
+  padding: 10px 12px;
+  outline: none;
+}
+
+.btn {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.btn.primary {
+  background: var(--primary, #0a66ff);
+  color: #fff;
+  border-color: var(--primary, #0a66ff);
+}
+
+.btn.ghost {
+  background: #fff;
+  color: var(--text, #0f172a);
+  border-color: var(--border, #e5e7eb);
+}
+
+.btn.danger {
+  background: #fff;
+  color: #ef4444;
+  border-color: #fecaca;
+}
