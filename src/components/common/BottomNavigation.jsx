@@ -63,7 +63,7 @@ const BottomNavigation = ({ isNotify }) => {
   const { user } = useContext(AuthContext);
   const renderNavigationTabs = () => {
     return NAVIGATION_TABS.filter((tab) => {
-      if (user.roles.includes("SUPER_ADMIN")) {
+      if (user.roles?.includes("SUPER_ADMIN")) {
         return tab.to !== "/mypage";
       } else {
         return tab.to !== "/admin";
