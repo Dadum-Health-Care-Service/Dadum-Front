@@ -18,9 +18,10 @@ import ModalExample from "../../common/ModalExample";
 import RoutineCreateModal from "./RoutineCreateModal/RoutineCreateModal";
 import RoutineDetailModal from "./RoutineDetailModal/RoutineDetailModal";
 import { useApi } from "../../../utils/api/useApi";
+import { useModal } from "../../../context/ModalContext";
 
 const Routine = () => {
-  const { GET } = useApi();
+  const { GET, DELETE } = useApi();
   const [searchTerm, setSearchTerm] = useState("");
   const [exercises, setExercises] = useState([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -28,6 +29,7 @@ const Routine = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedRoutine, setSelectedRoutine] = useState(null);
   const [routines, setRoutines] = useState([]);
+  const { showConfirmModal } = useModal();
 
   const categories = [
     { id: "all", label: "전체", color: "primary" },
@@ -74,15 +76,46 @@ const Routine = () => {
     setSelectedRoutine(null);
     setIsDetailModalOpen(false);
   };
+  const handleDeleteRoutine = (routine) => {
+    console.log(routine);
+    showConfirmModal(
+      "루틴을 삭제하시겠습니까?",
+      "루틴 삭제",
+      "",
+      async () => {
+        await DELETE(`/routine/${routine.setId}/delete`, {}, true)
+        .then((res) => {
+          console.log(res);
+          showConfirmModal(
+            "루틴이 삭제되었습니다.",
+            "루틴 삭제",
+            "",
+            () => {
+              getRoutines();
+            },
+            false
+          );
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+      },
+      true
+    );
+  };
+
+  const getRoutines =() =>{
+    GET("/routine/list", {}, true)
+    .then((res) => {
+      setRoutines(res.data);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+  }
 
   useEffect(() => {
-    GET("/routine/list", {}, true)
-      .then((res) => {
-        setRoutines(res.data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+   getRoutines();
   }, []);
 
   const getExercises = (exercises) => {
@@ -94,12 +127,15 @@ const Routine = () => {
         isModalOpen={isCreateModalOpen}
         setIsModalOpen={setIsCreateModalOpen}
         getExercises={getExercises}
+        getRoutines={getRoutines}
       />
       <RoutineDetailModal
         routine={selectedRoutine}
         exercises={exercises}
         isModalOpen={isDetailModalOpen}
         handleDetailModalClose={handleDetailModalClose}
+        getRoutines={getRoutines}
+        getExercises={getExercises}
       />
       {/* Header */}
       <div className={styles.header}>
@@ -187,7 +223,7 @@ const Routine = () => {
                   <FaEdit className={styles.buttonIcon} />
                   수정
                 </ButtonComponent>
-                <ButtonComponent variant="secondary" size="sm">
+                <ButtonComponent variant="secondary" size="sm" onClick={(e) => {e.stopPropagation(); handleDeleteRoutine(routine)}}>
                   <FaTrash className={styles.buttonIcon} />
                   삭제
                 </ButtonComponent>

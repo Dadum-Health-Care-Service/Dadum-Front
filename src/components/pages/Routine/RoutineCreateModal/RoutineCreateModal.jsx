@@ -45,6 +45,7 @@ export default function RoutineCreateModal({
   isModalOpen,
   setIsModalOpen,
   getExercises,
+  getRoutines
 }) {
   const [isExerciseSelectModalOpen, setIsExerciseSelectModalOpen] =
     useState(false);
@@ -85,7 +86,11 @@ export default function RoutineCreateModal({
           "루틴 생성",
           "",
           () => {
+            setRoutineName("");
+            setRoutineExercises([]);
+            setRoutineNameError("");
             handleCloseModal();
+            getRoutines();
           },
           false
         );
