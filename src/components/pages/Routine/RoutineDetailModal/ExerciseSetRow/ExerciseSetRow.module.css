@@ -123,3 +123,9 @@
   font-weight: 600;
   color: #ff0000;
 }
+
+@media (max-width: 768px) {
+  .set-row {
+    gap:0px;
+  }
+}

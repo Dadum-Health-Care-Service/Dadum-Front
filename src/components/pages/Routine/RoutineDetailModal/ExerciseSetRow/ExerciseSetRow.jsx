@@ -10,13 +10,13 @@ const ExerciseSetRow = ({
   workoutDataRef,
   deleteSet,
 }) => {
-  const handleChange = (field, value) => {
+  const handleChange = (id, field, value) => {
     const newExercises = workoutDataRef.current.exercises.map((exercise) =>
       exercise.id === exerciseId
         ? {
             ...exercise,
             sets: exercise.sets.map((set) =>
-              set.srsId === set.srsId
+              set.id === id
                 ? { ...set, [field]: parseInt(value) }
                 : set
             ),
@@ -33,21 +33,21 @@ const ExerciseSetRow = ({
     <div className={styles["set-row"]} key={set.srsId}>
       <div className={styles["set-number-id"]}>{idx + 1}</div>
       <InputComponent
-        value={set.reps}
+        value={set.many}
         className={styles["set-input"]}
-        onChange={(e) => handleChange("reps", e.target.value)}
+        onChange={(e) => handleChange(set.id, "many", e.target.value)}
         type="number"
       />
       <InputComponent
         value={set.weight}
         className={styles["set-input"]}
-        onChange={(e) => handleChange("weight", e.target.value)}
+        onChange={(e) => handleChange(set.id, "weight", e.target.value)}
         type="number"
       />
       <InputComponent
         value={set.rest}
         className={styles["set-input"]}
-        onChange={(e) => handleChange("rest", e.target.value)}
+        onChange={(e) => handleChange(set.id, "rest", e.target.value)}
         type="number"
       />
       <div

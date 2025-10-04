@@ -55,13 +55,21 @@ const ModalComponent = ({
       document.body.style.overflow = "hidden";
       document.body.style.paddingRight = "0px";
     } else {
-      document.body.style.overflow = "unset";
-      document.body.style.paddingRight = "0px";
+      // 다른 모달이 열려있는지 확인
+      const hasOpenModal = document.querySelector('[class*="modal-overlay"]');
+      if (!hasOpenModal) {
+        document.body.style.overflow = "unset";
+        document.body.style.paddingRight = "0px";
+      }
     }
 
     return () => {
-      document.body.style.overflow = "unset";
-      document.body.style.paddingRight = "0px";
+      // 정리 함수에서도 다른 모달이 열려있는지 확인
+      const hasOpenModal = document.querySelector('[class*="modal-overlay"]');
+      if (!hasOpenModal) {
+        document.body.style.overflow = "unset";
+        document.body.style.paddingRight = "0px";
+      }
     };
   }, [isOpen]);
 
