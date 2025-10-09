@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Container, Row, Col, Badge, InputGroup } from "react-bootstrap";
 import {
   FaSearch,
   FaPlus,
   FaFilter,
   FaPlay,
+  FaStop,
   FaEdit,
   FaTrash,
 } from "react-icons/fa";
@@ -14,11 +15,12 @@ import InputComponent from "../../common/InputComponent";
 import SelectComponent from "../../common/SelectComponent";
 import ContainerComponent from "../../common/ContainerComponent";
 import styles from "./Routine.module.css";
-import ModalExample from "../../common/ModalExample";
 import RoutineCreateModal from "./RoutineCreateModal/RoutineCreateModal";
 import RoutineDetailModal from "./RoutineDetailModal/RoutineDetailModal";
+import TotalTimer from "../../common/TotalTimer";
 import { useApi } from "../../../utils/api/useApi";
 import { useModal } from "../../../context/ModalContext";
+import { RunContext } from "../../../context/RunContext";
 
 const Routine = () => {
   const { GET, DELETE } = useApi();
@@ -30,6 +32,7 @@ const Routine = () => {
   const [selectedRoutine, setSelectedRoutine] = useState(null);
   const [routines, setRoutines] = useState([]);
   const { showConfirmModal } = useModal();
+  const { useRun, useStop, isRunning, setId } = useContext(RunContext);
 
   const categories = [
     { id: "all", label: "전체", color: "primary" },
@@ -121,6 +124,14 @@ const Routine = () => {
   const getExercises = (exercises) => {
     setExercises(exercises);
   };
+  const handleRun = (runId) => {
+    useStop();
+    if (isRunning&&runId===setId) {
+      useStop();
+    } else {
+      useRun(runId);
+    }
+  }
   return (
     <ContainerComponent className={`${styles.routine}`}>
       <RoutineCreateModal
@@ -195,15 +206,26 @@ const Routine = () => {
           <div key={routine.setId} className={styles.routineCard}>
             <CardComponent
               variant={routine.completed ? "success" : "primary"}
-              title={routine.routineName}
+              title={<div className={styles.routineTitleContainer}>{routine.routineName}{isRunning && setId===routine.setId && (
+                <div style={{ display: 'flex', gap: '1em', marginRight: '1em' }}>
+                  <img
+                    src={'/img/RunningRoutine.gif'}
+                    style={{ width: '30px', height: '30px' }}
+                  />
+                  <TotalTimer type="DETAIL" />
+                </div>
+                )}</div>}
               className={styles.routineCardComponent}
               buttonText=""
-              badge={routine.completed ? "완료" : "진행중"}
+              badge={isRunning&&setId===routine.setId ? "진행중" : "완료"}
               onClick={() => handleDetailModalOpen(routine)}
             >
               <div className={styles.routineHeader}>
                 <div className={styles.routineInfo}>
-                  <h5 className={styles.routineTitle}>{routine.title}</h5>
+                  <div className={styles.routineTitleContainer}>
+                  <div className={styles.routineTitle}>{routine.title}</div>
+                  </div>
+                  
                   <p className={styles.routineDescription}>
                     {routine.description}
                   </p>
@@ -211,9 +233,14 @@ const Routine = () => {
               </div>
 
               <div className={styles.routineActions}>
-                <ButtonComponent variant="primary" size="sm">
-                  <FaPlay className={styles.buttonIcon} />
-                  시작
+                <ButtonComponent variant="primary" size="sm" onClick={(e) => {
+                  e.stopPropagation();
+                  console.log(routine.setId);
+                  console.log(setId);
+                  console.log(isRunning);
+                  handleRun(routine.setId);}} style={{background: isRunning&&setId===routine.setId ? "red" : "#007bff"}}>
+                  {isRunning&&setId===routine.setId ? <FaStop className={styles.buttonIcon} /> : <FaPlay className={styles.buttonIcon} />}
+                  {isRunning&&setId===routine.setId ? "중지" : "시작"}
                 </ButtonComponent>
                 <ButtonComponent
                   variant="outline"
