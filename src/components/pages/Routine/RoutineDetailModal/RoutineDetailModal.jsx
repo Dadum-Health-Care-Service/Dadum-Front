@@ -54,7 +54,7 @@ export default function RoutineDetailModal({
               reps: 0,
               weight: set.weight,
               many: set.many,
-              rest: 0,
+              rest: set.rest,
             };
           }),
         };
@@ -68,7 +68,7 @@ export default function RoutineDetailModal({
   useEffect(() => {
     if(workoutExercises.length > 0){
     setWorkoutData((prev)=>{
-      return {
+      const updatedData = {
         ...prev,
         exercises: prev.exercises.filter(exercise => workoutExercises.includes(korEngDict[exercise.name]))
         .concat(workoutExercises.filter(exercise => !prev.exercises.some(e => {return e.name === engKorDict[exercise]})).map((exercise)=>{
@@ -85,9 +85,15 @@ export default function RoutineDetailModal({
             }]
           };
         })),
-        };
+      }
+      workoutDataRef.current = updatedData;
+      return updatedData;
       });
+    
+    
     }
+  
+    
   }, [workoutExercises]);
 
   // 운동 카드 렌더링 컴포넌트
@@ -306,6 +312,7 @@ export default function RoutineDetailModal({
       "saveRoutineDto": workoutDataRef.current.exercises.map((exercise) => {
         return {
           "srName": korEngDict[exercise.name],
+          "srId": exercise.id? exercise.id : null,
           "reps": exercise.reps,
           "set": exercise.sets.map((set) => {
             if(set.srsId){
@@ -313,12 +320,14 @@ export default function RoutineDetailModal({
               "srsId": set.srsId,
                 "weight": set.weight,
                 "many": set.many,
+                "rest": set.rest
               };
             }
             else{
               return {
                 "weight": set.weight,
                 "many": set.many,
+                "rest": set.rest
               };
             }
           }),
