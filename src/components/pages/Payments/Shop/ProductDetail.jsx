@@ -69,9 +69,9 @@ export default function ProductDetail({ product: propProduct, onClose, onBuyNow 
         </div>
 
         <div className={styles.productDetailContent}>
-          <div style={{ display: 'flex', gap: '40px', flexWrap: 'wrap' }}>
+          <div className={styles.productDetailGrid}>
             {/* 상품 이미지 */}
-            <div style={{ flex: '1', minWidth: '300px' }}>
+            <div className={styles.productImageSection}>
               <div className={styles.productImageContainer}>
                 <img 
                   src={product.imageData || product.imageUrl || "https://via.placeholder.com/500x300?text=No+Image"} 
@@ -87,7 +87,7 @@ export default function ProductDetail({ product: propProduct, onClose, onBuyNow 
             </div>
 
             {/* 상품 정보 */}
-            <div style={{ flex: '1', minWidth: '300px' }}>
+            <div className={styles.productInfoSection}>
               <div className={styles.productInfo}>
                 <h1 className={styles.productTitle}>{product.productName}</h1>
                 <p className={styles.productCategory}>{product.category}</p>
@@ -130,9 +130,9 @@ export default function ProductDetail({ product: propProduct, onClose, onBuyNow 
         <div className={styles.productDetailsCard}>
           <h4 className={styles.productDetailsHeader}>상품 상세 정보</h4>
           <div className={styles.productDetailsBody}>
-            <div style={{ display: 'flex', gap: '40px', flexWrap: 'wrap' }}>
-              <div style={{ flex: '1', minWidth: '250px' }}>
-                <h5 style={{ marginBottom: '20px', color: '#2c3e50' }}>제품 사양</h5>
+            <div className={styles.detailsGrid}>
+              <div className={styles.specificationsSection}>
+                <h5 className={styles.sectionTitle}>제품 사양</h5>
                 <table className={styles.specificationsTable}>
                   <tbody>
                     <tr>
@@ -150,8 +150,8 @@ export default function ProductDetail({ product: propProduct, onClose, onBuyNow 
                   </tbody>
                 </table>
               </div>
-              <div style={{ flex: '1', minWidth: '250px' }}>
-                <h5 style={{ marginBottom: '20px', color: '#2c3e50' }}>배송 정보</h5>
+              <div className={styles.deliverySection}>
+                <h5 className={styles.sectionTitle}>배송 정보</h5>
                 <ul className={styles.deliveryInfo}>
                   <li>🚚 무료 배송 (5만원 이상 구매 시)</li>
                   <li>📦 배송 기간: 1-3일</li>

@@ -77,4 +77,81 @@
     .orderTable td {
         padding: 0.5rem 0.25rem;
     }
+    
+    /* 모바일에서 카드 그리드 조정 */
+    .dashboardContainer {
+        padding: 0.5rem;
+    }
+    
+    .dashboardContainer .row {
+        margin-left: -0.5rem;
+        margin-right: -0.5rem;
+    }
+    
+    .dashboardContainer .col-md-3 {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .dashboardContainer .col-md-4 {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    /* 모바일에서 테이블 스크롤 */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* 모바일에서 버튼 크기 조정 */
+    .dashboardContainer .btn {
+        font-size: 0.875rem;
+        padding: 0.5rem 1rem;
+    }
+    
+    /* 모바일에서 카드 높이 조정 */
+    .dashboardContainer .card {
+        min-height: auto;
+        margin-bottom: 1rem;
+    }
+    
+    /* 모바일에서 텍스트 크기 조정 */
+    .dashboardContainer h5 {
+        font-size: 1.25rem;
+    }
+    
+    .dashboardContainer p {
+        font-size: 0.875rem;
+    }
+    
+    /* 모바일에서 헤더 조정 */
+    .dashboardContainer h2 {
+        font-size: 1.5rem;
+    }
+    
+    /* 모바일에서 카드 컨테이너 조정 */
+    .dashboardContainer .card {
+        width: 100%;
+        margin-bottom: 1rem;
+        box-sizing: border-box;
+    }
+    
+    /* 모바일에서 카드 내용 조정 */
+    .dashboardContainer .card-body {
+        padding: 1rem;
+    }
+    
+    /* 모바일에서 통계 카드 텍스트 조정 */
+    .dashboardContainer .text-center h5 {
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .dashboardContainer .text-center p {
+        font-size: 0.8rem;
+        margin-bottom: 0;
+    }
 }

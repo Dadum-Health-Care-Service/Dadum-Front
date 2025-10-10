@@ -88,7 +88,7 @@ export default function SellerDashboard() {
     console.log('SellerDashboard JSX 렌더링 시작');
     
     return (
-        <ContainerComponent variant="default" className="p-4">
+        <ContainerComponent variant="default" className={`p-4 ${styles.dashboardContainer}`}>
             <HeaderComponent variant="filled" size="medium" className="mb-4">
                 <h2 className="mb-0">판매자 대시보드</h2>
             </HeaderComponent>
@@ -206,55 +206,6 @@ export default function SellerDashboard() {
                     )}
                 </div>
             </CardComponent>
-
-            {/* 빠른 액션 버튼들 */}
-            <div className="row">
-                <div className="col-md-4 mb-3">
-                    <CardComponent variant="outlined" className="h-100">
-                        <div className="p-3 text-center">
-                            <h6 className="mb-3">상품 관리</h6>
-                            <ButtonComponent 
-                                variant="primary" 
-                                size="small"
-                                className="w-100"
-                                onClick={() => {/* 상품 관리 페이지로 이동 */}}
-                            >
-                                상품 등록/수정
-                            </ButtonComponent>
-                        </div>
-                    </CardComponent>
-                </div>
-                <div className="col-md-4 mb-3">
-                    <CardComponent variant="outlined" className="h-100">
-                        <div className="p-3 text-center">
-                            <h6 className="mb-3">주문 관리</h6>
-                            <ButtonComponent 
-                                variant="success" 
-                                size="small"
-                                className="w-100"
-                                onClick={() => {/* 주문 관리 페이지로 이동 */}}
-                            >
-                                주문 처리
-                            </ButtonComponent>
-                        </div>
-                    </CardComponent>
-                </div>
-                <div className="col-md-4 mb-3">
-                    <CardComponent variant="outlined" className="h-100">
-                        <div className="p-3 text-center">
-                            <h6 className="mb-3">통계 분석</h6>
-                            <ButtonComponent 
-                                variant="info" 
-                                size="small"
-                                className="w-100"
-                                onClick={() => {/* 통계 페이지로 이동 */}}
-                            >
-                                매출 분석
-                            </ButtonComponent>
-                        </div>
-                    </CardComponent>
-                </div>
-            </div>
         </ContainerComponent>
     );
 }

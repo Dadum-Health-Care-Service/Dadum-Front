@@ -7,10 +7,13 @@ import SellerDashboard from "./SellerDashboard";
 import ProductManagement from "./ProductManagement";
 import OrderManagement from "./OrderManagement";
 import RefundManagement from "./RefundManagement";
+import SalesAnalysis from "../SalesAnalysis";
+import SellerSettings from "./SellerSettings";
 import styles from "./SellerMain.module.css";
 
 export default function SellerMain() {
     const [activeTab, setActiveTab] = useState("dashboard");
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     const tabs = [
         { id: "dashboard", label: "대시보드", icon: "📊" },
@@ -32,43 +35,37 @@ export default function SellerMain() {
             case "refunds":
                 return <RefundManagement />;
             case "analytics":
-                return (
-                    <ContainerComponent variant="default" className="p-4">
-                        <HeaderComponent variant="filled" size="medium" className="mb-4">
-                            <h2 className="mb-0">매출 분석</h2>
-                        </HeaderComponent>
-                        <CardComponent variant="outlined">
-                            <div className="text-center py-5">
-                                <p className="text-muted">매출 분석 기능은 준비 중입니다.</p>
-                            </div>
-                        </CardComponent>
-                    </ContainerComponent>
-                );
+                return <SalesAnalysis />;
             case "settings":
-                return (
-                    <ContainerComponent variant="default" className="p-4">
-                        <HeaderComponent variant="filled" size="medium" className="mb-4">
-                            <h2 className="mb-0">판매자 설정</h2>
-                        </HeaderComponent>
-                        <CardComponent variant="outlined">
-                            <div className="text-center py-5">
-                                <p className="text-muted">판매자 설정 기능은 준비 중입니다.</p>
-                            </div>
-                        </CardComponent>
-                    </ContainerComponent>
-                );
+                return <SellerSettings />;
             default:
                 return <SellerDashboard />;
         }
     };
 
     return (
-        <div className="seller-main">
+        <div className={styles.sellerMain}>
+            {/* 모바일 메뉴 버튼 */}
+            <button 
+                className={styles.mobileMenuButton}
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+            >
+                ☰
+            </button>
+
+            {/* 모바일 오버레이 */}
+            {sidebarOpen && (
+                <div 
+                    className={styles.mobileOverlay}
+                    onClick={() => setSidebarOpen(false)}
+                />
+            )}
+
             <ContainerComponent variant="default" className="p-0">
                 <div className="row g-0">
                     {/* 사이드바 */}
                     <div className="col-md-3 col-lg-2">
-                        <div className="seller-sidebar">
+                        <div className={`${styles.sellerSidebar} ${sidebarOpen ? styles.show : ''}`}>
                             <div className="p-3 border-bottom">
                                 <h5 className="mb-0">판매자 센터</h5>
                             </div>
@@ -76,10 +73,13 @@ export default function SellerMain() {
                                 {tabs.map((tab) => (
                                     <button
                                         key={tab.id}
-                                        className={`nav-link d-flex align-items-center ${
-                                            activeTab === tab.id ? 'active' : ''
+                                        className={`${styles.navLink} d-flex align-items-center ${
+                                            activeTab === tab.id ? styles.active : ''
                                         }`}
-                                        onClick={() => setActiveTab(tab.id)}
+                                        onClick={() => {
+                                            setActiveTab(tab.id);
+                                            setSidebarOpen(false); // 모바일에서 탭 선택 시 사이드바 닫기
+                                        }}
                                     >
                                         <span className="me-2">{tab.icon}</span>
                                         {tab.label}
@@ -91,7 +91,7 @@ export default function SellerMain() {
 
                     {/* 메인 콘텐츠 */}
                     <div className="col-md-9 col-lg-10">
-                        <div className="seller-content">
+                        <div className={styles.sellerContent}>
                             {renderContent()}
                         </div>
                     </div>
