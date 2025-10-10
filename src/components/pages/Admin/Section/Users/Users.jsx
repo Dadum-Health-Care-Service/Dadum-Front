@@ -72,33 +72,48 @@ export default function Users({ type = "user", isNotify = null }) {
     });
   };
 
+  const fetchRoleList = async () => {
+    await GET("/users/role/list").then((res) => {
+      setUsers(
+        res.data.filter((user) => {
+          console.log(
+            user.roleAssignments.map(
+              (assignment) => assignment.rolesDto.roleName
+            )
+          );
+          console.log(
+            user.roleAssignments.some((assignment) =>
+              assignment.rolesDto.roleName.includes("SUPER_ADMIN")
+            )
+          );
+          return !user.roleAssignments.some((assignment) =>
+            assignment.rolesDto.roleName.includes("SUPER_ADMIN")
+          );
+        })
+      );
+    });
+  };
+  const fetchRoleRequest = async () => {
+    await GET("/users/role/request/list").then((res) => {
+      setUsers(res.data);
+    });
+  };
+
   useEffect(() => {
     if (type === "user") {
-      GET("/users/role/list").then((res) => {
-        setUsers(
-          res.data.filter((user) => {
-            console.log(
-              user.roleAssignments.map(
-                (assignment) => assignment.rolesDto.roleName
-              )
-            );
-            console.log(
-              user.roleAssignments.some((assignment) =>
-                assignment.rolesDto.roleName.includes("SUPER_ADMIN")
-              )
-            );
-            return !user.roleAssignments.some((assignment) =>
-              assignment.rolesDto.roleName.includes("SUPER_ADMIN")
-            );
-          })
-        );
-      });
+      fetchRoleList();
     } else {
       fetchRoleRequest();
     }
   }, [type]);
   useEffect(() => {
     fetchRoleRequest();
+  }, [isNotify]);
+
+  useEffect(() => {
+    if (type === "roleRequest") {
+      fetchRoleRequest();
+    }
   }, [isNotify]);
 
   const detailModalFooter = () => {
