@@ -5,9 +5,12 @@ import HeaderComponent from "../../common/HeaderComponent";
 import ButtonComponent from "../../common/ButtonComponent";
 import BottomNavigation from "../../common/BottomNavigation";
 import Chatbot from "../Chatbot/Chatbot";
+import { RunContext } from "../../../context/RunContext";
+import TotalTimer from "../../common/TotalTimer";
 
 export default function GNB({ isMobile }) {
   const { user, dispatch } = useContext(AuthContext);
+  const { isRunning, seconds } = useContext(RunContext);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -35,6 +38,23 @@ export default function GNB({ isMobile }) {
 
             <HeaderComponent.Section>
               <HeaderComponent.Navigation>
+                <HeaderComponent.MenuItem>
+                  {isRunning && (
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                      }}
+                    >
+                      <img
+                        src={"/img/RunningRoutine.gif"}
+                        style={{ width: "30px", height: "30px" }}
+                      />
+                      <TotalTimer seconds={seconds} type="DETAIL" />
+                    </div>
+                  )}
+                </HeaderComponent.MenuItem>
                 <HeaderComponent.MenuItem
                   active={isActive("/routine")}
                   onClick={() => navigate("/routine")}
