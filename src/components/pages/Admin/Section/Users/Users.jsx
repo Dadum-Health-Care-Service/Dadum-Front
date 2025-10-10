@@ -93,11 +93,6 @@ export default function Users({ type = "user", isNotify = null }) {
       );
     });
   };
-  const fetchRoleRequest = async () => {
-    await GET("/users/role/request/list").then((res) => {
-      setUsers(res.data);
-    });
-  };
 
   useEffect(() => {
     if (type === "user") {
