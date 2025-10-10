@@ -2711,6 +2711,9 @@ export const primaryMuscleKor = [
 export const engKorDict = Object.fromEntries(
   exercisesEng.map((eng, i) => [eng, exercisesKor[i]])
 );
+export const korEngDict = Object.fromEntries(
+  exercisesKor.map((kor, i) => [kor, exercisesEng[i]])
+);
 export const instructionKorDict = Object.fromEntries(
   exercisesEng.map((eng, i) => [eng, instructionsKor[i]])
 );
