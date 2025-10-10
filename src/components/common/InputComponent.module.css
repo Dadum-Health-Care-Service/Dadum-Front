@@ -41,6 +41,8 @@
   outline: none;
   background: #ffffff;
   color: #1f2937;
+  white-space: pre-wrap;   /* 연속 공백/줄바꿈 보존 */
+  word-break: break-word;  /* 긴 토큰 강제 줄바꿈 */
 }
 
 /* 크기별 스타일 */

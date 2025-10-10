@@ -101,19 +101,20 @@ const Chatbot = ({ className = "", onMessageSend }) => {
     }
   };
 
-  // 실시간 스트리밍 응답 처리 (완벽한 SSE 파서)
+  // 타이핑 효과가 있는 응답 처리
   const streamChatResponse = async (userMessage, streamingId) => {
-    const response = await fetch("http://localhost:8080/api/chat/stream", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "text/event-stream",
-      },
-      body: JSON.stringify({
-        messages: [
-          {
-            role: "system",
-            content: `당신은 다듬(Dadum) '운동/건강' 전용 챗봇이다.
+    try {
+      const response = await fetch("http://localhost:8080/api/chat/stream", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "text/event-stream",
+        },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: "system",
+              content: `당신은 다듬(Dadum) '운동/건강' 전용 챗봇이다.
 
 [역할] 운동/루틴/부상예방/회복/영양·식단/운동생리만 다룬다. 연예·정치·유명인 근황·일반 시사 등은 다루지 않는다.
 
@@ -122,101 +123,139 @@ const Chatbot = ({ className = "", onMessageSend }) => {
 2) 운동으로 재구성 제안 1줄.
 3) 최신뉴스/근황 요청은 답변하지 않음.
 4) 한국어, 5문장 이내, 이모지는 최대 1개.`,
-          },
-          { role: "user", content: userMessage },
-        ],
-      }),
-    });
-    if (!response.ok)
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder("utf-8");
-
-    let carry = "";
-    let eventBuffer = [];
-
-    const flush = () => {
-      if (!eventBuffer.length) return false;
-
-      // DONE 패턴: [DONE] 혹은 data: [DONE] 등 모든 변형(대소문자/공백 포함)
-      const isDone = eventBuffer.some(
-        (p) => /\bdata:\s*\[DONE\]\b/i.test(p) || /\[\s*DONE\s*\]/i.test(p)
-      );
-
-      // 본문 만들 때 DONE 관련 토막은 싹 제거
-      let body = eventBuffer
-        .filter(
-          (p) => !(/\bdata:\s*\[DONE\]\b/i.test(p) || /\[\s*DONE\s*\]/i.test(p))
-        )
-        .join("");
-
-      // 혹시 본문 끝/중간에 섞여들어간 잔여 문자열도 제거(방탄)
-      body = body
-        .replace(/\bdata:\s*\[DONE\]\b/gi, "")
-        .replace(/\[\s*DONE\s*\]/gi, "");
-
-      // 혹시라도 남아버린 'data:'가 body의 시작에 붙었으면 제거
-      body = body.replace(/^\s*data:\s*/i, "");
-
-      eventBuffer = [];
-
-      if (body) {
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === streamingId ? { ...m, text: m.text + body } : m
-          )
-        );
-      }
-      return isDone; // true면 스트림 종료
-    };
-
-    while (true) {
-      const { done, value } = await reader.read();
-      const chunk = decoder.decode(value ?? new Uint8Array(), {
-        stream: !done,
+            },
+            { role: "user", content: userMessage },
+          ],
+        }),
       });
+      
+      if (!response.ok)
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
 
-      const raw = carry + chunk;
-      const lines = raw.split("\n");
-      carry = lines.pop() ?? "";
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
 
-      for (let line of lines) {
-        // 1) 라인 정규화: 앞 BOM, 뒤 CR 제거
-        line = line.replace(/^\uFEFF/, "").replace(/\r$/, "");
+      let carry = "";
+      let eventBuffer = [];
+      let fullResponse = "";
 
-        // 2) data: 본문만 캡처 (공백 포함 그대로 살림)
-        const m = line.match(/^\s*data:\s*(.*)$/i);
-        if (m) {
-          // 캡처된 본문에서 BOM만 제거하고 공백은 그대로 유지
-          let payload = m[1].replace(/^\uFEFF/, "");
-          eventBuffer.push(payload);
-          continue;
+      const flush = () => {
+        if (!eventBuffer.length) return false;
+
+        // DONE 패턴: [DONE] 혹은 data: [DONE] 등 모든 변형(대소문자/공백 포함)
+        const isDone = eventBuffer.some(
+          (p) => /\bdata:\s*\[DONE\]\b/i.test(p) || /\[\s*DONE\s*\]/i.test(p)
+        );
+
+        // 본문 만들 때 DONE 관련 토막은 싹 제거
+        let body = eventBuffer
+          .filter(
+            (p) => !(/\bdata:\s*\[DONE\]\b/i.test(p) || /\[\s*DONE\s*\]/i.test(p))
+          )
+          .join("");
+
+        // 혹시 본문 끝/중간에 섞여들어간 잔여 문자열도 제거(방탄)
+        body = body
+          .replace(/\bdata:\s*\[DONE\]\b/gi, "")
+          .replace(/\[\s*DONE\s*\]/gi, "");
+
+        // 혹시라도 남아버린 'data:'가 body의 시작에 붙었으면 제거
+        body = body.replace(/^\s*data:\s*/i, "");
+
+        eventBuffer = [];
+
+        if (body) {
+          fullResponse += body;
+        }
+        return isDone; // true면 스트림 종료
+      };
+
+      while (true) {
+        const { done, value } = await reader.read();
+        const chunk = decoder.decode(value ?? new Uint8Array(), {
+          stream: !done,
+        });
+
+        const raw = carry + chunk;
+        const lines = raw.split("\n");
+        carry = lines.pop() ?? "";
+
+        for (let line of lines) {
+          // 1) 라인 정규화: 앞 BOM, 뒤 CR 제거
+          line = line.replace(/^\uFEFF/, "").replace(/\r$/, "");
+
+          // 2) data: 본문만 캡처 (공백 포함 그대로 살림)
+          const m = line.match(/^\s*data:\s*(.*)$/i);
+          if (m) {
+            // 캡처된 본문에서 BOM만 제거하고 공백은 그대로 유지
+            let payload = m[1].replace(/^\uFEFF/, "");
+            
+            // data:data: 중복 제거
+            if (payload.startsWith("data: ")) {
+              payload = payload.substring(6);
+            }
+            
+            eventBuffer.push(payload);
+            continue;
+          }
+
+          // 3) 이벤트 경계 (빈 줄/공백만)
+          if (/^\s*$/.test(line)) {
+            if (flush()) break; // [DONE]이면 종료
+            continue;
+          }
+
+          // 4) 그 밖의 헤더(event:, id:, retry:)는 무시
         }
 
-        // 3) 이벤트 경계 (빈 줄/공백만)
-        if (/^\s*$/.test(line)) {
-          if (flush()) return; // [DONE]이면 종료
-          continue;
+        if (done) {
+          // carry 처리
+          if (carry) {
+            let l = carry.replace(/^\uFEFF/, "").replace(/\r$/, "");
+            const m = l.match(/^\s*data:\s*(.*)$/i);
+            if (m) {
+              let payload = m[1].replace(/^\uFEFF/, "");
+              eventBuffer.push(payload);
+            } else if (/^\s*$/.test(l)) {
+              /* 경계 */
+            }
+          }
+          flush();
+          break;
         }
-
-        // 4) 그 밖의 헤더(event:, id:, retry:)는 무시
       }
 
-      if (done) {
-        // carry 처리
-        if (carry) {
-          let l = carry.replace(/^\uFEFF/, "").replace(/\r$/, "");
-          const m = l.match(/^\s*data:\s*(.*)$/i);
-          if (m) {
-            let payload = m[1].replace(/^\uFEFF/, "");
-            eventBuffer.push(payload);
-          } else if (/^\s*$/.test(l)) {
-            /* 경계 */
-          }
-        }
-        flush();
-        break;
+      // 전체 응답을 받은 후 타이핑 효과 적용
+      if (fullResponse.trim()) {
+        await typeMessage(fullResponse.trim(), streamingId);
+      }
+    } catch (error) {
+      console.error("챗봇 응답 오류:", error);
+      throw error;
+    }
+  };
+
+  // 타이핑 효과 함수
+  const typeMessage = async (message, messageId) => {
+    const charsPerMs = 60; // 글자당 60ms
+    const baseDelay = 500; // 기본 지연 500ms
+    const totalDelay = (message.length * charsPerMs) + baseDelay;
+    
+    // 기본 지연 시간 (생각하는 시간)
+    await new Promise(resolve => setTimeout(resolve, baseDelay));
+    
+    // 타이핑 효과로 한 글자씩 표시
+    for (let i = 0; i <= message.length; i++) {
+      const currentText = message.substring(0, i);
+      
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === messageId ? { ...m, text: currentText } : m
+        )
+      );
+      
+      if (i < message.length) {
+        await new Promise(resolve => setTimeout(resolve, charsPerMs));
       }
     }
   };

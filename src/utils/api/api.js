@@ -9,9 +9,9 @@ const host = {
   passwordless: passwordless,
 };
 
-const createAuthHeaders = (accessToken,isAuth)=>{
+const createAuthHeaders = (accessToken, isAuth) => {
   const headers = {};
-  if(isAuth) {
+  if (isAuth) {
     headers.Authorization = `Bearer ${accessToken}`;
   }
   return headers;
@@ -24,9 +24,9 @@ const createAuthHeaders = (accessToken,isAuth)=>{
   
   + data={}로 기본값 설정
 */
-function GET(URL, data={}, accessToken, isAuth = true, source = "main") {
+function GET(URL, data = {}, accessToken, isAuth = true, source = "main") {
   try {
-    const headers = createAuthHeaders(accessToken,isAuth);
+    const headers = createAuthHeaders(accessToken, isAuth);
     return axios.get(host[source] + URL, {
       params: data,
       headers: headers,
@@ -37,9 +37,9 @@ function GET(URL, data={}, accessToken, isAuth = true, source = "main") {
   }
 }
 
-function POST(URL, data={}, accessToken, isAuth = true, source = "main") {
+function POST(URL, data = {}, accessToken, isAuth = true, source = "main") {
   try {
-    const headers = createAuthHeaders(accessToken,isAuth);
+    const headers = createAuthHeaders(accessToken, isAuth);
     if (source === "passwordless") {
       const payload = new URLSearchParams();
       for (const key in data) {
@@ -63,9 +63,9 @@ function POST(URL, data={}, accessToken, isAuth = true, source = "main") {
   }
 }
 
-function PUT(URL, data={}, accessToken, isAuth = true, source = "main") {
+function PUT(URL, data = {}, accessToken, isAuth = true, source = "main") {
   try {
-    const headers = createAuthHeaders(accessToken,isAuth);
+    const headers = createAuthHeaders(accessToken, isAuth);
     return axios.put(host[source] + URL, data, {
       headers: headers,
     });
@@ -75,9 +75,9 @@ function PUT(URL, data={}, accessToken, isAuth = true, source = "main") {
   }
 }
 
-function DELETE(URL, data={}, accessToken,  isAuth = true, source = "main") {
+function DELETE(URL, data = {}, accessToken, isAuth = true, source = "main") {
   try {
-    const headers = createAuthHeaders(accessToken,isAuth);
+    const headers = createAuthHeaders(accessToken, isAuth);
     return axios.delete(host[source] + URL, {
       data: data,
       headers: headers,
