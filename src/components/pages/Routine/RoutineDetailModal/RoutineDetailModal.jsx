@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import ModalComponent from "../../../common/ModalComponent";
 import ButtonComponent from "../../../common/ButtonComponent";
 import InputComponent from "../../../common/InputComponent";
 import ExerciseSelectModal from "../ExerciseSelectModal/ExerciseSelectModal";
+import RoutineResultModal from "../RoutineResultModal/RoutineResultModal";
 import styles from "./RoutineDetailModal.module.css";
 import ExerciseSetRow from "./ExerciseSetRow/ExerciseSetRow";
-import { FaPlus, FaTrash } from "react-icons/fa";
+import { FaPlus, FaTrash, FaCheck, FaPause, FaPlay } from "react-icons/fa";
 import {
   engKorDict,
   korEngDict,
@@ -14,8 +15,10 @@ import {
   primaryMuscleKorDict,
   equipmentKorDict,
 } from "../../../data/translation";
+import { RunContext } from "../../../../context/RunContext";
 import { useApi } from "../../../../utils/api/useApi";
 import { useModal } from "../../../../context/ModalContext";
+import TotalTimer from "../../../common/TotalTimer";
 export default function RoutineDetailModal({
   routine,
   exercises,
@@ -27,14 +30,30 @@ export default function RoutineDetailModal({
   const [workoutData, setWorkoutData] = useState([]);
   const workoutDataRef = useRef(null);
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
-  const [isExerciseSelectModalOpen, setIsExerciseSelectModalOpen] = useState(false);
+  const [isResultModalOpen, setIsResultModalOpen] = useState(false);
+  const [workoutResult, setWorkoutResult] = useState(null);
+  const [isExerciseSelectModalOpen, setIsExerciseSelectModalOpen] =
+    useState(false);
   const [workoutExercises, setWorkoutExercises] = useState([]);
-  const { PUT } = useApi();
-  const { showConfirmModal, closeModal} = useModal();
-  
+  const { PUT, POST } = useApi();
+  const { showConfirmModal, closeModal } = useModal();
+  const {
+    isRunning,
+    setId,
+    usePause,
+    isPaused,
+    useResume,
+    useComplete,
+    endTime,
+    startTime,
+  } = useContext(RunContext);
+  const [runningSet, setRunningSet] = useState(null);
+  const [isRest, setIsRest] = useState(false);
+  const [doneSets, setDoneSets] = useState([]);
+  const [doneExercises, setDoneExercises] = useState([]);
+  const [doneRoutine, setDoneRoutine] = useState(false);
   useEffect(() => {
     if (!isModalOpen || !routine) return;
-    console.log(routine);
     const INITIAL_WORKOUT_DATA = {
       title: routine?.routineName,
       setId: routine?.setId,
@@ -47,7 +66,7 @@ export default function RoutineDetailModal({
           id: exercise.srId,
           name: engKorDict[exercise.srName],
           category: engKorDict[exercise.srName],
-          sets: exercise.set.map((set,i) => {
+          sets: exercise.set.map((set, i) => {
             return {
               id: i,
               srsId: set.srsId,
@@ -60,42 +79,105 @@ export default function RoutineDetailModal({
         };
       }),
     };
-    setWorkoutExercises(INITIAL_WORKOUT_DATA.exercises.map(exercise => korEngDict[exercise.name]));
+    setWorkoutExercises(
+      INITIAL_WORKOUT_DATA.exercises.map(
+        (exercise) => korEngDict[exercise.name]
+      )
+    );
     setWorkoutData(INITIAL_WORKOUT_DATA);
     workoutDataRef.current = INITIAL_WORKOUT_DATA;
   }, [isModalOpen, routine]);
 
   useEffect(() => {
-    if(workoutExercises.length > 0){
-    setWorkoutData((prev)=>{
-      const updatedData = {
-        ...prev,
-        exercises: prev.exercises.filter(exercise => workoutExercises.includes(korEngDict[exercise.name]))
-        .concat(workoutExercises.filter(exercise => !prev.exercises.some(e => {return e.name === engKorDict[exercise]})).map((exercise)=>{
-          console.log(exercise);
-          return {
-            name: engKorDict[exercise],
-            category: engKorDict[exercise],
-            sets:[{
-              id: 0,
-              srsId: null,
-              weight: 0,
-              many: 0,
-              rest: 0,
-            }]
-          };
-        })),
-      }
-      workoutDataRef.current = updatedData;
-      return updatedData;
-      });
-    
-    
+    if (isRunning && setId === routine?.setId) {
+      setRunningSet(workoutDataRef.current.exercises[0].sets[0]);
     }
-  
-    
-  }, [workoutExercises]);
+  }, [isRunning, routine]);
 
+  useEffect(() => {
+    if (workoutExercises.length > 0) {
+      setWorkoutData((prev) => {
+        const updatedData = {
+          ...prev,
+          exercises: prev.exercises
+            .filter((exercise) =>
+              workoutExercises.includes(korEngDict[exercise.name])
+            )
+            .concat(
+              workoutExercises
+                .filter(
+                  (exercise) =>
+                    !prev.exercises.some((e) => {
+                      return e.name === engKorDict[exercise];
+                    })
+                )
+                .map((exercise) => {
+                  console.log(exercise);
+                  return {
+                    name: engKorDict[exercise],
+                    category: engKorDict[exercise],
+                    sets: [
+                      {
+                        id: 0,
+                        srsId: null,
+                        weight: 0,
+                        many: 0,
+                        rest: 0,
+                      },
+                    ],
+                  };
+                })
+            ),
+        };
+        workoutDataRef.current = updatedData;
+        return updatedData;
+      });
+    }
+  }, []);
+
+  // 다음 세트 설정
+  const setNextSet = () => {
+    setIsRest(false);
+    const currentExercise = workoutDataRef.current.exercises.find((exercise) =>
+      exercise.sets.includes(runningSet)
+    );
+    const isNextSet = currentExercise.sets.find(
+      (set) => set.id === runningSet.id + 1
+    );
+    const nextExercise = workoutDataRef.current.exercises.find(
+      (exercise) => exercise.id === currentExercise.id + 1
+    );
+    if (isNextSet) {
+      setDoneSets([...doneSets, runningSet]);
+      setRunningSet(isNextSet);
+    } else {
+      setDoneSets([...doneSets, runningSet]);
+      setDoneExercises([...doneExercises, currentExercise]);
+      setRunningSet(nextExercise.sets[0]);
+    }
+  };
+  const setNextExercise = () => {
+    const currentExercise = workoutDataRef.current.exercises.find((exercise) =>
+      exercise.sets.includes(runningSet)
+    );
+    const nextExercise = workoutDataRef.current.exercises.find(
+      (exercise) => exercise.id === currentExercise.id + 1
+    );
+    if (nextExercise) {
+      setRunningSet(nextExercise.sets[0]);
+    } else {
+      setDoneExercises([...doneExercises, currentExercise]);
+      setRunningSet(null);
+      setDoneRoutine(true);
+    }
+  };
+  const setRest = (rest) => {
+    setIsRest(rest);
+  };
+
+  useEffect(() => {
+    console.log(isRest);
+  }, [isRest]);
   // 운동 카드 렌더링 컴포넌트
   const ExerciseCard = ({ exercise, onSetChange }) => {
     // 운동 헤더 렌더링
@@ -109,7 +191,7 @@ export default function RoutineDetailModal({
                 .filter((ex) => engKorDict[ex.name] === exercise.name)
                 .map((ex) => {
                   return (
-                    <>
+                    <React.Fragment key={ex.id}>
                       {ex.category && (
                         <div className={styles["exercise-category"]}>
                           #{categoryKorDict[ex.category]}
@@ -130,43 +212,105 @@ export default function RoutineDetailModal({
                           #{equipmentKorDict[ex.equipment]}
                         </div>
                       )}
-                    </>
+                    </React.Fragment>
                   );
                 })}
             </div>
             <div className={styles["exercise-buttons"]}>
-            <ButtonComponent
-              variant="outline"
-              onClick={() => {
-                addSet(exercise.id);
-              }}
-              style={{display: "flex", alignItems: "center", justifyContent: "center", gap: "4px"}}
-            >
-              <FaPlus />
-              {window.innerWidth >= 768 ? "추가" : ""}
-            </ButtonComponent>
-            <ButtonComponent
-              variant="secondary"
-              onClick={() => {
-                showConfirmModal(
-                  "운동을 삭제하시겠습니까?",
-                  "운동 삭제",
-                  "",
-                  () => {
-                    deleteExercise(exercise.id);
-                    closeModal();
-                  },
-                  true
-
-                );
-              }}
-              style={{backgroundColor: "red", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px"}}
-            >
-              <FaTrash />
-              {window.innerWidth >= 768 ? "삭제" : ""}
-            </ButtonComponent>
+              {!(isRunning && setId === routine.setId) ? (
+                <ButtonComponent
+                  variant="outline"
+                  onClick={() => {
+                    addSet(exercise.id);
+                  }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "4px",
+                  }}
+                >
+                  <FaPlus />
+                  {window.innerWidth >= 768 ? "추가" : ""}
+                </ButtonComponent>
+              ) : (
+                <ButtonComponent
+                  variant="primary"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "4px",
+                  }}
+                  onClick={() => {
+                    setNextExercise();
+                    setDoneExercises([...doneExercises, exercise]);
+                  }}
+                >
+                  <FaCheck />
+                  {window.innerWidth >= 768 ? "완료" : ""}
+                </ButtonComponent>
+              )}
+              {!(isRunning && setId === routine.setId) ? (
+                <ButtonComponent
+                  variant="secondary"
+                  onClick={() => {
+                    showConfirmModal(
+                      "운동을 삭제하시겠습니까?",
+                      "운동 삭제",
+                      "",
+                      () => {
+                        deleteExercise(exercise.id);
+                        closeModal();
+                      },
+                      true
+                    );
+                  }}
+                  style={{
+                    backgroundColor: "red",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "4px",
+                  }}
+                >
+                  <FaTrash />
+                  {window.innerWidth >= 768 ? "삭제" : ""}
+                </ButtonComponent>
+              ) : isPaused ? (
+                <ButtonComponent
+                  variant="secondary"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "4px",
+                  }}
+                  onClick={() => {
+                    useResume();
+                  }}
+                >
+                  <FaPlay />
+                  {window.innerWidth >= 768 ? "재개" : ""}
+                </ButtonComponent>
+              ) : (
+                <ButtonComponent
+                  variant="secondary"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "4px",
+                  }}
+                  onClick={() => {
+                    usePause();
+                  }}
+                >
+                  <FaPause />
+                  {window.innerWidth >= 768 ? "일시정지" : ""}
+                </ButtonComponent>
+              )}
             </div>
-            
           </div>
         </div>
       );
@@ -179,56 +323,95 @@ export default function RoutineDetailModal({
         <span>횟수</span>
         <span>중량(kg)</span>
         <span>휴식(초)</span>
-        <span>삭제</span>
+        <span>{!(isRunning && setId === routine.setId) ? "삭제" : "완료"}</span>
       </div>
     );
 
     // 운동 세트들 렌더링
-    const renderExerciseSets = () => {    
-      return (<div className={styles["exercise-sets"]}>
-        {renderSetsHeader()}
-        {exercise.sets?.map((set, idx) => {
-           return (
-            <ExerciseSetRow
-              key={idx}
-              idx={idx}
-              set={set}
-              exerciseId={exercise.id}
-              workoutDataRef={workoutDataRef}
-              deleteSet={deleteSet}
-              
-            />
-          );
-        })}
-      </div>
+    const renderExerciseSets = () => {
+      console.log(runningSet);
+      return (
+        <div className={styles["exercise-sets"]}>
+          {renderSetsHeader()}
+          {exercise.sets?.map((set, idx) => {
+            return (
+              <ExerciseSetRow
+                key={idx}
+                idx={idx}
+                set={set}
+                runningSet={runningSet}
+                exerciseId={exercise.id}
+                workoutDataRef={workoutDataRef}
+                setNextSet={setNextSet}
+                setRest={setRest}
+                isRest={isRest}
+                deleteSet={deleteSet}
+                doneSets={doneSets}
+                isPaused={isPaused}
+              />
+            );
+          })}
+        </div>
       );
     };
     return (
-      <div key={exercise.id} className={styles["exercise-card"]}>
+      <div
+        key={exercise.id}
+        className={styles["exercise-card"]}
+        disabled={doneExercises.includes(exercise)}
+        style={{
+          opacity: doneExercises.includes(exercise) ? 0.5 : 1,
+          cursor: doneExercises.includes(exercise) ? "not-allowed" : "pointer",
+        }}
+      >
         {renderExerciseHeader()}
         {renderExerciseSets()}
       </div>
     );
   };
 
-  const renderWorkoutSummary = () => (
-    <div className={styles["workout-summary"]}>
-      <div className={styles["summary-card"]}>
-        <div className={styles["summary-label"]}>총 운동 시간</div>
-        <div className={styles["summary-value"]}>{workoutData.totalTime}</div>
-      </div>
-      <div className={styles["summary-card"]}>
-        <div className={styles["summary-label"]}>총 세트 수</div>
-        <div className={styles["summary-value"]}>{workoutData.totalSets}</div>
-      </div>
-      <div className={styles["summary-card"]}>
-        <div className={styles["summary-label"]}>예상 칼로리</div>
-        <div className={styles["summary-value"]}>
-          {workoutData.estimatedCalories}
-        </div>
-      </div>
-    </div>
-  );
+  const renderWorkoutSummary = () => {
+    return (
+      <>
+        {!(isRunning && setId === routine?.setId) ? (
+          <div className={styles["workout-summary"]}>
+            <div className={styles["summary-card"]}>
+              <div className={styles["summary-label"]}>총 운동 시간</div>
+              <div className={styles["summary-value"]}>
+                {workoutData.totalTime}
+              </div>
+            </div>
+            <div className={styles["summary-card"]}>
+              <div className={styles["summary-label"]}>총 세트 수</div>
+              <div className={styles["summary-value"]}>
+                {workoutData.totalSets}
+              </div>
+            </div>
+            <div className={styles["summary-card"]}>
+              <div className={styles["summary-label"]}>예상 칼로리</div>
+              <div className={styles["summary-value"]}>
+                {workoutData.estimatedCalories}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "10px",
+              padding: "20px",
+            }}
+          >
+            총 운동시간
+            <TotalTimer type="DETAIL" size="40px" />
+          </div>
+        )}
+      </>
+    );
+  };
 
   const renderWorkoutExercises = () => (
     <div className={styles["workout-exercises"]}>
@@ -255,15 +438,24 @@ export default function RoutineDetailModal({
           exercise.id === exerciseId
             ? {
                 ...exercise,
-                sets: [...exercise.sets, { id: exercise.sets.length, reps:0, weight:0, rest:0, many:0 }]
+                sets: [
+                  ...exercise.sets,
+                  {
+                    id: exercise.sets.length,
+                    reps: 0,
+                    weight: 0,
+                    rest: 0,
+                    many: 0,
+                  },
+                ],
               }
             : exercise
         ),
       };
-      
+
       // ref도 동일한 데이터로 업데이트
       workoutDataRef.current = updatedData;
-      
+
       return updatedData;
     });
   };
@@ -271,13 +463,21 @@ export default function RoutineDetailModal({
     setWorkoutData((prev) => {
       const updatedData = {
         ...prev,
-        exercises: prev.exercises.filter((exercise) => exercise.id !== exerciseId),
+        exercises: prev.exercises.filter(
+          (exercise) => exercise.id !== exerciseId
+        ),
       };
       workoutDataRef.current = updatedData;
       return updatedData;
     });
     setWorkoutExercises((prev) => {
-      return prev.filter((exercise) => exercise !== korEngDict[workoutData.exercises.find((e) => e.id === exerciseId).name]);
+      return prev.filter(
+        (exercise) =>
+          exercise !==
+          korEngDict[
+            workoutData.exercises.find((e) => e.id === exerciseId).name
+          ]
+      );
     });
   };
 
@@ -294,53 +494,140 @@ export default function RoutineDetailModal({
             : exercise
         ),
       };
-      
+
       // ref도 동일한 데이터로 업데이트
       workoutDataRef.current = updatedData;
-      
+
       return updatedData;
     });
   };
 
-  const handleSaveWorkout = async() => {
+  const handleSaveWorkout = async () => {
     // 필요시 외부로 저장 이벤트를 전달하도록 확장 가능
     console.log("workoutDataRef.current", workoutDataRef.current);
-    const updateWorkoutData ={
-      "setId": workoutDataRef.current.setId,
-      "routineName": workoutDataRef.current.title,
-      "usersId": workoutDataRef.current.usersId,
-      "saveRoutineDto": workoutDataRef.current.exercises.map((exercise) => {
+    const updateWorkoutData = {
+      setId: workoutDataRef.current.setId,
+      routineName: workoutDataRef.current.title,
+      usersId: workoutDataRef.current.usersId,
+      saveRoutineDto: workoutDataRef.current.exercises.map((exercise) => {
         return {
-          "srName": korEngDict[exercise.name],
-          "srId": exercise.id? exercise.id : null,
-          "reps": exercise.reps,
-          "set": exercise.sets.map((set) => {
-            if(set.srsId){
-            return {
-              "srsId": set.srsId,
-                "weight": set.weight,
-                "many": set.many,
-                "rest": set.rest
-              };
-            }
-            else{
+          srName: korEngDict[exercise.name],
+          srId: exercise.id ? exercise.id : null,
+          reps: exercise.reps,
+          set: exercise.sets.map((set) => {
+            if (set.srsId) {
               return {
-                "weight": set.weight,
-                "many": set.many,
-                "rest": set.rest
+                srsId: set.srsId,
+                weight: set.weight,
+                many: set.many,
+                rest: set.rest,
+              };
+            } else {
+              return {
+                weight: set.weight,
+                many: set.many,
+                rest: set.rest,
               };
             }
           }),
         };
       }),
     };
-    await PUT(`/routine/${workoutDataRef.current.setId}/update`, updateWorkoutData)
-    .then((
-      (res) => {
-        console.log(res.data);
-        setIsCompleteModalOpen(true);
-      }
-    ));
+    await PUT(
+      `/routine/${workoutDataRef.current.setId}/update`,
+      updateWorkoutData
+    ).then((res) => {
+      console.log(res.data);
+      setIsCompleteModalOpen(true);
+    });
+  };
+
+  const handleDoneWorkout = async () => {
+    const exercises = workoutDataRef.current.exercises;
+
+    // 총 세트수
+    const totalSets = exercises.reduce(
+      (total, exercise) => total + exercise.sets.length,
+      0
+    );
+
+    // 총 운동횟수 (모든 세트의 reps 합)
+    const totalReps = exercises.reduce(
+      (total, exercise) =>
+        total + exercise.sets.reduce((sum, set) => sum + (set.many || 0), 0),
+      0
+    );
+
+    // 총 무게 (모든 세트의 weight 합)
+    const totalWeight = exercises.reduce(
+      (total, exercise) =>
+        total + exercise.sets.reduce((sum, set) => sum + (set.weight || 0), 0),
+      0
+    );
+
+    // 운동 볼륨 (weight × reps의 총합)
+    const totalVolume = exercises.reduce(
+      (total, exercise) =>
+        total +
+        exercise.sets.reduce(
+          (sum, set) => sum + (set.weight || 0) * (set.many || 0),
+          0
+        ),
+      0
+    );
+
+    // 총 운동시간 (초 단위)
+    const totalTime = endTime - startTime; // 밀리초를 초로 변환하려면 / 1000
+
+    // 소모 칼로리 (대략적 계산: 볼륨 기반)
+    // 일반적으로 웨이트 트레이닝은 분당 3-6 kcal 소모
+    const estimatedKcal = Math.round((totalTime / 1000 / 60) * 4); // 분당 4kcal 가정
+
+    // 또는 볼륨 기반: 1kg 들어올림당 약 0.01 kcal
+    // const estimatedKcal = Math.round(totalVolume * 0.01);
+
+    const formatToLocalDateTime = (timestamp) => {
+      const date = new Date(timestamp);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      const hours = String(date.getHours()).padStart(2, "0");
+      const minutes = String(date.getMinutes()).padStart(2, "0");
+      const seconds = String(date.getSeconds()).padStart(2, "0");
+
+      return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+    };
+
+    const completeWorkoutData = {
+      routineEndDetails: workoutDataRef.current.exercises.map((exercise) => {
+        return {
+          srName: exercise.name,
+          setNumber: exercise.sets.length,
+          reps: exercise.sets.reduce((acc, set) => acc + set.many, 0),
+          weight: exercise.sets.reduce((acc, set) => acc + set.weight, 0),
+        };
+      }),
+      routineResult: {
+        muscle: Math.round(totalVolume * 0.7),
+        kcal: estimatedKcal,
+        reSet: totalSets,
+        setNum: totalSets,
+        volum: totalVolume,
+        rouTime: Math.round(totalTime / 1000),
+        exVolum: totalVolume,
+      },
+      tStart: formatToLocalDateTime(startTime),
+      tEnd: formatToLocalDateTime(endTime),
+    };
+    await POST(
+      `/routine/${workoutDataRef.current.setId}/result`,
+      completeWorkoutData
+    ).then((res) => {
+      console.log(res.data);
+      setWorkoutResult(completeWorkoutData);
+      setIsResultModalOpen(true);
+      useComplete();
+    });
   };
 
   // 저장 완료 모달 푸터
@@ -360,59 +647,83 @@ export default function RoutineDetailModal({
     getRoutines();
   };
 
+  // 결과 모달 닫기
+  const closeResultModal = () => {
+    setIsResultModalOpen(false);
+    setWorkoutResult(null);
+    handleDetailModalClose();
+    getRoutines();
+  };
+
   return (
     <>
-    
-    <ModalComponent
-      isOpen={isModalOpen}
-      onClose={() => handleDetailModalClose()}
-      title={routine?.routineName}
-      subtitle="운동 상세 정보"
-      size={ModalComponent.SIZES.LARGE}
-      variant={ModalComponent.VARIANTS.ELEVATED}
-      footer={
-        <ModalComponent.Actions>
-          <ButtonComponent variant="primary" onClick={handleSaveWorkout}>
-            저장
-          </ButtonComponent>
+      <ModalComponent
+        isOpen={isModalOpen}
+        onClose={() => handleDetailModalClose()}
+        title={routine?.routineName}
+        subtitle="운동 상세 정보"
+        size={ModalComponent.SIZES.LARGE}
+        variant={ModalComponent.VARIANTS.ELEVATED}
+        footer={
+          <ModalComponent.Actions>
+            {isRunning && setId === routine?.setId ? (
+              <ButtonComponent
+                variant="primary"
+                onClick={handleDoneWorkout}
+                disabled={!doneRoutine}
+              >
+                완료
+              </ButtonComponent>
+            ) : (
+              <ButtonComponent variant="primary" onClick={handleSaveWorkout}>
+                저장
+              </ButtonComponent>
+            )}
+            <ButtonComponent
+              variant="secondary"
+              onClick={() => handleDetailModalClose()}
+            >
+              취소
+            </ButtonComponent>
+          </ModalComponent.Actions>
+        }
+      >
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          {renderWorkoutModalContent()}
           <ButtonComponent
-            variant="secondary"
-            onClick={() => handleDetailModalClose()}
+            variant="outline"
+            size="large"
+            onClick={() => {
+              setIsExerciseSelectModalOpen(true);
+            }}
+            style={{ width: "100%" }}
           >
-            취소
+            운동 추가
           </ButtonComponent>
-        </ModalComponent.Actions>
-      }
-    >
-      
-      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-        {renderWorkoutModalContent()}
-        <ButtonComponent
-          variant="outline"
-          size="large"
-          onClick={() => {setIsExerciseSelectModalOpen(true)}}
-          style={{ width: "100%" }}
-        >
-          운동 추가
-        </ButtonComponent>
-      </div>
-    </ModalComponent>
-    <ModalComponent
-      isOpen={isCompleteModalOpen}
-      onClose={closeCompleteModal}
-      title="권한 변경 완료"
-      size="small"
-      footer={completeModalFooter()}
-    >
-      <div>수정된 루틴을 저장했습니다.</div>
-    </ModalComponent>
-    <ExerciseSelectModal
-      isModalOpen={isExerciseSelectModalOpen}
-      setIsModalOpen={setIsExerciseSelectModalOpen}
-      routineExercises={workoutExercises}
-      setRoutineExercises={setWorkoutExercises}
-      getExercises={getExercises}
-    />
+        </div>
+      </ModalComponent>
+      <ModalComponent
+        isOpen={isCompleteModalOpen}
+        onClose={closeCompleteModal}
+        title="권한 변경 완료"
+        size="small"
+        footer={completeModalFooter()}
+      >
+        <div>수정된 루틴을 저장했습니다.</div>
+      </ModalComponent>
+      <RoutineResultModal
+        isOpen={isResultModalOpen}
+        onClose={closeResultModal}
+        workoutData={workoutResult}
+        routineName={routine?.routineName}
+      />
+      <ExerciseSelectModal
+        isModalOpen={isExerciseSelectModalOpen}
+        setIsModalOpen={setIsExerciseSelectModalOpen}
+        routineExercises={workoutExercises}
+        setRoutineExercises={setWorkoutExercises}
+        getExercises={getExercises}
+      />
     </>
   );
 }

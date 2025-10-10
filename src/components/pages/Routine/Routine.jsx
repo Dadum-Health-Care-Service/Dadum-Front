@@ -87,38 +87,38 @@ const Routine = () => {
       "",
       async () => {
         await DELETE(`/routine/${routine.setId}/delete`, {}, true)
-        .then((res) => {
-          console.log(res);
-          showConfirmModal(
-            "루틴이 삭제되었습니다.",
-            "루틴 삭제",
-            "",
-            () => {
-              getRoutines();
-            },
-            false
-          );
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+          .then((res) => {
+            console.log(res);
+            showConfirmModal(
+              "루틴이 삭제되었습니다.",
+              "루틴 삭제",
+              "",
+              () => {
+                getRoutines();
+              },
+              false
+            );
+          })
+          .catch((err) => {
+            console.log(err);
+          });
       },
       true
     );
   };
 
-  const getRoutines =() =>{
+  const getRoutines = () => {
     GET("/routine/list", {}, true)
-    .then((res) => {
-      setRoutines(res.data);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-  }
+      .then((res) => {
+        setRoutines(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
   useEffect(() => {
-   getRoutines();
+    getRoutines();
   }, []);
 
   const getExercises = (exercises) => {
@@ -126,12 +126,12 @@ const Routine = () => {
   };
   const handleRun = (runId) => {
     useStop();
-    if (isRunning&&runId===setId) {
+    if (isRunning && runId === setId) {
       useStop();
     } else {
       useRun(runId);
     }
-  }
+  };
   return (
     <ContainerComponent className={`${styles.routine}`}>
       <RoutineCreateModal
@@ -206,26 +206,37 @@ const Routine = () => {
           <div key={routine.setId} className={styles.routineCard}>
             <CardComponent
               variant={routine.completed ? "success" : "primary"}
-              title={<div className={styles.routineTitleContainer}>{routine.routineName}{isRunning && setId===routine.setId && (
-                <div style={{ display: 'flex', gap: '1em', marginRight: '1em' }}>
-                  <img
-                    src={'/img/RunningRoutine.gif'}
-                    style={{ width: '30px', height: '30px' }}
-                  />
-                  <TotalTimer type="DETAIL" />
+              title={
+                <div className={styles.routineTitleContainer}>
+                  {routine.routineName}
+                  {isRunning && setId === routine.setId && (
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "1em",
+                        marginRight: "1em",
+                      }}
+                    >
+                      <img
+                        src={"/img/RunningRoutine.gif"}
+                        style={{ width: "30px", height: "30px" }}
+                      />
+                      <TotalTimer type="DETAIL" />
+                    </div>
+                  )}
                 </div>
-                )}</div>}
+              }
               className={styles.routineCardComponent}
               buttonText=""
-              badge={isRunning&&setId===routine.setId ? "진행중" : "완료"}
+              badge={isRunning && setId === routine.setId ? "진행중" : "완료"}
               onClick={() => handleDetailModalOpen(routine)}
             >
               <div className={styles.routineHeader}>
                 <div className={styles.routineInfo}>
                   <div className={styles.routineTitleContainer}>
-                  <div className={styles.routineTitle}>{routine.title}</div>
+                    <div className={styles.routineTitle}>{routine.title}</div>
                   </div>
-                  
+
                   <p className={styles.routineDescription}>
                     {routine.description}
                   </p>
@@ -233,24 +244,46 @@ const Routine = () => {
               </div>
 
               <div className={styles.routineActions}>
-                <ButtonComponent variant="primary" size="sm" onClick={(e) => {
-                  e.stopPropagation();
-                  console.log(routine.setId);
-                  console.log(setId);
-                  console.log(isRunning);
-                  handleRun(routine.setId);}} style={{background: isRunning&&setId===routine.setId ? "red" : "#007bff"}}>
-                  {isRunning&&setId===routine.setId ? <FaStop className={styles.buttonIcon} /> : <FaPlay className={styles.buttonIcon} />}
-                  {isRunning&&setId===routine.setId ? "중지" : "시작"}
+                <ButtonComponent
+                  variant="primary"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    console.log(routine.setId);
+                    console.log(setId);
+                    console.log(isRunning);
+                    handleRun(routine.setId);
+                  }}
+                  style={{
+                    background:
+                      isRunning && setId === routine.setId ? "red" : "#007bff",
+                  }}
+                >
+                  {isRunning && setId === routine.setId ? (
+                    <FaStop className={styles.buttonIcon} />
+                  ) : (
+                    <FaPlay className={styles.buttonIcon} />
+                  )}
+                  {isRunning && setId === routine.setId ? "중지" : "시작"}
                 </ButtonComponent>
                 <ButtonComponent
                   variant="outline"
                   size="sm"
                   onClick={() => handleDetailModalOpen(routine)}
+                  disabled={isRunning && setId === routine.setId}
                 >
                   <FaEdit className={styles.buttonIcon} />
                   수정
                 </ButtonComponent>
-                <ButtonComponent variant="secondary" size="sm" onClick={(e) => {e.stopPropagation(); handleDeleteRoutine(routine)}}>
+                <ButtonComponent
+                  variant="secondary"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteRoutine(routine);
+                  }}
+                  disabled={isRunning && setId === routine.setId}
+                >
                   <FaTrash className={styles.buttonIcon} />
                   삭제
                 </ButtonComponent>
