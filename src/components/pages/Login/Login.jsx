@@ -1,20 +1,24 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useRef } from "react";
 import ContainerComponent from "../../common/ContainerComponent";
 import FormComponent from "../../common/FormComponent";
 import InputComponent from "../../common/InputComponent";
 import ButtonComponent from "../../common/ButtonComponent";
 import ListComponent from "../../common/ListComponent";
 import { AuthContext } from "../../../context/AuthContext";
-
+import { KAKAO_CLIENT_ID, KAKAO_AUTH_URL, KAKAO_REDIRECT_URI } from '../../../utils/oauth/oAuth';
 import styles from "./Login.module.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useModal } from "../../../context/ModalContext";
 import { useApi } from "../../../utils/api/useApi";
+import axios from "axios";
 
 function Login() {
   const { POST } = useApi();
   const navigate = useNavigate();
+  const location = useLocation();
   const { showBasicModal } = useModal();
+
+  
 
   // 현재 보여줄 뷰를 관리하는 상태 ('login', 'passwordless','loggedIn')
   const [view, setView] = useState("login");
@@ -46,6 +50,15 @@ function Login() {
   const [servicePassword, setServicePassword] = useState("");
   const [currentTerm, setCurrentTerm] = useState(0);
   const [termLength, setTermLength] = useState(0);
+
+  //쿼리 파라미터 추출
+  const query = new URLSearchParams(location.search);
+
+  // 카카오 코드 추출
+  const kakaoCode = query.get('code');
+
+  //카카오 로그인용
+  const kakaoRef = useRef(null);
 
   // 최초렌더링 시 user가 있다면
 
@@ -231,6 +244,49 @@ function Login() {
     };
     connectWebSocket();
   }, [pushConnectorToken]);
+
+  //카카오 로그인
+  useEffect(() => {
+    const grantType = 'authorization_code';
+    if (kakaoCode) {
+      axios
+        .post(
+          `https://kauth.kakao.com/oauth/token?grant_type=${grantType}&client_id=${KAKAO_CLIENT_ID}&redirect_uri=${KAKAO_REDIRECT_URI}&code=${kakaoCode}`,
+          {},
+          {
+            headers: {
+              'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
+            },
+            withCredentials: false,
+          },
+        )
+        .then(res => {
+          console.log(res);
+          const { access_token } = res.data;
+          console.log(access_token);
+          axios
+            .post(`http://localhost:8080/api/v1/users/login/kakao`, {
+              socialType: 'kakao',
+              accessToken: access_token,
+            })
+            .then(res => {
+              console.log('kakao login successful');
+              dispatch({ type: 'LOGIN', user: res.data });
+              
+              // 사용자 역할에 따라 적절한 페이지로 리다이렉트
+              if (res.data.role === 'SUPER_ADMIN') {
+                navigate('/admin', { replace: true });
+              } else {
+                navigate('/', { replace: true });
+              }
+            })
+            .catch();
+        })
+        .catch(error => {
+          //toast
+        });
+    }
+  }, [kakaoCode]);
 
   // 로그인 처리 핸들러
   const handleLogin = async (e) => {
@@ -460,7 +516,18 @@ function Login() {
             >
               로그인
             </ButtonComponent>
-
+            <ButtonComponent
+              variant="ghost"
+              size="large"
+              fullWidth
+              style={{objectFit: "fill" ,padding: "0"}}
+              onClick={() => {
+                kakaoRef.current.click();
+              }}
+            >
+              <img src={"/img/kakao_login.png"} style={{height: "100%"}} alt="kakao"/>
+              <a href={KAKAO_AUTH_URL} ref={kakaoRef} hidden></a>
+            </ButtonComponent>
             <ButtonComponent
               variant="outline-primary"
               size="large"
