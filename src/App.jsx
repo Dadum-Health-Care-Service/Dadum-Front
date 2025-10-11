@@ -93,10 +93,9 @@ function AppContent() {
       handleAllowNotification(user.accessToken);
     }
   }, [user]);
-
   const noGNBpaths = ["/login", "/signup", "/findid", "/findpw"];
   const showGNB = user && !noGNBpaths.includes(location.pathname);
-  const pagePadding = isMobile ? "90px" : "0px";
+  const pagePadding = isMobile && !noGNBpaths.includes(location.pathname) ? "90px" : "0px";
 
   return (
     <>
