@@ -1,0 +1,214 @@
+.news-section {
+  margin-bottom: 3rem;
+}
+
+.news-section-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.news-section-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #2c3e50;
+  margin: 0 0 1.5rem 0;
+  text-align: center;
+}
+
+/* 모바일에서 제목 크기 키우기 */
+@media (max-width: 768px) {
+  .news-section-title {
+    font-size: 2rem; /* 모바일에서 더 크게 */
+    font-weight: 700;
+  }
+}
+
+/* 캐러셀 래퍼 */
+.news-carousel-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* 캐러셀 버튼 - 심플한 블루 테마 */
+.news-carousel-btn {
+  width: 40px;
+  height: 40px;
+  background-color: #007bff;
+  border: none;
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+  opacity: 0.8;
+}
+
+.news-carousel-btn:hover {
+  background-color: #0056b3;
+  opacity: 1;
+}
+
+.news-carousel-btn:active {
+  transform: scale(0.95);
+}
+
+.news-carousel-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* 모바일에서는 버튼 숨김 */
+@media (max-width: 768px) {
+  .news-carousel-btn {
+    display: none;
+  }
+  
+  .news-carousel-wrapper {
+    gap: 0;
+  }
+}
+
+.news-icon {
+  font-size: 2rem;
+}
+
+/* 썸네일 카드 스타일 */
+.news-thumbnail-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  max-width: 700px;
+  margin: 0 auto;
+  touch-action: pan-y; /* 세로 스크롤은 허용, 가로 스와이프 제스처 활성화 */
+  user-select: none; /* 텍스트 선택 방지 */
+}
+
+.news-thumbnail-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.news-thumbnail-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  overflow: hidden;
+  background: #f0f0f0;
+}
+
+/* 모바일에서 이미지 높이 축소 */
+@media (max-width: 768px) {
+  .news-thumbnail-image-wrapper {
+    height: 200px;
+  }
+}
+
+.news-thumbnail-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.news-thumbnail-overlay {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1;
+}
+
+.news-badge {
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+.news-thumbnail-content {
+  padding: 15px;
+}
+
+.news-thumbnail-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 10px 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 2.8em;
+}
+
+.news-thumbnail-time {
+  font-size: 0.85rem;
+  color: #6c757d;
+  margin: 0;
+}
+
+/* 모바일 대응 */
+@media (max-width: 768px) {
+  .news-section-title {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .news-icon {
+    font-size: 1.5rem;
+  }
+  
+  .news-card {
+    min-height: 250px;
+  }
+  
+  .news-card-title {
+    font-size: 0.9rem;
+    -webkit-line-clamp: 2;
+  }
+  
+  .news-summary {
+    font-size: 0.85rem;
+    -webkit-line-clamp: 2;
+  }
+  
+  .news-category-badge {
+    font-size: 0.7rem;
+    padding: 0.4rem 0.8rem;
+  }
+  
+  .news-time {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .news-section-title {
+    font-size: 1.3rem;
+  }
+  
+  .news-card {
+    min-height: 220px;
+  }
+  
+  .news-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
