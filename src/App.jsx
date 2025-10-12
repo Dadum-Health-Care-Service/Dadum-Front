@@ -43,6 +43,8 @@ import { ModalProvider } from "./context/ModalContext.jsx";
 
 //Utils
 import { handleAllowNotification } from "./utils/webpush/notificationPermission";
+import GoogleTagManager from "./utils/tagmanager/GoogleTagManager.jsx";
+import usePageView from "./utils/tagmanager/PageView.jsx";
 import "./utils/webpush/foregroundMessage";
 
 function AppContent() {
@@ -50,7 +52,7 @@ function AppContent() {
   const [isMobile, setIsMobile] = useState(false);
   const [isNotify, setIsNotify] = useState(false);
   const location = useLocation();
-
+  usePageView();
   useEffect(() => {
     // Firebase 연결 상태 확인
     //console.log("Firebase 앱:", app);
@@ -153,6 +155,7 @@ function AppContent() {
           </Routes>
         </div>
       </main>
+      <GoogleTagManager gtmId="GTM-ND9XH56H" />
     </>
   );
 }
