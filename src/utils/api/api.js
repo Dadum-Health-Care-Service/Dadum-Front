@@ -5,11 +5,13 @@ const main = "http://localhost:8080/api/v1";
 const ai = "http://localhost:8000";
 const security = "/security";
 const passwordless = "/passwordless";
+const kakao = "https://kauth.kakao.com";
 const host = {
   main: main,
   ai: ai,
   passwordless: passwordless,
   security: security,
+  kakao: kakao,
 };
 
 const createAuthHeaders = (accessToken, isAuth) => {
@@ -55,6 +57,14 @@ function POST(URL, data = {}, accessToken, isAuth = true, source = "main") {
           "X-Requested-With": "XMLHttpRequest",
           Accept: "application/json",
         },
+      });
+    }
+    if (source === "kakao") {
+      return axios.post(kakao + URL, data, {
+        headers: {
+          "Content-type": "application/x-www-form-urlencoded;charset=utf-8",
+        },
+        withCredentials: false,
       });
     }
     return axios.post(host[source] + URL, data, {
