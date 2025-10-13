@@ -77,9 +77,10 @@ function AppContent() {
       //console.log("SW ready");
 
       const handleSWMessage = (event) => {
-        //console.log("SW 메시지 수신:", event.data);
-        if (event.data.type === "REQUEST_ROLE") {
-          setIsNotify(event.data.type);
+        console.log("SW 메시지 수신:", event.data);
+        if (event.data.data.type === "REQUEST_ROLE") {
+          console.log("REQUEST_ROLE");
+          setIsNotify(event.data.data.type);
         }
       };
 
@@ -100,7 +101,8 @@ function AppContent() {
   }, [user]);
   const noGNBpaths = ["/login", "/signup", "/findid", "/findpw"];
   const showGNB = user && !noGNBpaths.includes(location.pathname);
-  const pagePadding = isMobile && !noGNBpaths.includes(location.pathname) ? "90px" : "0px";
+  const pagePadding =
+    isMobile && !noGNBpaths.includes(location.pathname) ? "90px" : "0px";
 
   return (
     <>
@@ -130,9 +132,18 @@ function AppContent() {
                 <Route path="/shop" element={<Shop />}></Route>
                 <Route path="/order" element={<OrderPage />}></Route>
                 <Route path="/orders" element={<OrderHistory />}></Route>
-                <Route path="/payment/complete" element={<PaymentComplete />}></Route>
-                <Route path="/payment/mobile-complete" element={<PaymentComplete />}></Route>
-                <Route path="/sales-analysis" element={<SalesAnalysis />}></Route>
+                <Route
+                  path="/payment/complete"
+                  element={<PaymentComplete />}
+                ></Route>
+                <Route
+                  path="/payment/mobile-complete"
+                  element={<PaymentComplete />}
+                ></Route>
+                <Route
+                  path="/sales-analysis"
+                  element={<SalesAnalysis />}
+                ></Route>
                 <Route
                   path="/statistics"
                   element={
