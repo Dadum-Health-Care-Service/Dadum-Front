@@ -61,23 +61,25 @@ export default function RoutineDetailModal({
       totalTime: "50분",
       totalSets: "15세트",
       estimatedCalories: "400kcal",
-      exercises: routine?.saveRoutineDto.map((exercise) => {
-        return {
-          id: exercise.srId,
-          name: engKorDict[exercise.srName],
-          category: engKorDict[exercise.srName],
-          sets: exercise.set.map((set, i) => {
-            return {
-              id: i,
-              srsId: set.srsId,
-              reps: 0,
-              weight: set.weight,
-              many: set.many,
-              rest: set.rest,
-            };
-          }),
-        };
-      }),
+      exercises: routine?.saveRoutineDto
+        .map((exercise) => {
+          return {
+            id: exercise.srId,
+            name: engKorDict[exercise.srName],
+            category: engKorDict[exercise.srName],
+            sets: exercise.set.map((set, i) => {
+              return {
+                id: i,
+                srsId: set.srsId,
+                reps: 0,
+                weight: set.weight,
+                many: set.many,
+                rest: set.rest,
+              };
+            }),
+          };
+        })
+        .sort((a, b) => a.id - b.id),
     };
     setWorkoutExercises(
       INITIAL_WORKOUT_DATA.exercises.map(
@@ -86,6 +88,7 @@ export default function RoutineDetailModal({
     );
     setWorkoutData(INITIAL_WORKOUT_DATA);
     workoutDataRef.current = INITIAL_WORKOUT_DATA;
+    setDoneRoutine(false);
   }, [isModalOpen, routine]);
 
   useEffect(() => {
