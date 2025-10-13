@@ -40,14 +40,7 @@ messaging.onBackgroundMessage((payload) => {
       clients.forEach((client) => {
         //console.log("client", client);
         if (payload.data.title.includes("권한 요청")) {
-          client.postMessage({
-            type: "REQUEST_ROLE",
-            payload: {
-              title: payload.notification?.title,
-              body: payload.notification?.body,
-              data: payload.data,
-            },
-          });
+          client.postMessage(payload);
         }
       });
     });
