@@ -1,4 +1,4 @@
-import { useContext, useRef, useState } from "react";
+import { useContext, useRef, useState, useEffect } from "react";
 import HeaderComponent from "../../common/HeaderComponent";
 import ContainerComponent from "../../common/ContainerComponent";
 import InputComponent from "../../common/InputComponent";
@@ -13,8 +13,8 @@ export default function Settings(){
     const { user, dispatch } = useContext(AuthContext);
     //전역모달 사용
     const { showBasicModal, showConfirmModal } = useModal();
-    //설정의 네비게이션헤더탭 제어용 (비밀번호 변경, 회원 탈퇴)
-    const [activeHeaderMenu,setActiveHeaderMenu]=useState("updatePassword");
+    //설정의 네비게이션헤더탭 제어용 (회원 정보 변경, 비밀번호 변경, 회원 탈퇴)
+    const [activeHeaderMenu,setActiveHeaderMenu]=useState("userInfo");
     const handleHeaderMenuClick = (menuId)=>{
         setActiveHeaderMenu(menuId);
         console.log("선택된 설정 헤더 메뉴:",menuId);
@@ -30,6 +30,19 @@ export default function Settings(){
         newPWcheck:''
     });
 
+    //역할 관련 state
+    const [availableRoles, setAvailableRoles] = useState([]);
+    const [userRoles, setUserRoles] = useState([]);
+    const [selectedRole, setSelectedRole] = useState('');
+    const [roleErrors, setRoleErrors] = useState({});
+
+    // 역할 이름 매핑
+    const roleNameMap = {
+        'SUPER_ADMIN': '관리자',
+        'USER': '사용자',
+        'SELLER': '판매자',
+    };
+
     //인풋 값 전부 초기화 하기 위한 함수
     const handleReset = ()=>{
         setPasswords({existPW:'',currentPW:'',newPW:'',newPWcheck:''});
@@ -37,6 +50,134 @@ export default function Settings(){
             setErrors({});
         };
     };
+
+    //역할 관련 함수들
+    const loadAvailableRoles = async () => {
+        try {            
+            const response = await fetch('/api/v1/users/roles/available');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const roles = await response.json();
+            setAvailableRoles(roles || []);
+        } catch (error) {
+            setAvailableRoles([]);
+            showBasicModal('역할 목록을 불러오는데 실패했습니다.', '오류');
+        }
+    };
+
+    const loadUserRoles = async () => {
+        try {
+            // 토큰 검사 - user 객체에서 직접 가져오기
+            let token = null;
+            
+            // 1. localStorage에서 accessToken 키로 직접 확인
+            token = localStorage.getItem('accessToken');
+            
+            // 2. 없으면 user 객체에서 가져오기
+            if (!token && user && user.accessToken) {
+                token = user.accessToken;
+            }
+            
+            // 3. 여전히 없으면 localStorage의 user 키에서 파싱
+            if (!token) {
+                const userInfo = localStorage.getItem('user');
+                if (userInfo) {
+                    try {
+                        const parsedUser = JSON.parse(userInfo);
+                        if (parsedUser.accessToken) {
+                            token = parsedUser.accessToken;
+                        }
+                    } catch (e) {
+                        // 사용자 정보 파싱 실패 시 무시
+                    }
+                }
+            }
+            
+            if (!token) {
+                setUserRoles([]);
+                return;
+            }
+            
+            const response = await fetch('/api/v1/users/roles/current', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const roles = await response.json();
+            setUserRoles(roles || []);
+        } catch (error) {
+            setUserRoles([]);
+        }
+    };
+
+    const handleRoleChange = (e) => {
+        setSelectedRole(e.target.value);
+        if (roleErrors.role) {
+            setRoleErrors(prev => ({ ...prev, role: '' }));
+        }
+    };
+
+    const handleRoleRequest = async (e) => {
+        e.preventDefault();
+        
+        const newErrors = {};
+        if (!selectedRole) {
+            newErrors.role = '권한을 선택해주세요.';
+        }
+        setRoleErrors(newErrors);
+
+        if (Object.keys(newErrors).length === 0) {
+            try {
+                const response = await POST('/users/role/request', {
+                    roleName: selectedRole
+                });
+                showBasicModal('권한 요청이 완료되었습니다. 관리자 승인을 기다려주세요.', '신청 완료');
+                setSelectedRole('');
+                loadUserRoles(); // 사용자 역할 목록 새로고침
+            } catch (error) {
+                if (error?.status === 400) {
+                    showBasicModal(error.message || '권한 요청에 실패했습니다.', '신청 실패');
+                } else {
+                    showBasicModal('권한 요청 중 오류가 발생했습니다.', '네트워크 오류');
+                }
+            }
+        }
+    };
+
+    // 이미 신청된 역할들을 제외한 사용 가능한 역할 목록 필터링
+    const getFilteredAvailableRoles = () => {
+        if (!userRoles || !availableRoles) return [];
+        const userRoleNames = userRoles.map(role => 
+            role.rolesDto?.roleName || role.roleName
+        );
+        return availableRoles.filter(role => 
+            !userRoleNames.includes(role.roleName)
+        );
+    };
+
+    // 승인된 역할과 대기중인 역할 분리
+    const getApprovedRoles = () => {
+        if (!userRoles) return [];
+        return userRoles.filter(role => role.isActive === 1);
+    };
+
+    const getPendingRoles = () => {
+        if (!userRoles) return [];
+        return userRoles.filter(role => role.isActive === 0);
+    };
+
+    // 컴포넌트 마운트 시 역할 데이터 로드
+    useEffect(() => {
+        loadAvailableRoles();
+        loadUserRoles();
+    }, [user]);
 
     //인풋 값 변경 시 passwords에 저장 및 에러 초기화
     const handleChange =(field)=>(e)=>{
@@ -158,9 +299,102 @@ export default function Settings(){
         };
     }
 
-    //settings 탭에 따라 비밀번호 변경/회원 탈퇴 렌더링
+    //settings 탭에 따라 회원 정보 변경/비밀번호 변경/회원 탈퇴 렌더링
     const renderSettingPages = (menuId)=>{
             switch(menuId){
+                //회원 정보 변경
+                case "userInfo": {
+                    const approvedRoles = getApprovedRoles() || [];
+                    const pendingRoles = getPendingRoles() || [];
+                    const filteredAvailableRoles = getFilteredAvailableRoles() || [];
+
+                    return (
+                        <ContainerComponent variant="filled" size="small" className="p-5">
+                            {/* 승인된 권한 목록 */}
+                            <div className="mb-4">
+                                <h5 className="mb-3">승인된 권한 목록</h5>
+                                {approvedRoles.length > 0 ? (
+                                    <div className="d-flex flex-wrap gap-2">
+                                        {approvedRoles.map((role, index) => {
+                                            const roleName = role.rolesDto?.roleName || role.roleName;
+                                            return (
+                                                <span 
+                                                    key={index}
+                                                    className="badge bg-success"
+                                                >
+                                                    {roleNameMap[roleName] || roleName}
+                                                </span>
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    <p className="text-muted">승인된 권한 목록이 없습니다.</p>
+                                )}
+                            </div>
+
+                            {/* 대기중인 권한 요청 */}
+                            {pendingRoles.length > 0 && (
+                                <div className="mb-4">
+                                    <h5 className="mb-3">대기중인 권한 요청</h5>
+                                    <div className="d-flex flex-wrap gap-2">
+                                        {pendingRoles.map((role, index) => {
+                                            const roleName = role.rolesDto?.roleName || role.roleName;
+                                            return (
+                                                <span 
+                                                    key={index}
+                                                    className="badge bg-warning"
+                                                >
+                                                    {roleNameMap[roleName] || roleName} (대기중)
+                                                </span>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+                            
+                            <hr className="my-4" />
+                            
+                            {/* 권한 신청 */}
+                            <div>
+                                <h5 className="mb-3">권한 요청</h5>
+                                {filteredAvailableRoles.length > 0 ? (
+                                    <form onSubmit={handleRoleRequest}>
+                                        <div className="mb-3">
+                                            <label className="form-label">권한을 선택해주세요</label>
+                                            <select 
+                                                className={`form-select ${roleErrors.role ? 'is-invalid' : ''}`}
+                                                value={selectedRole}
+                                                onChange={handleRoleChange}
+                                            >
+                                                <option value="">권한을 선택해주세요</option>
+                                                {filteredAvailableRoles.map((role) => (
+                                                    <option key={role.roleId} value={role.roleName}>
+                                                        {roleNameMap[role.roleName] || role.roleName} - {role.roleDescription}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            {roleErrors.role && (
+                                                <div className="invalid-feedback">{roleErrors.role}</div>
+                                            )}
+                                        </div>
+                                        <div className="d-flex justify-content-center">
+                                            <ButtonComponent 
+                                                variant="primary" 
+                                                size="small"
+                                                type="submit"
+                                                className="h-75"
+                                            >
+                                                권한 신청
+                                            </ButtonComponent>
+                                        </div>
+                                    </form>
+                                ) : (
+                                    <p className="text-muted">신청 가능한 권한이 없습니다.</p>
+                                )}
+                            </div>
+                        </ContainerComponent>
+                    )
+                }
                 //회원 탈퇴
                 case "withdrawalUser": {
                     return (
@@ -190,7 +424,7 @@ export default function Settings(){
                     )
                 }
                 //비밀번호 변경
-                default: {
+                case "updatePassword": {
                     return (
                         <ContainerComponent variant="filled" size="small" >
                             <div style={{padding:"3em 3em 0.5em 3em "}}>
@@ -241,6 +475,13 @@ export default function Settings(){
                         </ContainerComponent>
                     )
                 }
+                default: {
+                    return (
+                        <ContainerComponent variant="filled" size="small" className="p-5">
+                            <p className="text-muted">잘못된 메뉴입니다.</p>
+                        </ContainerComponent>
+                    )
+                }
             }
     }
 
@@ -249,6 +490,12 @@ export default function Settings(){
             <ContainerComponent size="medium" variant="default" className="mb-3">
                 <HeaderComponent variant="filled" size="small" align="center">
                     <HeaderComponent.Navigation>
+                        <HeaderComponent.MenuItem
+                            active={activeHeaderMenu === "userInfo"}
+                            onClick={()=>handleHeaderMenuClick("userInfo")}
+                        >
+                            회원 정보 변경
+                        </HeaderComponent.MenuItem>
                         <HeaderComponent.MenuItem
                             active={activeHeaderMenu === "updatePassword"}
                             onClick={()=>handleHeaderMenuClick("updatePassword")}

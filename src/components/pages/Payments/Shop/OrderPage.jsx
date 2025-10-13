@@ -193,15 +193,10 @@ export default function OrderPage() {
     return Math.round(((original - current) / original) * 100);
   };
 
-  const calculateShippingFee = () => {
-    return product && product.price >= 50000 ? 0 : 3000;
-  };
-
   const calculateTotalAmount = () => {
     if (!product) return 0;
-    const shippingFee = calculateShippingFee();
     const discountAmount = discountInfo.deposit;
-    return product.price + shippingFee - discountAmount;
+    return product.price - discountAmount;
   };
 
   const handleInputChange = (section, field, value) => {
@@ -697,10 +692,6 @@ export default function OrderPage() {
                   <div className="d-flex justify-content-between mb-2">
                     <span>상품금액</span>
                     <span>{product.price.toLocaleString()}원</span>
-                  </div>
-                  <div className="d-flex justify-content-between mb-2">
-                    <span>배송비</span>
-                    <span>{calculateShippingFee() === 0 ? '무료' : `${calculateShippingFee().toLocaleString()}원`}</span>
                   </div>
                   <div className="d-flex justify-content-between mb-2">
                     <span>할인금액</span>

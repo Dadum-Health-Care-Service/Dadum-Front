@@ -31,7 +31,10 @@ import Shop from "./components/pages/Payments/Shop/Shop.jsx";
 import ProductDetail from "./components/pages/Payments/Shop/ProductDetail.jsx";
 import OrderPage from "./components/pages/Payments/Shop/OrderPage.jsx";
 import OrderHistory from "./components/pages/Payments/Shop/OrderHistory.jsx";
+import PaymentComplete from "./components/pages/Payments/PaymentComplete.jsx";
+import SalesAnalysis from "./components/pages/Payments/SalesAnalysis.jsx";
 import PoseAccuracyMVP from "./components/pages/Pose/PoseAccuracyMVP.jsx";
+import SellerMain from "./components/pages/Payments/Seller/SellerMain.jsx";
 import MapPage from "./components/pages/Map/MapPage.jsx";
 
 //Contexts
@@ -127,6 +130,9 @@ function AppContent() {
                 <Route path="/shop" element={<Shop />}></Route>
                 <Route path="/order" element={<OrderPage />}></Route>
                 <Route path="/orders" element={<OrderHistory />}></Route>
+                <Route path="/payment/complete" element={<PaymentComplete />}></Route>
+                <Route path="/payment/mobile-complete" element={<PaymentComplete />}></Route>
+                <Route path="/sales-analysis" element={<SalesAnalysis />}></Route>
                 <Route
                   path="/statistics"
                   element={
@@ -137,6 +143,7 @@ function AppContent() {
                 ></Route>
                 <Route path="/social" element={<Social />}></Route>
                 <Route path="/mypage/*" element={<MyPage />}></Route>
+                <Route path="/seller/*" element={<SellerMain />}></Route>
                 <Route
                   path="/admin"
                   element={
