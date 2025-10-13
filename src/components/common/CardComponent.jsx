@@ -18,10 +18,29 @@ const CardComponent = ({
     }
   };
 
-  // children이 있으면 컨테이너로 사용
+  // children이 있으면 컨테이너로 사용하되, title도 렌더링
   if (children) {
     return (
-      <div className={`${styles.card} ${className} ${disabled ? styles.disabled : ""}`}>
+      <div
+        className={`${styles.card} ${className} ${
+          disabled ? styles.disabled : ""
+        }`}
+        onClick={handleClick}
+        role="button"
+        tabIndex={disabled ? -1 : 0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleClick();
+          }
+        }}
+      >
+        {title && (
+          <div className={styles["card-content"]}>
+            <div className={styles["card-title"]}>{title}</div>
+            {details && <p className={styles["card-details"]}>{details}</p>}
+          </div>
+        )}
         {children}
       </div>
     );
@@ -44,7 +63,7 @@ const CardComponent = ({
       }}
     >
       <div className={styles["card-content"]}>
-        <h3 className={styles["card-title"]}>{title}</h3>
+        <div className={styles["card-title"]}>{title}</div>
         <p className={styles["card-details"]}>{details}</p>
       </div>
       {children}

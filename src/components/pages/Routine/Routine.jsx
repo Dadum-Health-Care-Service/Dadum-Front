@@ -50,6 +50,7 @@ const Routine = () => {
 
       const matchesCategory =
         selectedCategory === "all" || routine.category === selectedCategory;
+      console.log(routine);
       return matchesSearch && matchesCategory;
     })
     .sort((a, b) => {
