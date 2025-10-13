@@ -15,19 +15,20 @@ const NewsScroll = () => {
   const [allNews, setAllNews] = useState([]);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(false);
 
   // 컴포넌트 마운트 시 실제 뉴스 데이터 가져오기
   useEffect(() => {
     loadNewsData();
   }, []);
 
-  const loadNewsData = async () => {
+  const loadNewsData = async (forceRefresh = false) => {
     try {
       setLoading(true);
       setError(null);
       
       // 실제 네이버 뉴스 API 호출 (5개만 가져오기)
-      const realNews = await getWorkoutNews(5);
+      const realNews = await getWorkoutNews(5, forceRefresh);
       setAllNews(realNews);
       setCurrentIndex(0);
       
@@ -47,14 +48,31 @@ const NewsScroll = () => {
 
   // 다음 뉴스로 이동
   const handleNext = () => {
-    const nextIndex = (currentIndex + 1) % allNews.length;
-    setCurrentIndex(nextIndex);
+    const nextIndex = currentIndex + 1;
+    if (nextIndex >= allNews.length) {
+      // 마지막 뉴스에 도달하면 새로고침
+      handleRefresh();
+    } else {
+      setCurrentIndex(nextIndex);
+    }
   };
 
   // 이전 뉴스로 이동
   const handlePrev = () => {
     const prevIndex = currentIndex === 0 ? allNews.length - 1 : currentIndex - 1;
     setCurrentIndex(prevIndex);
+  };
+
+  // 뉴스 새로고침
+  const handleRefresh = () => {
+    setCurrentIndex(0);
+    setIsAutoPlaying(true);
+    loadNewsData(true); // forceRefresh = true로 설정
+    
+    // 새로고침 완료 후 자동재생 상태 해제
+    setTimeout(() => {
+      setIsAutoPlaying(false);
+    }, 2000);
   };
 
   // 터치 이벤트 핸들러 (모바일 스와이프)
@@ -74,7 +92,7 @@ const NewsScroll = () => {
     const isRightSwipe = distance < -50;
 
     if (isLeftSwipe) {
-      handleNext(); // 왼쪽으로 스와이프 -> 다음 뉴스
+      handleNext(); // 왼쪽으로 스와이프 -> 다음 뉴스 (마지막이면 새로고침)
     }
     if (isRightSwipe) {
       handlePrev(); // 오른쪽으로 스와이프 -> 이전 뉴스
@@ -249,6 +267,44 @@ const NewsScroll = () => {
         </div>
       ) : (
         <p className="text-center">뉴스가 없습니다.</p>
+      )}
+
+      {/* 하단 선 인디케이터 */}
+      {allNews.length > 0 && (
+        <div className="news-indicators">
+          <div 
+            className="news-line-indicator"
+            onClick={() => {
+              // 클릭한 위치에 따라 뉴스 이동
+              const rect = event.currentTarget.getBoundingClientRect();
+              const clickX = event.clientX - rect.left;
+              const percentage = clickX / rect.width;
+              const targetIndex = Math.floor(percentage * allNews.length);
+              if (targetIndex >= allNews.length - 1) {
+                handleRefresh(); // 마지막 지점 클릭 시 새로고침
+              } else {
+                setCurrentIndex(targetIndex);
+              }
+            }}
+          >
+            <div 
+              className="news-line-progress"
+              style={{
+                width: `${((currentIndex + 1) / allNews.length) * 100}%`
+              }}
+            />
+          </div>
+          {isAutoPlaying && (
+            <div style={{
+              marginTop: '10px',
+              fontSize: '0.8rem',
+              color: '#007bff',
+              textAlign: 'center'
+            }}>
+              🔄 새로운 뉴스를 가져오는 중...
+            </div>
+          )}
+        </div>
       )}
 
       <NewsDetailModal 

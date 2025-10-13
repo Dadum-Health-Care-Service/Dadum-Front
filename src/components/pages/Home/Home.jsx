@@ -6,7 +6,7 @@ import { FaPlay, FaClock, FaStar, FaFire } from "react-icons/fa";
 import styles from "./Home.module.css";
 import CardComponent from "../../common/CardComponent";
 import ButtonComponent from "../../common/ButtonComponent";
-import NewsScroll from "../../common/NewsScroll";
+import FitnessNewsFeed from "../../FitnessNewsFeed";
 import { POST } from "../../../utils/api/api";
 const Home = () => {
   const navigate = useNavigate();
@@ -211,7 +211,7 @@ const Home = () => {
 
       {/* News Section */}
       <div className={styles.newsSection}>
-        <NewsScroll />
+        <FitnessNewsFeed perTabCount={2} />
       </div>
     </ContainerComponent>
   );

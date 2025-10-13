@@ -15,27 +15,37 @@ const NAVER_CLIENT_SECRET = import.meta.env.VITE_NAVER_CLIENT_SECRET || 'YOUR_NA
 const NAVER_NEWS_API_URL = 'https://openapi.naver.com/v1/search/news.json';
 
 /**
- * 운동 관련 뉴스 검색어 목록
+ * 스포츠 피트니스 관련 뉴스 검색어 목록 (네이버 스포츠 아웃도어 피트니스 섹션 특화)
  */
 const WORKOUT_SEARCH_TERMS = [
-  '운동',
-  '헬스',
-  '피트니스',
-  '홈트레이닝',
-  '요가',
-  '필라테스',
-  '맨몸운동',
-  '다이어트',
-  '체중감량',
-  '근력운동'
+  '아웃도어 피트니스',
+  '스포츠 피트니스',
+  '헬스장 운동',
+  '홈트레이닝 스포츠',
+  '요가 아웃도어',
+  '맨몸운동 스포츠',
+  '다이어트 운동',
+  '근력운동 헬스',
+  '유산소 스포츠',
+  '스트레칭 요가',
+  '보디빌딩 헬스',
+  '크로스핏 피트니스',
+  '필라테스 운동',
+  '웨이트 트레이닝',
+  '피트니스 아웃도어'
 ];
 
 /**
  * 백엔드를 통한 네이버 뉴스 검색 (운동 관련)
  */
-const fetchFitnessNews = async (count = 5) => {
+const fetchFitnessNews = async (count = 5, searchTerm = null) => {
   try {
-    const url = `http://localhost:8080/api/v1/news/fitness?query=운동&display=${count}`;
+    // 랜덤한 검색어 선택 (중복 방지)
+    const randomTerm = searchTerm || WORKOUT_SEARCH_TERMS[Math.floor(Math.random() * WORKOUT_SEARCH_TERMS.length)];
+    // 5개 뉴스 요청
+    const url = `http://localhost:8080/api/v1/news/fitness?query=${encodeURIComponent(randomTerm)}&display=${count}`;
+    
+    console.log('검색어:', randomTerm);
     
     const response = await fetch(url, {
       method: 'GET',
@@ -49,7 +59,7 @@ const fetchFitnessNews = async (count = 5) => {
     }
 
     const data = await response.json();
-    return data;
+    return { ...data, searchTerm: randomTerm };
   } catch (error) {
     console.error('운동 뉴스 가져오기 오류:', error);
     throw error;
@@ -88,16 +98,21 @@ const fetchNewsImage = async (query) => {
 /**
  * 운동 관련 뉴스 가져오기
  * @param {number} count - 가져올 뉴스 개수
+ * @param {boolean} forceRefresh - 강제 새로고침 여부
  */
-export const getWorkoutNews = async (count = 5) => {
+export const getWorkoutNews = async (count = 5, forceRefresh = false) => {
   try {
     console.log('네이버 뉴스 검색 시작... (', count, '개)');
     
-    // 백엔드에서 운동 뉴스 가져오기
-    const data = await fetchFitnessNews(count);
+    // 새로고침 시에는 랜덤한 검색어 사용
+    const searchTerm = forceRefresh ? null : '스포츠 피트니스';
+    const data = await fetchFitnessNews(count, searchTerm);
     
     if (data && data.items && data.items.length > 0) {
-      console.log('실제 뉴스 데이터 로드 완료:', data.items.length, '개');
+      console.log('실제 뉴스 데이터 로드 완료:', data.items.length, '개, 검색어:', data.searchTerm);
+      
+      // 건강/운동 관련 뉴스만 필터링
+      const filteredItems = filterHealthRelatedNews(data.items);
       
       // Unsplash의 운동 관련 고품질 이미지 (무료, API 키 불필요)
       const workoutImages = [
@@ -111,20 +126,32 @@ export const getWorkoutNews = async (count = 5) => {
         'https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=700&h=400&fit=crop', // 스포츠
       ];
       
-      // 네이버 API 응답 형식을 우리 형식으로 변환
-      const processedNews = data.items.map((item, index) => {
+      // 네이버 API 응답 형식을 우리 형식으로 변환 (썸네일 개선)
+      const processedNews = await Promise.all(filteredItems.map(async (item, index) => {
+        // 기사 제목으로 네이버 이미지 검색 시도
+        let thumbnail = workoutImages[index % workoutImages.length]; // 기본값
+        try {
+          const imageUrl = await fetchNewsImage(item.title.replace(/<[^>]*>/g, ''));
+          if (imageUrl) {
+            thumbnail = imageUrl;
+          }
+        } catch (error) {
+          console.log('이미지 검색 실패, 기본 이미지 사용:', error);
+        }
+        
         return {
-          id: `news_${index}`,
+          id: `news_${Date.now()}_${index}`, // 고유 ID 생성
           title: item.title.replace(/<[^>]*>/g, ''), // HTML 태그 제거
           description: item.description.replace(/<[^>]*>/g, ''),
           summary: item.description.replace(/<[^>]*>/g, '').substring(0, 80) + '...',
           link: item.link,
           originallink: item.originallink,
           pubDate: item.pubDate,
-          category: '운동 뉴스',
+          category: getCategoryFromSearchTerm(data.searchTerm),
           time: formatNewsTime(item.pubDate),
-          // 썸네일 이미지 - Unsplash의 실제 운동 사진
-          thumbnail: workoutImages[index % workoutImages.length],
+          // 개선된 썸네일 (네이버 이미지 검색 또는 Unsplash fallback)
+          thumbnail: thumbnail,
+          source: item.originallink ? new URL(item.originallink).hostname : null,
           details: [
             "최신 운동 관련 뉴스입니다.",
             "전문가들의 의견과 연구 결과를 확인하세요.",
@@ -132,8 +159,9 @@ export const getWorkoutNews = async (count = 5) => {
           ],
           tips: "최신 운동 트렌드와 건강 정보를 확인하여 더 나은 운동 습관을 만드세요!"
         };
-      });
+      }));
       
+      console.log('필터링 완료:', processedNews.length, '개');
       return processedNews.slice(0, count);
     } else {
       console.log('뉴스 데이터가 없어 더미 데이터를 사용합니다.');
@@ -152,19 +180,24 @@ export const getWorkoutNews = async (count = 5) => {
  */
 const getCategoryFromSearchTerm = (searchTerm) => {
   const categoryMap = {
-    '운동': '운동일반',
-    '헬스': '헬스케어',
-    '피트니스': '피트니스',
-    '홈트레이닝': '홈트레이닝',
-    '요가': '요가/명상',
-    '필라테스': '필라테스',
-    '맨몸운동': '맨몸운동',
-    '다이어트': '다이어트',
-    '체중감량': '체중관리',
-    '근력운동': '근력운동'
+    '운동 건강': '운동 건강',
+    '헬스케어': '헬스케어',
+    '피트니스 건강': '피트니스',
+    '홈트레이닝 운동': '홈트레이닝',
+    '요가 명상': '요가/명상',
+    '필라테스 건강': '필라테스',
+    '맨몸운동 효과': '맨몸운동',
+    '다이어트 건강': '다이어트',
+    '체중감량 운동': '체중관리',
+    '근력운동 효과': '근력운동',
+    '운동 과학': '운동 과학',
+    '건강 관리': '건강 관리',
+    '웰빙 운동': '웰빙',
+    '운동 상식': '운동 상식',
+    '건강 뉴스': '건강 뉴스'
   };
   
-  return categoryMap[searchTerm] || '운동정보';
+  return categoryMap[searchTerm] || '운동 건강';
 };
 
 /**
@@ -226,6 +259,63 @@ const formatTimeAgo = (dateString) => {
 };
 
 /**
+ * 건강/운동과 관련 없는 뉴스 필터링 (완화된 버전)
+ */
+const filterHealthRelatedNews = (newsList) => {
+  // 완전히 제외할 키워드들 (강한 제외)
+  const strongExcludeKeywords = [
+    '창업', '투자', '주식', '금융',
+    '정치', '선거', '국회', '정부',
+    '부동산', '아파트', '임대',
+    '자동차', '운전', '교통',
+    '연예', '배우', '가수', '드라마'
+  ];
+  
+  // 약한 제외 키워드들 (제목에만 있으면 제외)
+  const weakExcludeKeywords = [
+    '기업', '경제', '기술', 'IT', '소프트웨어',
+    '축구', '야구', '농구', '프로야구', '구단'
+  ];
+  
+  return newsList.filter(news => {
+    const title = news.title.toLowerCase();
+    const description = (news.description || '').toLowerCase();
+    const text = title + ' ' + description;
+    
+    // 강한 제외 키워드가 있으면 제외
+    const hasStrongExclude = strongExcludeKeywords.some(keyword => 
+      text.includes(keyword.toLowerCase())
+    );
+    
+    // 제목에 약한 제외 키워드가 있으면 제외
+    const hasWeakExcludeInTitle = weakExcludeKeywords.some(keyword => 
+      title.includes(keyword.toLowerCase())
+    );
+    
+    // 제외 조건에 해당하면 필터링
+    if (hasStrongExclude || hasWeakExcludeInTitle) {
+      return false;
+    }
+    
+    // 운동/건강 관련 키워드가 하나라도 있으면 통과
+    const healthKeywords = [
+      '운동', '건강', '헬스', '피트니스', '다이어트',
+      '요가', '필라테스', '홈트레이닝', '맨몸운동',
+      '근력', '유산소', '스트레칭', '체중감량',
+      '영양', '식단', '비타민', '보충제',
+      '의학', '병원', '의료', '치료', '예방',
+      '웰빙', '라이프스타일', '맞춤', '케어'
+    ];
+    
+    const hasHealthKeyword = healthKeywords.some(keyword => 
+      text.includes(keyword.toLowerCase())
+    );
+    
+    return hasHealthKeyword;
+  });
+};
+
+/**
  * 중복 뉴스 제거
  */
 const removeDuplicateNews = (newsList) => {
@@ -246,7 +336,7 @@ const removeDuplicateNews = (newsList) => {
 const getDummyNewsData = (count) => {
   const dummyNews = [
     {
-      id: 'dummy_1',
+      id: `dummy_${Date.now()}_1`,
       title: '새로운 연구: 하루 30분 운동으로 심혈관 질환 위험 40% 감소',
       description: '최신 연구에 따르면 하루 30분의 규칙적인 운동이 심혈관 질환 위험을 크게 줄일 수 있다는 것이 밝혀졌습니다.',
       link: '#',
@@ -263,7 +353,7 @@ const getDummyNewsData = (count) => {
       tips: '하루 30분 운동을 위해 계단 이용하기, 점심시간 산책하기 등 작은 습관부터 시작해보세요.'
     },
     {
-      id: 'dummy_2',
+      id: `dummy_${Date.now()}_2`,
       title: '겨울철 실내 운동 효과적인 방법 - 홈트레이닝 트렌드',
       description: '추운 겨울, 실내에서도 효과적으로 운동할 수 있는 다양한 홈트레이닝 방법들을 소개합니다.',
       link: '#',
