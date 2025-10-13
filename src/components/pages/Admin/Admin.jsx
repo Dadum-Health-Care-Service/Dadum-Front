@@ -45,7 +45,7 @@ const Admin = ({ isMobile, isNotify, setIsNotify }) => {
     <div style={{ padding: 0 }}>
       <iframe
         title="dashboard-embed"
-        src="http://192.168.0.30:5601/app/r/s/ZwhPG"
+        src={`${import.meta.env.VITE_ELASTICSEARCH_URL}:5601/app/r/s/ZwhPG`}
         style={{
           width: "100%",
           height: "calc(100vh - 64px)",

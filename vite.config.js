@@ -85,6 +85,12 @@ export default defineConfig(({ mode }) => {
           secure: false,
           ws: true,
         },
+        "/security": {
+          target: env.SECURITY_URL + ":8010/main",
+          changeOrigin: true,
+          secure: false,
+          rewrite: (path) => path.replace(/^\/security/, ""), // /security -> /main
+        },
         "/ml": {
           target: "http://127.0.0.1:8000",
           changeOrigin: true,

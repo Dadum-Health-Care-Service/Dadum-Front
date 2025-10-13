@@ -1,12 +1,15 @@
 import axios from "axios";
 
 const main = "http://localhost:8080/api/v1";
+//const main = "/security"; //보안서버 경유용
 const ai = "http://localhost:8000";
+const security = "/security";
 const passwordless = "/passwordless";
 const host = {
   main: main,
   ai: ai,
   passwordless: passwordless,
+  security: security,
 };
 
 const createAuthHeaders = (accessToken, isAuth) => {
