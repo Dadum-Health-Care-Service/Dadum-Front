@@ -106,7 +106,7 @@ const Admin = ({ isMobile, isNotify, setIsNotify }) => {
                 notifyIndex={1}
               >
                 {[
-                  <Users type="user" />,
+                  <Users type="user" isNotify={isNotify} />,
                   <Users type="roleRequest" isNotify={isNotify} />,
                 ]}
               </ToggleComponent>
