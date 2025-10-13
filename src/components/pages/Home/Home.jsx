@@ -6,7 +6,7 @@ import { FaPlay, FaClock, FaStar, FaFire } from "react-icons/fa";
 import styles from "./Home.module.css";
 import CardComponent from "../../common/CardComponent";
 import ButtonComponent from "../../common/ButtonComponent";
-import { POST } from "../../../utils/api/api";
+import { useApi } from "../../../utils/api/useApi";
 const Home = () => {
   const navigate = useNavigate();
   const [userStats, setUserStats] = useState({
@@ -16,6 +16,7 @@ const Home = () => {
   });
   const [userRoutines, setUserRoutines] = useState([]);
   const [loading, setLoading] = useState(false);
+  const { GET } = useApi();
 
   const fetchUserData = useCallback(async () => {
     setLoading(true);

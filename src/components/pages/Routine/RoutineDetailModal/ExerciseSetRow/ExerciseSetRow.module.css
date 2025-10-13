@@ -1,0 +1,141 @@
+.set-row {
+  display: grid;
+  grid-template-columns: 0.4fr 1fr 1fr 1fr 0.4fr;
+  gap: 12px;
+  padding: 8px;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: center;
+  font-size: 14px;
+  color: #475569;
+}
+
+.set-row:last-child {
+  border-bottom: none;
+}
+
+.set-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #000000;
+}
+.set-number-id {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #000000;
+}
+
+.set-number-input {
+  width: 100%;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #3b82f6;
+  border: 2px solid transparent;
+  background: transparent;
+  padding: 6px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.set-number-input:focus {
+  border-color: #3b82f6;
+  background: #ffffff;
+  outline: none;
+}
+
+.set-number-input:hover {
+  border-color: #e2e8f0;
+  background: #ffffff;
+}
+
+.set-number-input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.set-number-input[type="number"]::-webkit-outer-spin-button,
+.set-number-input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.set-reps {
+  font-weight: 500;
+}
+
+.set-weight {
+  font-weight: 500;
+}
+
+.set-rest {
+  font-weight: 500;
+  color: #64748b;
+}
+
+/* 세트 input 필드 스타일 */
+.set-input {
+  width: 100%;
+  text-align: center;
+  font-size: 14px;
+  color: #475569;
+  border: 2px solid transparent;
+  background: transparent;
+  padding: 6px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.set-input:focus {
+  border-color: #3b82f6;
+  background: #ffffff;
+  outline: none;
+}
+
+.set-input:hover {
+  border-color: #e2e8f0;
+  background: #ffffff;
+}
+
+.set-input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.set-input[type="number"]::-webkit-outer-spin-button,
+.set-input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.set-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  padding: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #ff0000;
+}
+
+.set-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  padding: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #3b82f6;
+}
+@media (max-width: 768px) {
+  .set-row {
+    gap: 0px;
+  }
+}
