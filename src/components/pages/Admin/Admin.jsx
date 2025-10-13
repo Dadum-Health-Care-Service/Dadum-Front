@@ -137,10 +137,27 @@ const Admin = ({ isMobile, isNotify, setIsNotify }) => {
         return (
           <>
             <SectionHeader
-              title="통계 및 리포트"
-              description="서비스 데이터를 분석합니다"
+              title="실시간 페이지 통계"
+              description="실시간 페이지 내 트래픽, 조회수, 사용자 통계등을 조회합니다"
             />
-            <Placeholder label="통계 및 리포트" />
+            <ContainerComponent
+              variant="filled"
+              shadow="none"
+              borderRadius="none"
+              className={styles.section}
+            >
+              <iframe
+                title="reports-embed"
+                src='https://lookerstudio.google.com/embed/reporting/a58d20f5-fc94-4b00-90e6-42f77385bdd9/page/kIV1C?params=%7B"dp56":"a310653790w507274485","df1":"include%25EE%2580%25800%25EE%2580%2580IN%25EE%2580%2580THIS_MONTH"%7D'
+                style={{
+                  width: "100%",
+                  height: "calc(100vh - 64px)",
+                  border: "none",
+                  background: "#ffffff",
+                }}
+              />
+            </ContainerComponent>
+            <Placeholder label="실시간 페이지 통계" />
           </>
         );
       case "settings":
@@ -230,7 +247,7 @@ const Admin = ({ isMobile, isNotify, setIsNotify }) => {
         <SidebarLink id="users" label="사용자 관리" emoji="👥" />
         <SidebarLink id="contents" label="콘텐츠 관리" emoji="🗂️" />
         <SidebarLink id="orders" label="주문/거래 관리" emoji="🧾" />
-        <SidebarLink id="reports" label="통계 및 리포트" emoji="📈" />
+        <SidebarLink id="reports" label="실시간 페이지 통계" emoji="📈" />
         <SidebarLink id="settings" label="시스템 설정" emoji="⚙️" />
         <SidebarLink id="support" label="고객 지원 관리" emoji="💬" />
         <SidebarLink id="security" label="보안 관리" emoji="🔐" />
