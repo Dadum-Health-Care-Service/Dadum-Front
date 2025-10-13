@@ -150,7 +150,6 @@ function Login() {
       await POST(
         "/users/auth/passwordless/register",
         { passwordlessToken: pushConnectorToken },
-        user.accessToken,
         true
       ).then(async (res) => {
         console.log(res.data);
