@@ -211,7 +211,7 @@ const Home = () => {
 
       {/* News Section */}
       <div className={styles.newsSection}>
-        <FitnessNewsFeed perTabCount={2} />
+        <FitnessNewsFeed />
       </div>
     </ContainerComponent>
   );

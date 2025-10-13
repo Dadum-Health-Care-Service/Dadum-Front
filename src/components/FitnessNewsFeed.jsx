@@ -1,39 +1,36 @@
-import React, { useEffect, useState } from 'react';
-import { getWorkoutNews } from '../services/newsApi';
+import React, { useEffect, useState } from "react";
+import { getWorkoutNews } from "../services/newsApi";
 
-const TABS = [
-  { key: 'fitness', label: '피트니스' },
-  { key: 'yoga', label: '요가/필라테스' },
-  { key: 'hometraining', label: '홈트레이닝' },
-  { key: 'weight', label: '웨이트' },
-  { key: 'diet', label: '다이어트' }
-];
-
-const TAB_SEARCH_TERMS = {
-  fitness: '스포츠 피트니스',
-  yoga: '요가 필라테스',
-  hometraining: '홈트레이닝 운동',
-  weight: '웨이트 트레이닝',
-  diet: '다이어트 운동'
-};
-
-const FitnessNewsFeed = ({ perTabCount = 2 }) => {
-  const [active, setActive] = useState('fitness');
+export default function FitnessNewsFeed() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState("");
+
+  // 화면 크기에 따른 뉴스 개수 결정
+  const getNewsCount = () => {
+    const width = window.innerWidth;
+    console.log("[FitnessNewsFeed] 현재 화면 너비:", width);
+    if (width < 768) {
+      console.log("[FitnessNewsFeed] 모바일 감지 - 1개 요청");
+      return 1; // 모바일: 1개
+    } else {
+      console.log("[FitnessNewsFeed] PC 감지 - 2개 요청");
+      return 2; // PC: 2개
+    }
+  };
 
   const load = async () => {
     setLoading(true);
-    setError(null);
-    
+    setError("");
     try {
-      const searchTerm = TAB_SEARCH_TERMS[active];
-      const news = await getWorkoutNews(perTabCount, true); // forceRefresh = true
-      setItems(news);
-    } catch (err) {
-      setError('뉴스를 불러오는데 실패했습니다.');
-      console.error('뉴스 로드 실패:', err);
+      // ✅ 화면 크기에 따른 뉴스 개수 결정
+      const newsCount = getNewsCount();
+      const news = await getWorkoutNews(newsCount, true);
+      console.log("[FitnessNewsFeed] 요청 개수:", newsCount, "받은 뉴스:", news?.length);
+      setItems(Array.isArray(news) ? news : []);
+    } catch (e) {
+      console.error(e);
+      setError("뉴스를 불러오지 못했습니다.");
     } finally {
       setLoading(false);
     }
@@ -41,41 +38,52 @@ const FitnessNewsFeed = ({ perTabCount = 2 }) => {
 
   useEffect(() => {
     load();
-  }, [active, perTabCount]);
+  }, []);
+
+  // 화면 크기 변경 시 뉴스 개수 업데이트 (디바운싱 적용)
+  useEffect(() => {
+    let timeoutId;
+    const handleResize = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        console.log("[FitnessNewsFeed] 화면 크기 변경 감지 - 재로드");
+        load();
+      }, 500); // 500ms 디바운싱
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(timeoutId);
+    };
+  }, []);
 
   return (
-    <div className="w-full max-w-7xl mx-auto p-4">
-      {/* Header */}
-      <div className="flex items-center justify-center mb-4 relative">
-        <h2 className="text-2xl font-bold text-gray-900 text-center">뉴스</h2>
-        <button
-          onClick={load}
-          className="absolute right-0 p-2 rounded-full border bg-white hover:bg-gray-50 transition-colors"
-          title="새로고침"
-        >
-          🔄
-        </button>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex gap-2 mb-3 overflow-x-auto">
-        {TABS.map((tab) => (
+    <div className="w-full mx-auto p-4">
+      {/* 통합 건강 뉴스 */}
+      <div className="mx-auto w-full max-w-[720px]">
+        {/* Header with Refresh Button */}
+        <div className="flex items-center justify-center mb-4 relative">
+          <h2 className="text-2xl font-bold text-gray-900 text-center">뉴스</h2>
           <button
-            key={tab.key}
-            onClick={() => setActive(tab.key)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-              active === tab.key
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
+            onClick={load}
+            className="absolute right-0 flex items-center justify-center w-9 h-9 rounded-full text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition"
+            title="새로고침"
           >
-            {tab.label}
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
+            </svg>
           </button>
-        ))}
+        </div>
       </div>
 
-      {/* Content */}
-      <div className="mt-4">
+      {/* 카드 그리드: 탭과 동일 폭 컨테이너 */}
+      <div className="mx-auto w-full max-w-[720px]">
         {loading && (
           <div className="flex items-center gap-3 p-6 rounded-2xl border">
             <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
@@ -100,21 +108,24 @@ const FitnessNewsFeed = ({ perTabCount = 2 }) => {
                 className="group block rounded-2xl overflow-hidden border hover:shadow-md transition-all duration-200 bg-white"
               >
                 <div className="aspect-[16/9] bg-gray-100 overflow-hidden">
+                  {/* eslint-disable-next-line jsx-a11y/alt-text */}
                   <img
                     src={n.thumbnail}
                     alt={n.title}
                     className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-200"
                     loading="lazy"
                     onError={(e) => {
-                      e.target.src = 'https://via.placeholder.com/400x225/4CAF50/ffffff?text=피트니스+뉴스';
+                      e.currentTarget.src =
+                        "https://via.placeholder.com/400x225/4CAF50/ffffff?text=피트니스+뉴스";
                     }}
                   />
                 </div>
-                <div className="p-4">
-                  <div className="text-xs text-gray-500 mb-1 flex items-center gap-2">
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
-                      {TABS.find((t) => t.key === active)?.label || "피트니스"}
-                    </span>
+                  <div className="p-4">
+                    {/* ✅ 카테고리 표시는 각 뉴스의 실제 카테고리 사용 */}
+                    <div className="text-xs text-gray-500 mb-1 flex items-center gap-2">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
+                        {n.category || "건강 뉴스"}
+                      </span>
                     <span>•</span>
                     <span>{n.time}</span>
                     {n.source && (
@@ -129,9 +140,7 @@ const FitnessNewsFeed = ({ perTabCount = 2 }) => {
                   <h3 className="text-base font-semibold leading-snug line-clamp-2 group-hover:text-blue-600 transition-colors">
                     {n.title}
                   </h3>
-                  {n.summary && (
-                    <p className="mt-2 text-sm text-gray-600 line-clamp-2">{n.summary}</p>
-                  )}
+                  {n.summary && <p className="mt-2 text-sm text-gray-600 line-clamp-2">{n.summary}</p>}
                 </div>
               </a>
             ))}
@@ -139,14 +148,9 @@ const FitnessNewsFeed = ({ perTabCount = 2 }) => {
         )}
 
         {!loading && !error && items.length === 0 && (
-          <div className="p-6 rounded-2xl border text-gray-600 text-center">
-            표시할 뉴스가 없습니다.
-          </div>
+          <div className="p-6 rounded-2xl border text-gray-600 text-center">표시할 뉴스가 없습니다.</div>
         )}
       </div>
-
     </div>
   );
-};
-
-export default FitnessNewsFeed;
+}
