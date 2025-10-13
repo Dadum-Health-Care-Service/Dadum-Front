@@ -48,7 +48,6 @@ import { ModalProvider } from "./context/ModalContext.jsx";
 import { handleAllowNotification } from "./utils/webpush/notificationPermission";
 import GoogleTagManager from "./utils/tagmanager/GoogleTagManager.jsx";
 import usePageView from "./utils/tagmanager/PageView.jsx";
-import "./utils/webpush/foregroundMessage";
 
 function AppContent() {
   const { user } = useContext(AuthContext);
@@ -94,7 +93,16 @@ function AppContent() {
 
   useEffect(() => {
     // Service Worker 등록 및 알림 권한 요청
-    if (user) {
+    if (
+      user &&
+      "serviceWorker" in navigator &&
+      "Notification" in window &&
+      window.isSecureContext
+    ) {
+      // 동적 import로 변경
+      import("./utils/webpush/foregroundMessage").catch((err) => {
+        console.warn("Firebase messaging not supported:", err);
+      });
       //console.log("handleAllowNotification");
       handleAllowNotification(user.accessToken);
     }
@@ -172,7 +180,6 @@ function AppContent() {
           </Routes>
         </div>
       </main>
-      <GoogleTagManager gtmId="GTM-ND9XH56H" />
     </>
   );
 }
@@ -180,6 +187,7 @@ function AppContent() {
 function App() {
   return (
     <Router>
+      <GoogleTagManager gtmId="GTM-ND9XH56H" />
       <AuthProvider>
         <ModalProvider>
           <RunProvider>

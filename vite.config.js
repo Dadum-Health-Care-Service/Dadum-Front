@@ -66,6 +66,7 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 3000, // 개발 서버 포트 설정 (기본값: 5173)
       open: true, // 개발 서버 실행 시 자동으로 브라우저 열기
+      host: "0.0.0.0",
       allowedHosts: "all",
       proxy: {
         "/api": {
