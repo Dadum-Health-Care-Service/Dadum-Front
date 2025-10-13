@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Carousel, Badge, Spinner } from 'react-bootstrap';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import NewsDetailModal from './NewsDetailModal';
-import { getWorkoutNews } from '../../services/newsApi';
+import { getWorkoutNews } from '../../../services/newsApi';
 import './NewsScroll.css';
 
 const NewsScroll = () => {
@@ -317,3 +317,4 @@ const NewsScroll = () => {
 };
 
 export default NewsScroll;
+

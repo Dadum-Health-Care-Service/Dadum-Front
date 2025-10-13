@@ -6,7 +6,7 @@ import { FaPlay, FaClock, FaStar, FaFire } from "react-icons/fa";
 import styles from "./Home.module.css";
 import CardComponent from "../../common/CardComponent";
 import ButtonComponent from "../../common/ButtonComponent";
-import FitnessNewsFeed from "../../FitnessNewsFeed";
+import FitnessNewsFeed from "../News/FitnessNewsFeed";
 import { POST } from "../../../utils/api/api";
 const Home = () => {
   const navigate = useNavigate();

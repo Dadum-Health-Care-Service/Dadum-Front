@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getWorkoutNews } from "../services/newsApi";
+import { getWorkoutNews } from "../../../services/newsApi";
 
 export default function FitnessNewsFeed() {
   const [items, setItems] = useState([]);
@@ -154,3 +154,4 @@ export default function FitnessNewsFeed() {
     </div>
   );
 }
+
