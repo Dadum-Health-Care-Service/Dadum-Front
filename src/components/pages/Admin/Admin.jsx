@@ -7,6 +7,7 @@ import TextareaComponent from "../../common/TextareaComponent";
 import ContainerComponent from "../../common/ContainerComponent";
 import styles from "./Admin.module.css";
 import Users from "./Section/Users/Users";
+import Security from "./Section/Security/Security";
 import ToggleComponent from "../../common/ToggleComponent";
 
 // 메인 Admin 컴포넌트
@@ -187,7 +188,14 @@ const Admin = ({ isMobile, isNotify, setIsNotify }) => {
               title="보안 관리"
               description="접근 제어와 로그를 확인합니다"
             />
-            <Placeholder label="보안 관리" />
+            <ContainerComponent
+              variant="filled"
+              shadow="none"
+              borderRadius="none"
+              className={styles.section}
+            >
+              <Security />
+            </ContainerComponent>
           </>
         );
 
