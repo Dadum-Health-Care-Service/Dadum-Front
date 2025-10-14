@@ -136,7 +136,7 @@ export default function RoutineDetailModal({
         return updatedData;
       });
     }
-  }, []);
+  }, [workoutExercises]);
 
   // 다음 세트 설정
   const setNextSet = () => {
@@ -332,7 +332,6 @@ export default function RoutineDetailModal({
 
     // 운동 세트들 렌더링
     const renderExerciseSets = () => {
-      console.log(runningSet);
       return (
         <div className={styles["exercise-sets"]}>
           {renderSetsHeader()}

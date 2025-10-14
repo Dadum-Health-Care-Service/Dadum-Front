@@ -95,18 +95,16 @@ export default function Users({ type = "user", isNotify = null }) {
   };
 
   useEffect(() => {
+    console.log(type);
     if (type === "user") {
       fetchRoleList();
     } else {
       fetchRoleRequest();
     }
   }, [type]);
-  useEffect(() => {
-    fetchRoleRequest();
-  }, [isNotify]);
 
   useEffect(() => {
-    if (type === "roleRequest") {
+    if (type === "roleRequest" && isNotify) {
       fetchRoleRequest();
     }
   }, [isNotify]);
