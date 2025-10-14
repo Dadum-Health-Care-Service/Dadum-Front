@@ -91,6 +91,27 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: false,
           rewrite: (path) => path.replace(/^\/security/, ""), // /security -> /main
+          configure: (proxy, options) => {
+            proxy.on("proxyReq", (proxyReq, req, res) => {
+              // 원본 클라이언트 IP 추출
+              const clientIp =
+                req.headers["x-forwarded-for"] ||
+                req.headers["x-real-ip"] ||
+                req.socket.remoteAddress ||
+                req.connection.remoteAddress;
+
+              console.log(`[Vite Proxy] Original Client IP: ${clientIp}`);
+
+              // 보안서버로 전달할 때 원본 IP를 헤더에 포함
+              if (clientIp) {
+                proxyReq.setHeader("X-Real-IP", clientIp);
+                proxyReq.setHeader("X-Forwarded-For", clientIp);
+              }
+
+              // 프로토콜은 http로 고정 (또는 조건에 따라 설정)
+              proxyReq.setHeader("X-Forwarded-Proto", "http");
+            });
+          },
         },
         "/ml": {
           target: "http://127.0.0.1:8000",

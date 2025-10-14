@@ -707,7 +707,7 @@ export default function RoutineDetailModal({
       <ModalComponent
         isOpen={isCompleteModalOpen}
         onClose={closeCompleteModal}
-        title="권한 변경 완료"
+        title="루틴 변경 완료"
         size="small"
         footer={completeModalFooter()}
       >
