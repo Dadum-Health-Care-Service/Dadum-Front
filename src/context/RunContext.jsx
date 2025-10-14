@@ -11,7 +11,6 @@ const initialState = {
   isRunning: false,
   setId: null,
   startTime: null,
-  endTime: null,
 };
 
 function runReducer(state, action) {
@@ -26,12 +25,13 @@ function runReducer(state, action) {
         startTime: start,
       };
     case "COMPLETE":
-      const end = Date.now();
-      return { ...state, setId: action.setId, isRunning: false, endTime: end };
+      return { ...state, setId: action.setId, isRunning: false };
     case "PAUSE":
       return { ...state, isPaused: true };
     case "RESUME":
       return { ...state, isPaused: false };
+    case "RESET":
+      return { ...state, isRunning: false, startTime: null };
     default:
       return state;
   }
@@ -67,7 +67,7 @@ export function RunProvider({ children }) {
 
   const useStop = () => {
     setSeconds(0);
-    dispatch({ type: "COMPLETE" });
+    dispatch({ type: "RESET" });
   };
 
   const usePause = () => {
@@ -78,7 +78,7 @@ export function RunProvider({ children }) {
   };
   const useComplete = () => {
     setSeconds(0);
-    dispatch({ type: "COMPLETE" });
+    dispatch({ type: "COMPLETE", setId: state.setId });
   };
 
   // seconds 제외한 value
@@ -92,16 +92,9 @@ export function RunProvider({ children }) {
       isRunning: state.isRunning,
       isPaused: state.isPaused,
       setId: state.setId,
-      endTime: state.endTime,
       startTime: state.startTime,
     }),
-    [
-      state.isRunning,
-      state.setId,
-      state.isPaused,
-      state.endTime,
-      state.startTime,
-    ]
+    [state.isRunning, state.setId, state.isPaused, state.startTime]
   );
 
   return (

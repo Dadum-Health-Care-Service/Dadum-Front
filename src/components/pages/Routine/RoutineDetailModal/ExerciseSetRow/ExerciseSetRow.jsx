@@ -48,7 +48,10 @@ const ExerciseSetRow = ({
   return (
     <div className={styles["set-row"]} key={set.srsId}>
       <div className={styles["set-number-id"]}>
-        {runningSet?.srsId === set.srsId && !isRest && !isPaused ? (
+        {isRunning &&
+        runningSet?.srsId === set.srsId &&
+        !isRest &&
+        !isPaused ? (
           <img
             src={"/img/RunningRoutine.gif"}
             style={{ width: "30px", height: "30px" }}
