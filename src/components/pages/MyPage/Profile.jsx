@@ -270,7 +270,6 @@ export default function Profile() {
       }
     }
   };
-
   return (
     <>
       {
@@ -287,7 +286,10 @@ export default function Profile() {
                     className="rounded-circle mt-5 mb-3"
                     width="150px"
                     style={{
-                      filter: `invert(42%) sepia(92%) saturate(2385%) hue-rotate(199deg)
+                      filter:
+                        profile.profileImg !== "/img/userAvatar.png"
+                          ? "none"
+                          : `invert(42%) sepia(92%) saturate(2385%) hue-rotate(199deg)
                                     brightness(95%) contrast(97%)`,
                     }}
                     src={profile.profileImg || "/img/userAvatar.png"}
