@@ -42,7 +42,7 @@ export default function Security() {
       return;
     }
 
-    ws = new WebSocket("ws://172.24.137.184:8000/ws");
+    ws = new WebSocket(import.meta.env.VITE_WEBSOCKET_URL + ":8000/ws");
 
     ws.onopen = function (event) {
       console.log("WebSocket 연결됨");
