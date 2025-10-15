@@ -14,7 +14,21 @@ const DEV_CONFIG = {
     API_SECRET: 'hRILlnbJnma5kNc1GFc6EBzCiL89Dch8vNV23hXw3274QoXAE7ft2B8cdgQtRM99PZiL2TVSZxFQTb3M', // ✅ V2 API Secret
     IS_TEST_MODE: true,
     PAYMENT_METHODS: ['card'],
-    CURRENCY: 'KRW'
+    CURRENCY: 'KRW',
+    // 리디렉션 URL 추가 (모바일 환경 대응)
+    REDIRECT_URL: typeof window !== 'undefined' ? window.location.origin + '/payment/complete' : '',
+    // 모바일 환경 설정
+    MOBILE_REDIRECT_URL: typeof window !== 'undefined' ? window.location.origin + '/payment/mobile-complete' : '',
+    // 모바일 환경에서의 추가 설정
+    MOBILE_SETTINGS: {
+      app_scheme: 'dadumapp://payment',
+      escrow: false,
+      digital: false,
+      bypass: {
+        nice: ['card'],
+        kcp: ['card']
+      }
+    }
   };
   
   /*

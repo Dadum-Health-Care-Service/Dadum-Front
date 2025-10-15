@@ -2623,10 +2623,109 @@ const instructionsKor = [
   "상체를 똑바로 세우고 양손에 덤벨을 하나씩 들고 팔을 쭉 뻗은 상태로 서세요. 팔꿈치는 몸통에 가깝게 위치해야 합니다. 손바닥이 서로 마주 보도록 하세요. 이것이 시작 자세입니다. 상완은 고정한 채, 숨을 내쉬면서 이두근을 수축하면서 덤벨을 들어 올리세요. 팔뚝만 움직여야 합니다. 손목을 돌려 손바닥이 위를 향하게 하세요. 이두근이 완전히 수축되고 덤벨이 어깨 높이에 올 때까지 동작을 계속하세요. 이두근을 조이면서 수축 자세를 1초간 유지하세요. 수축 자세에서 손목을 돌려 손바닥이 아래를 향하게 하고 엄지손가락이 새끼손가락보다 높은 위치에 오도록 하세요. 천천히 회내 그립을 사용하여 덤벨을 다시 내리세요. 덤벨이 허벅지에 가까워지면 손목을 돌려 손바닥이 몸을 향하게 하는 중립 그립으로 돌아가세요. 반복하세요. 권장되는 반복 횟수입니다.",
   "양손에 덤벨을 하나씩 잡고 상완을 프리처 벤치나 인클라인 벤치 위에 올려놓으세요. 덤벨은 어깨 높이에 들고 팔꿈치는 굽혀야 합니다. 손바닥이 아래로 향하도록 덤벨을 잡으세요. 이것이 시작 자세입니다. 숨을 들이마시면서 손바닥이 아래로 향하도록 덤벨을 천천히 내리세요. 상완이 쭉 펴지고 이두근이 완전히 스트레칭될 때까지요. 이제 동작의 마지막 지점에 도달하면 손목을 돌려 손바닥이 위를 향하도록 하세요. 숨을 내쉬면서 이두근을 사용하여 덤벨이 완전히 수축되고 덤벨이 어깨 높이에 오도록 위로 들어 올리세요. 다시 한번 강조하지만, 완전한 수축을 위해서는 새끼손가락을 엄지손가락보다 높게 올려야 한다는 점을 기억하세요. 수축된 자세에서 이두근을 1초 동안 강하게 조인 후 손목을 돌려 손바닥이 다시 아래를 향하도록 하세요. 권장 횟수만큼 반복하세요.",
 ];
+export const categoryEng = [
+  "strength",
+  "stretching",
+  "plyometrics",
+  "strongman",
+  "powerlifting",
+  "cardio",
+  "olympic weightlifting",
+];
+export const categoryKor = [
+  "근력",
+  "스트레칭",
+  "플라이오메트릭스",
+  "스트롱맨",
+  "파워리프팅",
+  "유산소",
+  "올림픽 웨이트리프팅",
+];
+export const equipmentEng = [
+  "body only",
+  "machine",
+  "other",
+  "foam roll",
+  "dumbbell",
+  "barbell",
+  "cable",
+  "medicine ball",
+  "bands",
+  "exercise ball",
+  "e-z curl bar",
+];
+export const equipmentKor = [
+  "맨몸운동",
+  "머신",
+  "기타",
+  "폼롤러",
+  "덤벨",
+  "바벨",
+  "케이블",
+  "메디슨 볼",
+  "밴드",
+  "짐 볼",
+  "e-z 컬 바",
+];
+export const levelEng = ["beginner", "intermediate", "advanced"];
+export const levelKor = ["초급", "중급", "고급"];
+export const primaryMuscleEng = [
+  "abdominals",
+  "hamstrings",
+  "adductors",
+  "quadriceps",
+  "biceps",
+  "shoulders",
+  "chest",
+  "middle back",
+  "calves",
+  "glutes",
+  "lower back",
+  "lats",
+  "triceps",
+  "traps",
+  "forearms",
+  "neck",
+  "abductors",
+];
+export const primaryMuscleKor = [
+  "복부",
+  "햄스트링",
+  "내전근",
+  "대퇴사두근",
+  "이두근",
+  "어깨",
+  "가슴",
+  "등",
+  "종아리",
+  "둔근",
+  "허리",
+  "광배근",
+  "삼두근",
+  "승모근",
+  "팔뚝",
+  "목",
+  "외전근",
+];
 
 export const engKorDict = Object.fromEntries(
   exercisesEng.map((eng, i) => [eng, exercisesKor[i]])
 );
+export const korEngDict = Object.fromEntries(
+  exercisesKor.map((kor, i) => [kor, exercisesEng[i]])
+);
 export const instructionKorDict = Object.fromEntries(
   exercisesEng.map((eng, i) => [eng, instructionsKor[i]])
+);
+export const categoryKorDict = Object.fromEntries(
+  categoryEng.map((eng, i) => [eng, categoryKor[i]])
+);
+export const equipmentKorDict = Object.fromEntries(
+  equipmentEng.map((eng, i) => [eng, equipmentKor[i]])
+);
+export const levelKorDict = Object.fromEntries(
+  levelEng.map((eng, i) => [eng, levelKor[i]])
+);
+export const primaryMuscleKorDict = Object.fromEntries(
+  primaryMuscleEng.map((eng, i) => [eng, primaryMuscleKor[i]])
 );

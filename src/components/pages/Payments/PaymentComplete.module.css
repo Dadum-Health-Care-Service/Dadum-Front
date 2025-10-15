@@ -1,0 +1,162 @@
+/* 결제 완료 페이지 스타일 */
+.container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.content {
+  background: white;
+  border-radius: 16px;
+  padding: 40px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 500px;
+  width: 100%;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.loadingText {
+  color: #6b7280;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.successContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.successIcon {
+  font-size: 4rem;
+  margin-bottom: 10px;
+}
+
+.successTitle {
+  color: #10b981;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.successText {
+  color: #6b7280;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.paymentInfo {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+  text-align: left;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.paymentInfo p {
+  margin: 8px 0;
+  color: #374151;
+  font-size: 0.95rem;
+}
+
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.errorIcon {
+  font-size: 4rem;
+  margin-bottom: 10px;
+}
+
+.errorTitle {
+  color: #ef4444;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.errorText {
+  color: #6b7280;
+  font-size: 1.1rem;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.buttonGroup > * {
+  flex: 1;
+  min-width: 120px;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+  
+  .content {
+    padding: 30px 20px;
+  }
+  
+  .successTitle,
+  .errorTitle {
+    font-size: 1.5rem;
+  }
+  
+  .successIcon,
+  .errorIcon {
+    font-size: 3rem;
+  }
+  
+  .buttonGroup {
+    flex-direction: column;
+  }
+  
+  .buttonGroup > * {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .content {
+    padding: 20px 15px;
+  }
+  
+  .successTitle,
+  .errorTitle {
+    font-size: 1.3rem;
+  }
+  
+  .successIcon,
+  .errorIcon {
+    font-size: 2.5rem;
+  }
+  
+  .paymentInfo {
+    padding: 15px;
+  }
+}
