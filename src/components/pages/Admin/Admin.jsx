@@ -8,6 +8,12 @@ import ContainerComponent from "../../common/ContainerComponent";
 import styles from "./Admin.module.css";
 import Users from "./Section/Users/Users";
 import ToggleComponent from "../../common/ToggleComponent";
+import FraudDetection from "../Payments/FraudDetection";
+import FraudStatistics from "./components/FraudStatistics";
+import RealTimeMonitor from "./components/RealTimeMonitor";
+import SystemTest from "./components/SystemTest";
+import PerformanceMonitor from "./components/PerformanceMonitor";
+import TransactionManagement from "./TransactionManagement";
 
 // 모달 타입별 설정을 객체로 분리하여 관리
 const MODAL_CONFIGS = {
@@ -680,14 +686,14 @@ const Admin = ({ isMobile }) => {
             <Placeholder label="콘텐츠 관리" />
           </>
         );
-      case "orders":
+      case "transactions":
         return (
           <>
             <SectionHeader
-              title="주문/거래 관리"
-              description="주문 흐름과 상태를 모니터링합니다"
+              title="거래 관리"
+              description="AI 기반 이상거래 탐지 및 거래 관련 모든 기능을 관리합니다"
             />
-            <Placeholder label="주문/거래 관리" />
+            <TransactionManagement />
           </>
         );
       case "reports":
@@ -795,7 +801,7 @@ const Admin = ({ isMobile }) => {
         <SidebarLink id="dashboard" label="대시보드" emoji="📊" />
         <SidebarLink id="users" label="사용자 관리" emoji="👥" />
         <SidebarLink id="contents" label="콘텐츠 관리" emoji="🗂️" />
-        <SidebarLink id="orders" label="주문/거래 관리" emoji="🧾" />
+        <SidebarLink id="transactions" label="거래 관리" emoji="💳" />
         <SidebarLink id="reports" label="통계 및 리포트" emoji="📈" />
         <SidebarLink id="settings" label="시스템 설정" emoji="⚙️" />
         <SidebarLink id="support" label="고객 지원 관리" emoji="💬" />

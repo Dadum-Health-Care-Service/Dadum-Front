@@ -7,6 +7,9 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   return {
     plugins: [react()], // React 플러그인 적용
+    // define: {
+    //   global: 'globalThis',
+    // },
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "src"),
@@ -27,7 +30,7 @@ export default defineConfig(({ mode }) => {
           target: env.PASSWORDLESS_URL,
           changeOrigin: true,
           secure: false,
-          rewrite: (path) => path.replace(/^\/passwordless/, "/api/Login"), // /passwordless -> /api/Login
+          rewrite: (path) => path.replace(/^\/passwordless/, "/api/Login"),
         },
         "/passwordless-ws": {
           target: env.PASSWORDLESS_URL + ":15010",

@@ -32,6 +32,7 @@ import OrderPage from "./components/pages/Payments/Shop/OrderPage.jsx";
 import OrderHistory from "./components/pages/Payments/Shop/OrderHistory.jsx";
 import PaymentComplete from "./components/pages/Payments/PaymentComplete.jsx";
 import SalesAnalysis from "./components/pages/Payments/SalesAnalysis.jsx";
+import FraudDetection from "./components/pages/Payments/FraudDetection.jsx";
 import PoseAccuracyMVP from "./components/pages/Pose/PoseAccuracyMVP.jsx";
 import SellerMain from "./components/pages/Payments/Seller/SellerMain.jsx";
 
@@ -93,6 +94,7 @@ function AppContent() {
                 <Route path="/payment/complete" element={<PaymentComplete />}></Route>
                 <Route path="/payment/mobile-complete" element={<PaymentComplete />}></Route>
                 <Route path="/sales-analysis" element={<SalesAnalysis />}></Route>
+                <Route path="/fraud-detection" element={<FraudDetection />}></Route>
                 <Route
                   path="/statistics"
                   element={
