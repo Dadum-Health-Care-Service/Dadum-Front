@@ -44,7 +44,6 @@ export default function RoutineDetailModal({
     isPaused,
     useResume,
     useComplete,
-    endTime,
     startTime,
   } = useContext(RunContext);
   const [runningSet, setRunningSet] = useState(null);
@@ -52,6 +51,8 @@ export default function RoutineDetailModal({
   const [doneSets, setDoneSets] = useState([]);
   const [doneExercises, setDoneExercises] = useState([]);
   const [doneRoutine, setDoneRoutine] = useState(false);
+  const [setIdx, setSetIdx] = useState(0);
+  const [exerciseIdx, setExerciseIdx] = useState(0);
   useEffect(() => {
     if (!isModalOpen || !routine) return;
     const INITIAL_WORKOUT_DATA = {
@@ -61,23 +62,25 @@ export default function RoutineDetailModal({
       totalTime: "50분",
       totalSets: "15세트",
       estimatedCalories: "400kcal",
-      exercises: routine?.saveRoutineDto.map((exercise) => {
-        return {
-          id: exercise.srId,
-          name: engKorDict[exercise.srName],
-          category: engKorDict[exercise.srName],
-          sets: exercise.set.map((set, i) => {
-            return {
-              id: i,
-              srsId: set.srsId,
-              reps: 0,
-              weight: set.weight,
-              many: set.many,
-              rest: set.rest,
-            };
-          }),
-        };
-      }),
+      exercises: routine?.saveRoutineDto
+        .map((exercise) => {
+          return {
+            id: exercise.srId,
+            name: engKorDict[exercise.srName],
+            category: engKorDict[exercise.srName],
+            sets: exercise.set.map((set, i) => {
+              return {
+                id: i,
+                srsId: set.srsId,
+                reps: 0,
+                weight: set.weight,
+                many: set.many,
+                rest: set.rest,
+              };
+            }),
+          };
+        })
+        .sort((a, b) => a.id - b.id),
     };
     setWorkoutExercises(
       INITIAL_WORKOUT_DATA.exercises.map(
@@ -86,6 +89,7 @@ export default function RoutineDetailModal({
     );
     setWorkoutData(INITIAL_WORKOUT_DATA);
     workoutDataRef.current = INITIAL_WORKOUT_DATA;
+    setDoneRoutine(false);
   }, [isModalOpen, routine]);
 
   useEffect(() => {
@@ -114,6 +118,7 @@ export default function RoutineDetailModal({
                 .map((exercise) => {
                   console.log(exercise);
                   return {
+                    id: Date.now() + Math.random(), // 임시 고유 ID
                     name: engKorDict[exercise],
                     category: engKorDict[exercise],
                     sets: [
@@ -133,42 +138,70 @@ export default function RoutineDetailModal({
         return updatedData;
       });
     }
-  }, []);
+  }, [workoutExercises]);
 
   // 다음 세트 설정
   const setNextSet = () => {
     setIsRest(false);
-    const currentExercise = workoutDataRef.current.exercises.find((exercise) =>
-      exercise.sets.includes(runningSet)
+    const currentExerciseIndex = workoutDataRef.current.exercises.findIndex(
+      (exercise) => exercise.sets.includes(runningSet)
     );
-    const isNextSet = currentExercise.sets.find(
-      (set) => set.id === runningSet.id + 1
+
+    if (currentExerciseIndex === -1) return;
+
+    const currentExercise =
+      workoutDataRef.current.exercises[currentExerciseIndex];
+    const currentSetIndex = currentExercise.sets.findIndex(
+      (set) => set === runningSet
     );
-    const nextExercise = workoutDataRef.current.exercises.find(
-      (exercise) => exercise.id === currentExercise.id + 1
-    );
-    if (isNextSet) {
+    const nextSet = currentExercise.sets[currentSetIndex + 1];
+    const nextExercise =
+      workoutDataRef.current.exercises[currentExerciseIndex + 1];
+
+    if (nextSet) {
+      // 같은 운동의 다음 세트
       setDoneSets([...doneSets, runningSet]);
-      setRunningSet(isNextSet);
-    } else {
+      setRunningSet(nextSet);
+      setSetIdx(currentSetIndex + 1);
+    } else if (nextExercise) {
+      // 다음 운동의 첫 번째 세트
       setDoneSets([...doneSets, runningSet]);
       setDoneExercises([...doneExercises, currentExercise]);
       setRunningSet(nextExercise.sets[0]);
-    }
-  };
-  const setNextExercise = () => {
-    const currentExercise = workoutDataRef.current.exercises.find((exercise) =>
-      exercise.sets.includes(runningSet)
-    );
-    const nextExercise = workoutDataRef.current.exercises.find(
-      (exercise) => exercise.id === currentExercise.id + 1
-    );
-    if (nextExercise) {
-      setRunningSet(nextExercise.sets[0]);
+      setSetIdx(0);
+      setExerciseIdx(currentExerciseIndex + 1);
     } else {
+      // 마지막 운동의 마지막 세트
+      setDoneSets([...doneSets, runningSet]);
       setDoneExercises([...doneExercises, currentExercise]);
       setRunningSet(null);
       setDoneRoutine(true);
+    }
+  };
+  const setNextExercise = () => {
+    const currentExerciseIndex = workoutDataRef.current.exercises.findIndex(
+      (exercise) => exercise.sets.includes(runningSet)
+    );
+
+    if (currentExerciseIndex === -1) return;
+
+    const currentExercise =
+      workoutDataRef.current.exercises[currentExerciseIndex];
+    const nextExercise =
+      workoutDataRef.current.exercises[currentExerciseIndex + 1];
+
+    if (nextExercise) {
+      setDoneExercises([...doneExercises, currentExercise]);
+      setRunningSet(nextExercise.sets[0]);
+      setSetIdx(0);
+      setExerciseIdx(currentExerciseIndex + 1);
+    } else {
+      // 마지막 운동
+      setDoneExercises([...doneExercises, currentExercise]);
+      setRunningSet(null);
+      setDoneRoutine(true);
+      setExerciseIdx(0);
+      setSetIdx(0);
     }
   };
   const setRest = (rest) => {
@@ -329,7 +362,6 @@ export default function RoutineDetailModal({
 
     // 운동 세트들 렌더링
     const renderExerciseSets = () => {
-      console.log(runningSet);
       return (
         <div className={styles["exercise-sets"]}>
           {renderSetsHeader()}
@@ -543,6 +575,7 @@ export default function RoutineDetailModal({
   };
 
   const handleDoneWorkout = async () => {
+    useComplete();
     const exercises = workoutDataRef.current.exercises;
 
     // 총 세트수
@@ -576,15 +609,16 @@ export default function RoutineDetailModal({
       0
     );
 
-    // 총 운동시간 (초 단위)
-    const totalTime = endTime - startTime; // 밀리초를 초로 변환하려면 / 1000
+    // 총 운동시간 (초 단위) - 현재 시간으로 직접 계산
+    const currentEndTime = Date.now();
+    const totalTime = currentEndTime - startTime; // 밀리초를 초로 변환하려면 / 1000
 
-    // 소모 칼로리 (대략적 계산: 볼륨 기반)
-    // 일반적으로 웨이트 트레이닝은 분당 3-6 kcal 소모
-    const estimatedKcal = Math.round((totalTime / 1000 / 60) * 4); // 분당 4kcal 가정
-
-    // 또는 볼륨 기반: 1kg 들어올림당 약 0.01 kcal
-    // const estimatedKcal = Math.round(totalVolume * 0.01);
+    // 소모 칼로리 (시간 + 볼륨 기반 계산)
+    // 시간 기반: 초당 약 0.067 kcal 소모 (분당 4kcal / 60초)
+    // 볼륨 기반: 1kg 들어올림당 약 0.01 kcal
+    const timeBasedKcal = (totalTime / 1000) * 0.067;
+    const volumeBasedKcal = totalVolume * 0.01;
+    const estimatedKcal = Math.round(timeBasedKcal + volumeBasedKcal);
 
     const formatToLocalDateTime = (timestamp) => {
       const date = new Date(timestamp);
@@ -617,7 +651,7 @@ export default function RoutineDetailModal({
         exVolum: totalVolume,
       },
       tStart: formatToLocalDateTime(startTime),
-      tEnd: formatToLocalDateTime(endTime),
+      tEnd: formatToLocalDateTime(currentEndTime),
     };
     await POST(
       `/routine/${workoutDataRef.current.setId}/result`,
@@ -626,7 +660,6 @@ export default function RoutineDetailModal({
       console.log(res.data);
       setWorkoutResult(completeWorkoutData);
       setIsResultModalOpen(true);
-      useComplete();
     });
   };
 

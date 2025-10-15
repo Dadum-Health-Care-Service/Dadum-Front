@@ -78,9 +78,10 @@ function AppContent() {
       //console.log("SW ready");
 
       const handleSWMessage = (event) => {
-        //console.log("SW 메시지 수신:", event.data);
-        if (event.data.type === "REQUEST_ROLE") {
-          setIsNotify(event.data.type);
+        console.log("SW 메시지 수신:", event.data);
+        if (event.data.data.type === "REQUEST_ROLE") {
+          console.log("REQUEST_ROLE");
+          setIsNotify(event.data.data.type);
         }
       };
 
@@ -101,7 +102,8 @@ function AppContent() {
   }, [user]);
   const noGNBpaths = ["/login", "/signup", "/findid", "/findpw"];
   const showGNB = user && !noGNBpaths.includes(location.pathname);
-  const pagePadding = isMobile && !noGNBpaths.includes(location.pathname) ? "90px" : "0px";
+  const pagePadding =
+    isMobile && !noGNBpaths.includes(location.pathname) ? "90px" : "0px";
 
   return (
     <>

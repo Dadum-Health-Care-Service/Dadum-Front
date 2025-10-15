@@ -48,7 +48,10 @@ const ExerciseSetRow = ({
   return (
     <div className={styles["set-row"]} key={set.srsId}>
       <div className={styles["set-number-id"]}>
-        {runningSet?.srsId === set.srsId && !isRest && !isPaused ? (
+        {isRunning &&
+        runningSet?.srsId === set.srsId &&
+        !isRest &&
+        !isPaused ? (
           <img
             src={"/img/RunningRoutine.gif"}
             style={{ width: "30px", height: "30px" }}
@@ -104,10 +107,10 @@ const ExerciseSetRow = ({
               : setNextSet()
             : deleteSet(set.id, exerciseId);
         }}
-        disabled={doneSets.includes(set)}
         style={{
           opacity: doneSets.includes(set) ? 0.5 : 1,
           cursor: doneSets.includes(set) ? "not-allowed" : "pointer",
+          pointerEvents: doneSets.includes(set) ? "none" : "auto",
         }}
       >
         {isRunning && setId !== set.setId ? (
