@@ -248,6 +248,15 @@
   cursor: not-allowed;
   pointer-events: none;
 }
+.header-menu-item-notify {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8px;
+  height: 8px;
+  background-color: #ff0000;
+  border-radius: 50%;
+}
 
 /* 반응형 디자인 */
 @media (max-width: 768px) {
@@ -299,6 +308,7 @@
   .header-menu-item {
     padding: 6px 12px;
     font-size: 13px;
+    position: relative;
   }
 }
 

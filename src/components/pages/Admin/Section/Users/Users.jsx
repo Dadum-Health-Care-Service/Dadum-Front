@@ -8,7 +8,7 @@ import styles from "./Users.module.css";
 import { useApi } from "../../../../../utils/api/useApi";
 import { useModal } from "../../../../../context/ModalContext";
 
-export default function Users({ type = "user" }) {
+export default function Users({ type = "user", isNotify = null }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [users, setUsers] = useState([]);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -66,34 +66,48 @@ export default function Users({ type = "user" }) {
   const closeConfirmModal = () => {
     setIsConfirmModalOpen(false);
   };
+  const fetchRoleRequest = () => {
+    GET("/users/role/request/list").then((res) => {
+      setUsers(res.data);
+    });
+  };
+
+  const fetchRoleList = async () => {
+    await GET("/users/role/list").then((res) => {
+      setUsers(
+        res.data.filter((user) => {
+          console.log(
+            user.roleAssignments.map(
+              (assignment) => assignment.rolesDto.roleName
+            )
+          );
+          console.log(
+            user.roleAssignments.some((assignment) =>
+              assignment.rolesDto.roleName.includes("SUPER_ADMIN")
+            )
+          );
+          return !user.roleAssignments.some((assignment) =>
+            assignment.rolesDto.roleName.includes("SUPER_ADMIN")
+          );
+        })
+      );
+    });
+  };
 
   useEffect(() => {
+    console.log(type);
     if (type === "user") {
-      GET("/users/role/list").then((res) => {
-        setUsers(
-          res.data.filter((user) => {
-            console.log(
-              user.roleAssignments.map(
-                (assignment) => assignment.rolesDto.roleName
-              )
-            );
-            console.log(
-              user.roleAssignments.some((assignment) =>
-                assignment.rolesDto.roleName.includes("SUPER_ADMIN")
-              )
-            );
-            return !user.roleAssignments.some((assignment) =>
-              assignment.rolesDto.roleName.includes("SUPER_ADMIN")
-            );
-          })
-        );
-      });
+      fetchRoleList();
     } else {
-      GET("/users/role/request/list").then((res) => {
-        setUsers(res.data);
-      });
+      fetchRoleRequest();
     }
   }, [type]);
+
+  useEffect(() => {
+    if (type === "roleRequest" && isNotify) {
+      fetchRoleRequest();
+    }
+  }, [isNotify]);
 
   const detailModalFooter = () => {
     return (

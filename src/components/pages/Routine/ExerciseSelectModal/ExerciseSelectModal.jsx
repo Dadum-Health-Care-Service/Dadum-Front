@@ -4,128 +4,30 @@ import InputComponent from "../../../common/InputComponent";
 import ButtonComponent from "../../../common/ButtonComponent";
 import ListComponent from "../../../common/ListComponent";
 import ModalComponent from "../../../common/ModalComponent";
-import { engKorDict, instructionKorDict } from "../../../data/translation";
+import TabDetailDropdown from "./TabDetailDropdown/TabDetailDropdown";
+import {
+  engKorDict,
+  instructionKorDict,
+  equipmentKorDict,
+  categoryKorDict,
+  levelKorDict,
+  primaryMuscleKorDict,
+  equipmentEng,
+  categoryEng,
+  levelEng,
+  primaryMuscleEng,
+  categoryKor,
+  equipmentKor,
+  levelKor,
+  primaryMuscleKor,
+} from "../../../data/translation";
 import { useApi } from "../../../../utils/api/useApi";
 
-// 탭별 세부 옵션 드롭다운 컴포넌트
-const TabDetailDropdown = ({
-  placeholder,
-  options,
-  value,
-  onChange,
-  size = "medium",
+const ModalFooter = ({
+  addedExercises,
+  setIsModalOpen,
+  setRoutineExercises,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedValue, setSelectedValue] = useState(value || "");
-
-  const handleOptionClick = (optionValue) => {
-    setSelectedValue(optionValue);
-    setIsOpen(false);
-    if (onChange) {
-      onChange({ target: { value: optionValue } });
-    }
-  };
-
-  const selectedLabel =
-    options.find((opt) => opt.value === selectedValue)?.label || placeholder;
-
-  const sizeStyles = {
-    small: { padding: "8px 12px", fontSize: "12px" },
-    medium: { padding: "10px 14px", fontSize: "14px" },
-    large: { padding: "12px 16px", fontSize: "16px" },
-  };
-
-  return (
-    <div style={{ position: "relative", width: "100%" }}>
-      <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        style={{
-          width: "100%",
-          ...sizeStyles[size],
-          border: "1px solid #d1d5db",
-          borderRadius: "6px",
-          backgroundColor: "#ffffff",
-          color: selectedValue ? "#374151" : "#9ca3af",
-          textAlign: "left",
-          cursor: "pointer",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          transition: "border-color 0.2s ease",
-        }}
-        onMouseEnter={(e) => {
-          e.target.style.borderColor = "#3b82f6";
-        }}
-        onMouseLeave={(e) => {
-          e.target.style.borderColor = "#d1d5db";
-        }}
-      >
-        <span>{selectedLabel}</span>
-        <span
-          style={{
-            transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-            transition: "transform 0.2s ease",
-          }}
-        >
-          ▼
-        </span>
-      </button>
-
-      {isOpen && (
-        <div
-          style={{
-            position: "absolute",
-            top: "100%",
-            left: 0,
-            right: 0,
-            backgroundColor: "#ffffff",
-            border: "1px solid #d1d5db",
-            borderRadius: "6px",
-            boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-            zIndex: 1000,
-            maxHeight: "200px",
-            overflowY: "auto",
-            marginTop: "2px",
-          }}
-        >
-          {options.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => handleOptionClick(option.value)}
-              style={{
-                width: "100%",
-                ...sizeStyles[size],
-                border: "none",
-                backgroundColor:
-                  selectedValue === option.value ? "#eff6ff" : "transparent",
-                color: selectedValue === option.value ? "#1d4ed8" : "#374151",
-                textAlign: "left",
-                cursor: "pointer",
-                transition: "background-color 0.2s ease",
-              }}
-              onMouseEnter={(e) => {
-                if (selectedValue !== option.value) {
-                  e.target.style.backgroundColor = "#f9fafb";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (selectedValue !== option.value) {
-                  e.target.style.backgroundColor = "transparent";
-                }
-              }}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
-const ModalFooter = ({ setIsModalOpen }) => {
   return (
     <div
       style={{
@@ -139,7 +41,8 @@ const ModalFooter = ({ setIsModalOpen }) => {
         variant="primary"
         onClick={(e) => {
           e.stopPropagation();
-          console.log("save");
+          setRoutineExercises(addedExercises);
+          setIsModalOpen(false);
         }}
       >
         저장
@@ -157,16 +60,21 @@ const ModalFooter = ({ setIsModalOpen }) => {
   );
 };
 
-export default function ExerciseSelectModal({ isModalOpen, setIsModalOpen }) {
+export default function ExerciseSelectModal({
+  isModalOpen,
+  setIsModalOpen,
+  routineExercises,
+  setRoutineExercises,
+  getExercises,
+}) {
   const { POST } = useApi();
   const [selectedExercise, setSelectedExercise] = useState(null);
   const [expandedExercise, setExpandedExercise] = useState(null);
   const [exercises, setExercises] = useState([]);
-  const [translatedExerciseInstructions, setTranslatedExerciseInstructions] =
-    useState([]);
   const [activeTab, setActiveTab] = useState("전체");
   const [selectedTabDetails, setSelectedTabDetails] = useState([]);
-
+  const [addedExercises, setAddedExercises] = useState([]);
+  const [search, setSearch] = useState("");
   useEffect(() => {
     fetch(
       "https://raw.githubusercontent.com/kimbongkum/ict4e/master/exercises.json"
@@ -176,6 +84,12 @@ export default function ExerciseSelectModal({ isModalOpen, setIsModalOpen }) {
         setExercises(data.exercises);
       });
   }, []);
+  useEffect(() => {
+    setAddedExercises(routineExercises);
+  }, [isModalOpen]);
+  useEffect(() => {
+    getExercises(exercises);
+  }, [exercises]);
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
@@ -189,21 +103,59 @@ export default function ExerciseSelectModal({ isModalOpen, setIsModalOpen }) {
   const handleToggleExercise = (exercise) => {
     setExpandedExercise(expandedExercise === exercise ? null : exercise);
   };
+
+  const handleAddExercise = (exercise) => {
+    setAddedExercises(addedExercises.concat(exercise));
+  };
+  const handleRemoveExercise = (i) => {
+    setAddedExercises(addedExercises.filter((e, index) => index !== i));
+  };
+
   const handleTabDetailDropdownChange = (value) => {
-    setSelectedTabDetails((prev) => [...prev, value.target.value]);
+    console.log(value);
+    if (selectedTabDetails.includes(value.target.value)) return;
+    switch (activeTab) {
+      case "운동 카테고리":
+        console.log("운동 카테고리");
+        setSelectedTabDetails(
+          selectedTabDetails
+            .filter((detail) => {
+              return !categoryKor.includes(detail);
+            })
+            .concat(value.target.value)
+        );
+        break;
+      case "운동 장비":
+        setSelectedTabDetails(
+          selectedTabDetails
+            .filter((detail) => {
+              return !equipmentKor.includes(detail);
+            })
+            .concat(value.target.value)
+        );
+        break;
+      case "운동 주요 근육":
+        setSelectedTabDetails(
+          selectedTabDetails
+            .filter((detail) => {
+              return !primaryMuscleKor.includes(detail);
+            })
+            .concat(value.target.value)
+        );
+        break;
+      case "운동 난이도":
+        setSelectedTabDetails(
+          selectedTabDetails
+            .filter((detail) => {
+              return !levelKor.includes(detail);
+            })
+            .concat(value.target.value)
+        );
+        break;
+    }
   };
 
   const renderModalContent = () => {
-    const translateExerciseInstructions = async (instructions) => {
-      const res = await POST(
-        "/suggest/translate",
-        { instructions: instructions },
-        false,
-        "ai"
-      ).then((res) => {
-        setTranslatedExerciseInstructions(res.data);
-      });
-    };
     return (
       <ModalComponent.Section
         style={{ display: "flex", flexDirection: "column", gap: "20px" }}
@@ -246,7 +198,14 @@ export default function ExerciseSelectModal({ isModalOpen, setIsModalOpen }) {
               ].map((tab) => (
                 <button
                   key={tab}
-                  onClick={() => setActiveTab(tab)}
+                  onClick={() => {
+                    if (tab === "전체") {
+                      setActiveTab(tab);
+                      setSearch("");
+                    } else {
+                      setActiveTab(tab);
+                    }
+                  }}
                   style={{
                     padding: "12px 16px",
                     border: "none",
@@ -278,33 +237,25 @@ export default function ExerciseSelectModal({ isModalOpen, setIsModalOpen }) {
                   onChange={handleTabDetailDropdownChange}
                   options={
                     activeTab === "운동 카테고리"
-                      ? [
-                          { value: "strength", label: "근력" },
-                          { value: "stretching", label: "스트레칭" },
-                          { value: "cardio", label: "유산소" },
-                        ]
+                      ? categoryEng.map((category) => ({
+                          value: category,
+                          label: categoryKorDict[category],
+                        }))
                       : activeTab === "운동 장비"
-                      ? [
-                          { value: "body only", label: "body only" },
-                          { value: "dumbbell", label: "dumbbell" },
-                          { value: "barbell", label: "barbell" },
-                          { value: "cable", label: "cable" },
-                          { value: "machine", label: "machine" },
-                          { value: "other", label: "other" },
-                        ]
+                      ? equipmentEng.map((equipment) => ({
+                          value: equipment,
+                          label: equipmentKorDict[equipment],
+                        }))
                       : activeTab === "운동 주요 근육"
-                      ? [
-                          { value: "hamstrings", label: "hamstrings" },
-                          { value: "calves", label: "calves" },
-                          { value: "glutes", label: "glutes" },
-                          { value: "legs", label: "legs" },
-                        ]
+                      ? primaryMuscleEng.map((primaryMuscle) => ({
+                          value: primaryMuscle,
+                          label: primaryMuscleKorDict[primaryMuscle],
+                        }))
                       : activeTab === "운동 난이도"
-                      ? [
-                          { value: "beginner", label: "beginner" },
-                          { value: "intermediate", label: "intermediate" },
-                          { value: "advanced", label: "advanced" },
-                        ]
+                      ? levelEng.map((level) => ({
+                          value: level,
+                          label: levelKorDict[level],
+                        }))
                       : []
                   }
                 />
@@ -316,36 +267,128 @@ export default function ExerciseSelectModal({ isModalOpen, setIsModalOpen }) {
             placeholder="운동 이름을 검색해주세요"
             variant="outlined"
             size="medium"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
           />
-          {selectedTabDetails.map((detail) => (
-            <div
-              key={detail}
+          <div
+            style={{
+              display: "flex",
+              gap: "4px",
+              flexWrap: "wrap",
+            }}
+          >
+            {selectedTabDetails.map((detail) => (
+              <div
+                key={detail}
+                style={{
+                  width: "fit-content",
+                  backgroundColor: "#76ABF0",
+                  color: "#ffffff",
+                  padding: "4px 12px",
+                  borderRadius: "20px",
+                  fontSize: "12px",
+                  fontWeight: "500",
+                  fontStyle: "italic",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                #{detail}
+                <button
+                  style={{
+                    backgroundColor: "transparent",
+                    color: "#ffffff",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: "12px",
+                    fontWeight: "500",
+                    fontStyle: "italic",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.5px",
+                  }}
+                  onClick={() =>
+                    setSelectedTabDetails(
+                      selectedTabDetails.filter((d) => d !== detail)
+                    )
+                  }
+                >
+                  x
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+          <h3>추가된 운동</h3>
+          <ListComponent variant="">
+            <ul
               style={{
-                width: "fit-content",
-                backgroundColor: "#76ABF0",
-                color: "#ffffff",
-                padding: "4px 12px",
-                borderRadius: "20px",
-                fontSize: "12px",
-                fontWeight: "500",
-                fontStyle: "italic",
-                textTransform: "uppercase",
-                letterSpacing: "0.5px",
+                display: "flex",
+                flexDirection: "column",
+                margin: 0,
+                padding: 0,
+                gap: "4px",
               }}
             >
-              #{detail}
-            </div>
-          ))}
+              {addedExercises.map((exercise, i) => (
+                <li key={i}>
+                  <div
+                    style={{
+                      backgroundColor: "#3b82f6",
+                      padding: "8px 16px",
+                      color: "#ffffff",
+                      fontSize: "14px",
+                      fontWeight: "500",
+                      display: "flex",
+
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      borderRadius: "10px",
+                    }}
+                  >
+                    {engKorDict[exercise]}
+                    <div
+                      style={{ cursor: "pointer" }}
+                      onClick={() => handleRemoveExercise(i)}
+                    >
+                      X
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </ListComponent>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
           <h3>운동 목록</h3>
           <ListComponent variant="bordered">
             {exercises
               ?.filter((exercise) => {
-                if (activeTab === "전체") return true;
-                if (activeTab === "유산소")
-                  return exercise.category === "cardio";
-                return exercise.primaryMuscle === activeTab.toLowerCase();
+                if (activeTab === "전체") {
+                  return true;
+                } else {
+                  if (selectedTabDetails.length === 0) return true;
+                  const conditions = [
+                    categoryKorDict[exercise.category],
+                    equipmentKorDict[exercise.equipment],
+                    primaryMuscleKorDict[exercise.primaryMuscles],
+                    levelKorDict[exercise.level],
+                  ];
+
+                  // 모든 조건이 selectedTabDetails 안에 있어야 통과
+                  return selectedTabDetails.every((selected) =>
+                    conditions.includes(selected)
+                  );
+                }
+              })
+              .filter((exercise) => {
+                if (search === "") return true;
+                return search
+                  .split(" ")
+                  .some((s) => engKorDict[exercise.name].includes(s));
               })
               .map((exercise, i) => (
                 <ListComponent.Item
@@ -359,7 +402,6 @@ export default function ExerciseSelectModal({ isModalOpen, setIsModalOpen }) {
                   expanded={expandedExercise === exercise.name}
                   onToggle={() => {
                     handleToggleExercise(exercise.name);
-                    translateExerciseInstructions(exercise.instructions);
                   }}
                   onClick={() => handleListClick(exercise.name)}
                   noPadding={true}
@@ -371,9 +413,25 @@ export default function ExerciseSelectModal({ isModalOpen, setIsModalOpen }) {
                         backgroundColor: "#f8fafc",
                         padding: "12px 16px",
                         boxShadow: "inset 0 0 12px 0 rgba(0, 0, 0, 0.1)",
+                        cursor: "default",
                       }}
                     >
-                      <h4>운동 상세 정보</h4>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <h4>운동 상세 정보</h4>
+                        <ButtonComponent
+                          variant="primary"
+                          size="small"
+                          padding="0px"
+                          onClick={() => handleAddExercise(exercise.name)}
+                        >
+                          + 추가
+                        </ButtonComponent>
+                      </div>
                       <ListComponent>
                         <ListComponent.Item>
                           <strong>운동 이름</strong> {" : "}
@@ -381,20 +439,20 @@ export default function ExerciseSelectModal({ isModalOpen, setIsModalOpen }) {
                         </ListComponent.Item>
                         <ListComponent.Item>
                           <strong>운동 난이도</strong> {" : "}
-                          {exercise.level}
+                          {levelKorDict[exercise.level]}
                         </ListComponent.Item>
                         <ListComponent.Item>
                           <strong>운동 장비</strong> {" : "}
-                          {exercise.equipment}
+                          {equipmentKorDict[exercise.equipment]}
                         </ListComponent.Item>
                         <ListComponent.Item>
                           <strong>운동 주요 근육</strong> {" : "}
-                          {exercise.primaryMuscles.join(", ")}
+                          {primaryMuscleKorDict[exercise.primaryMuscles]}
                         </ListComponent.Item>
                         <ListComponent.Item>
                           <strong>운동 카테고리</strong>
                           {" : "}
-                          {exercise.category}
+                          {categoryKorDict[exercise.category]}
                         </ListComponent.Item>
                         <ListComponent.Item>
                           <strong>운동 방법</strong>
@@ -412,118 +470,6 @@ export default function ExerciseSelectModal({ isModalOpen, setIsModalOpen }) {
                   )}
                 </ListComponent.Item>
               ))}
-            <ListComponent.Item
-              primary={"벤치프레스"}
-              secondary={"가슴 운동"}
-              selected={selectedExercise === "벤치프레스"}
-              expandable={true}
-              expanded={expandedExercise === "벤치프레스"}
-              onToggle={() => handleToggleExercise("벤치프레스")}
-              onClick={() => handleListClick("벤치프레스")}
-            >
-              {expandedExercise === "벤치프레스" && (
-                <div
-                  style={{
-                    padding: "12px 16px",
-                    backgroundColor: "#f8fafc",
-                    borderRadius: "8px",
-                  }}
-                >
-                  <h4>운동 상세 정보</h4>
-                  <p>
-                    <strong>주요 근육:</strong> 대흉근, 삼두근, 전면삼각근
-                  </p>
-                  <p>
-                    <strong>난이도:</strong> 중급
-                  </p>
-                  <p>
-                    <strong>권장 세트:</strong> 3-4세트
-                  </p>
-                  <p>
-                    <strong>권장 횟수:</strong> 8-12회
-                  </p>
-                  <p>
-                    <strong>주의사항:</strong> 어깨를 고정하고 가슴에 집중하여
-                    수행
-                  </p>
-                </div>
-              )}
-            </ListComponent.Item>
-
-            <ListComponent.Item
-              primary="스쿼트"
-              secondary="하체 운동"
-              selected={selectedExercise === "스쿼트"}
-              expandable={true}
-              expanded={expandedExercise === "스쿼트"}
-              onToggle={() => handleToggleExercise("스쿼트")}
-              onClick={() => handleListClick("스쿼트")}
-            >
-              {expandedExercise === "스쿼트" && (
-                <div
-                  style={{
-                    padding: "12px 16px",
-                    backgroundColor: "#f8fafc",
-                    borderRadius: "8px",
-                  }}
-                >
-                  <h4>운동 상세 정보</h4>
-                  <p>
-                    <strong>주요 근육:</strong> 대퇴사두근, 대퇴이두근, 둔근
-                  </p>
-                  <p>
-                    <strong>난이도:</strong> 초급
-                  </p>
-                  <p>
-                    <strong>권장 세트:</strong> 3-4세트
-                  </p>
-                  <p>
-                    <strong>권장 횟수:</strong> 10-15회
-                  </p>
-                  <p>
-                    <strong>주의사항:</strong> 무릎이 발끝을 넘지 않도록 주의
-                  </p>
-                </div>
-              )}
-            </ListComponent.Item>
-
-            <ListComponent.Item
-              primary="데드리프트"
-              secondary="등 운동"
-              selected={selectedExercise === "데드리프트"}
-              expandable={true}
-              expanded={expandedExercise === "데드리프트"}
-              onToggle={() => handleToggleExercise("데드리프트")}
-              onClick={() => handleListClick("데드리프트")}
-            >
-              {expandedExercise === "데드리프트" && (
-                <div
-                  style={{
-                    padding: "12px 16px",
-                    backgroundColor: "#f8fafc",
-                    borderRadius: "8px",
-                  }}
-                >
-                  <h4>운동 상세 정보</h4>
-                  <p>
-                    <strong>주요 근육:</strong> 광배근, 척추기립근, 둔근
-                  </p>
-                  <p>
-                    <strong>난이도:</strong> 고급
-                  </p>
-                  <p>
-                    <strong>권장 세트:</strong> 3-5세트
-                  </p>
-                  <p>
-                    <strong>권장 횟수:</strong> 5-8회
-                  </p>
-                  <p>
-                    <strong>주의사항:</strong> 허리를 곧게 펴고 척추 중립 자세
-                    유지
-                  </p>
-                </div>
-              )}
-            </ListComponent.Item>
           </ListComponent>
         </div>
       </ModalComponent.Section>
@@ -536,7 +482,13 @@ export default function ExerciseSelectModal({ isModalOpen, setIsModalOpen }) {
         subtitle="운동을 선택해주세요"
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        footer={<ModalFooter setIsModalOpen={setIsModalOpen} />}
+        footer={
+          <ModalFooter
+            addedExercises={addedExercises}
+            setIsModalOpen={setIsModalOpen}
+            setRoutineExercises={setRoutineExercises}
+          />
+        }
         zIndex={10000}
       >
         {renderModalContent()}

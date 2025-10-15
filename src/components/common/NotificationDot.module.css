@@ -1,0 +1,9 @@
+.notificationDot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #ff0000;
+  border-radius: 50%;
+  top: 2px;
+  right: 2px;
+}

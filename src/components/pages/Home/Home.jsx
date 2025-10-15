@@ -6,7 +6,7 @@ import { FaPlay, FaClock, FaStar, FaFire, FaCheckCircle } from "react-icons/fa";
 import styles from "./Home.module.css";
 import CardComponent from "../../common/CardComponent";
 import ButtonComponent from "../../common/ButtonComponent";
-import { POST } from "../../../utils/api/api";
+import { useApi } from "../../../utils/api/useApi";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -18,6 +18,7 @@ const Home = () => {
   const [userRoutines, setUserRoutines] = useState([]);
   const [loading, setLoading] = useState(false);
   const [dailyTip, setDailyTip] = useState("");
+  const { GET } = useApi();
 
   const fetchUserData = useCallback(async () => {
     setLoading(true);
@@ -198,7 +199,7 @@ const Home = () => {
               <CardComponent 
                 className={styles.tipCard} 
                 title="오늘의 팁" 
-                details="작은 습관이 큰 변화를 만듭니다."
+                details=""
                 buttonText=""
                 onClick={null}
               >
