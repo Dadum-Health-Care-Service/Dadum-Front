@@ -1,12 +1,62 @@
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
+import fs from "fs";
 // https://vitejs.dev/config/
+
+// Service Worker 환경변수 치환 플러그인
+function serviceWorkerEnvPlugin() {
+  return {
+    name: "service-worker-env",
+    generateBundle() {
+      // 빌드 시점에 환경변수로 치환
+      const swPath = path.resolve(__dirname, "public/firebase-messaging-sw.js");
+      let swContent = fs.readFileSync(swPath, "utf8");
+
+      // 환경변수 치환
+      swContent = swContent.replace(
+        /\{\{VITE_FIREBASE_API_KEY\}\}/g,
+        process.env.VITE_FIREBASE_API_KEY || ""
+      );
+      swContent = swContent.replace(
+        /\{\{VITE_FIREBASE_AUTH_DOMAIN\}\}/g,
+        process.env.VITE_FIREBASE_AUTH_DOMAIN || ""
+      );
+      swContent = swContent.replace(
+        /\{\{VITE_FIREBASE_PROJECT_ID\}\}/g,
+        process.env.VITE_FIREBASE_PROJECT_ID || ""
+      );
+      swContent = swContent.replace(
+        /\{\{VITE_FIREBASE_STORAGE_BUCKET\}\}/g,
+        process.env.VITE_FIREBASE_STORAGE_BUCKET || ""
+      );
+      swContent = swContent.replace(
+        /\{\{VITE_FIREBASE_MESSAGING_SENDER_ID\}\}/g,
+        process.env.VITE_FIREBASE_MESSAGING_SENDER_ID || ""
+      );
+      swContent = swContent.replace(
+        /\{\{VITE_FIREBASE_APP_ID\}\}/g,
+        process.env.VITE_FIREBASE_APP_ID || ""
+      );
+      swContent = swContent.replace(
+        /\{\{VITE_FIREBASE_MEASUREMENT_ID\}\}/g,
+        process.env.VITE_FIREBASE_MEASUREMENT_ID || ""
+      );
+
+      // dist 폴더에 치환된 파일 복사
+      this.emitFile({
+        type: "asset",
+        fileName: "firebase-messaging-sw.js",
+        source: swContent,
+      });
+    },
+  };
+}
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   return {
-    plugins: [react()], // React 플러그인 적용
+    plugins: [react(), serviceWorkerEnvPlugin()],
     // define: {
     //   global: 'globalThis',
     // },
@@ -38,10 +88,16 @@ export default defineConfig(({ mode }) => {
           secure: false,
           ws: true,
         },
-        '/ml': {
-        target: 'http://127.0.0.1:8000',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/ml/, ''), // ★ /ml 접두어 제거해서 /analyze-coach로 전달
+        "/security": {
+          target: env.SECURITY_URL + ":8010/main",
+          changeOrigin: true,
+          secure: false,
+          rewrite: (path) => path.replace(/^\/security/, ""), // /security -> /main
+        },
+        "/ml": {
+          target: "http://127.0.0.1:8000",
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/ml/, ""), // ★ /ml 접두어 제거해서 /analyze-coach로 전달
         },
       },
     },
@@ -51,4 +107,3 @@ export default defineConfig(({ mode }) => {
     },
   };
 });
-

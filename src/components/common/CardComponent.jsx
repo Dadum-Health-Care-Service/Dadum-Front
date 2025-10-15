@@ -30,7 +30,9 @@ const CardComponent = ({
   // children이 없으면 루틴 카드로 사용
   return (
     <div
-      className={`${styles.card} ${className} ${disabled ? styles.disabled : ""}`}
+      className={`${styles.card} ${className} ${
+        disabled ? styles.disabled : ""
+      }`}
       onClick={handleClick}
       role="button"
       tabIndex={disabled ? -1 : 0}
@@ -45,6 +47,7 @@ const CardComponent = ({
         <h3 className={styles["card-title"]}>{title}</h3>
         <p className={styles["card-details"]}>{details}</p>
       </div>
+      {children}
       {buttonText && !disabled && (
         <div className={styles["card-button-container"]} onClick={handleClick}>
           <ButtonComponent variant="outline" onClick={onClick} size="medium">

@@ -1,27 +1,25 @@
-/* =========================================================
-  Variables
-========================================================= */
 :root {
-  --bottom-nav-h: 0px;   /* runtime injected by JS (0 if absent) */
+  --bottom-nav-h: 0px;   /* JS가 런타임에 주입(없으면 0) */
 
-  /* component sizes */
+  /* 컴포넌트 크기 */
   --fab-h: 56px;
-  --fab-gap: 6px;          /* 네비와 FAB 사이 간격 */
+  --fab-gap: 6px;          /* 하단 네비와 FAB 사이 간격 */
   --toolbar-offset: 10px;  /* 상단 "전체/팔로워" 오프셋 */
 
-  /* theme */
+  /* 테마 컬러/라운드 값 */
   --text: #0F172A;
   --muted: #64748B;
-  --primary: #0A66FF;
-  --primary-2: #3BAAFF;
+  --primary: #2F6BFF;      /* ★ 단색으로 통일 */
+  --primary-2: #2F6BFF;    /* ★ 그라데이션 제거 → 동일 색상 */
   --border: #D6E4FF;
   --light: #F5F9FF;
+
   --radius: 14px;
 }
 
 /* =========================================================
-  Page container
-  ▶ 하단 패딩에서 FAB 높이 제거 (빈공간 축소)
+  페이지 컨테이너
+  ▶ 하단 패딩에서 FAB 높이만큼 제외(빈 공간 최소화)
 ========================================================= */
 .social-root {
   width: 100%;
@@ -40,7 +38,7 @@
   background: linear-gradient(180deg, #f6f9ff, #e9f0ff);
 }
 
-/* reduce Bootstrap influence */
+/* 기본 폼 요소에 테마 폰트/스타일 우선 적용 */
 .social-root button,
 .social-root input,
 .social-root select,
@@ -51,8 +49,8 @@
 }
 
 /* =========================================================
-  Top segment (전체 / 팔로워)
-  ▶ safe-area 포함 오프셋 + 자연스러운 배경
+  상단 세그먼트(전체 / 팔로워)
+  ▶ 안전영역 포함 고정 + 상단 그라디언트 배경
 ========================================================= */
 .social-root .m-toolbar {
   position: sticky;
@@ -73,19 +71,21 @@
   color: var(--primary);
   font-weight: 800;
   cursor: pointer;
+  transition: background-color .12s ease, box-shadow .12s ease, transform .06s ease;
 }
 .social-root .seg-btn.is-active {
   color: #fff;
   border-color: transparent;
-  background: linear-gradient(135deg, var(--primary), var(--primary-2));
+  background: var(--primary); /* ★ 단색 */
 }
+.social-root .seg-btn:active { transform: translateY(1px); }
 
 /* =========================================================
-  Feed / Cards
+  피드 / 카드
 ========================================================= */
 .social-root .m-feed { display: grid; gap: 12px; margin-top: 8px; }
 
-/* ▶ 피드의 맨 아래에만 FAB 높이만큼 여유 (FAB에 가리지 않음) */
+/* ▶ 피드 맨 아래에 FAB 높이만큼 여유(가려지지 않게) */
 .social-root .m-feed::after{
   content: "";
   display: block;
@@ -114,6 +114,11 @@
   display: inline-block;
 }
 .social-root .avatar.lg { width: 32px; height: 32px; }
+/* ★ 실제 프로필 이미지가 있을 때 */
+.social-root .avatar-img{
+  width: 28px; height: 28px; border-radius: 50%;
+  object-fit: cover; display: block;
+}
 
 .social-root .meta .row1 { display: flex; align-items: baseline; gap: 6px; }
 .social-root .name { font-weight: 800; font-size: 14px; }
@@ -146,7 +151,7 @@
 }
 
 /* =========================================================
-  FAB (글쓰기)
+  FAB(글쓰기)  ★ 단색으로 변경
 ========================================================= */
 .social-root .compose-fab {
   position: fixed;
@@ -155,7 +160,7 @@
   height: var(--fab-h, 56px);
   border: 0; border-radius: 14px;
   padding: 12px 16px; color: #fff; font-weight: 900;
-  background: linear-gradient(135deg, var(--primary), var(--primary-2));
+  background: var(--primary); /* ★ */
   box-shadow: 0 10px 24px rgba(10, 102, 255, .25);
   cursor: pointer; z-index: 11000;
 }
@@ -165,7 +170,7 @@
 }
 
 /* =========================================================
-  Modal (Portal)
+  모달(포털)
 ========================================================= */
 body.modal-open { overflow: hidden; touch-action: none; }
 body.modal-open .bottom-navigation,
@@ -203,6 +208,8 @@ body.modal-open #bottom-nav { pointer-events: none !important; opacity: 0 !impor
 .compose-title { margin: 0; font-size: 16px; font-weight: 900; }
 .compose-close  { border: 0; background: transparent; color: #64748B; font-size: 20px; }
 .compose-card-body { padding: 12px; overflow: auto; }
+
+/* 텍스트 입력 라인(아바타 제거 버전) */
 .compose-row { display: flex; gap: 10px; }
 .compose-row textarea {
   flex: 1; min-height: 120px; resize: vertical;
@@ -210,30 +217,89 @@ body.modal-open #bottom-nav { pointer-events: none !important; opacity: 0 !impor
 }
 
 /* =========================================================
-  Compose actions
+  작성 하단 툴바
+  ▶ 왼쪽: 툴 아이콘 / 오른쪽: (작은 알약 드롭다운) + 게시 버튼
 ========================================================= */
 .compose-actions {
   display: grid; grid-template-columns: 1fr auto;
   align-items: center; column-gap: 8px; row-gap: 8px; margin-top: 10px;
 }
 .compose-actions .tools { display: flex; gap: 8px; overflow-x: auto; }
+
+/* 툴 버튼 */
 .tool-btn{
-  display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px;
+  display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 12px;
   border: 1.5px solid var(--border); border-radius: 10px; background: #fff; color: var(--text); font-weight: 700; cursor: pointer;
+  transition: border-color .12s ease, box-shadow .12s ease, transform .06s ease;
 }
 .tool-btn .ico { font-size: 16px; line-height: 1; }
 .tool-btn:hover { border-color: #b8cbff; box-shadow: 0 3px 10px rgba(157, 184, 255, .25); }
+.tool-btn:active { transform: translateY(1px); }
 
-.compose-actions .submit { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
-.pill-select{
-  height: 36px; padding: 0 12px; border: 1.5px solid var(--border); border-radius: 999px; color: var(--muted); background: #fff;
+/* 오른쪽 그룹 정렬 */
+.compose-actions .submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
 }
 
-/* CTA (게시하기) */
+/* ── 알약 드롭다운(공개/팔로워/비공개) ── */
+.compose-card .select.pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(180deg,#ffffff 0%,#fbfdff 100%);
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  height: 32px;
+  padding: 0 26px 0 12px;           /* 우측 화살표 공간 포함 */
+  box-shadow: 0 2px 5px rgba(16, 24, 40, 0.05);
+  transition: border-color .12s ease, box-shadow .12s ease, background-color .12s ease, transform .06s ease;
+}
+.compose-card .select.pill.pill--sm {
+  height: 28px;
+  padding: 0 18px 0 10px;           /* ★ 더 컴팩트 */
+  box-shadow: 0 2px 4px rgba(16,24,40,.05);
+}
+
+.compose-card .select.pill select {
+  appearance: none; -webkit-appearance: none; -moz-appearance: none;
+  border: 0; background: transparent; outline: 0;
+  font-size: 13px; font-weight: 600; color: var(--text); line-height: 1;
+  padding-right: 6px; min-width: 72px;
+}
+.compose-card .select.pill.pill--sm select {
+  min-width: 58px;                 /* ★ '비공개' 폭도 커버 */
+  font-size: 12px;
+  padding-right: 4px;
+}
+
+.compose-card .select.pill::after {
+  content: "▾";
+  position: absolute;
+  right: 10px; top: 50%; transform: translateY(-50%);
+  font-size: 12px; color: var(--primary);
+  pointer-events: none;
+}
+.compose-card .select.pill.pill--sm::after { right: 8px; font-size: 11px; }
+
+.compose-card .select.pill:hover {
+  border-color: #b8cbff;
+  box-shadow: 0 3px 9px rgba(157, 184, 255, 0.12);
+}
+.compose-card .select.pill:active { transform: translateY(1px); }
+.compose-card .select.pill:focus-within {
+  border-color: var(--primary-2);
+  box-shadow: 0 0 0 3px rgba(145, 182, 255, 0.22);
+}
+.compose-card .select.pill select:disabled { opacity: .6; cursor: not-allowed; }
+
+/* CTA(게시하기) 버튼  ★ 단색으로 변경 */
 .compose-card .cta{
   display: inline-flex; align-items: center; justify-content: center;
   height: 36px; min-width: 96px; padding: 0 16px; border: 0; border-radius: 10px;
-  background: linear-gradient(135deg, var(--primary), var(--primary-2)) !important;
+  background: var(--primary) !important; /* ★ */
   color: #fff !important; font-weight: 900; box-shadow: 0 6px 16px rgba(10, 102, 255, .25);
   transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
 }
@@ -241,11 +307,11 @@ body.modal-open #bottom-nav { pointer-events: none !important; opacity: 0 !impor
 .compose-card .cta:active:not(:disabled){ transform: translateY(0); filter: brightness(.98); box-shadow: 0 5px 12px rgba(10, 102, 255, .22); }
 .compose-card .cta:disabled{ background: #E7EEFF !important; color: #9CB4FF !important; box-shadow: none; cursor: not-allowed; }
 
-/* fallback if .btn-primary is used */
+/* (호환) .btn-primary를 사용했을 때도 동일 룩 적용 */
 .social-root .compose-card .btn-primary,
 .social-root .compose-card .btn-primary.post-btn{
   height: 36px; min-width: 96px; padding: 0 16px; border: 0 !important; border-radius: 10px;
-  background: linear-gradient(135deg, var(--primary), var(--primary-2)) !important;
+  background: var(--primary) !important; /* ★ */
   color: #fff !important; font-weight: 900; box-shadow: 0 6px 16px rgba(10, 102, 255, .25);
 }
 .social-root .compose-card .btn-primary:disabled,
@@ -253,7 +319,7 @@ body.modal-open #bottom-nav { pointer-events: none !important; opacity: 0 !impor
   background: #E7EEFF !important; color: #9CB4FF !important; box-shadow: none;
 }
 
-/* legacy namespaced controls */
+/* (레거시) 네임스페이스 버튼/셀렉트 */
 .social-root .btn-outline{
   padding: 8px 12px; border: 1.5px solid var(--primary); border-radius: 10px;
   background: #fff; color: var(--primary); font-weight: 800; cursor: pointer;
@@ -264,8 +330,58 @@ body.modal-open #bottom-nav { pointer-events: none !important; opacity: 0 !impor
 }
 
 /* =========================================================
-  Desktop
+  데스크톱 반응형
 ========================================================= */
 @media (min-width: 768px){
   .social-root{ padding-bottom: 24px; }
+}
+
+/* ───── 카드 우측상단 케밥 메뉴 ───── */
+.social-root .m-card-head { position: relative; }
+.social-root .popup-menu{
+  position: absolute; top: 6px; right: 6px;
+  background: #fff; border: 1px solid var(--border); border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(16,24,40,.12);
+  padding: 6px; z-index: 20; min-width: 96px;
+  display: grid; gap: 4px;
+}
+.social-root .popup-menu .menu-item{
+  height: 34px; padding: 0 10px; text-align: left;
+  border: 0; border-radius: 8px; background: transparent; cursor: pointer;
+  font-weight: 700; color: var(--text);
+}
+.social-root .popup-menu .menu-item:hover{ background: #f3f7ff; }
+.social-root .popup-menu .menu-item.danger{ color: #e5484d; }
+.social-root .popup-menu .menu-item.danger:hover{ background: #ffe9ec; }
+
+/* ───── 댓글 블록 ───── */
+.social-root .m-card-comments { padding: 8px 12px 12px; }
+.comments { border-top: 1px solid #EEF3FF; padding-top: 8px; }
+
+.comment-list { display: grid; gap: 8px; margin: 8px 0; }
+.comment-item { display: flex; align-items: flex-start; gap: 8px; }
+.comment-avatar {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--primary-2));
+  flex: 0 0 20px;
+}
+.comment-body { flex: 1; }
+.comment-meta { font-size: 12px; color: var(--muted); margin-bottom: 2px; display: flex; gap: 6px; align-items: center; }
+.comment-text { font-size: 14px; color: var(--text); }
+.comment-del { border: 0; background: transparent; color: #e5484d; font-size: 12px; cursor: pointer; padding: 2px 6px; }
+
+.comment-input-row { display: flex; gap: 8px; align-items: center; }
+.comment-input-row input {
+  flex: 1; height: 36px; border: 1.5px solid #E5EDFF; border-radius: 10px; padding: 0 10px;
+}
+
+/* 미니 CTA(등록 버튼) */
+.compose-card .cta.sm, .cta.sm {
+  height: 32px; min-width: 72px; padding: 0 12px; border-radius: 8px;
+}
+
+/* 작성 모달 이미지 미리보기 */
+.compose-preview{
+  display:block; width:100%; max-height:240px; object-fit:cover;
+  border-radius:10px; border:1.5px solid #E5EDFF; margin-top:8px;
 }

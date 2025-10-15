@@ -5,6 +5,7 @@ import ModalComponent from '../../../common/ModalComponent';
 import styles from './OrderHistory.module.css';
 
 export default function OrderHistory() {
+  console.log("OrderHistory 컴포넌트 렌더링됨");
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -18,6 +19,7 @@ export default function OrderHistory() {
   const [additionalInfo, setAdditionalInfo] = useState('');
 
   useEffect(() => {
+    console.log("OrderHistory useEffect 실행됨");
     fetchOrders();
   }, []);
 
@@ -39,53 +41,42 @@ export default function OrderHistory() {
         }
       }
       
-      if (!token) {
-        console.error('❌ Access Token이 없습니다!');
-        setError('로그인이 필요합니다. (토큰 없음)');
-        setLoading(false);
-        return;
-      }
-
-      // 토큰 형식 검사
-      if (!token.startsWith('Bearer ') && !token.includes('.')) {
-        console.error('❌ 토큰 형식이 올바르지 않습니다:', token);
-        setError('토큰 형식이 올바르지 않습니다. 다시 로그인해주세요.');
-        setLoading(false);
-        return;
-      }
-
-      const response = await axios.get(
-        'http://localhost:8080/api/v1/payments/user/orders',
+      // 임시로 샘플 데이터 사용 (API 호출 대신)
+      console.log("샘플 데이터로 테스트 중...");
+      
+      const sampleOrders = [
         {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+          id: 1,
+          orderNumber: "ORD-2024-001",
+          productName: "프리미엄 요가매트",
+          productCategory: "운동기구",
+          quantity: 1,
+          totalAmount: 45000,
+          status: "DELIVERED",
+          orderDate: "2024-01-15T10:30:00Z",
+          deliveryDate: "2024-01-17T14:20:00Z",
+          merchantUid: "merchant_001"
+        },
+        {
+          id: 2,
+          orderNumber: "ORD-2024-002", 
+          productName: "스마트 웨이트",
+          productCategory: "운동기구",
+          quantity: 1,
+          totalAmount: 120000,
+          status: "SHIPPED",
+          orderDate: "2024-01-20T15:45:00Z",
+          merchantUid: "merchant_002"
         }
-      );
-      setOrders(response.data);
+      ];
+      
+      setOrders(sampleOrders);
+      setError('');
       setLoading(false);
+      return;
     } catch (error) {
       console.error('❌ 주문 내역 조회 실패:', error);
-      
-      // 에러 상세 정보
-      if (error.response) {
-        console.error('📡 서버 응답:', error.response.status, error.response.data);
-        if (error.response.status === 401) {
-          setError('인증이 만료되었습니다. 다시 로그인해주세요.');
-        } else if (error.response.status === 403) {
-          setError('접근 권한이 없습니다.');
-        } else {
-          setError(`서버 오류: ${error.response.status}`);
-        }
-      } else if (error.request) {
-        console.error('🌐 네트워크 오류:', error.request);
-        setError('서버에 연결할 수 없습니다. 백엔드가 실행 중인지 확인해주세요.');
-      } else {
-        console.error('💻 클라이언트 오류:', error.message);
-        setError('주문 내역을 불러올 수 없습니다.');
-      }
-      
+      setError('주문 내역을 불러오는데 실패했습니다.');
       setLoading(false);
     }
   };
@@ -323,7 +314,7 @@ export default function OrderHistory() {
         ) : (
           <div className={styles.ordersGrid}>
             {orders.map((order) => (
-              <div key={order.orderId} className={styles.orderCard}>
+              <div key={order.id} className={styles.orderCard}>
                 <div className={styles.orderCardHeader}>
                   <span className={styles.orderNumber}>주문번호</span>
                   <span>{order.orderNumber}</span>

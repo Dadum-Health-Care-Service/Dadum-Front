@@ -1,12 +1,13 @@
 // 새로운 JSON 스키마 기반 업적 달성 체크 서비스
 export class AchievementService {
-  constructor(config) {
+  constructor(config, gamificationService = null) {
     this.config = config;
     this.validSessionCriteria = config.valid_session_definition;
     this.caps = config.caps;
+    this.gamificationService = gamificationService;
   }
 
-  // 유효 세션 판정
+  // 유효 루틴 판정
   isValidSession(session) {
     return (
       session.duration >= this.validSessionCriteria.min_active_minutes &&
@@ -15,13 +16,13 @@ export class AchievementService {
     );
   }
 
-  // 세션 간격 체크
+  // 루틴 간격 체크
   checkSessionInterval(session1, session2) {
     const timeDiff = Math.abs(new Date(session1.endTime) - new Date(session2.startTime));
     return timeDiff >= this.validSessionCriteria.min_gap_between_sessions_minutes * 60 * 1000;
   }
 
-  // 세션 겹침 체크
+  // 루틴 겹침 체크
   checkSessionOverlap(session1, session2) {
     const start1 = new Date(session1.startTime);
     const end1 = new Date(session1.endTime);
@@ -40,7 +41,7 @@ export class AchievementService {
       validSessions.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
       for (let i = 1; i < validSessions.length; i++) {
         if (this.checkSessionOverlap(validSessions[i-1], validSessions[i])) {
-          validSessions.splice(i, 1); // 겹치는 세션 제거
+          validSessions.splice(i, 1); // 겹치는 루틴 제거
           i--;
         }
       }
@@ -132,7 +133,7 @@ export class AchievementService {
     return false;
   }
 
-  // 주간 세션 수 계산
+  // 주간 루틴 수 계산
   getWeeklySessions(sessions) {
     const now = new Date();
     const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
@@ -227,7 +228,7 @@ export class AchievementService {
     return consecutiveWeeks >= weeks;
   }
 
-  // 일일 세션 수 체크
+  // 일일 루틴 수 체크
   evaluateDailySessions(condition, sessions) {
     const dailySessions = this.groupSessionsByDay(sessions);
     
@@ -242,7 +243,7 @@ export class AchievementService {
     return false;
   }
 
-  // 세션 지속시간 체크
+  // 루틴 지속시간 체크
   evaluateSessionDuration(condition, sessions) {
     for (const [operator, target] of Object.entries(condition)) {
       const hasValidSession = sessions.some(session => 
@@ -253,7 +254,7 @@ export class AchievementService {
     return true;
   }
 
-  // 세션 간격 체크
+  // 루틴 간격 체크
   evaluateSessionGap(condition, sessions) {
     const dailySessions = this.groupSessionsByDay(sessions);
     
@@ -291,7 +292,7 @@ export class AchievementService {
     return monthlySessions.reduce((sum, session) => sum + session.duration, 0);
   }
 
-  // 월간 세션 수 계산
+  // 월간 루틴 수 계산
   getMonthlySessions(sessions) {
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -309,7 +310,7 @@ export class AchievementService {
     return categories.size;
   }
 
-  // 카테고리별 세션 수 체크
+  // 카테고리별 루틴 수 체크
   evaluateCategorySessions(condition, sessions) {
     const categoryCounts = {};
     
@@ -328,7 +329,7 @@ export class AchievementService {
     return true;
   }
 
-  // 시간대별 세션 체크
+  // 시간대별 루틴 체크
   evaluateTimeWindowSessions(condition, sessions) {
     const { start, end, count } = condition;
     const monthlySessions = this.getMonthlySessions(sessions);
@@ -377,6 +378,107 @@ export class AchievementService {
     });
     
     return unlockedAchievements;
+  }
+
+  // 백엔드에서 사용자 세션 데이터를 가져오는 메서드
+  async loadUserSessions(accessToken, dateRange = null) {
+    if (!this.gamificationService) {
+      console.warn('GamificationService가 설정되지 않았습니다.');
+      return [];
+    }
+
+    try {
+      const routines = await this.gamificationService.getRoutines(accessToken);
+
+      // 루틴이 있으면 결과 데이터도 가져오기
+      let routineResults = [];
+      if (routines && routines.length > 0) {
+        routineResults = await this.gamificationService.getRoutineResults(accessToken, dateRange);
+      }
+
+      return this.gamificationService.transformToSessionData(routineResults, routines);
+    } catch (error) {
+      return [];
+    }
+  }
+
+  // 업적 진행률을 계산하는 메서드
+  calculateProgress(achievement, userSessions) {
+    const rule = achievement.rule;
+    const ruleType = Object.keys(rule)[0];
+    const condition = rule[ruleType];
+
+    let currentValue = 0;
+    let targetValue = 0;
+
+    switch (ruleType) {
+      case 'total_valid_sessions':
+        currentValue = userSessions.length;
+        targetValue = condition['>='] || condition['>'] || condition['=='];
+        break;
+      
+      case 'lifetime_active_minutes':
+        currentValue = this.getTotalActiveMinutes(userSessions);
+        targetValue = condition['>='] || condition['>'] || condition['=='];
+        break;
+      
+      case 'consecutive_days_with_valid_session':
+        currentValue = this.getConsecutiveDays(userSessions);
+        targetValue = condition['>='] || condition['>'] || condition['=='];
+        break;
+      
+      case 'weekly_sessions':
+        currentValue = this.getWeeklySessions(userSessions).length;
+        targetValue = condition['>='] || condition['>'] || condition['=='];
+        break;
+      
+      case 'active_days_in_week':
+        currentValue = this.getActiveDaysInWeek(userSessions);
+        targetValue = condition['>='] || condition['>'] || condition['=='];
+        break;
+      
+      case 'monthly_active_minutes':
+        currentValue = this.getMonthlyActiveMinutes(userSessions);
+        targetValue = condition['>='] || condition['>'] || condition['=='];
+        break;
+      
+      case 'monthly_valid_sessions':
+        currentValue = this.getMonthlySessions(userSessions).length;
+        targetValue = condition['>='] || condition['>'] || condition['=='];
+        break;
+      
+      case 'lifetime_distinct_categories':
+        currentValue = this.getDistinctCategories(userSessions);
+        targetValue = condition['>='] || condition['>'] || condition['=='];
+        break;
+      
+      default:
+        return { progress: 0, isComplete: false };
+    }
+
+    const progress = Math.min((currentValue / targetValue) * 100, 100);
+    const isComplete = progress >= 100;
+
+    return {
+      progress: Math.round(progress),
+      currentValue,
+      targetValue,
+      isComplete
+    };
+  }
+
+  // 업적 달성 상태와 진행률을 함께 반환하는 메서드
+  getAchievementStatusWithProgress(achievement, userSessions) {
+    const isUnlocked = this.checkAchievementUnlock(achievement, userSessions);
+    const progressInfo = this.calculateProgress(achievement, userSessions);
+    
+    return {
+      unlocked: isUnlocked,
+      progress: progressInfo.progress,
+      currentValue: progressInfo.currentValue,
+      targetValue: progressInfo.targetValue,
+      isComplete: progressInfo.isComplete
+    };
   }
 }
 

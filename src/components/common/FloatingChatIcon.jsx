@@ -73,11 +73,6 @@ const FloatingChatIcon = ({
           </svg>
         )}
       </div>
-      
-      {/* 알림 배지 (새 메시지가 있을 때) */}
-      <div className="floating-icon__badge">
-        <span className="floating-icon__badge-text">1</span>
-      </div>
     </button>
   );
 };

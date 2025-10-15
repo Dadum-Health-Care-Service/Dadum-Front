@@ -110,7 +110,14 @@
   margin-bottom: 0.5rem;
   font-size: 1.2rem;
 }
-
+.routineTitleContainer {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: space-between;
+  height:30px;
+  gap: 0.5rem;
+}
 .routineDescription {
   color: #6c757d;
   font-size: 0.9rem;
@@ -185,6 +192,7 @@
 
 .routineActions {
   display: flex;
+  flex-direction: row;
   gap: 0.5rem;
   justify-content: flex-end;
   margin-top: auto;
@@ -196,7 +204,7 @@
 
 /* 모바일 기준 스타일 */
 .routineActions {
-  flex-direction: column;
+  flex-direction: row;
   gap: 0.5rem;
 }
 
