@@ -261,7 +261,6 @@ const Admin = ({ isMobile, isNotify, setIsNotify }) => {
         <SidebarLink id="users" label="사용자 관리" emoji="👥" />
         <SidebarLink id="contents" label="콘텐츠 관리" emoji="🗂️" />
         <SidebarLink id="transactions" label="거래 관리" emoji="💳" />
-        <SidebarLink id="reports" label="통계 및 리포트" emoji="📈" />
         <SidebarLink id="reports" label="실시간 페이지 통계" emoji="📈" />
         <SidebarLink id="settings" label="시스템 설정" emoji="⚙️" />
         <SidebarLink id="support" label="고객 지원 관리" emoji="💬" />
