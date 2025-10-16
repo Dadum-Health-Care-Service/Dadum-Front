@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import ButtonComponent from '../../common/ButtonComponent';
+import ModalComponent from '../../common/ModalComponent';
 
 const CalorieCam = () => {
   console.log("CalorieCam 컴포넌트가 렌더링되었습니다!");
@@ -9,6 +10,8 @@ const CalorieCam = () => {
   const [analysisResult, setAnalysisResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [saveMessage, setSaveMessage] = useState('');
   const fileInputRef = useRef(null);
 
   const handleFileChange = (e) => {
@@ -35,6 +38,11 @@ const CalorieCam = () => {
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+  };
+
+  const closeSaveModal = () => {
+    setShowSaveModal(false);
+    setSaveMessage('');
   };
 
   const analyzeImage = async () => {
@@ -143,66 +151,18 @@ const CalorieCam = () => {
       if (response.ok) {
         const savedMeal = await response.json();
         console.log('식사 로그 자동 저장 완료:', savedMeal);
-        alert(`식사 정보가 자동으로 저장되었습니다!\n음식: ${savedMeal.label}\n칼로리: ${savedMeal.calories}kcal`);
+        setSaveMessage(`식사 정보가 저장되었습니다!\n음식: ${savedMeal.label}\n칼로리: ${savedMeal.calories}kcal`);
+        setShowSaveModal(true);
       } else {
         const errorData = await response.json();
         console.error('자동 저장 실패:', errorData);
-        alert('자동 저장에 실패했습니다. 수동으로 저장해주세요.');
+        setSaveMessage('저장에 실패했습니다. 다시 시도해주세요.');
+        setShowSaveModal(true);
       }
     } catch (error) {
       console.error('자동 저장 중 오류:', error);
-      alert('자동 저장 중 오류가 발생했습니다. 수동으로 저장해주세요.');
-    }
-  };
-
-  const saveMealData = async () => {
-    if (!analysisResult) return;
-
-    try {
-      // analysisResult에서 원본 분석 데이터를 추출
-      const originalData = analysisResult.meta?.originalAnalysis || {
-        calories: analysisResult.calories,
-        protein_g: parseFloat(analysisResult.nutrients['단백질'].replace('g', '')),
-        carbs_g: parseFloat(analysisResult.nutrients['탄수화물'].replace('g', '')),
-        fat_g: parseFloat(analysisResult.nutrients['지방'].replace('g', '')),
-        fiber_g: parseFloat(analysisResult.nutrients['식이섬유'].replace('g', ''))
-      };
-
-      const mealLogData = {
-        user_id: 'demo',
-        timestamp: new Date().toISOString(),
-        label: analysisResult.foodName,
-        grams: analysisResult.grams,
-        calories: originalData.calories,
-        protein_g: originalData.protein_g,
-        carbs_g: originalData.carbs_g,
-        fat_g: originalData.fat_g,
-        fiber_g: originalData.fiber_g,
-        meta: analysisResult.meta
-      };
-
-      console.log('수동 저장 시작:', mealLogData);
-
-      const response = await fetch('/ml/meal-log', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(mealLogData),
-      });
-
-      if (response.ok) {
-        const savedMeal = await response.json();
-        console.log('식사 로그 수동 저장 완료:', savedMeal);
-        alert(`식사 정보가 저장되었습니다!\n음식: ${savedMeal.label}\n칼로리: ${savedMeal.calories}kcal`);
-      } else {
-        const errorData = await response.json();
-        console.error('수동 저장 실패:', errorData);
-        alert(`저장 실패: ${errorData?.detail || response.statusText}`);
-      }
-    } catch (error) {
-      console.error('저장 중 오류:', error);
-      alert('식사 정보 저장 중 오류가 발생했습니다.');
+      setSaveMessage('저장 중 오류가 발생했습니다. 다시 시도해주세요.');
+      setShowSaveModal(true);
     }
   };
 
@@ -232,12 +192,14 @@ const CalorieCam = () => {
                 </div>
               ) : (
                 <div>
-                  <img
-                    src={imagePreviewUrl}
-                    alt="업로드된 음식"
-                    className="img-fluid rounded mb-3"
-                    style={{ maxHeight: "300px", objectFit: "cover" }}
-                  />
+                  <div className="d-flex justify-content-center mb-3">
+                    <img
+                      src={imagePreviewUrl}
+                      alt="업로드된 음식"
+                      className="img-fluid rounded"
+                      style={{ maxHeight: "300px", objectFit: "cover" }}
+                    />
+                  </div>
                   <div className="d-flex gap-2 justify-content-center">
                     <ButtonComponent 
                       variant="outline-secondary"
@@ -349,29 +311,64 @@ const CalorieCam = () => {
                     </div>
                   </div>
                 )}
-
-                <div className="text-center mt-4">
-                  <ButtonComponent 
-                    variant="primary"
-                    onClick={saveMealData}
-                  >
-                    식사 정보 저장
-                  </ButtonComponent>
-                </div>
               </div>
             </div>
           )}
 
-          <div className="alert alert-info">
-            <h6 className="alert-heading">💡 사용 방법</h6>
-            <ul className="mb-0">
-              <li>음식이 잘 보이도록 사진을 찍어주세요</li>
-              <li>조명이 충분한 곳에서 촬영하면 더 정확합니다</li>
-              <li>한 번에 하나의 음식만 분석할 수 있습니다</li>
-            </ul>
+          <div className="row justify-content-center">
+            <div className="col-md-8">
+              <div className="alert alert-info">
+                <h6 className="alert-heading">💡 사용 방법</h6>
+                <ol className="mb-0" style={{ listStyleType: 'decimal', paddingLeft: '20px' }}>
+                  <li>음식이 잘 보이도록 사진을 찍어주세요</li>
+                  <li>조명이 충분한 곳에서 촬영하면 더 정확합니다</li>
+                  <li>한 번에 하나의 음식만 분석할 수 있습니다</li>
+                </ol>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* 저장 완료 모달 */}
+      <ModalComponent
+        isOpen={showSaveModal}
+        onClose={closeSaveModal}
+        title="저장 완료"
+        size={ModalComponent.SIZES.SMALL}
+        variant={ModalComponent.VARIANTS.LIGHT}
+        closeOnOverlayClick={true}
+      >
+        <ModalComponent.Section>
+          <div style={{ textAlign: 'center', padding: '20px 0' }}>
+            <div style={{ 
+              fontSize: '48px', 
+              marginBottom: '16px',
+              color: '#28a745'
+            }}>
+              ✓
+            </div>
+            <p style={{ 
+              fontSize: '16px', 
+              color: '#666', 
+              margin: '0 0 10px 0',
+              lineHeight: '1.5',
+              whiteSpace: 'pre-line'
+            }}>
+              {saveMessage}
+            </p>
+          </div>
+        </ModalComponent.Section>
+        <ModalComponent.Actions align="center">
+          <ButtonComponent
+            variant="primary"
+            size="medium"
+            onClick={closeSaveModal}
+          >
+            확인
+          </ButtonComponent>
+        </ModalComponent.Actions>
+      </ModalComponent>
     </div>
   );
 };
