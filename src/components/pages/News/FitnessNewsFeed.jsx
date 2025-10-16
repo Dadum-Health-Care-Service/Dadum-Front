@@ -6,16 +6,32 @@ export default function FitnessNewsFeed() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // 화면 크기에 따른 뉴스 개수 결정
+  // 화면 크기에 따른 뉴스 개수 결정 (최대 5개, 항상 1줄 유지)
   const getNewsCount = () => {
     const width = window.innerWidth;
     console.log("[FitnessNewsFeed] 현재 화면 너비:", width);
-    if (width < 768) {
-      console.log("[FitnessNewsFeed] 모바일 감지 - 1개 요청");
+    
+    if (width < 480) {
+      console.log("[FitnessNewsFeed] 모바일 소형 - 1개 요청");
+      return 1; // 모바일 소형: 1개
+    } else if (width < 640) {
+      console.log("[FitnessNewsFeed] 모바일 - 1개 요청");
       return 1; // 모바일: 1개
+    } else if (width < 768) {
+      console.log("[FitnessNewsFeed] 모바일 중형 - 2개 요청");
+      return 2; // 모바일 중형: 2개
+    } else if (width < 1024) {
+      console.log("[FitnessNewsFeed] 태블릿 - 2개 요청");
+      return 2; // 태블릿: 2개
+    } else if (width < 1280) {
+      console.log("[FitnessNewsFeed] PC 소형 - 3개 요청");
+      return 3; // PC 소형: 3개
+    } else if (width < 1536) {
+      console.log("[FitnessNewsFeed] PC 중형 - 4개 요청");
+      return 4; // PC 중형: 4개
     } else {
-      console.log("[FitnessNewsFeed] PC 감지 - 2개 요청");
-      return 2; // PC: 2개
+      console.log("[FitnessNewsFeed] PC 대형 - 5개 요청");
+      return 5; // PC 대형: 5개
     }
   };
 
@@ -59,46 +75,42 @@ export default function FitnessNewsFeed() {
   }, []);
 
   return (
-    <div className="w-full mx-auto p-4">
-      {/* 통합 건강 뉴스 */}
-      <div className="mx-auto w-full max-w-[720px]">
-        {/* Header with Refresh Button */}
-        <div className="flex items-center justify-center mb-4 relative">
-          <h2 className="text-2xl font-bold text-gray-900 text-center">뉴스</h2>
-          <button
-            onClick={load}
-            className="absolute right-0 flex items-center justify-center w-9 h-9 rounded-full text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition"
-            title="새로고침"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-              />
-            </svg>
-          </button>
-        </div>
+    <div className="w-full pb-4 min-h-0">
+      {/* Header with Refresh Button */}
+      <div className="flex items-center justify-center mb-4 relative">
+        <h2 className="text-2xl font-extrabold text-center" style={{ color: '#0F172A' }}>뉴스</h2>
+        <button
+          onClick={load}
+          className="absolute right-0 flex items-center justify-center w-9 h-9 rounded-full text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition"
+          title="새로고침"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            />
+          </svg>
+        </button>
       </div>
 
-      {/* 카드 그리드: 탭과 동일 폭 컨테이너 */}
-      <div className="mx-auto w-full max-w-[720px]">
-        {loading && (
+      {/* 카드 그리드 */}
+      {loading && (
           <div className="flex items-center gap-3 p-6 rounded-2xl border">
             <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
             <span className="text-gray-600">불러오는 중...</span>
           </div>
-        )}
+      )}
 
-        {!loading && error && (
+      {!loading && error && (
           <div className="p-6 rounded-2xl border border-red-200 bg-red-50 text-red-700">
             {error}
           </div>
-        )}
+      )}
 
-        {!loading && !error && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {!loading && !error && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 min-h-0">
             {items.map((n) => (
               <a
                 key={n.id}
@@ -107,7 +119,7 @@ export default function FitnessNewsFeed() {
                 rel="noreferrer"
                 className="group block rounded-2xl overflow-hidden border hover:shadow-md transition-all duration-200 bg-white"
               >
-                <div className="aspect-[16/9] bg-gray-100 overflow-hidden">
+                <div className="aspect-[4/3] bg-gray-100 overflow-hidden">
                   {/* eslint-disable-next-line jsx-a11y/alt-text */}
                   <img
                     src={n.thumbnail}
@@ -120,10 +132,10 @@ export default function FitnessNewsFeed() {
                     }}
                   />
                 </div>
-                  <div className="p-4">
+                  <div className="p-5">
                     {/* ✅ 카테고리 표시는 각 뉴스의 실제 카테고리 사용 */}
-                    <div className="text-xs text-gray-500 mb-1 flex items-center gap-2">
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
+                    <div className="text-xs mb-1 flex items-center gap-2" style={{ color: '#64748B' }}>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100" style={{ color: '#64748B' }}>
                         {n.category || "건강 뉴스"}
                       </span>
                     <span>•</span>
@@ -137,20 +149,19 @@ export default function FitnessNewsFeed() {
                       </>
                     )}
                   </div>
-                  <h3 className="text-base font-semibold leading-snug line-clamp-2 group-hover:text-blue-600 transition-colors">
+                  <h3 className="text-lg font-extrabold leading-snug line-clamp-3 group-hover:text-blue-600 transition-colors" style={{ color: '#0F172A' }}>
                     {n.title}
                   </h3>
-                  {n.summary && <p className="mt-2 text-sm text-gray-600 line-clamp-2">{n.summary}</p>}
+                  {n.summary && <p className="mt-2 text-sm leading-relaxed line-clamp-3" style={{ color: '#64748B' }}>{n.summary}</p>}
                 </div>
               </a>
             ))}
           </div>
-        )}
+      )}
 
-        {!loading && !error && items.length === 0 && (
-          <div className="p-6 rounded-2xl border text-gray-600 text-center">표시할 뉴스가 없습니다.</div>
-        )}
-      </div>
+      {!loading && !error && items.length === 0 && (
+        <div className="p-6 rounded-2xl border text-gray-600 text-center">표시할 뉴스가 없습니다.</div>
+      )}
     </div>
   );
 }
