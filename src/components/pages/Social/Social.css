@@ -35,7 +35,7 @@
 
   font-family: Inter, system-ui, -apple-system, "Noto Sans KR", sans-serif;
   color: var(--text);
-  background: linear-gradient(180deg, #f6f9ff, #e9f0ff);
+  background: #f0f8ff;
 }
 
 /* 기본 폼 요소에 테마 폰트/스타일 우선 적용 */

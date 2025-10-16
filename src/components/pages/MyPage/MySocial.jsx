@@ -169,9 +169,21 @@ export default function MySocial(){
         <div>
             <div>
                 <div className="d-flex justify-content-between">
-                    <Card className="col-5">
+                    <Card className="col-md-5">
                         <div className="d-flex flex-column align-items-center">
-                            <img className="rounded-circle mb-1" width="100px" src={userData.profileImg}/>
+                            <img 
+                                className="rounded-circle mb-1 p-2" 
+                                style={{
+                                    width:"150px",
+                                    height:"150px",
+                                    filter:
+                                        userData.profileImg !== "/img/userAvatar.png"
+                                        ? "none"
+                                        : `invert(42%) sepia(92%) saturate(2385%) hue-rotate(199deg)
+                                                    brightness(95%) contrast(97%)`,
+                                }} 
+                                src={userData.profileImg}
+                            />
                             <div className="fs-3">{userData.nickName}</div>
                             <div className="text-muted">{userData.email}</div>
                         </div>
@@ -186,7 +198,7 @@ export default function MySocial(){
                             </div>
                         </div>
                     </Card>
-                    <div className="col-6 d-flex align-items-center">
+                    <div className="col-6 d-flex justify-content-center align-items-center pl-2">
                         <ListComponent variant="elevated" className="rounded">
                             <ListComponent.Item
                                 primary="나의 글"

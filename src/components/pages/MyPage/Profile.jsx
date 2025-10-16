@@ -284,8 +284,9 @@ export default function Profile() {
                 <div className="d-flex flex-column align-items-center text-center px-4">
                   <img
                     className="rounded-circle mt-5 mb-3"
-                    width="150px"
                     style={{
+                      width:"150px",
+                      height:"150px",
                       filter:
                         profile.profileImg !== "/img/userAvatar.png"
                           ? "none"
@@ -463,7 +464,15 @@ export default function Profile() {
                 <div className="d-flex flex-column align-items-center text-center px-4">
                   <img
                     className="rounded-circle mt-5 mb-3"
-                    width="150px"
+                    style={{
+                      width:"150px",
+                      height:"150px",
+                      filter:
+                        inputs.profileImg !== "/img/userAvatar.png"
+                          ? "none"
+                          : `invert(42%) sepia(92%) saturate(2385%) hue-rotate(199deg)
+                                    brightness(95%) contrast(97%)`,
+                    }}
                     src={inputs.profileImg}
                   />
                 </div>
