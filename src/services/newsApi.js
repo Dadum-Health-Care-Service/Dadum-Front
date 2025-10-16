@@ -271,19 +271,31 @@ export const getWorkoutNews = async (
     // API 호출 제한 방지를 위한 지연
     await new Promise(resolve => setTimeout(resolve, 100));
 
-    // 1) 백엔드 프록시로 뉴스 가져오기
-    const data = await fetchFitnessNews(count, searchTerm);
+    // 1) 백엔드 프록시로 뉴스 가져오기 (강화된 재시도 로직)
+    let data = await fetchFitnessNews(count, searchTerm);
+    let retryCount = 0;
+    const maxRetries = 3;
 
+    // 재시도 로직: 최대 3회까지 재시도
+    while ((!data || !data.items || data.items.length === 0) && retryCount < maxRetries) {
+      retryCount++;
+      console.log(`뉴스 데이터 없음 → ${retryCount}차 재시도 (${retryCount}/${maxRetries})`);
+      
+      // 재시도 간격을 점진적으로 증가 (1초, 2초, 3초)
+      await new Promise(resolve => setTimeout(resolve, retryCount * 1000));
+      
+      // 재시도 시 다른 검색어 사용 (더 일반적인 검색어로)
+      const retrySearchTerms = ["운동", "건강", "피트니스", "헬스"];
+      const retrySearchTerm = retrySearchTerms[retryCount % retrySearchTerms.length];
+      
+      console.log(`재시도 검색어: ${retrySearchTerm}`);
+      data = await fetchFitnessNews(count, retrySearchTerm);
+    }
+
+    // 모든 재시도 실패 시 더미 데이터 사용
     if (!data || !data.items || data.items.length === 0) {
-      console.log("뉴스 데이터 없음 → 재시도");
-      // 1초 후 재시도
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const retryData = await fetchFitnessNews(count, searchTerm);
-      if (!retryData || !retryData.items || retryData.items.length === 0) {
-        console.log("재시도 실패 → 더미 사용");
-        return getDummyNewsData(count);
-      }
-      return retryData;
+      console.log("모든 재시도 실패 → 더미 데이터 사용");
+      return getDummyNewsData(count);
     }
 
     // 2) 필터링/중복제거

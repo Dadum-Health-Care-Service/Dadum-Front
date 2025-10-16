@@ -186,21 +186,6 @@ const Routine = () => {
         </div>
       </div>
 
-      {/* Categories */}
-      <div className={styles.categories}>
-        {categories.map((category) => (
-          <Badge
-            key={category.id}
-            bg={category.id === selectedCategory ? category.color : "light"}
-            text={category.id === selectedCategory ? "white" : "dark"}
-            className={styles.categoryBadge}
-            onClick={() => setSelectedCategory(category.id)}
-          >
-            {category.label}
-          </Badge>
-        ))}
-      </div>
-
       {/* Routines Grid */}
       <div className={styles.routinesGrid}>
         {filteredRoutines?.map((routine) => (

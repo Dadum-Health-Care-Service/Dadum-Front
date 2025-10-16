@@ -12,7 +12,7 @@
 /* Floating Chat Wrapper */
 .floating-chat-wrapper {
   position: fixed;
-  bottom: 100px; /* 하단 네비게이션 위에 위치 */
+  bottom: 150px; /* 글쓰기 버튼과 충분한 간격 확보 */
   right: 20px;
   z-index: 1000;
   display: flex;
@@ -211,6 +211,10 @@
 
 /* 모바일 반응형 */
 @media (max-width: 768px) {
+  .floating-chat-wrapper {
+    bottom: 140px; /* 글쓰기 버튼과 충분한 간격 확보 */
+  }
+  
   .floating-chat-icon {
     bottom: 90px; /* 모바일에서 하단 네비게이션과의 간격 조정 */
     right: 16px;
@@ -234,6 +238,10 @@
 
 /* 매우 작은 화면 */
 @media (max-width: 480px) {
+  .floating-chat-wrapper {
+    bottom: 160px; /* 매우 작은 화면에서도 충분한 간격 확보 */
+  }
+  
   .floating-chat-icon {
     width: 56px;
     height: 56px;
