@@ -22,7 +22,10 @@ export default function MySocial(){
     const [loading, setLoding]=useState(false);
 
     useEffect(()=>{
-        if(!user || !user.usersId) return;
+        if(!user || !user.usersId) {
+            showConfirmModal('사용자 정보를 찾을 수 없습니다','네트워크 에러','확인을 누르시면 로그아웃 됩니다',()=>{dispatch('LOGOUT');});
+            return;
+        }
         const fetchUser = async () => {
             try{
                 const res = await GET(`/users/${user.usersId}`,{},false);
