@@ -1,0 +1,61 @@
+.spinner-container {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1em;
+  font-weight: 500;
+}
+.spinner-wrapper {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.spinner-span {
+  color: #ffc800;
+}
+.spinner {
+  width: 100%;
+  height: 100%;
+  border-radius: 90%;
+  background: conic-gradient(from 90deg, #ffc800, white 75%);
+  mask-image: radial-gradient(circle, transparent 0 40%, black 41% 100%);
+  -webkit-mask-image: radial-gradient(circle, transparent 0 40%, black 41% 100%);
+  animation: spin 1s linear infinite;
+}
+.spinner::after,
+.spinner::before {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+}
+
+.spinner::after {
+  top: 5%;
+  right: 5%;
+  bottom: 5%;
+  left: 5%;
+  background-color: white;
+}
+
+.spinner::before {
+  width: 5%;
+  height: 5%;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+
+  background-color: #ffc800;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(360deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
