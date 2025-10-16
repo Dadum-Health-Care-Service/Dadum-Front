@@ -110,14 +110,14 @@ export default function FitnessNewsFeed() {
       )}
 
       {!loading && !error && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 min-h-0">
+          <div className="grid gap-4 min-h-0" style={{ gridTemplateColumns: `repeat(${Math.min(items.length, 5)}, 1fr)` }}>
             {items.map((n) => (
               <a
                 key={n.id}
                 href={n.link || n.originallink}
                 target="_blank"
                 rel="noreferrer"
-                className="group block rounded-2xl overflow-hidden border hover:shadow-md transition-all duration-200 bg-white"
+                className="group block rounded-2xl overflow-hidden border hover:shadow-md transition-all duration-200 bg-white min-w-0 flex-1"
               >
                 <div className="aspect-[4/3] bg-gray-100 overflow-hidden">
                   {/* eslint-disable-next-line jsx-a11y/alt-text */}
