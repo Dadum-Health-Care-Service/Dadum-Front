@@ -745,7 +745,7 @@ export default function DailySummary() {
           종합 분석 생성
         </ButtonComponent>
         <ButtonComponent
-          variant="outline"
+          variant="primary"
           size="large"
           onClick={handleShowDetails}
         >
