@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import ButtonComponent from "../../common/ButtonComponent";
+import ModalComponent from "../../common/ModalComponent";
 import "./DailySummary.css";
 
 /**
@@ -126,6 +127,14 @@ export default function DailySummary() {
   const [usersId, setUsersId] = useState("");
   const [healthItems, setHealthItems] = useState([]);
   const [showDetails, setShowDetails] = useState(false);
+  
+  // 모달 상태
+  const [showNoDataModal, setShowNoDataModal] = useState(false);
+  
+  // 모달 상태 디버깅
+  useEffect(() => {
+    console.log("showNoDataModal 상태 변경:", showNoDataModal);
+  }, [showNoDataModal]);
 
   /* ---------- helpers ---------- */
   const findById = (id) => meals.find((m) => m.id === id) || {};
@@ -229,6 +238,7 @@ export default function DailySummary() {
 
   // 워치 정보 표시: usersId 해석 → 워치 데이터 조회 → 워치 정보 열기
   const handleShowDetails = async () => {
+    console.log("handleShowDetails 호출됨");
     let id = usersId || localStorage.getItem("usersId");
     if (!id) {
       id = await fetchUsersIdFromSTS();
@@ -237,9 +247,36 @@ export default function DailySummary() {
       alert("사용자 ID를 찾을 수 없습니다. 로그인 또는 이메일 저장을 확인하세요.");
       return;
     }
+    console.log("사용자 ID:", id);
     setUsersId(String(id));
-    await fetchHealthDirect(id); // 워치 데이터만 조회
-    setShowDetails(true);
+    
+    // 워치 데이터 조회
+    try {
+      console.log("워치 데이터 조회 시작...");
+      const res = await axios.get(`/api/v1/health/${id}`);
+      console.log("워치 데이터 응답:", res.data);
+      const arr = Array.isArray(res.data) ? res.data : [];
+      const normalized = normalizeHealthItems(arr, String(id));
+      const currentHealthItems = normalized.length ? normalized : arr;
+      
+      console.log("정규화된 워치 데이터:", currentHealthItems);
+      console.log("워치 데이터 길이:", currentHealthItems.length);
+      
+      // 워치 데이터가 있는지 확인
+      if (!currentHealthItems || currentHealthItems.length === 0) {
+        console.log("워치 데이터가 없음 - 모달 표시");
+        setShowNoDataModal(true);
+        return;
+      }
+      
+      console.log("워치 데이터 있음 - 상세 표시");
+      setHealthItems(currentHealthItems);
+      setShowDetails(true);
+    } catch (e) {
+      console.warn("health GET 실패:", e?.response?.data || e.message);
+      console.log("에러 발생 - 모달 표시");
+      setShowNoDataModal(true);
+    }
   };
 
   /* ---------- ML: 하루 합계/목록 불러오기 ---------- */
@@ -1045,6 +1082,36 @@ export default function DailySummary() {
           </div>
         </div>
       )}
+
+      {/* 워치 정보 없음 모달 */}
+      <ModalComponent
+        isOpen={showNoDataModal}
+        onClose={() => setShowNoDataModal(false)}
+        title="워치 정보 없음"
+        size={ModalComponent.SIZES.SMALL}
+        variant={ModalComponent.VARIANTS.DEFAULT}
+      >
+        <ModalComponent.Section>
+          <div style={{ textAlign: 'center', padding: '20px 0' }}>
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>⌚</div>
+            <p style={{ fontSize: '16px', color: '#666', margin: '0 0 20px 0' }}>
+              워치 정보가 없습니다.
+            </p>
+            <p style={{ fontSize: '14px', color: '#999', margin: 0 }}>
+              워치를 연결하거나 동기화를 확인해주세요.
+            </p>
+          </div>
+        </ModalComponent.Section>
+        <ModalComponent.Actions align="center">
+          <ButtonComponent
+            variant="primary"
+            size="medium"
+            onClick={() => setShowNoDataModal(false)}
+          >
+            확인
+          </ButtonComponent>
+        </ModalComponent.Actions>
+      </ModalComponent>
     </div>
   );
 }
