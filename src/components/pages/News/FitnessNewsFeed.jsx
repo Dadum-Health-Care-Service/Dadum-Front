@@ -78,7 +78,7 @@ export default function FitnessNewsFeed() {
     <div className="w-full pb-4 min-h-0">
       {/* Header with Refresh Button */}
       <div className="flex items-center justify-center mb-4 relative">
-        <h2 className="text-2xl font-extrabold text-center" style={{ color: '#0F172A' }}>뉴스</h2>
+        <h2 className="text-2xl font-extrabold text-center" style={{ color: '#0A66FF' }}>뉴스</h2>
         <button
           onClick={load}
           className="absolute right-0 flex items-center justify-center w-9 h-9 rounded-full text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition"
