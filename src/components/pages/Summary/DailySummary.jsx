@@ -859,12 +859,12 @@ export default function DailySummary() {
             <div className="stat-bar-visual">
               <div 
                 className="stat-bar-fill" 
-                style={{ width: `${activityStats.stepsProgress}%` }}
+                style={{ width: `${activityStats?.stepsProgress || 0}%` }}
               >
-                {activityStats.stepsProgress >= 15 && `${Math.round(activityStats.stepsProgress)}%`}
+                {(activityStats?.stepsProgress || 0) >= 15 && `${Math.round(activityStats?.stepsProgress || 0)}%`}
               </div>
             </div>
-            <div className="stat-bar-value">{Math.round(activityStats.stepsProgress)}%</div>
+            <div className="stat-bar-value">{Math.round(activityStats?.stepsProgress || 0)}%</div>
           </div>
         </div>
       )}
@@ -897,59 +897,54 @@ export default function DailySummary() {
           </div>
 
           {/* 칼로리 수지 */}
-          {activityStats && (
-            <div className="stat-bar">
-              <div className="stat-bar-label">칼로리 수지</div>
-              <div className="stat-bar-visual">
-                <div 
-                  className="stat-bar-fill" 
-                  style={{ 
-                    width: `${Math.min(100, Math.abs(calorieBalance) / 30)}%`,
-                    background: calorieBalance > 0 
-                      ? 'linear-gradient(90deg, #ed8936 0%, #dd6b20 100%)'
-                      : 'linear-gradient(90deg, #48bb78 0%, #38a169 100%)'
-                  }}
-                >
-                </div>
-              </div>
-              <div className="stat-bar-value">
-                {calorieBalance > 0 ? '+' : ''}{calorieBalance}kcal
+          <div className="stat-bar">
+            <div className="stat-bar-label">칼로리 수지</div>
+            <div className="stat-bar-visual">
+              <div 
+                className="stat-bar-fill" 
+                style={{ 
+                  width: `${Math.min(100, Math.abs(calorieBalance || 0) / 30)}%`,
+                  background: (calorieBalance || 0) > 0 
+                    ? 'linear-gradient(90deg, #ed8936 0%, #dd6b20 100%)'
+                    : 'linear-gradient(90deg, #48bb78 0%, #38a169 100%)'
+                }}
+              >
+                {Math.abs(calorieBalance || 0) >= 30 && `${Math.round(calorieBalance || 0)}kcal`}
               </div>
             </div>
-          )}
+            <div className="stat-bar-value">
+              {(calorieBalance || 0) > 0 ? '+' : ''}{calorieBalance || 0}kcal
+            </div>
+          </div>
 
           {/* 영양소 비율 바 */}
-          {ratios && (
-            <>
-              <div className="stat-bar">
-                <div className="stat-bar-label">단백질 비율</div>
-                <div className="stat-bar-visual">
-                  <div className="stat-bar-fill" style={{ width: `${ratios.protein}%` }}>
-                    {ratios.protein >= 15 && `${ratios.protein}%`}
-                  </div>
-                </div>
-                <div className="stat-bar-value">{ratios.protein}%</div>
+          <div className="stat-bar">
+            <div className="stat-bar-label">단백질 비율</div>
+            <div className="stat-bar-visual">
+              <div className="stat-bar-fill" style={{ width: `${ratios?.protein || 0}%` }}>
+                {(ratios?.protein || 0) >= 15 && `${ratios?.protein || 0}%`}
               </div>
-              <div className="stat-bar">
-                <div className="stat-bar-label">탄수화물 비율</div>
-                <div className="stat-bar-visual">
-                  <div className="stat-bar-fill" style={{ width: `${ratios.carbs}%` }}>
-                    {ratios.carbs >= 15 && `${ratios.carbs}%`}
-                  </div>
-                </div>
-                <div className="stat-bar-value">{ratios.carbs}%</div>
+            </div>
+            <div className="stat-bar-value">{ratios?.protein || 0}%</div>
+          </div>
+          <div className="stat-bar">
+            <div className="stat-bar-label">탄수화물 비율</div>
+            <div className="stat-bar-visual">
+              <div className="stat-bar-fill" style={{ width: `${ratios?.carbs || 0}%` }}>
+                {(ratios?.carbs || 0) >= 15 && `${ratios?.carbs || 0}%`}
               </div>
-              <div className="stat-bar">
-                <div className="stat-bar-label">지방 비율</div>
-                <div className="stat-bar-visual">
-                  <div className="stat-bar-fill" style={{ width: `${ratios.fat}%` }}>
-                    {ratios.fat >= 15 && `${ratios.fat}%`}
-                  </div>
-                </div>
-                <div className="stat-bar-value">{ratios.fat}%</div>
+            </div>
+            <div className="stat-bar-value">{ratios?.carbs || 0}%</div>
+          </div>
+          <div className="stat-bar">
+            <div className="stat-bar-label">지방 비율</div>
+            <div className="stat-bar-visual">
+              <div className="stat-bar-fill" style={{ width: `${ratios?.fat || 0}%` }}>
+                {(ratios?.fat || 0) >= 15 && `${ratios?.fat || 0}%`}
               </div>
-            </>
-          )}
+            </div>
+            <div className="stat-bar-value">{ratios?.fat || 0}%</div>
+          </div>
 
           <div className="mt-3" style={{ fontSize: "14px", color: "#718096" }}>
             총 {meals.length}끼 식사 기록

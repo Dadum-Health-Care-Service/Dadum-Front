@@ -144,7 +144,7 @@
 }
 
 /* 통계 바 - 공통 컴포넌트 색상 적용 */
-.stat-bar {
+.report-container .stat-bar {
   display: flex;
   align-items: center;
   margin-bottom: 16px;
@@ -152,43 +152,97 @@
   background: #f9fafb;
   border-radius: 8px;
   border: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .stat-bar-label {
-  min-width: 120px;
+  min-width: 100px;
   font-weight: 600;
   color: #212121;
+  font-size: 14px;
 }
 
 .stat-bar-visual {
   flex: 1;
+  min-width: 120px;
   height: 24px;
   background: var(--light);
   border-radius: 12px;
   overflow: hidden;
-  margin: 0 16px;
+  margin: 0 8px;
   position: relative;
   border: 1px solid #bbdefb;
 }
 
 .stat-bar-fill {
-  height: 100%;
-  background: linear-gradient(135deg, var(--primary), var(--primary-2));
+  height: 100% !important;
+  background-color: #0A66FF !important;
+  background: #0A66FF !important;
   transition: width 0.3s ease;
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: flex-end;
   padding-right: 8px;
-  color: white;
+  color: white !important;
   font-size: 12px;
   font-weight: 600;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  border-radius: 12px;
+  position: relative !important;
+  z-index: 1 !important;
 }
 
 .stat-bar-value {
-  min-width: 80px;
+  min-width: 60px;
   text-align: right;
   font-weight: 600;
   color: #212121;
+  font-size: 14px;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .stat-bar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 16px;
+  }
+  
+  .stat-bar-label {
+    min-width: auto;
+    margin-bottom: 8px;
+    font-size: 16px;
+    text-align: center;
+  }
+  
+  .stat-bar-visual {
+    margin: 0 0 8px 0;
+    height: 28px;
+    min-width: auto;
+  }
+  
+  .stat-bar-fill {
+    font-size: 14px !important;
+    padding-right: 12px !important;
+    height: 100% !important;
+    background-color: #0A66FF !important;
+    background: #0A66FF !important;
+    display: flex !important;
+    color: white !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    border-radius: 12px !important;
+    position: relative !important;
+    z-index: 1 !important;
+  }
+  
+  .stat-bar-value {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+  }
 }
 
 /* 조언 카드 */
