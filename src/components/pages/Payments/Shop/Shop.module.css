@@ -78,7 +78,7 @@
 
 .categoryBtn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
 }
 
 .productsGrid {
@@ -171,6 +171,13 @@
   margin-bottom: 20px;
 }
 
+.stockInfo {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
 .originalPrice {
   font-size: 0.9rem;
   color: #bdc3c7;
@@ -191,7 +198,7 @@
 }
 
 .buyButton {
-  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border: none;
   color: white;
   font-weight: 600;
@@ -201,15 +208,15 @@
 }
 
 .buyButton:hover {
-  background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(243, 156, 18, 0.4);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 .wishlistButton {
   background: transparent;
-  border: 2px solid #f39c12;
-  color: #f39c12;
+  border: 2px solid #667eea;
+  color: #667eea;
   font-weight: 600;
   padding: 10px;
   border-radius: 8px;
@@ -217,9 +224,10 @@
 }
 
 .wishlistButton:hover {
-  background: #f39c12;
+  background: #667eea;
   color: white;
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .emptyState {

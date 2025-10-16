@@ -1,20 +1,26 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useRef } from "react";
 import ContainerComponent from "../../common/ContainerComponent";
 import FormComponent from "../../common/FormComponent";
 import InputComponent from "../../common/InputComponent";
 import ButtonComponent from "../../common/ButtonComponent";
 import ListComponent from "../../common/ListComponent";
 import { AuthContext } from "../../../context/AuthContext";
-
+import {
+  KAKAO_CLIENT_ID,
+  KAKAO_AUTH_URL,
+  KAKAO_REDIRECT_URI,
+} from "../../../utils/oauth/oAuth";
 import styles from "./Login.module.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useModal } from "../../../context/ModalContext";
 import { useApi } from "../../../utils/api/useApi";
+import axios from "axios";
 
 function Login() {
   const { POST } = useApi();
   const navigate = useNavigate();
-  const {showBasicModal}=useModal();
+  const location = useLocation();
+  const { showBasicModal } = useModal();
 
   // 현재 보여줄 뷰를 관리하는 상태 ('login', 'passwordless','loggedIn')
   const [view, setView] = useState("login");
@@ -39,7 +45,7 @@ function Login() {
   //QR 등록 여부
   const [isQrRegistered, setIsQrRegistered] = useState(false);
 
-  //세션 ID 설정
+  //루틴 ID 설정
   const [sessionId, setSessionId] = useState("");
 
   //서비스 패스워드 설정
@@ -47,8 +53,16 @@ function Login() {
   const [currentTerm, setCurrentTerm] = useState(0);
   const [termLength, setTermLength] = useState(0);
 
-  // 최초렌더링 시 user가 있다면 
+  //쿼리 파라미터 추출
+  const query = new URLSearchParams(location.search);
 
+  // 카카오 코드 추출
+  const kakaoCode = query.get("code");
+
+  //카카오 로그인용
+  const kakaoRef = useRef(null);
+
+  // 최초렌더링 시 user가 있다면
 
   // view 상태가 'passwordless'로 변경될 때 QR 코드를 생성하는 로직 (Side Effect)
   useEffect(() => {
@@ -136,7 +150,6 @@ function Login() {
       await POST(
         "/users/auth/passwordless/register",
         { passwordlessToken: pushConnectorToken },
-        user.accessToken,
         true
       ).then(async (res) => {
         console.log(res.data);
@@ -151,7 +164,7 @@ function Login() {
             if (res.data.result === "OK") {
               setIsQrRegistered(true);
               setIsLoggedIn(true);
-              navigate('/');
+              navigate("/");
             }
           });
         }
@@ -207,7 +220,7 @@ function Login() {
                     console.log(res.data);
                     dispatch({ type: "LOGIN", user: res.data });
                     setIsLoggedIn(true);
-                    navigate('/');
+                    navigate("/");
                   });
                 } else {
                   await POST(
@@ -232,6 +245,43 @@ function Login() {
     };
     connectWebSocket();
   }, [pushConnectorToken]);
+
+  //카카오 로그인
+  useEffect(() => {
+    const grantType = "authorization_code";
+    if (kakaoCode) {
+      POST(
+        `/oauth/token?grant_type=${grantType}&client_id=${KAKAO_CLIENT_ID}&redirect_uri=${KAKAO_REDIRECT_URI}&code=${kakaoCode}`,
+        {},
+        false,
+        "kakao"
+      )
+        .then((res) => {
+          console.log(res);
+          const { access_token } = res.data;
+          console.log(access_token);
+          POST("/users/login/kakao", {
+            socialType: "kakao",
+            accessToken: access_token,
+          })
+            .then((res) => {
+              console.log("kakao login successful");
+              dispatch({ type: "LOGIN", user: res.data });
+
+              // 사용자 역할에 따라 적절한 페이지로 리다이렉트
+              if (res.data.role === "SUPER_ADMIN") {
+                navigate("/admin", { replace: true });
+              } else {
+                navigate("/", { replace: true });
+              }
+            })
+            .catch();
+        })
+        .catch((error) => {
+          //toast
+        });
+    }
+  }, [kakaoCode]);
 
   // 로그인 처리 핸들러
   const handleLogin = async (e) => {
@@ -267,12 +317,16 @@ function Login() {
         })
         .catch((error) => {
           console.error("로그인 오류:", error);
-          if (typeof error.response?.data === 'string'){
+          if (typeof error.response?.data === "string") {
             const msg = error.response.data;
-            if(msg.length > 0) showBasicModal(msg.substring(msg.indexOf(':')+1),'로그인 실패');
-            else showBasicModal('로그인에 실패하였습니다','로그인 실패');
-          }else {
-            showBasicModal('로그인에 실패하였습니다.','네트워크 에러');
+            if (msg.length > 0)
+              showBasicModal(
+                msg.substring(msg.indexOf(":") + 1),
+                "로그인 실패"
+              );
+            else showBasicModal("로그인에 실패하였습니다", "로그인 실패");
+          } else {
+            showBasicModal("로그인에 실패하였습니다.", "네트워크 에러");
           }
         });
 
@@ -356,7 +410,7 @@ function Login() {
 
     return interval;
   };
-  
+
   const handlePasswordlessRegister = async () => {
     await POST(
       "/join",
@@ -377,7 +431,7 @@ function Login() {
       </div>
 
       {/* 로그인 뷰 */}
-      {(view === "login" && !user) && (
+      {view === "login" && !user && (
         <FormComponent
           title="로그인"
           subtitle="다듬에 오신 것을 환영합니다."
@@ -457,29 +511,44 @@ function Login() {
             >
               로그인
             </ButtonComponent>
-
+            <ButtonComponent
+              variant="ghost"
+              size="large"
+              fullWidth
+              style={{ objectFit: "fill", padding: "0" }}
+              onClick={() => {
+                kakaoRef.current.click();
+              }}
+            >
+              <img
+                src={"/img/kakao_login.png"}
+                style={{ height: "100%" }}
+                alt="kakao"
+              />
+              <a href={KAKAO_AUTH_URL} ref={kakaoRef} hidden></a>
+            </ButtonComponent>
             <ButtonComponent
               variant="outline-primary"
               size="large"
-              onClick={()=>navigate('/signup')}
+              onClick={() => navigate("/signup")}
               fullWidth
             >
               계정이 없으신가요? 회원가입
             </ButtonComponent>
           </div>
-          
+
           <div className={styles["button-find"]}>
             <ButtonComponent
               variant="outline-primary"
               size="large"
-              onClick={()=>navigate('/findid')}
+              onClick={() => navigate("/findid")}
             >
               아이디 찾기
             </ButtonComponent>
             <ButtonComponent
               variant="outline-primary"
               size="large"
-              onClick={()=>navigate('/findpw')}
+              onClick={() => navigate("/findpw")}
             >
               비밀번호 찾기
             </ButtonComponent>
@@ -551,7 +620,10 @@ function Login() {
           className={styles["logged-in-container"]}
         >
           <h2>로그인 성공!</h2>
-          <p>환영합니다, {user.email}님!</p>
+          <p>
+            환영합니다, <span style={{ color: "#2563eb" }}>{user.email}</span>
+            님!
+          </p>
           <p>다듬 서비스를 이용하실 수 있습니다.</p>
 
           <div className={styles["button-group"]}>
@@ -559,7 +631,7 @@ function Login() {
               variant="outline-primary"
               size="large"
               onClick={() => {
-                navigate('/',{replace:true});
+                navigate("/", { replace: true });
               }}
               fullWidth
             >

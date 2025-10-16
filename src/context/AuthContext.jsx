@@ -1,4 +1,4 @@
-import { createContext, useReducer } from "react";
+import { createContext, useReducer, useContext } from "react";
 
 //초기값 user는 로컬스토리지에 'user'라는 키로 저장된 데이터가 있으면 읽어오고 없으면 null저장
 const initialState = {user: JSON.parse(localStorage.getItem('user'))||null};
@@ -29,3 +29,12 @@ export function AuthProvider({children}){
         </AuthContext.Provider>
     </>
 };
+
+// useAuth 훅 추가
+export function useAuth() {
+    const context = useContext(AuthContext);
+    if (context === undefined) {
+        throw new Error('useAuth must be used within an AuthProvider');
+    }
+    return context;
+}

@@ -30,12 +30,20 @@
   color: #1f2937;
   line-height: 1.5;
   min-height: 80px;
+  border: 2px solid #d1d5db;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.textarea-field:hover:not(:disabled):not(:read-only) {
+  border-color: #9ca3af;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 /* Variant별 스타일 */
 .outlined {
   border: 2px solid #d1d5db;
   background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .outlined:focus {
@@ -46,6 +54,7 @@
 
 .outlined:hover:not(:disabled):not(:read-only) {
   border-color: #9ca3af;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .filled {
@@ -229,6 +238,15 @@
 
 /* 반응형 디자인 */
 @media (max-width: 768px) {
+  .textarea-field {
+    border-width: 2px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+  
+  .textarea-field:hover:not(:disabled):not(:read-only) {
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.15);
+  }
+
   .small {
     padding: 6px 8px;
     font-size: 12px;
