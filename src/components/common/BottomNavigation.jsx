@@ -39,7 +39,7 @@ const NavigationTab = ({ tab, isNotify }) => {
 
   const isActive =
     location.pathname.startsWith('/mypage') 
-    ? location.pathname.includes(tab.to) 
+    ? tab.to === '/mypage' 
     : location.pathname === '/shop' || location.pathname === '/orders'
     ? tab.to === '/shop'
     : location.pathname === tab.to;

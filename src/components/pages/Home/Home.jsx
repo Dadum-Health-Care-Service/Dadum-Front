@@ -6,8 +6,8 @@ import { FaPlay, FaClock, FaStar, FaFire, FaCheckCircle } from "react-icons/fa";
 import styles from "./Home.module.css";
 import CardComponent from "../../common/CardComponent";
 import ButtonComponent from "../../common/ButtonComponent";
+import FitnessNewsFeed from "../News/FitnessNewsFeed";
 import { useApi } from "../../../utils/api/useApi";
-
 const Home = () => {
   const navigate = useNavigate();
   const [userStats, setUserStats] = useState({
@@ -316,6 +316,13 @@ const Home = () => {
           {totalCount > 0 && (
             <CardComponent className={styles.todayGoal} title="오늘의 목표" details={`${completedCount}/${totalCount} 루틴 완료`} />
           )}
+        </Container>
+      </section>
+
+      {/* News Section */}
+      <section className={styles.newsSection}>
+        <Container>
+          <FitnessNewsFeed />
         </Container>
       </section>
     </ContainerComponent>

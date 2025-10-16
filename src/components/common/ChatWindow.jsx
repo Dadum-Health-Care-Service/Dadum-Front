@@ -32,13 +32,15 @@ const ChatWindow = ({
     }
   }, [isOpen]);
 
-  const handleSendMessage = async (e) => {
+  const handleSendMessage = async (e, suggestionText = null) => {
     e.preventDefault();
-    if (inputValue.trim() && onSendMessage && !isLoading) {
-      const messageText = inputValue.trim();
-      
+    const messageText = suggestionText || inputValue.trim();
+    
+    if (messageText && onSendMessage && !isLoading) {
       // 입력창을 먼저 비우기 (사용자 경험 개선)
-      setInputValue('');
+      if (!suggestionText) {
+        setInputValue('');
+      }
       
       try {
         // onSendMessage가 async 함수이므로 await로 기다림
@@ -46,7 +48,9 @@ const ChatWindow = ({
       } catch (error) {
         console.error('메시지 전송 실패:', error);
         // 실패 시 입력창에 다시 텍스트 복원
-        setInputValue(messageText);
+        if (!suggestionText) {
+          setInputValue(messageText);
+        }
       }
     }
   };
@@ -56,6 +60,12 @@ const ChatWindow = ({
       e.preventDefault();
       handleSendMessage(e);
     }
+  };
+
+  // 추천 질문 클릭 핸들러
+  const handleSuggestionClick = (suggestion) => {
+    // 바로 전송 (입력 필드에 입력하지 않고)
+    handleSendMessage({ preventDefault: () => {} }, suggestion);
   };
 
   const formatTime = (timestamp) => {
@@ -189,6 +199,30 @@ const ChatWindow = ({
           
           <div ref={messagesEndRef} />
         </div>
+
+        {/* 추천 질문 */}
+        {!isLoading && (
+          <div className="chat-window__suggestions">
+            <div className="chat-window__suggestions-title">추천 질문</div>
+            <div className="chat-window__suggestions-list">
+              {[
+                "어깨 통증 스트레칭 방법",
+                "체지방 감량 식단 추천",
+                "3일 분할 루틴 만들기",
+                "운동 전후 스트레칭"
+              ].map((suggestion, index) => (
+                <button
+                  key={index}
+                  className="chat-window__suggestion-item"
+                  onClick={() => handleSuggestionClick(suggestion)}
+                  disabled={isLoading}
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* 메시지 입력 */}
         <div className="chat-window__input">
