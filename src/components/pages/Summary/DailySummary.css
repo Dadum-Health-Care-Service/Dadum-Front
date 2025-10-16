@@ -16,8 +16,8 @@
 
 /* 보고서 헤더 - 공통 컴포넌트 스타일 적용 */
 .report-header {
-  background: linear-gradient(135deg, var(--primary), var(--primary-2));
-  color: white;
+  background: linear-gradient(135deg, #eef4ff, #e6f2ff);
+  color: #0A66FF;
   padding: 30px;
   border-radius: 12px;
   margin-bottom: 24px;
@@ -86,8 +86,8 @@
 }
 
 .summary-card.primary {
-  background: linear-gradient(135deg, var(--primary), var(--primary-2)) !important;
-  color: white !important;
+  background: linear-gradient(135deg, #eef4ff, #e6f2ff) !important;
+  color: #0A66FF !important;
   border: 0 !important; /* 활동/식단 지표 카드 테두리 제거 */
 }
 
@@ -176,22 +176,19 @@
 }
 
 .stat-bar-fill {
-  height: 100% !important;
-  background-color: #0A66FF !important;
-  background: #0A66FF !important;
+  height: 100%;
+  background: linear-gradient(135deg, #0A66FF, #3BAAFF);
   transition: width 0.3s ease;
-  display: flex !important;
+  display: flex;
   align-items: center;
   justify-content: flex-end;
   padding-right: 8px;
-  color: white !important;
+  color: white;
   font-size: 12px;
   font-weight: 600;
-  min-width: 0 !important;
-  max-width: 100% !important;
+  min-width: 0;
+  max-width: 100%;
   border-radius: 12px;
-  position: relative !important;
-  z-index: 1 !important;
 }
 
 .stat-bar-value {
@@ -224,18 +221,15 @@
   }
   
   .stat-bar-fill {
-    font-size: 14px !important;
-    padding-right: 12px !important;
-    height: 100% !important;
-    background-color: #0A66FF !important;
-    background: #0A66FF !important;
-    display: flex !important;
-    color: white !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    border-radius: 12px !important;
-    position: relative !important;
-    z-index: 1 !important;
+    font-size: 14px;
+    padding-right: 12px;
+    height: 100%;
+    background: linear-gradient(135deg, #0A66FF, #3BAAFF);
+    display: flex;
+    color: white;
+    min-width: 0;
+    max-width: 100%;
+    border-radius: 12px;
   }
   
   .stat-bar-value {
@@ -244,6 +238,7 @@
     font-weight: 700;
   }
 }
+
 
 /* 조언 카드 */
 .advice-list {
@@ -312,7 +307,7 @@
 }
 
 .data-table thead tr {
-  background: linear-gradient(135deg, var(--primary), var(--primary-2)); /* 전체 행 그라데이션 */
+  background: linear-gradient(135deg, #eef4ff, #e6f2ff); /* 전체 행 그라데이션 */
 }
 
 .data-table th {
@@ -320,8 +315,8 @@
   padding: 14px 12px;
   text-align: left;
   font-weight: 800;
-  color: #ffffff;                        /* 흰색 텍스트 */
-  border-bottom: 1px solid rgba(255,255,255,.15); /* 은은한 하단 라인 */
+  color: #0A66FF;                        /* 파란색 텍스트 */
+  border-bottom: 1px solid rgba(10, 102, 255, 0.15); /* 은은한 하단 라인 */
 }
 
 .data-table th:first-child { border-top-left-radius: 12px; }
