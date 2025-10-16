@@ -9,6 +9,8 @@ const CardComponent = ({
   onClick,
   className = "",
   disabled = false,
+  variant = "default",
+  children,
 }) => {
   const handleClick = () => {
     if (!disabled && onClick) {
@@ -16,9 +18,40 @@ const CardComponent = ({
     }
   };
 
+  // children이 있으면 컨테이너로 사용하되, title도 렌더링
+  if (children) {
+    return (
+      <div
+        className={`${styles.card} ${className} ${
+          disabled ? styles.disabled : ""
+        }`}
+        onClick={handleClick}
+        role="button"
+        tabIndex={disabled ? -1 : 0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleClick();
+          }
+        }}
+      >
+        {title && (
+          <div className={styles["card-content"]}>
+            <div className={styles["card-title"]}>{title}</div>
+            {details && <p className={styles["card-details"]}>{details}</p>}
+          </div>
+        )}
+        {children}
+      </div>
+    );
+  }
+
+  // children이 없으면 루틴 카드로 사용
   return (
     <div
-      className={`${styles.card} ${className} ${disabled ? styles.disabled : ""}`}
+      className={`${styles.card} ${className} ${
+        disabled ? styles.disabled : ""
+      }`}
       onClick={handleClick}
       role="button"
       tabIndex={disabled ? -1 : 0}
@@ -30,9 +63,10 @@ const CardComponent = ({
       }}
     >
       <div className={styles["card-content"]}>
-        <h3 className={styles["card-title"]}>{title}</h3>
+        <div className={styles["card-title"]}>{title}</div>
         <p className={styles["card-details"]}>{details}</p>
       </div>
+      {children}
       {buttonText && !disabled && (
         <div className={styles["card-button-container"]} onClick={handleClick}>
           <ButtonComponent variant="outline" onClick={onClick} size="medium">

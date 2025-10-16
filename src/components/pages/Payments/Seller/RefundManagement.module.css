@@ -1,0 +1,141 @@
+/* RefundManagement 컴포넌트 스타일 */
+
+.refundManagement {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.refundHeader {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 2rem 0;
+  margin-bottom: 2rem;
+}
+
+.refundCard {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.refundTable {
+  margin-bottom: 0;
+}
+
+.refundTable th {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+  font-weight: 600;
+  color: #495057;
+  padding: 1rem 0.75rem;
+}
+
+.refundTable td {
+  padding: 1rem 0.75rem;
+  vertical-align: middle;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.refundTable tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.statusBadge {
+  font-size: 0.75rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #6c757d;
+}
+
+.emptyState h4 {
+  margin-bottom: 1rem;
+  color: #495057;
+}
+
+.filterCard {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1.5rem;
+}
+
+.detailModal {
+  max-width: 800px;
+}
+
+.detailSection {
+  margin-bottom: 1.5rem;
+}
+
+.detailSection h6 {
+  color: #495057;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.detailTable {
+  margin-bottom: 0;
+}
+
+.detailTable td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.detailTable td:first-child {
+  font-weight: 500;
+  color: #6c757d;
+  width: 30%;
+}
+
+.reasonBox {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 0.375rem;
+  padding: 1rem;
+  margin-top: 0.5rem;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+.modalActions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #dee2e6;
+}
+
+@media (max-width: 768px) {
+  .refundTable {
+    font-size: 0.875rem;
+  }
+  
+  .refundTable th,
+  .refundTable td {
+    padding: 0.5rem 0.25rem;
+  }
+  
+  .actionButtons {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .modalActions {
+    flex-direction: column;
+  }
+}

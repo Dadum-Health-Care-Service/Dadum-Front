@@ -1,0 +1,199 @@
+/* 차트 컴포넌트 스타일 */
+.chartContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.chartTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 15px 0;
+  text-align: center;
+}
+
+.chartContent {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.noDataMessage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* 막대 차트 */
+.barChart {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  height: 200px;
+  width: 100%;
+  padding: 0 10px;
+  gap: 5px;
+}
+
+.barContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  height: 100%;
+}
+
+.bar {
+  background: linear-gradient(135deg, #4facfe 0%, #00d4aa 100%);
+  width: 100%;
+  min-height: 10px;
+  border-radius: 4px 4px 0 0;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.bar:hover {
+  background: linear-gradient(135deg, #00d4aa 0%, #4facfe 100%);
+  transform: scaleY(1.05);
+}
+
+.barLabel {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-top: 5px;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* 라인 차트 */
+.lineChart {
+  width: 100%;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lineSvg {
+  width: 100%;
+  height: 100%;
+}
+
+.dataPoint {
+  cursor: pointer;
+  transition: r 0.3s ease;
+}
+
+.dataPoint:hover {
+  r: 6;
+  fill: #00d4aa;
+}
+
+/* 파이 차트 */
+.pieChart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+}
+
+.pieSvg {
+  width: 200px;
+  height: 200px;
+}
+
+.pieSlice {
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+}
+
+.pieSlice:hover {
+  opacity: 0.8;
+}
+
+.pieLegend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+}
+
+.legendColor {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.legendLabel {
+  font-size: 0.9rem;
+  color: #374151;
+  font-weight: 500;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .barChart {
+    height: 150px;
+    gap: 3px;
+  }
+  
+  .barLabel {
+    font-size: 0.7rem;
+  }
+  
+  .lineChart {
+    height: 150px;
+  }
+  
+  .pieSvg {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .pieLegend {
+    max-width: 250px;
+  }
+  
+  .legendLabel {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .barChart {
+    height: 120px;
+  }
+  
+  .lineChart {
+    height: 120px;
+  }
+  
+  .pieSvg {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .pieLegend {
+    max-width: 200px;
+  }
+  
+  .legendLabel {
+    font-size: 0.75rem;
+  }
+}
