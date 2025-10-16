@@ -825,73 +825,70 @@ export default function DailySummary() {
       )}
 
       {/* 활동량 요약 */}
-      {activityStats && (
-        <div className="report-section">
-          <h2>활동량 현황</h2>
-          <div className="summary-grid">
-            <div className="summary-card primary">
-              <div className="summary-card-label">걸음수</div>
-              <div className="summary-card-value">{activityStats.totalSteps.toLocaleString()}</div>
-              <div className="summary-card-unit">/ 10,000 보</div>
-            </div>
-            <div className="summary-card primary">
-              <div className="summary-card-label">이동 거리</div>
-              <div className="summary-card-value">{activityStats.totalDistance.toFixed(1)}</div>
-              <div className="summary-card-unit">km</div>
-            </div>
-            <div className="summary-card primary">
-              <div className="summary-card-label">소모 칼로리</div>
-              <div className="summary-card-value">{activityStats.totalCaloriesBurned}</div>
-              <div className="summary-card-unit">kcal</div>
-            </div>
-            {activityStats.avgHeartRate > 0 && (
-              <div className="summary-card primary">
-                <div className="summary-card-label">평균 심박수</div>
-                <div className="summary-card-value">{activityStats.avgHeartRate}</div>
-                <div className="summary-card-unit">bpm</div>
-              </div>
-            )}
+      <div className="report-section">
+        <h2>활동량 현황</h2>
+        <div className="summary-grid">
+          <div className="summary-card primary">
+            <div className="summary-card-label">걸음수</div>
+            <div className="summary-card-value">{(activityStats?.totalSteps || 0).toLocaleString()}</div>
+            <div className="summary-card-unit">/ 10,000 보</div>
           </div>
-          
-          {/* 걸음수 진행바 */}
-          <div className="stat-bar">
-            <div className="stat-bar-label">목표 달성률</div>
-            <div className="stat-bar-visual">
-              <div 
-                className="stat-bar-fill" 
-                style={{ width: `${activityStats?.stepsProgress || 0}%` }}
-              >
-                {(activityStats?.stepsProgress || 0) >= 15 && `${Math.round(activityStats?.stepsProgress || 0)}%`}
-              </div>
-            </div>
-            <div className="stat-bar-value">{Math.round(activityStats?.stepsProgress || 0)}%</div>
+          <div className="summary-card primary">
+            <div className="summary-card-label">이동 거리</div>
+            <div className="summary-card-value">{(activityStats?.totalDistance || 0).toFixed(1)}</div>
+            <div className="summary-card-unit">km</div>
           </div>
+          <div className="summary-card primary">
+            <div className="summary-card-label">소모 칼로리</div>
+            <div className="summary-card-value">{activityStats?.totalCaloriesBurned || 0}</div>
+            <div className="summary-card-unit">kcal</div>
+          </div>
+          {(activityStats?.avgHeartRate || 0) > 0 && (
+            <div className="summary-card primary">
+              <div className="summary-card-label">평균 심박수</div>
+              <div className="summary-card-value">{activityStats?.avgHeartRate || 0}</div>
+              <div className="summary-card-unit">bpm</div>
+            </div>
+          )}
         </div>
-      )}
+        
+        {/* 걸음수 진행바 */}
+        <div className="stat-bar">
+          <div className="stat-bar-label">목표 달성률</div>
+          <div className="stat-bar-visual">
+            <div 
+              className="stat-bar-fill" 
+              style={{ width: `${activityStats?.stepsProgress || 0}%` }}
+            >
+              {(activityStats?.stepsProgress || 0) >= 15 && `${Math.round(activityStats?.stepsProgress || 0)}%`}
+            </div>
+          </div>
+          <div className="stat-bar-value">{Math.round(activityStats?.stepsProgress || 0)}%</div>
+        </div>
+      </div>
 
       {/* 식단 요약 */}
-      {meals && meals.length > 0 && (
-        <div className="report-section">
-          <h2>식단 현황</h2>
+      <div className="report-section">
+        <h2>식단 현황</h2>
           <div className="summary-grid">
             <div className="summary-card primary">
               <div className="summary-card-label">총 칼로리</div>
-              <div className="summary-card-value">{totals.calories}</div>
+              <div className="summary-card-value">{totals?.calories || 0}</div>
               <div className="summary-card-unit">kcal</div>
             </div>
             <div className="summary-card primary">
               <div className="summary-card-label">단백질</div>
-              <div className="summary-card-value">{totals.protein_g}</div>
+              <div className="summary-card-value">{totals?.protein_g || 0}</div>
               <div className="summary-card-unit">g ({ratios?.protein || 0}%)</div>
             </div>
             <div className="summary-card primary">
               <div className="summary-card-label">탄수화물</div>
-              <div className="summary-card-value">{totals.carbs_g}</div>
+              <div className="summary-card-value">{totals?.carbs_g || 0}</div>
               <div className="summary-card-unit">g ({ratios?.carbs || 0}%)</div>
             </div>
             <div className="summary-card primary">
               <div className="summary-card-label">지방</div>
-              <div className="summary-card-value">{totals.fat_g}</div>
+              <div className="summary-card-value">{totals?.fat_g || 0}</div>
               <div className="summary-card-unit">g ({ratios?.fat || 0}%)</div>
             </div>
           </div>
@@ -947,10 +944,9 @@ export default function DailySummary() {
           </div>
 
           <div className="mt-3" style={{ fontSize: "14px", color: "#718096" }}>
-            총 {meals.length}끼 식사 기록
+            총 {meals?.length || 0}끼 식사 기록
           </div>
         </div>
-      )}
 
       {/* 워치 정보 상세 패널 */}
       {showDetails && healthItems && healthItems.length > 0 && (
