@@ -71,6 +71,13 @@ export default defineConfig(({ mode }) => {
       open: true, // 개발 서버 실행 시 자동으로 브라우저 열기
       host: "0.0.0.0",
       allowedHosts: "all",
+      // https: {
+      //   key: fs.readFileSync(path.resolve(__dirname, "192.168.0.51+2-key.pem")),
+      //   cert: fs.readFileSync(path.resolve(__dirname, "192.168.0.51+2.pem")),
+      // },
+      // headers: {
+      //   "Content-Security-Policy": "script-src 'self' 'unsafe-inline';",
+      // },
       proxy: {
         "/api": {
           target: "http://localhost:8080",
@@ -117,10 +124,16 @@ export default defineConfig(({ mode }) => {
           },
         },
         "/ml": {
-          target: "http://127.0.0.1:8000",
+          target: "http://127.0.0.1:8020",
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/ml/, ""), // ★ /ml 접두어 제거해서 /analyze-coach로 전달
         },
+        // "/elk": {
+        //   target: env.VITE_ELASTICSEARCH_URL + ":5601",
+        //   changeOrigin: true,
+        //   secure: false,
+        //   rewrite: (path) => path.replace(/^\/elk/, ""),
+        // },
       },
     },
 

@@ -4,8 +4,7 @@
  * - 탭별 검색어(explicitSearchTerm) 반영
  */
 
-// (프런트에서 직접 ClientID/Secret 쓰지 않음 — 반드시 서버에서 프록시)
-const API_BASE = "http://localhost:8080/api/v1/news";
+import { GET } from "../utils/api/api";
 
 /**
  * 스포츠 피트니스 관련 뉴스 검색어 목록 (랜덤 기본값)
@@ -35,40 +34,37 @@ const fetchFitnessNews = async (count = 5, searchTerm = null) => {
   // 전달된 검색어가 없으면 랜덤
   const term =
     searchTerm ||
-    WORKOUT_SEARCH_TERMS[Math.floor(Math.random() * WORKOUT_SEARCH_TERMS.length)];
+    WORKOUT_SEARCH_TERMS[
+      Math.floor(Math.random() * WORKOUT_SEARCH_TERMS.length)
+    ];
 
   // 필터링을 위해 더 많은 뉴스를 요청 (최소 30개)
   const requestCount = Math.max(count * 5, 20);
 
-  const url =
-    `${API_BASE}/fitness` +
-    `?query=${encodeURIComponent(term)}` +
-    `&display=${requestCount}` +
-    `&_t=${Date.now()}`; // ✅ 캐시 방지
+  const params = {
+    query: term,
+    display: requestCount,
+    _t: Date.now(), // ✅ 캐시 방지
+  };
 
-  console.log("[fetchFitnessNews] GET", url);
+  console.log("[fetchFitnessNews] GET /news/fitness", params);
 
-  const res = await fetch(url, {
-    method: "GET",
-    headers: { Accept: "application/json" },
-    cache: "no-store",              // ✅ 캐시 사용 금지
-  });
+  const response = await GET("/news/fitness", params, true);
+  const data = response.data;
 
-  if (!res.ok) {
-    throw new Error(`HTTP error! status: ${res.status}`);
-  }
-
-  const data = await res.json(); // { items: [...], ... }
   return { ...data, searchTerm: term };
 };
 
 const fetchNewsImage = async (query) => {
   try {
-    const url = `${API_BASE}/image?query=${encodeURIComponent(query)}&display=1`;
-    const res = await fetch(url, { method: "GET", headers: { Accept: "application/json" } });
-    if (!res.ok) return null;
+    const params = {
+      query: query,
+      display: 1,
+    };
 
-    const data = await res.json();
+    const response = await GET("/news/image", params, true);
+    const data = response.data;
+
     if (data && data.items && data.items.length > 0) {
       return data.items[0].link || null;
     }
@@ -101,7 +97,6 @@ const formatNewsTime = (dateString) => {
     return "최근";
   }
 };
-
 
 // 건강/운동 관련 필터
 const filterHealthRelatedNews = (newsList) => {
@@ -181,9 +176,12 @@ const filterHealthRelatedNews = (newsList) => {
     const text = `${title} ${description}`;
 
     if (strongExclude.some((k) => text.includes(k.toLowerCase()))) return false;
-    if (weakExcludeInTitle.some((k) => title.includes(k.toLowerCase()))) return false;
+    if (weakExcludeInTitle.some((k) => title.includes(k.toLowerCase())))
+      return false;
 
-    const hasHealthKeyword = healthKeywords.some((k) => text.includes(k.toLowerCase()));
+    const hasHealthKeyword = healthKeywords.some((k) =>
+      text.includes(k.toLowerCase())
+    );
     return hasHealthKeyword;
   });
 };
@@ -197,7 +195,6 @@ const removeDuplicateNews = (newsList) => {
     return true;
   });
 };
-
 
 /** ------------------------------------------------------------------
  *  더미 데이터 (백업)
@@ -263,13 +260,19 @@ export const getWorkoutNews = async (
 ) => {
   try {
     // ✅ 탭 검색어 최우선 사용 (null/undefined만 대체)
-    const searchTerm = explicitSearchTerm ?? (forceRefresh ? null : "스포츠 피트니스");
+    const searchTerm =
+      explicitSearchTerm ?? (forceRefresh ? null : "스포츠 피트니스");
 
     // 확인용 로그
-    console.log("[getWorkoutNews] searchTerm =", searchTerm, "forceRefresh =", forceRefresh);
+    console.log(
+      "[getWorkoutNews] searchTerm =",
+      searchTerm,
+      "forceRefresh =",
+      forceRefresh
+    );
 
     // API 호출 제한 방지를 위한 지연
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     // 1) 백엔드 프록시로 뉴스 가져오기 (강화된 재시도 로직)
     let data = await fetchFitnessNews(count, searchTerm);
@@ -277,17 +280,23 @@ export const getWorkoutNews = async (
     const maxRetries = 3;
 
     // 재시도 로직: 최대 3회까지 재시도
-    while ((!data || !data.items || data.items.length === 0) && retryCount < maxRetries) {
+    while (
+      (!data || !data.items || data.items.length === 0) &&
+      retryCount < maxRetries
+    ) {
       retryCount++;
-      console.log(`뉴스 데이터 없음 → ${retryCount}차 재시도 (${retryCount}/${maxRetries})`);
-      
+      console.log(
+        `뉴스 데이터 없음 → ${retryCount}차 재시도 (${retryCount}/${maxRetries})`
+      );
+
       // 재시도 간격을 점진적으로 증가 (1초, 2초, 3초)
-      await new Promise(resolve => setTimeout(resolve, retryCount * 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, retryCount * 1000));
+
       // 재시도 시 다른 검색어 사용 (더 일반적인 검색어로)
       const retrySearchTerms = ["운동", "건강", "피트니스", "헬스"];
-      const retrySearchTerm = retrySearchTerms[retryCount % retrySearchTerms.length];
-      
+      const retrySearchTerm =
+        retrySearchTerms[retryCount % retrySearchTerms.length];
+
       console.log(`재시도 검색어: ${retrySearchTerm}`);
       data = await fetchFitnessNews(count, retrySearchTerm);
     }

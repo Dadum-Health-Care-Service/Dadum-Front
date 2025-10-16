@@ -38,12 +38,16 @@ export default function Security() {
   const maxReconnectAttempts = 3;
 
   function connectWebSocket() {
+    console.log("connectWebSocket");
     if (ws && ws.readyState === WebSocket.OPEN) {
       return;
     }
 
-    ws = new WebSocket(import.meta.env.VITE_WEBSOCKET_URL + ":8000/ws");
-
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    console.log(protocol);
+    ws = new WebSocket(`ws://192.168.0.51:8000/ws`);
+    //ws = new WebSocket(import.meta.env.VITE_WEBSOCKET_URL + ":8000/ws");
+    console.log(ws);
     ws.onopen = function (event) {
       console.log("WebSocket 연결됨");
       reconnectAttempts = 0;

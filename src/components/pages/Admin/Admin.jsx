@@ -50,7 +50,7 @@ const Admin = ({ isMobile, isNotify, setIsNotify }) => {
 
   const DashboardSection = () => (
     <div style={{ padding: 0 }}>
-      <iframe
+      <embed
         title="dashboard-embed"
         src={`${import.meta.env.VITE_ELASTICSEARCH_URL}:5601/app/r/s/ZwhPG`}
         style={{

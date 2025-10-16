@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, useRef } from "react";
+import { useState, useEffect, useContext, useRef, useCallback } from "react";
 import ContainerComponent from "../../common/ContainerComponent";
 import FormComponent from "../../common/FormComponent";
 import InputComponent from "../../common/InputComponent";
@@ -60,6 +60,7 @@ function Login() {
   const kakaoCode = query.get("code");
 
   //카카오 로그인용
+  const kakaoLogin = useRef(false);
   const kakaoRef = useRef(null);
 
   // 최초렌더링 시 user가 있다면
@@ -248,40 +249,47 @@ function Login() {
 
   //카카오 로그인
   useEffect(() => {
-    const grantType = "authorization_code";
-    if (kakaoCode) {
-      POST(
-        `/oauth/token?grant_type=${grantType}&client_id=${KAKAO_CLIENT_ID}&redirect_uri=${KAKAO_REDIRECT_URI}&code=${kakaoCode}`,
-        {},
-        false,
-        "kakao"
-      )
-        .then((res) => {
-          console.log(res);
-          const { access_token } = res.data;
-          console.log(access_token);
-          POST("/users/login/kakao", {
-            socialType: "kakao",
-            accessToken: access_token,
-          })
-            .then((res) => {
-              console.log("kakao login successful");
-              dispatch({ type: "LOGIN", user: res.data });
-
-              // 사용자 역할에 따라 적절한 페이지로 리다이렉트
-              if (res.data.role === "SUPER_ADMIN") {
-                navigate("/admin", { replace: true });
-              } else {
-                navigate("/", { replace: true });
-              }
+    const kakaoLogin = async () => {
+      const grantType = "authorization_code";
+      if (kakaoCode && !kakaoLogin.current) {
+        kakaoLogin.current = true;
+        await POST(
+          `/oauth/token?grant_type=${grantType}&client_id=${KAKAO_CLIENT_ID}&redirect_uri=${KAKAO_REDIRECT_URI}&code=${kakaoCode}`,
+          {},
+          false,
+          "kakao"
+        )
+          .then(async (res) => {
+            console.log(res);
+            const { access_token } = res.data;
+            console.log(access_token);
+            await POST("/users/login/kakao", {
+              socialType: "kakao",
+              accessToken: access_token,
             })
-            .catch();
-        })
-        .catch((error) => {
-          //toast
-        });
-    }
-  }, [kakaoCode]);
+              .then((res) => {
+                console.log("kakao login successful");
+                dispatch({ type: "LOGIN", user: res.data });
+
+                // 사용자 역할에 따라 적절한 페이지로 리다이렉트
+                if (res.data.role === "SUPER_ADMIN") {
+                  navigate("/admin", { replace: true });
+                } else {
+                  navigate("/", { replace: true });
+                }
+              })
+              .catch();
+          })
+          .catch((error) => {
+            //toast
+          })
+          .finally(() => {
+            kakaoLogin.current = false;
+          });
+      }
+    };
+    kakaoLogin();
+  }, [kakaoCode, dispatch, navigate]);
 
   // 로그인 처리 핸들러
   const handleLogin = async (e) => {
