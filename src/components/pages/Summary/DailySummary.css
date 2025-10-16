@@ -166,7 +166,8 @@
 .stat-bar-visual {
   flex: 1;
   min-width: 120px;
-  height: 24px;
+  height: 24px !important;
+  min-height: 24px !important;
   background: var(--light);
   border-radius: 12px;
   overflow: hidden;
@@ -186,7 +187,6 @@
   color: white;
   font-size: 12px;
   font-weight: 600;
-  min-width: 0;
   max-width: 100%;
   border-radius: 12px;
 }
@@ -205,6 +205,7 @@
     flex-direction: column;
     align-items: stretch;
     padding: 16px;
+    gap: 0;
   }
   
   .stat-bar-label {
@@ -212,12 +213,15 @@
     margin-bottom: 8px;
     font-size: 16px;
     text-align: center;
+    order: 1;
   }
   
   .stat-bar-visual {
     margin: 0 0 8px 0;
-    height: 28px;
+    height: 23px !important;
+    min-height: 23px !important;
     min-width: auto;
+    order: 2;
   }
   
   .stat-bar-fill {
@@ -226,8 +230,9 @@
     height: 100%;
     background: linear-gradient(135deg, #0A66FF, #3BAAFF);
     display: flex;
+    align-items: center;
+    justify-content: flex-end;
     color: white;
-    min-width: 0;
     max-width: 100%;
     border-radius: 12px;
   }
@@ -236,6 +241,8 @@
     text-align: center;
     font-size: 16px;
     font-weight: 700;
+    order: 3;
+    margin-top: 8px;
   }
 }
 

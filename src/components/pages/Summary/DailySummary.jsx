@@ -130,6 +130,13 @@ export default function DailySummary() {
   
   // 모달 상태
   const [showNoDataModal, setShowNoDataModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteMealId, setDeleteMealId] = useState(null);
+  const [showAlertModal, setShowAlertModal] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState("success"); // success, error
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [saveMealId, setSaveMealId] = useState(null);
   
   // 모달 상태 디버깅
   useEffect(() => {
@@ -342,21 +349,32 @@ export default function DailySummary() {
   }, [usersId]);
 
   /* ---------- 행 저장(이름+중량 동시) ---------- */
-  const saveRow = async (mealId) => {
-    const prev = findById(mealId);
-    const nextGrams = Number(editGrams[mealId] ?? prev.grams);
+  const handleSaveClick = (mealId) => {
+    setSaveMealId(mealId);
+    setShowSaveModal(true);
+  };
 
-    const nextLabelRaw = (editLabel[mealId] ?? prev.label) || "";
+  const confirmSave = async () => {
+    if (!saveMealId) return;
+    const prev = findById(saveMealId);
+    const nextGrams = Number(editGrams[saveMealId] ?? prev.grams);
+
+    const nextLabelRaw = (editLabel[saveMealId] ?? prev.label) || "";
     const nextLabel = String(nextLabelRaw).trim();
 
-    if (!Number.isFinite(nextGrams) || nextGrams <= 0) return;
+    if (!Number.isFinite(nextGrams) || nextGrams <= 0) {
+      showAlert("올바른 중량을 입력해주세요.", "error");
+      setShowSaveModal(false);
+      setSaveMealId(null);
+      return;
+    }
 
     const body = {
       grams: nextGrams,
       ...(nextLabel && nextLabel !== prev.label ? { label: nextLabel } : {}),
     };
 
-    const res = await fetch(`${ML_BASE}/meal-log/${mealId}`, {
+    const res = await fetch(`${ML_BASE}/meal-log/${saveMealId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -364,7 +382,7 @@ export default function DailySummary() {
     const data = await res.json();
 
     if (res.ok) {
-      setMeals((arr) => arr.map((m) => (m.id === mealId ? data : m)));
+      setMeals((arr) => arr.map((m) => (m.id === saveMealId ? data : m)));
       setTotals((t) => ({
         calories: t.calories - (prev.calories || 0) + data.calories,
         protein_g: t.protein_g - (prev.protein_g || 0) + data.protein_g,
@@ -375,22 +393,39 @@ export default function DailySummary() {
       setDailyText(""); // 수정 후 다시 생성하도록 비움
       setSummaryModel("");
       setHealthHint("");
+      
+      // 저장 성공 알림
+      showAlert("식사 정보가 저장되었습니다.", "success");
     } else {
-      alert(`저장 실패: ${data?.detail || res.statusText}`);
+      showAlert(`저장 실패: ${data?.detail || res.statusText}`, "error");
     }
+    
+    setShowSaveModal(false);
+    setSaveMealId(null);
+  };
+
+  const cancelSave = () => {
+    setShowSaveModal(false);
+    setSaveMealId(null);
   };
 
   /* ---------- 행 삭제 ---------- */
-  const deleteRow = async (mealId) => {
-    const prev = findById(mealId);
-    if (!prev?.id) return;
-    if (!confirm("이 항목을 삭제할까요?")) return;
+  const handleDeleteClick = (mealId) => {
+    setDeleteMealId(mealId);
+    setShowDeleteModal(true);
+  };
 
-    const res = await fetch(`${ML_BASE}/meal-log/${mealId}`, { method: "DELETE" });
+  const confirmDelete = async () => {
+    if (!deleteMealId) return;
+    
+    const prev = findById(deleteMealId);
+    if (!prev?.id) return;
+
+    const res = await fetch(`${ML_BASE}/meal-log/${deleteMealId}`, { method: "DELETE" });
     const data = await res.json();
 
     if (res.ok) {
-      setMeals((arr) => arr.filter((m) => m.id !== mealId));
+      setMeals((arr) => arr.filter((m) => m.id !== deleteMealId));
       setTotals((t) => ({
         calories: t.calories - (prev.calories || 0),
         protein_g: t.protein_g - (prev.protein_g || 0),
@@ -401,9 +436,32 @@ export default function DailySummary() {
       setDailyText(""); // 다시 생성하도록
       setSummaryModel("");
       setHealthHint("");
+      
+      // 삭제 성공 알림
+      showAlert("항목이 성공적으로 삭제되었습니다.", "success");
     } else {
-      alert(`삭제 실패: ${data?.detail || res.statusText}`);
+      showAlert(`삭제 실패: ${data?.detail || res.statusText}`, "error");
     }
+    
+    setShowDeleteModal(false);
+    setDeleteMealId(null);
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
+    setDeleteMealId(null);
+  };
+
+  // 알림 표시 함수
+  const showAlert = (message, type = "success") => {
+    setAlertMessage(message);
+    setAlertType(type);
+    setShowAlertModal(true);
+  };
+
+  const closeAlert = () => {
+    setShowAlertModal(false);
+    setAlertMessage("");
   };
 
   /* ---------- 프론트엔드 자체 분석 (API 호출 없이 종합 분석) ---------- */
@@ -854,12 +912,14 @@ export default function DailySummary() {
         
         {/* 걸음수 진행바 */}
         <div className="stat-bar">
-          <div className="stat-bar-label">목표 달성률</div>
+          <div className="stat-bar-label">
+            목표 달성률
+            <div style={{ fontSize: '11px', color: '#999', fontWeight: 'normal', marginTop: '2px' }}>
+              (10,000보 기준)
+            </div>
+          </div>
           <div className="stat-bar-visual">
-            <div 
-              className="stat-bar-fill" 
-              style={{ width: `${activityStats?.stepsProgress || 0}%` }}
-            >
+            <div className="stat-bar-fill" style={{ width: `${activityStats?.stepsProgress || 0}%`, minWidth: (activityStats?.stepsProgress || 0) > 0 ? '2%' : '0', height: '100%', minHeight: '21px' }}>
               {(activityStats?.stepsProgress || 0) >= 15 && `${Math.round(activityStats?.stepsProgress || 0)}%`}
             </div>
           </div>
@@ -897,13 +957,13 @@ export default function DailySummary() {
           <div className="stat-bar">
             <div className="stat-bar-label">칼로리 수지</div>
             <div className="stat-bar-visual">
-              <div 
-                className="stat-bar-fill" 
-                style={{ 
+              <div
+                className="stat-bar-fill"
+                style={{
                   width: `${Math.min(100, Math.abs(calorieBalance || 0) / 30)}%`,
                   background: (calorieBalance || 0) > 0 
-                    ? 'linear-gradient(90deg, #ed8936 0%, #dd6b20 100%)'
-                    : 'linear-gradient(90deg, #48bb78 0%, #38a169 100%)'
+                    ? 'linear-gradient(90deg, #f56565 0%, #e53e3e 100%)'
+                    : 'linear-gradient(90deg, #68d391 0%, #48bb78 100%)'
                 }}
               >
                 {Math.abs(calorieBalance || 0) >= 30 && `${Math.round(calorieBalance || 0)}kcal`}
@@ -918,7 +978,7 @@ export default function DailySummary() {
           <div className="stat-bar">
             <div className="stat-bar-label">단백질 비율</div>
             <div className="stat-bar-visual">
-              <div className="stat-bar-fill" style={{ width: `${ratios?.protein || 0}%` }}>
+              <div className="stat-bar-fill" style={{ width: `${ratios?.protein || 0}%`, minWidth: (ratios?.protein || 0) > 0 ? '2%' : '0', height: '100%', minHeight: '21px' }}>
                 {(ratios?.protein || 0) >= 15 && `${ratios?.protein || 0}%`}
               </div>
             </div>
@@ -985,7 +1045,7 @@ export default function DailySummary() {
       {/* 식사 기록 */}
       {meals && meals.length > 0 && (
         <div className="report-section">
-          <h2>식사 기록 상세</h2>
+          <h2>식사 상세 기록</h2>
           <div className="table-responsive">
             <table className="data-table">
               <thead>
@@ -1043,12 +1103,12 @@ export default function DailySummary() {
                     <td>{m.fiber_g}g</td>
                     <td>
                       <div className="d-flex gap-1">
-                        <button className="btn btn-primary btn-sm" onClick={() => saveRow(m.id)}>
+                        <button className="btn btn-primary btn-sm" onClick={() => handleSaveClick(m.id)}>
                           저장
                         </button>
                         <button
                           className="btn btn-outline-danger btn-sm"
-                          onClick={() => deleteRow(m.id)}
+                          onClick={() => handleDeleteClick(m.id)}
                         >
                           삭제
                         </button>
@@ -1098,6 +1158,111 @@ export default function DailySummary() {
             variant="primary"
             size="medium"
             onClick={() => setShowNoDataModal(false)}
+          >
+            확인
+          </ButtonComponent>
+        </ModalComponent.Actions>
+      </ModalComponent>
+
+      {/* 저장 확인 모달 */}
+      <ModalComponent
+        isOpen={showSaveModal}
+        onClose={cancelSave}
+        title="식사 정보 저장"
+        size={ModalComponent.SIZES.SMALL}
+        closeOnOverlayClick={true}
+      >
+        <ModalComponent.Section>
+          <p style={{ fontSize: '16px', color: '#666', margin: '0 0 20px 0', textAlign: 'center' }}>
+            식사 정보를 저장하시겠습니까?
+          </p>
+        </ModalComponent.Section>
+        <ModalComponent.Actions align="center">
+          <ButtonComponent
+            variant="primary"
+            size="medium"
+            onClick={confirmSave}
+            style={{ marginRight: '8px' }}
+          >
+            저장
+          </ButtonComponent>
+          <ButtonComponent
+            variant="secondary"
+            size="medium"
+            onClick={cancelSave}
+          >
+            취소
+          </ButtonComponent>
+        </ModalComponent.Actions>
+      </ModalComponent>
+
+      {/* 삭제 확인 모달 */}
+      <ModalComponent
+        isOpen={showDeleteModal}
+        onClose={cancelDelete}
+        title="항목 삭제"
+        size={ModalComponent.SIZES.SMALL}
+        closeOnOverlayClick={true}
+      >
+        <ModalComponent.Section>
+          <p style={{ fontSize: '16px', color: '#666', margin: '0 0 20px 0', textAlign: 'center' }}>
+            이 항목을 삭제하시겠습니까?
+          </p>
+          <p style={{ fontSize: '14px', color: '#999', margin: 0, textAlign: 'center' }}>
+            삭제된 항목은 복구할 수 없습니다.
+          </p>
+        </ModalComponent.Section>
+        <ModalComponent.Actions align="center">
+          <ButtonComponent
+            variant="secondary"
+            size="medium"
+            onClick={cancelDelete}
+            style={{ marginRight: '8px' }}
+          >
+            취소
+          </ButtonComponent>
+          <ButtonComponent
+            variant="danger"
+            size="medium"
+            onClick={confirmDelete}
+          >
+            삭제
+          </ButtonComponent>
+        </ModalComponent.Actions>
+      </ModalComponent>
+
+      {/* 알림 모달 */}
+      <ModalComponent
+        isOpen={showAlertModal}
+        onClose={closeAlert}
+        title={alertType === "success" ? "성공" : "오류"}
+        size={ModalComponent.SIZES.SMALL}
+        closeOnOverlayClick={true}
+      >
+        <ModalComponent.Section>
+          <div style={{ textAlign: 'center', padding: '20px 0' }}>
+            <div style={{ 
+              fontSize: '48px', 
+              marginBottom: '16px',
+              color: alertType === "success" ? '#28a745' : '#dc3545'
+            }}>
+              {alertType === "success" ? '✓' : '⚠'}
+            </div>
+            <p style={{ 
+              fontSize: '16px', 
+              color: '#666', 
+              margin: '0 0 10px 0',
+              lineHeight: '1.5'
+            }}>
+              {alertMessage}
+            </p>
+          </div>
+        </ModalComponent.Section>
+        <ModalComponent.Actions align="center">
+          <ButtonComponent
+            variant={alertType === "success" ? "primary" : "danger"}
+            size="medium"
+            onClick={closeAlert}
           >
             확인
           </ButtonComponent>
