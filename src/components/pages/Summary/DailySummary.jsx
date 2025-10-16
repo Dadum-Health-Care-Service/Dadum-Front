@@ -749,7 +749,7 @@ export default function DailySummary() {
           size="large"
           onClick={handleShowDetails}
         >
-          상세 워치 정보
+          워치 상세정보
         </ButtonComponent>
       </div>
 
@@ -1098,7 +1098,7 @@ export default function DailySummary() {
               워치 정보가 없습니다.
             </p>
             <p style={{ fontSize: '14px', color: '#999', margin: 0 }}>
-              워치를 연결하거나 동기화를 확인해주세요.
+              워치 정보를 연동해주세요.
             </p>
           </div>
         </ModalComponent.Section>
