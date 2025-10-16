@@ -199,7 +199,7 @@ const RealTimeMonitor = () => {
   };
 
   // 알림 권한 요청
-  const requestNotificationPermission = async () => {
+  const requestmission = async () => {
     if ('Notification' in window) {
       const permission = await Notification.requestPermission();
       if (permission === 'granted') {
