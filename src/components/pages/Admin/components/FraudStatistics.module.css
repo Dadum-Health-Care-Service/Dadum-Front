@@ -1,0 +1,486 @@
+/* 통계 대시보드 스타일 */
+.statisticsContainer {
+  padding: 20px;
+  background-color: #f8fafc;
+  min-height: 100vh;
+}
+
+.header {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.headerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .headerContent {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .controlsSection {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  
+  .timeRangeSelector {
+    min-width: auto;
+  }
+  
+  .refreshButton {
+    justify-content: center;
+  }
+}
+
+.titleSection {
+  flex: 1;
+}
+
+.title {
+  margin: 0 0 0.5rem 0;
+  color: #111827;
+  font-size: 1.875rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.subtitle {
+  margin: 0;
+  color: #6b7280;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.controlsSection {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.timeRangeSelector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 200px;
+}
+
+.timeLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.timeSelect {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: white;
+  font-size: 14px;
+  color: #374151;
+}
+
+.timeSelect:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* 새로고침 버튼 스타일 */
+.refreshButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+  min-height: 44px; /* 터치 친화적 */
+}
+
+.refreshButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+  transform: translateY(-1px);
+}
+
+.refreshButton:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+.refreshButton:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.refreshIcon {
+  font-size: 1rem;
+  transition: transform 0.2s ease;
+}
+
+.refreshButton:not(:disabled):hover .refreshIcon {
+  transform: rotate(180deg);
+}
+
+/* 요약 카드들 */
+.summaryCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.summaryCard {
+  text-align: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.summaryValue {
+  font-size: 32px;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+/* 차트 그리드 */
+.chartsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.chartCard {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.chartContainer {
+  height: 300px;
+  padding: 16px;
+  position: relative;
+}
+
+/* 거래 목록 */
+.transactionListCard {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.transactionList {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.transactionTable {
+  display: flex;
+  flex-direction: column;
+}
+
+.tableHeader {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1.5fr;
+  gap: 16px;
+  padding: 12px 16px;
+  background-color: #f7fafc;
+  border-bottom: 1px solid #e2e8f0;
+  font-weight: 600;
+  color: #4a5568;
+  font-size: 14px;
+}
+
+.tableRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1.5fr;
+  gap: 16px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  align-items: center;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.tableRow:hover {
+  background-color: #f8fafc;
+}
+
+.transactionId {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.riskScore {
+  display: flex;
+  justify-content: center;
+}
+
+.riskBadge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  min-width: 50px;
+}
+
+.highRisk {
+  background-color: #fed7d7;
+  color: #c53030;
+}
+
+.mediumRisk {
+  background-color: #fef5e7;
+  color: #dd6b20;
+}
+
+.lowRisk {
+  background-color: #bee3f8;
+  color: #2b6cb0;
+}
+
+.safeRisk {
+  background-color: #c6f6d5;
+  color: #2f855a;
+}
+
+.status {
+  display: flex;
+  justify-content: center;
+}
+
+.anomaly {
+  color: #e53e3e;
+  font-weight: 600;
+}
+
+.normal {
+  color: #38a169;
+  font-weight: 600;
+}
+
+.timestamp {
+  color: #718096;
+  font-size: 12px;
+}
+
+/* 로딩 및 에러 상태 */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f4f6;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.errorMessage {
+  color: #e53e3e;
+  margin-bottom: 16px;
+  font-size: 16px;
+}
+
+.retryButton {
+  padding: 8px 16px;
+  background-color: #667eea;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.retryButton:hover {
+  background-color: #5a67d8;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .statisticsContainer {
+    padding: 8px;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+    margin-bottom: 16px;
+  }
+
+  .header h3 {
+    font-size: 18px;
+    margin: 0;
+  }
+
+  .timeRangeSelector {
+    width: 100%;
+  }
+
+  .timeSelect {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 16px; /* iOS 줌 방지 */
+  }
+
+  .summaryCards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .summaryCard {
+    padding: 12px;
+    text-align: center;
+  }
+
+  .summaryValue {
+    font-size: 20px;
+    margin-top: 4px;
+  }
+
+  .chartsGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .chartContainer {
+    height: 200px;
+    padding: 8px;
+  }
+
+  .transactionList {
+    max-height: 300px;
+  }
+
+  .tableHeader,
+  .tableRow {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    font-size: 11px;
+    padding: 8px 4px;
+  }
+
+  .tableHeader div:nth-child(n+3),
+  .tableRow div:nth-child(n+3) {
+    display: none;
+  }
+
+  .transactionId {
+    font-size: 10px;
+  }
+
+  .riskBadge {
+    padding: 2px 4px;
+    font-size: 10px;
+    min-width: 40px;
+  }
+
+  .timestamp {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .statisticsContainer {
+    padding: 4px;
+  }
+
+  .header h3 {
+    font-size: 16px;
+  }
+
+  .summaryCards {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .summaryCard {
+    padding: 8px;
+  }
+
+  .summaryValue {
+    font-size: 18px;
+  }
+
+  .chartContainer {
+    height: 180px;
+    padding: 4px;
+  }
+
+  .tableHeader,
+  .tableRow {
+    grid-template-columns: 1fr;
+    gap: 4px;
+    font-size: 10px;
+    padding: 6px 2px;
+  }
+
+  .tableHeader div:nth-child(n+2),
+  .tableRow div:nth-child(n+2) {
+    display: none;
+  }
+
+  .transactionId {
+    font-size: 9px;
+  }
+
+  .riskBadge {
+    padding: 1px 3px;
+    font-size: 9px;
+    min-width: 35px;
+  }
+
+  .timestamp {
+    font-size: 9px;
+  }
+}

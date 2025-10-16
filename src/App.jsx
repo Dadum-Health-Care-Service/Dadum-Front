@@ -11,6 +11,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import "./App.css";
 
+
 // Pages
 import Home from "./components/pages/Home/Home.jsx";
 import Login from "./components/pages/Login/Login.jsx";
@@ -33,6 +34,7 @@ import OrderPage from "./components/pages/Payments/Shop/OrderPage.jsx";
 import OrderHistory from "./components/pages/Payments/Shop/OrderHistory.jsx";
 import PaymentComplete from "./components/pages/Payments/PaymentComplete.jsx";
 import SalesAnalysis from "./components/pages/Payments/SalesAnalysis.jsx";
+import FraudDetection from "./components/pages/Payments/FraudDetection.jsx";
 import PoseAccuracyMVP from "./components/pages/Pose/PoseAccuracyMVP.jsx";
 import SellerMain from "./components/pages/Payments/Seller/SellerMain.jsx";
 import MapPage from "./components/pages/Map/MapPage.jsx";
@@ -132,18 +134,10 @@ function AppContent() {
                 <Route path="/shop" element={<Shop />}></Route>
                 <Route path="/order" element={<OrderPage />}></Route>
                 <Route path="/orders" element={<OrderHistory />}></Route>
-                <Route
-                  path="/payment/complete"
-                  element={<PaymentComplete />}
-                ></Route>
-                <Route
-                  path="/payment/mobile-complete"
-                  element={<PaymentComplete />}
-                ></Route>
-                <Route
-                  path="/sales-analysis"
-                  element={<SalesAnalysis />}
-                ></Route>
+                <Route path="/payment/complete" element={<PaymentComplete />}></Route>
+                <Route path="/payment/mobile-complete" element={<PaymentComplete />}></Route>
+                <Route path="/sales-analysis" element={<SalesAnalysis />}></Route>
+                <Route path="/fraud-detection" element={<FraudDetection />}></Route>
                 <Route
                   path="/statistics"
                   element={

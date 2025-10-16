@@ -37,7 +37,12 @@ const NavigationTab = ({ tab, isNotify }) => {
   const { isRunning } = useContext(RunContext);
   const IconComponent = tab.icon;
 
-  const isActive = location.pathname === tab.to;
+  const isActive =
+    location.pathname.startsWith('/mypage') 
+    ? tab.to === '/mypage' 
+    : location.pathname === '/shop' || location.pathname === '/orders'
+    ? tab.to === '/shop'
+    : location.pathname === tab.to;
 
   const handleClick = () => {
     navigate(tab.to);

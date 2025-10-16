@@ -297,6 +297,55 @@
 }
 
 /* 메시지 입력 */
+/* 추천 질문 */
+.chat-window__suggestions {
+  padding: 16px 20px 8px;
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+}
+
+.chat-window__suggestions-title {
+  font-size: 12px;
+  color: #6c757d;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.chat-window__suggestions-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chat-window__suggestion-item {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 14px;
+  color: #495057;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.chat-window__suggestion-item:hover {
+  background: #e9ecef;
+  border-color: #2563eb;
+  color: #2563eb;
+  transform: translateY(-1px);
+}
+
+.chat-window__suggestion-item:active {
+  transform: translateY(0);
+  background: #dee2e6;
+}
+
+.chat-window__suggestion-item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .chat-window__input {
   padding: 16px 20px;
   background: white;

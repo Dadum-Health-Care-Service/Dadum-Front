@@ -10,7 +10,7 @@ import styles from "./Profile.module.css";
 export default function Profile() {
   const { GET, PUT } = useApi();
   //유저정보,로딩상태,에러상태를 저장하는 state
-  const { user } = useContext(AuthContext);
+  const { user, dispatch } = useContext(AuthContext);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   //프로필 수정 버튼 제어용
@@ -47,7 +47,7 @@ export default function Profile() {
     //저장된 user정보가 없을때 알림 모달 띄우고 에러 페이지 렌더
     if (!user || !user.usersId) {
       setError("사용자 정보를 찾을 수 없습니다.");
-      showBasicModal("사용자 정보를 찾을 수 없습니다", "네트워크 에러");
+      showConfirmModal('사용자 정보를 찾을 수 없습니다','네트워크 에러','확인을 누르시면 로그아웃 됩니다',()=>{dispatch('LOGOUT');});
       //로딩상태x
       setLoading(false);
       return;
@@ -284,8 +284,9 @@ export default function Profile() {
                 <div className="d-flex flex-column align-items-center text-center px-4">
                   <img
                     className="rounded-circle mt-5 mb-3"
-                    width="150px"
                     style={{
+                      width:"150px",
+                      height:"150px",
                       filter:
                         profile.profileImg !== "/img/userAvatar.png"
                           ? "none"
@@ -463,7 +464,15 @@ export default function Profile() {
                 <div className="d-flex flex-column align-items-center text-center px-4">
                   <img
                     className="rounded-circle mt-5 mb-3"
-                    width="150px"
+                    style={{
+                      width:"150px",
+                      height:"150px",
+                      filter:
+                        inputs.profileImg !== "/img/userAvatar.png"
+                          ? "none"
+                          : `invert(42%) sepia(92%) saturate(2385%) hue-rotate(199deg)
+                                    brightness(95%) contrast(97%)`,
+                    }}
                     src={inputs.profileImg}
                   />
                 </div>
