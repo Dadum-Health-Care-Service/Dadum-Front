@@ -218,16 +218,6 @@ const RealTimeMonitor = () => {
     }, refreshInterval);
   };
 
-  // 알림 권한 요청
-  const requestmission = async () => {
-    if ('Notification' in window) {
-      const permission = await Notification.requestPermission();
-      if (permission === 'granted') {
-        console.log('알림 권한이 허용되었습니다.');
-      }
-    }
-  };
-
   // 연결 시작/중지
   const toggleConnection = () => {
     if (isConnected) {
@@ -261,9 +251,6 @@ const RealTimeMonitor = () => {
   };
 
   useEffect(() => {
-    // 컴포넌트 마운트 시 알림 권한 요청
-    requestNotificationPermission();
-
     // 사용자 로그인 확인 후 자동 시작
     if (user && user.accessToken && autoRefresh) {
       startPolling();
@@ -360,11 +347,6 @@ const RealTimeMonitor = () => {
                 <option value={10000}>10초</option>
               </select>
             </label>
-          </div>
-          <div className={styles.settingItem}>
-            <ButtonComponent onClick={requestNotificationPermission} size="small">
-              알림 권한 설정
-            </ButtonComponent>
           </div>
         </div>
       </CardComponent>
