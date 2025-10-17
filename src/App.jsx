@@ -11,7 +11,6 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import "./App.css";
 
-
 // Pages
 import Home from "./components/pages/Home/Home.jsx";
 import Login from "./components/pages/Login/Login.jsx";
@@ -116,7 +115,7 @@ function AppContent() {
           alignItems: "center",
         }}
       >
-        {user && <GNB isMobile={isMobile} isNotify={isNotify} />}
+        {showGNB && <GNB isMobile={isMobile} isNotify={isNotify} />}
         <div style={{ width: "100%", maxWidth: "1360px" }}>
           <Routes>
             <Route path="/" element={user ? <Home /> : <MainView />}></Route>
@@ -134,10 +133,22 @@ function AppContent() {
                 <Route path="/shop" element={<Shop />}></Route>
                 <Route path="/order" element={<OrderPage />}></Route>
                 <Route path="/orders" element={<OrderHistory />}></Route>
-                <Route path="/payment/complete" element={<PaymentComplete />}></Route>
-                <Route path="/payment/mobile-complete" element={<PaymentComplete />}></Route>
-                <Route path="/sales-analysis" element={<SalesAnalysis />}></Route>
-                <Route path="/fraud-detection" element={<FraudDetection />}></Route>
+                <Route
+                  path="/payment/complete"
+                  element={<PaymentComplete />}
+                ></Route>
+                <Route
+                  path="/payment/mobile-complete"
+                  element={<PaymentComplete />}
+                ></Route>
+                <Route
+                  path="/sales-analysis"
+                  element={<SalesAnalysis />}
+                ></Route>
+                <Route
+                  path="/fraud-detection"
+                  element={<FraudDetection />}
+                ></Route>
                 <Route
                   path="/statistics"
                   element={
