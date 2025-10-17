@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { GET } from '../../../utils/api/api';
+import { useApi } from '../../../utils/api/useApi';
 import ButtonComponent from '../../common/ButtonComponent';
 import CardComponent from '../../common/CardComponent';
 import SalesChart from './components/SalesChart';
 import styles from './SalesAnalysis.module.css';
 
 const SalesAnalysis = () => {
+  const { GET } = useApi();
   const [salesData, setSalesData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -57,17 +58,24 @@ const SalesAnalysis = () => {
       ]);
 
       // 응답 데이터 처리 및 변환
+      console.log('📊 API 응답 데이터:', {
+        summary: summaryResponse.status === 'fulfilled' ? summaryResponse.value.data : null,
+        daily: dailyResponse.status === 'fulfilled' ? dailyResponse.value.data : null,
+        category: categoryResponse.status === 'fulfilled' ? categoryResponse.value.data : null,
+        products: productsResponse.status === 'fulfilled' ? productsResponse.value.data : null
+      });
+
       const summaryData = summaryResponse.status === 'fulfilled' 
         ? transformApiData(summaryResponse.value.data, 'summary')
         : null;
       const dailyData = dailyResponse.status === 'fulfilled' 
-        ? transformApiData(dailyResponse.value.data, 'dailySales')
+        ? transformApiData(dailyResponse.value.data.dailySales, 'dailySales')
         : [];
       const categoryData = categoryResponse.status === 'fulfilled' 
-        ? transformApiData(categoryResponse.value.data, 'categorySales')
+        ? transformApiData(categoryResponse.value.data.categorySales, 'categorySales')
         : [];
       const productsData = productsResponse.status === 'fulfilled' 
-        ? transformApiData(productsResponse.value.data, 'topProducts')
+        ? transformApiData(productsResponse.value.data.topProducts, 'topProducts')
         : [];
 
       // 데이터 통합
@@ -110,6 +118,14 @@ const SalesAnalysis = () => {
 
   // 백엔드 API 응답 데이터 변환 함수
   const transformApiData = (apiData, dataType) => {
+    console.log(`🔄 변환 중 - 타입: ${dataType}, 데이터:`, apiData);
+    
+    // 데이터가 null이거나 undefined인 경우 처리
+    if (!apiData) {
+      console.log(`⚠️ 데이터 없음 - 타입: ${dataType}`);
+      return dataType === 'summary' ? null : [];
+    }
+
     switch (dataType) {
       case 'summary':
         return {
@@ -120,26 +136,32 @@ const SalesAnalysis = () => {
         };
       
       case 'dailySales':
-        return (apiData || []).map(item => ({
+        // apiData가 배열인지 확인
+        const dailyArray = Array.isArray(apiData) ? apiData : [];
+        return dailyArray.map(item => ({
           date: item.date || item.sale_date,
-          sales: item.sales || item.total_amount || 0,
-          orders: item.orders || item.order_count || 0
+          sales: Number(item.sales || item.total_amount || 0) || 0,
+          orders: Number(item.orders || item.order_count || 0) || 0
         }));
       
       case 'categorySales':
-        return (apiData || []).map(item => ({
+        // apiData가 배열인지 확인
+        const categoryArray = Array.isArray(apiData) ? apiData : [];
+        return categoryArray.map(item => ({
           category: item.category || item.category_name,
           name: item.name || item.category_display_name,
-          sales: item.sales || item.total_amount || 0,
-          percentage: item.percentage || item.sales_percentage || 0
+          sales: Number(item.sales || item.total_amount || 0) || 0,
+          percentage: Number(item.percentage || item.sales_percentage || 0) || 0
         }));
       
       case 'topProducts':
-        return (apiData || []).map(item => ({
+        // apiData가 배열인지 확인
+        const productsArray = Array.isArray(apiData) ? apiData : [];
+        return productsArray.map(item => ({
           id: item.id || item.product_id,
           name: item.name || item.product_name,
-          sales: item.sales || item.total_amount || 0,
-          orders: item.orders || item.order_count || 0
+          sales: Number(item.sales || item.total_amount || 0) || 0,
+          orders: Number(item.orders || item.order_count || 0) || 0
         }));
       
       default:

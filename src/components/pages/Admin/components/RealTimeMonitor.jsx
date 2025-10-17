@@ -1,10 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
+import { useApi } from '../../../../utils/api/useApi';
+import { AuthContext } from '../../../../context/AuthContext';
 import CardComponent from '../../../common/CardComponent';
 import ButtonComponent from '../../../common/ButtonComponent';
 import MonitorCard from './MonitorCard';
 import styles from './RealTimeMonitor.module.css';
 
 const RealTimeMonitor = () => {
+  const { GET } = useApi();
+  const { user } = useContext(AuthContext);
   const [isConnected, setIsConnected] = useState(false);
   const [alerts, setAlerts] = useState([]);
   const [monitoringStats, setMonitoringStats] = useState({
@@ -35,7 +39,7 @@ const RealTimeMonitor = () => {
         return;
       }
 
-      const socket = new window.SockJS('http://localhost:8080/ws/fraud-monitor');
+      const socket = new window.SockJS('/ws/fraud-monitor');
       const stompClient = window.Stomp.over(socket);
       
       stompClient.debug = false; // 디버그 로그 비활성화
@@ -143,54 +147,70 @@ const RealTimeMonitor = () => {
 
     intervalRef.current = setInterval(async () => {
       try {
-        // 통계 데이터 업데이트
-        const statsResponse = await fetch('/api/ai/statistics');
-        if (statsResponse.ok) {
-          const stats = await statsResponse.json();
-          setMonitoringStats(prev => ({
-            ...prev,
-            totalTransactions: stats.totalTransactions || 0,
-            anomalyCount: stats.anomalyCount || 0
-          }));
+        // 사용자 로그인 확인
+        if (!user || !user.accessToken) {
+          console.log('사용자가 로그인하지 않음 - 폴링 중단');
+          return;
         }
 
-        // 최근 거래 데이터 확인
-        const transactionsResponse = await fetch('/api/ai/transactions?size=5');
-        if (transactionsResponse.ok) {
-          const data = await transactionsResponse.json();
-          const recentTransactions = data.transactions || [];
-          
-          // 새로운 이상거래 확인
-          recentTransactions.forEach(transaction => {
-            if (transaction.isAnomaly && transaction.createdAt) {
-              const alertTime = new Date(transaction.createdAt);
-              const now = new Date();
-              const timeDiff = now - alertTime;
-              
-              // 1분 이내의 새로운 이상거래만 알림
-              if (timeDiff < 60000) {
-                const newAlert = {
-                  id: transaction.id,
-                  timestamp: alertTime.toLocaleString(),
-                  transactionId: transaction.transactionId,
-                  userId: transaction.userId,
-                  amount: transaction.amount,
-                  riskScore: transaction.riskScore,
-                  message: transaction.recommendation || '이상거래가 감지되었습니다.',
-                  severity: transaction.riskScore >= 80 ? 'high' : 
-                           transaction.riskScore >= 60 ? 'medium' : 'low'
-                };
+        // 통계 데이터 업데이트 (useApi 사용)
+        try {
+          const statsResponse = await GET('/ai/statistics', {}, true, 'main');
+          console.log('실시간 모니터링 통계 응답:', statsResponse);
+          if (statsResponse && statsResponse.data) {
+            const stats = statsResponse.data;
+            setMonitoringStats(prev => ({
+              ...prev,
+              totalTransactions: stats.total_transactions || 0,
+              anomalyCount: stats.anomaly_transactions || 0
+            }));
+          }
+        } catch (error) {
+          console.error('통계 데이터 업데이트 실패:', error);
+        }
+
+        // 최근 거래 데이터 확인 (useApi 사용)
+        try {
+          const transactionsResponse = await GET('/ai/transactions?size=5', {}, true, 'main');
+          console.log('실시간 모니터링 거래 응답:', transactionsResponse);
+          if (transactionsResponse && transactionsResponse.data) {
+            const data = transactionsResponse.data;
+            const recentTransactions = data.transactions || [];
+            
+            // 새로운 이상거래 확인
+            recentTransactions.forEach(transaction => {
+              if (transaction.isAnomaly && transaction.createdAt) {
+                const alertTime = new Date(transaction.createdAt);
+                const now = new Date();
+                const timeDiff = now - alertTime;
                 
-                setAlerts(prev => {
-                  const exists = prev.some(alert => alert.id === newAlert.id);
-                  if (!exists) {
-                    return [newAlert, ...prev.slice(0, 49)];
-                  }
-                  return prev;
-                });
+                // 1분 이내의 새로운 이상거래만 알림
+                if (timeDiff < 60000) {
+                  const newAlert = {
+                    id: transaction.id,
+                    timestamp: alertTime.toLocaleString(),
+                    transactionId: transaction.transactionId,
+                    userId: transaction.userId,
+                    amount: transaction.amount,
+                    riskScore: transaction.riskScore,
+                    message: transaction.recommendation || '이상거래가 감지되었습니다.',
+                    severity: transaction.riskScore >= 80 ? 'high' : 
+                             transaction.riskScore >= 60 ? 'medium' : 'low'
+                  };
+                  
+                  setAlerts(prev => {
+                    const exists = prev.some(alert => alert.id === newAlert.id);
+                    if (!exists) {
+                      return [newAlert, ...prev.slice(0, 49)];
+                    }
+                    return prev;
+                  });
+                }
               }
-            }
-          });
+            });
+          }
+        } catch (error) {
+          console.error('거래 데이터 업데이트 실패:', error);
         }
       } catch (error) {
         console.error('폴링 데이터 업데이트 실패:', error);
@@ -244,8 +264,8 @@ const RealTimeMonitor = () => {
     // 컴포넌트 마운트 시 알림 권한 요청
     requestNotificationPermission();
 
-    // 자동 시작
-    if (autoRefresh) {
+    // 사용자 로그인 확인 후 자동 시작
+    if (user && user.accessToken && autoRefresh) {
       startPolling();
       setIsConnected(true);
     }
@@ -258,7 +278,7 @@ const RealTimeMonitor = () => {
         clearInterval(intervalRef.current);
       }
     };
-  }, [autoRefresh, refreshInterval]);
+  }, [autoRefresh, refreshInterval, user]);
 
   const getSeverityColor = (severity) => {
     switch (severity) {

@@ -1,11 +1,14 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useState, useEffect, useContext } from 'react';
+import { useApi } from '../../../utils/api/useApi';
+import { AuthContext } from '../../../context/AuthContext';
 import ModalComponent from '../../common/ModalComponent';
 import ButtonComponent from '../../common/ButtonComponent';
 import { getPaymentConfig } from '../../../config/payment.config';
 import styles from './PaymentModal.module.css';
 
 const PaymentModal = ({ show, onHide, product, deliveryInfo, user, onPaymentSuccess }) => {
+  const { GET, POST } = useApi();
+  const { user: authUser } = useContext(AuthContext);
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -29,19 +32,16 @@ const PaymentModal = ({ show, onHide, product, deliveryInfo, user, onPaymentSucc
             return;
           }
           
-          const response = await axios.get(
-            `http://localhost:8080/api/v1/users/${user.usersId}`,
-            {
-              headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-              }
-            }
-          );
+          // useApi 사용하여 사용자 정보 조회
+          const response = await GET(`/users/${user.usersId}`, {}, true, 'main');
           
-          setUserDetails(response.data);
-          setUserDetailsLoading(false);
-          setError(''); // 성공 시 에러 메시지 초기화
+          if (response.status === 'fulfilled') {
+            setUserDetails(response.value.data);
+            setUserDetailsLoading(false);
+            setError(''); // 성공 시 에러 메시지 초기화
+          } else {
+            throw new Error(response.reason || '사용자 정보 조회 실패');
+          }
         } catch (error) {
           setError('사용자 정보를 가져오는데 실패했습니다. 다시 시도해주세요.');
           setUserDetailsLoading(false);
@@ -110,22 +110,18 @@ const PaymentModal = ({ show, onHide, product, deliveryInfo, user, onPaymentSucc
         orderNotes: deliveryInfo?.deliveryMessage || ''
       };
 
-      const response = await axios.post(
-        'http://localhost:8080/api/v1/payments/process',
-        paymentRequest,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      // useApi 사용하여 결제 정보 전송
+      const response = await POST('/payments/process', paymentRequest, true, 'main');
 
-      onPaymentSuccess(response.data);
-      onHide();
+      if (response.status === 'fulfilled') {
+        onPaymentSuccess(response.value.data);
+        onHide();
+      } else {
+        throw new Error(response.reason || '결제 정보 저장 실패');
+      }
       
     } catch (error) {
-      if (error.response?.status === 401) {
+      if (error.message?.includes('401') || error.message?.includes('로그인')) {
         setError('로그인이 필요합니다. 다시 로그인해주세요.');
       } else {
         setError('결제 정보 저장에 실패했습니다. 관리자에게 문의해주세요.');
@@ -384,17 +380,14 @@ const PaymentModal = ({ show, onHide, product, deliveryInfo, user, onPaymentSucc
                     const fetchUserDetails = async () => {
                       try {
                         const token = user.accessToken;
-                        const response = await axios.get(
-                          `http://localhost:8080/api/v1/users/${user.usersId}`,
-                          {
-                            headers: {
-                              'Authorization': `Bearer ${token}`,
-                              'Content-Type': 'application/json'
-                            }
-                          }
-                        );
-                        setUserDetails(response.data);
-                        setUserDetailsLoading(false);
+                        const response = await GET(`/users/${user.usersId}`, {}, true, 'main');
+                        
+                        if (response.status === 'fulfilled') {
+                          setUserDetails(response.value.data);
+                          setUserDetailsLoading(false);
+                        } else {
+                          throw new Error(response.reason || '사용자 정보 조회 실패');
+                        }
                       } catch (error) {
                         setError('사용자 정보를 가져오는데 실패했습니다. 다시 시도해주세요.');
                         setUserDetailsLoading(false);
