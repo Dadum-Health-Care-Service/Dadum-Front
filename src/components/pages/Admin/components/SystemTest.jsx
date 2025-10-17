@@ -1,9 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { useApi } from '../../../../utils/api/useApi';
+import { AuthContext } from '../../../../context/AuthContext';
 import CardComponent from '../../../common/CardComponent';
 import ButtonComponent from '../../../common/ButtonComponent';
 import styles from './SystemTest.module.css';
 
 const SystemTest = () => {
+  const { GET, POST } = useApi();
+  const { user } = useContext(AuthContext);
   const [testResults, setTestResults] = useState({});
   const [isRunning, setIsRunning] = useState(false);
   const [testLog, setTestLog] = useState([]);
@@ -24,14 +28,20 @@ const SystemTest = () => {
   const testAIService = async () => {
     addLog('AI 서비스 상태 확인 중...', 'info');
     try {
-      const response = await fetch('/api/ai/health');
-      if (response.ok) {
-        const data = await response.json();
+      if (!user || !user.accessToken) {
+        updateTestResult('ai_service', 'error', '로그인이 필요합니다');
+        addLog('❌ 로그인이 필요합니다', 'error');
+        return false;
+      }
+
+      const response = await GET('/ai/health', {}, true, 'main');
+      if (response.status === 'fulfilled') {
+        const data = response.value.data;
         updateTestResult('ai_service', 'success', `AI 서비스 정상: ${data.message}`);
         addLog('✅ AI 서비스 정상 작동', 'success');
         return true;
       } else {
-        updateTestResult('ai_service', 'error', `HTTP ${response.status}`);
+        updateTestResult('ai_service', 'error', response.reason || 'AI 서비스 응답 오류');
         addLog('❌ AI 서비스 응답 오류', 'error');
         return false;
       }
@@ -46,9 +56,15 @@ const SystemTest = () => {
   const testAIModel = async () => {
     addLog('AI 모델 상태 확인 중...', 'info');
     try {
-      const response = await fetch('/api/ai/model-status');
-      if (response.ok) {
-        const data = await response.json();
+      if (!user || !user.accessToken) {
+        updateTestResult('ai_model', 'error', '로그인이 필요합니다');
+        addLog('❌ 로그인이 필요합니다', 'error');
+        return false;
+      }
+
+      const response = await GET('/ai/model-status', {}, true, 'main');
+      if (response.status === 'fulfilled') {
+        const data = response.value.data;
         if (data.is_trained) {
           updateTestResult('ai_model', 'success', '모델 훈련 완료');
           addLog('✅ AI 모델 훈련 완료', 'success');
@@ -59,7 +75,7 @@ const SystemTest = () => {
           return false;
         }
       } else {
-        updateTestResult('ai_model', 'error', `HTTP ${response.status}`);
+        updateTestResult('ai_model', 'error', response.reason || 'AI 모델 상태 확인 실패');
         addLog('❌ AI 모델 상태 확인 실패', 'error');
         return false;
       }
@@ -74,14 +90,20 @@ const SystemTest = () => {
   const testStatisticsAPI = async () => {
     addLog('통계 API 테스트 중...', 'info');
     try {
-      const response = await fetch('/api/ai/statistics');
-      if (response.ok) {
-        const data = await response.json();
+      if (!user || !user.accessToken) {
+        updateTestResult('statistics_api', 'error', '로그인이 필요합니다');
+        addLog('❌ 로그인이 필요합니다', 'error');
+        return false;
+      }
+
+      const response = await GET('/ai/statistics', {}, true, 'main');
+      if (response.status === 'fulfilled') {
+        const data = response.value.data;
         updateTestResult('statistics_api', 'success', `총 거래: ${data.totalTransactions || 0}`);
         addLog('✅ 통계 API 정상 작동', 'success');
         return true;
       } else {
-        updateTestResult('statistics_api', 'error', `HTTP ${response.status}`);
+        updateTestResult('statistics_api', 'error', response.reason || '통계 API 오류');
         addLog('❌ 통계 API 오류', 'error');
         return false;
       }
@@ -96,14 +118,20 @@ const SystemTest = () => {
   const testTransactionsAPI = async () => {
     addLog('거래 목록 API 테스트 중...', 'info');
     try {
-      const response = await fetch('/api/ai/transactions?size=5');
-      if (response.ok) {
-        const data = await response.json();
+      if (!user || !user.accessToken) {
+        updateTestResult('transactions_api', 'error', '로그인이 필요합니다');
+        addLog('❌ 로그인이 필요합니다', 'error');
+        return false;
+      }
+
+      const response = await GET('/ai/transactions?size=5', {}, true, 'main');
+      if (response.status === 'fulfilled') {
+        const data = response.value.data;
         updateTestResult('transactions_api', 'success', `거래 수: ${data.transactions?.length || 0}`);
         addLog('✅ 거래 목록 API 정상 작동', 'success');
         return true;
       } else {
-        updateTestResult('transactions_api', 'error', `HTTP ${response.status}`);
+        updateTestResult('transactions_api', 'error', response.reason || '거래 목록 API 오류');
         addLog('❌ 거래 목록 API 오류', 'error');
         return false;
       }
@@ -118,6 +146,12 @@ const SystemTest = () => {
   const testFraudDetection = async () => {
     addLog('이상거래 탐지 테스트 중...', 'info');
     try {
+      if (!user || !user.accessToken) {
+        updateTestResult('fraud_detection', 'error', '로그인이 필요합니다');
+        addLog('❌ 로그인이 필요합니다', 'error');
+        return false;
+      }
+
       const testTransaction = {
         transactionId: `TEST_${Date.now()}`,
         amount: 100000,
@@ -135,20 +169,16 @@ const SystemTest = () => {
         deviceInfo: 'test_device'
       };
 
-      const response = await fetch('/api/ai/detect-fraud', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(testTransaction)
-      });
+      const response = await POST('/ai/detect-fraud', testTransaction, true, 'main');
 
-      if (response.ok) {
-        const data = await response.json();
+      if (response.status === 'fulfilled') {
+        const data = response.value.data;
         updateTestResult('fraud_detection', 'success', 
           `위험도: ${data.riskScore}%, 이상거래: ${data.isAnomaly ? '예' : '아니오'}`);
         addLog(`✅ 이상거래 탐지 완료 - 위험도: ${data.riskScore}%`, 'success');
         return true;
       } else {
-        updateTestResult('fraud_detection', 'error', `HTTP ${response.status}`);
+        updateTestResult('fraud_detection', 'error', response.reason || '이상거래 탐지 API 오류');
         addLog('❌ 이상거래 탐지 API 오류', 'error');
         return false;
       }
@@ -180,7 +210,7 @@ const SystemTest = () => {
         }
 
         // SockJS와 STOMP를 사용한 WebSocket 연결 테스트
-        const socket = new window.SockJS('http://localhost:8080/ws/fraud-monitor');
+        const socket = new window.SockJS('/ws/fraud-monitor');
         const stompClient = window.Stomp.over(socket);
         
         stompClient.debug = false;
@@ -218,6 +248,13 @@ const SystemTest = () => {
     setTestLog([]);
     
     addLog('🚀 시스템 테스트 시작', 'info');
+    
+    // 사용자 로그인 확인
+    if (!user || !user.accessToken) {
+      addLog('❌ 로그인이 필요합니다. 먼저 로그인해주세요.', 'error');
+      setIsRunning(false);
+      return;
+    }
     
     const tests = [
       { name: 'AI 서비스', fn: testAIService },

@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect, useContext } from 'react';
+import { useApi } from '../../../../utils/api/useApi';
+import { AuthContext } from '../../../../context/AuthContext';
 import ButtonComponent from '../../../common/ButtonComponent';
 import ModalComponent from '../../../common/ModalComponent';
 import styles from './OrderHistory.module.css';
 
 export default function OrderHistory() {
   console.log("OrderHistory 컴포넌트 렌더링됨");
+  const { GET, DELETE, POST } = useApi();
+  const { user } = useContext(AuthContext);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -25,55 +28,55 @@ export default function OrderHistory() {
 
   const fetchOrders = async () => {
     try {
-      // 토큰 검사
-      let token = localStorage.getItem('accessToken');
-      const userInfo = localStorage.getItem('user');
-      
-      // user 객체에서 토큰 추출 시도
-      if (!token && userInfo) {
-        try {
-          const user = JSON.parse(userInfo);
-          if (user.accessToken) {
-            token = user.accessToken;
+      // 사용자 로그인 확인
+      if (!user || !user.accessToken) {
+        console.log("사용자가 로그인하지 않음 - 샘플 데이터 사용");
+        
+        // 임시로 샘플 데이터 사용 (API 호출 대신)
+        const sampleOrders = [
+          {
+            id: 1,
+            orderNumber: "ORD-2024-001",
+            productName: "프리미엄 요가매트",
+            productCategory: "운동기구",
+            quantity: 1,
+            totalAmount: 45000,
+            status: "DELIVERED",
+            orderDate: "2024-01-15T10:30:00Z",
+            deliveryDate: "2024-01-17T14:20:00Z",
+            merchantUid: "merchant_001"
+          },
+          {
+            id: 2,
+            orderNumber: "ORD-2024-002", 
+            productName: "스마트 웨이트",
+            productCategory: "운동기구",
+            quantity: 1,
+            totalAmount: 120000,
+            status: "SHIPPED",
+            orderDate: "2024-01-20T15:45:00Z",
+            merchantUid: "merchant_002"
           }
-        } catch (e) {
-          // 토큰 파싱 실패 시 무시
-        }
+        ];
+        
+        setOrders(sampleOrders);
+        setError('');
+        setLoading(false);
+        return;
+      }
+
+      // 실제 API 호출 (useApi 사용)
+      console.log("실제 API로 주문 내역 조회 중...");
+      const response = await GET('/orders', {}, true, 'main');
+      
+      if (response.status === 'fulfilled') {
+        setOrders(response.value.data || []);
+        setError('');
+      } else {
+        throw new Error(response.reason || '주문 내역 조회 실패');
       }
       
-      // 임시로 샘플 데이터 사용 (API 호출 대신)
-      console.log("샘플 데이터로 테스트 중...");
-      
-      const sampleOrders = [
-        {
-          id: 1,
-          orderNumber: "ORD-2024-001",
-          productName: "프리미엄 요가매트",
-          productCategory: "운동기구",
-          quantity: 1,
-          totalAmount: 45000,
-          status: "DELIVERED",
-          orderDate: "2024-01-15T10:30:00Z",
-          deliveryDate: "2024-01-17T14:20:00Z",
-          merchantUid: "merchant_001"
-        },
-        {
-          id: 2,
-          orderNumber: "ORD-2024-002", 
-          productName: "스마트 웨이트",
-          productCategory: "운동기구",
-          quantity: 1,
-          totalAmount: 120000,
-          status: "SHIPPED",
-          orderDate: "2024-01-20T15:45:00Z",
-          merchantUid: "merchant_002"
-        }
-      ];
-      
-      setOrders(sampleOrders);
-      setError('');
       setLoading(false);
-      return;
     } catch (error) {
       console.error('❌ 주문 내역 조회 실패:', error);
       setError('주문 내역을 불러오는데 실패했습니다.');
@@ -89,43 +92,22 @@ export default function OrderHistory() {
 
     setLoading(true);
     try {
-      let token = localStorage.getItem('accessToken');
-      if (!token) {
-        const userInfo = localStorage.getItem('user');
-        if (userInfo) {
-          try {
-            const user = JSON.parse(userInfo);
-            if (user.accessToken) {
-              token = user.accessToken;
-            }
-          } catch (e) {
-            console.error('User 객체 파싱 실패:', e);
-          }
-        }
-      }
-      
-      if (!token) {
+      if (!user || !user.accessToken) {
         setError('로그인이 필요합니다.');
         setLoading(false);
         return;
       }
 
-      // 결제 취소 API 호출
-      const response = await axios.delete(
-        `http://localhost:8080/api/v1/payments/${order.merchantUid || order.orderNumber}/cancel`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      // 결제 취소 API 호출 (useApi 사용)
+      const response = await DELETE(`/payments/${order.merchantUid || order.orderNumber}/cancel`, {}, true, 'main');
 
-
-      alert('결제가 성공적으로 취소되었습니다.\n환불은 3-5일 내에 처리됩니다.');
-      
-      // 주문 내역 새로고침
-      fetchOrders();
+      if (response.status === 'fulfilled') {
+        alert('결제가 성공적으로 취소되었습니다.\n환불은 3-5일 내에 처리됩니다.');
+        // 주문 내역 새로고침
+        fetchOrders();
+      } else {
+        throw new Error(response.reason || '결제 취소 실패');
+      }
       
     } catch (error) {
       console.error('결제 취소 실패:', error);
@@ -160,22 +142,7 @@ export default function OrderHistory() {
 
     setLoading(true);
     try {
-      let token = localStorage.getItem('accessToken');
-      if (!token) {
-        const userInfo = localStorage.getItem('user');
-        if (userInfo) {
-          try {
-            const user = JSON.parse(userInfo);
-            if (user.accessToken) {
-              token = user.accessToken;
-            }
-          } catch (e) {
-            console.error('User 객체 파싱 실패:', e);
-          }
-        }
-      }
-      
-      if (!token) {
+      if (!user || !user.accessToken) {
         setError('로그인이 필요합니다.');
         setLoading(false);
         return;
@@ -188,22 +155,22 @@ export default function OrderHistory() {
         additionalInfo: additionalInfo
       };
 
-      // 환불 요청 API 호출
-      const response = await axios.post(
-        `http://localhost:8080/api/v1/payments/${selectedOrder.merchantUid || selectedOrder.orderNumber}/refund`,
+      // 환불 요청 API 호출 (useApi 사용)
+      const response = await POST(
+        `/payments/${selectedOrder.merchantUid || selectedOrder.orderNumber}/refund`,
         refundRequest,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
+        true,
+        'main'
       );
-      alert('환불 요청이 성공적으로 접수되었습니다.\n검토 후 3-5일 내에 처리됩니다.');
-      
-      // 모달 닫기 및 주문 내역 새로고침
-      closeRefundModal();
-      fetchOrders();
+
+      if (response.status === 'fulfilled') {
+        alert('환불 요청이 성공적으로 접수되었습니다.\n검토 후 3-5일 내에 처리됩니다.');
+        // 모달 닫기 및 주문 내역 새로고침
+        closeRefundModal();
+        fetchOrders();
+      } else {
+        throw new Error(response.reason || '환불 요청 실패');
+      }
       
     } catch (error) {
       console.error('환불 요청 실패:', error);
@@ -275,21 +242,7 @@ export default function OrderHistory() {
               variant="outline" 
               size="small"
               onClick={() => {
-                let token = localStorage.getItem('accessToken');
-                const user = localStorage.getItem('user');
-                
-                // user 객체에서 토큰 추출 시도
-                if (!token && user) {
-                  try {
-                    const userObj = JSON.parse(user);
-                    if (userObj.accessToken) {
-                      token = userObj.accessToken;
-                    }
-                  } catch (e) {
-                    console.error('User 객체 파싱 실패:', e);
-                  }
-                }
-                alert(`직접 토큰: ${localStorage.getItem('accessToken') ? '있음' : '없음'}\n사용자: ${user ? '있음' : '없음'}\n최종 토큰: ${token ? '있음' : '없음'}`);
+                alert(`사용자: ${user ? '있음' : '없음'}\n토큰: ${user?.accessToken ? '있음' : '없음'}\n사용자 ID: ${user?.usersId || '없음'}`);
               }}
               className={styles.debugButton}
             >

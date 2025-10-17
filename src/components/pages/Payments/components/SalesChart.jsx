@@ -13,21 +13,29 @@ const SalesChart = ({ data, type = 'line', title }) => {
     );
   }
 
+  // 안전한 숫자 변환 함수
+  const safeNumber = (value) => {
+    const num = Number(value);
+    return isNaN(num) ? 0 : num;
+  };
+
   // 최대값 계산 (차트 스케일링용)
-  const maxValue = Math.max(...data.map(item => item.sales || item.value || 0));
+  const salesValues = data.map(item => safeNumber(item.sales || item.value || 0));
+  const maxValue = salesValues.length > 0 ? Math.max(...salesValues) : 1;
   
   // 간단한 막대 차트 렌더링
   const renderBarChart = () => {
     return (
       <div className={styles.barChart}>
         {data.map((item, index) => {
-          const height = ((item.sales || item.value || 0) / maxValue) * 100;
+          const salesValue = safeNumber(item.sales || item.value || 0);
+          const height = maxValue > 0 ? (salesValue / maxValue) * 100 : 0;
           return (
             <div key={index} className={styles.barContainer}>
               <div 
                 className={styles.bar}
                 style={{ height: `${height}%` }}
-                title={`${item.date || item.label}: ${item.sales || item.value}원`}
+                title={`${item.date || item.label}: ${salesValue}원`}
               />
               <div className={styles.barLabel}>
                 {item.date ? item.date.split('-')[2] : item.label}
@@ -50,13 +58,15 @@ const SalesChart = ({ data, type = 'line', title }) => {
             strokeWidth="2"
             points={data.map((item, index) => {
               const x = (index / (data.length - 1)) * 380 + 10;
-              const y = 190 - ((item.sales || item.value || 0) / maxValue) * 180;
+              const salesValue = safeNumber(item.sales || item.value || 0);
+              const y = 190 - (maxValue > 0 ? (salesValue / maxValue) * 180 : 0);
               return `${x},${y}`;
             }).join(' ')}
           />
           {data.map((item, index) => {
             const x = (index / (data.length - 1)) * 380 + 10;
-            const y = 190 - ((item.sales || item.value || 0) / maxValue) * 180;
+            const salesValue = safeNumber(item.sales || item.value || 0);
+            const y = 190 - (maxValue > 0 ? (salesValue / maxValue) * 180 : 0);
             return (
               <circle
                 key={index}
@@ -82,7 +92,9 @@ const SalesChart = ({ data, type = 'line', title }) => {
       <div className={styles.pieChart}>
         <svg viewBox="0 0 200 200" className={styles.pieSvg}>
           {data.map((item, index) => {
-            const percentage = item.percentage || ((item.sales || item.value || 0) / data.reduce((sum, d) => sum + (d.sales || d.value || 0), 0)) * 100;
+            const salesValue = safeNumber(item.sales || item.value || 0);
+            const totalSales = data.reduce((sum, d) => sum + safeNumber(d.sales || d.value || 0), 0);
+            const percentage = item.percentage || (totalSales > 0 ? (salesValue / totalSales) * 100 : 0);
             const startAngle = (cumulativePercentage / 100) * 360;
             const endAngle = ((cumulativePercentage + percentage) / 100) * 360;
             cumulativePercentage += percentage;
@@ -122,7 +134,7 @@ const SalesChart = ({ data, type = 'line', title }) => {
                 style={{ backgroundColor: colors[index % colors.length] }}
               />
               <span className={styles.legendLabel}>
-                {item.name || item.label}: {item.percentage || ((item.sales || item.value || 0) / data.reduce((sum, d) => sum + (d.sales || d.value || 0), 0) * 100).toFixed(1)}%
+                {item.name || item.label}: {item.percentage || (totalSales > 0 ? (salesValue / totalSales) * 100 : 0).toFixed(1)}%
               </span>
             </div>
           ))}

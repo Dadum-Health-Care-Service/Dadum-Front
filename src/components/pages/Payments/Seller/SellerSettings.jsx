@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { GET, POST, PUT } from '../../../../utils/api/api';
+import React, { useState, useEffect, useContext } from 'react';
+import { useApi } from '../../../../utils/api/useApi';
+import { AuthContext } from '../../../../context/AuthContext';
 import ButtonComponent from '../../../common/ButtonComponent';
 import CardComponent from '../../../common/CardComponent';
 import InputComponent from '../../../common/InputComponent';
@@ -9,6 +10,8 @@ import AddressSearch from '../AddressSearch';
 import styles from './SellerSettings.module.css';
 
 const SellerSettings = () => {
+  const { GET, POST, PUT } = useApi();
+  const { user } = useContext(AuthContext);
   const [activeSection, setActiveSection] = useState('profile');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -90,6 +93,17 @@ const SellerSettings = () => {
       setLoading(true);
       setError('');
 
+      console.log('🔧 판매자 설정 데이터 로드 시작');
+      console.log('🔧 현재 사용자:', user);
+      console.log('🔧 Access Token:', user?.accessToken);
+
+      // 사용자가 로그인하지 않은 경우 처리
+      if (!user || !user.accessToken) {
+        console.error('❌ 사용자가 로그인하지 않았거나 토큰이 없습니다.');
+        setError('로그인이 필요합니다. 로그인 후 다시 시도해주세요.');
+        return;
+      }
+
       // 각 섹션별 데이터 로드
       const [profileResponse, storeResponse, billingResponse, notificationResponse] = await Promise.allSettled([
         GET('/seller/settings/profile'),
@@ -140,8 +154,13 @@ const SellerSettings = () => {
   };
 
   useEffect(() => {
-    loadSettingsData();
-  }, []);
+    // 사용자가 로그인한 경우에만 데이터 로드
+    if (user && user.accessToken) {
+      loadSettingsData();
+    } else {
+      console.log('🔧 사용자가 로그인하지 않음 - 데이터 로드 건너뜀');
+    }
+  }, [user]);
 
   // 주소 선택 핸들러
   const handleAddressSelect = (addressData) => {
@@ -470,6 +489,23 @@ const SellerSettings = () => {
         return renderProfileSection();
     }
   };
+
+  // 사용자가 로그인하지 않은 경우
+  if (!user || !user.accessToken) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <h1 className={styles.title}>⚙️ 판매자 설정</h1>
+          <p className={styles.subtitle}>스토어 운영에 필요한 모든 설정을 관리하세요</p>
+        </div>
+        <div className={styles.alert}>
+          <div className={styles.alertError}>
+            ❌ 로그인이 필요합니다. 로그인 후 다시 시도해주세요.
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loading && !success) {
     return (
