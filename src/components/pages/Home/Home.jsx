@@ -251,9 +251,9 @@ const Home = () => {
           )}
 
           {!loading && userRoutines.length > 0 && (
-            <Row>
+            <div className={styles.quickRoutinesRow}>
               {userRoutines.slice(0, 3).map((routine) => (
-                <Col key={routine.id} lg={4} md={6} className="mb-3">
+                <div key={routine.id} className={styles.quickRoutinesCard}>
                   <CardComponent
                     title=""
                     details=""
@@ -290,9 +290,9 @@ const Home = () => {
                       </ButtonComponent>
                     </div>
                   </CardComponent>
-                </Col>
+                </div>
               ))}
-            </Row>
+            </div>
           )}
         </Container>
       </section>
