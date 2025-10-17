@@ -3,8 +3,8 @@ import ButtonComponent from "./ButtonComponent";
 import styles from "./CardComponent.module.css";
 
 const CardComponent = ({
-  title = "루틴 제목",
-  details = "월/수/금 · 45분",
+  title = "",
+  details = "",
   buttonText = "시작",
   onClick,
   className = "",

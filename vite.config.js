@@ -99,6 +99,12 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/ml/, ""), // ★ /ml 접두어 제거해서 /analyze-coach로 전달
         },
+        "/ws": {
+          target: "http://localhost:8080",
+          changeOrigin: true,
+          secure: false,
+          ws: true, // WebSocket 프록시 활성화
+        },
       },
     },
 

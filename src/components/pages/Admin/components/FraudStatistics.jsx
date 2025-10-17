@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -10,11 +10,14 @@ import {
   Tooltip,
   Legend,
   ArcElement,
+  Filler,
 } from 'chart.js';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import CardComponent from '../../../common/CardComponent';
 import StatCard from './StatCard';
 import ChartCard from './ChartCard';
+import { useApi } from '../../../../utils/api/useApi';
+import { AuthContext } from '../../../../context/AuthContext';
 import styles from './FraudStatistics.module.css';
 
 // Chart.js 등록
@@ -27,10 +30,13 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  ArcElement
+  ArcElement,
+  Filler
 );
 
 const FraudStatistics = () => {
+  const { GET } = useApi();
+  const { user } = useContext(AuthContext);
   const [statistics, setStatistics] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -42,12 +48,18 @@ const FraudStatistics = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/ai/statistics');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      console.log('통계 데이터 로드 시작...');
+      console.log('사용자 상태:', user ? '로그인됨' : '로그인 안됨');
+      
+      const response = await GET('/ai/statistics', {}, true, 'main');
+      console.log('통계 API 응답:', response);
+      
+      if (response && response.data) {
+        console.log('통계 데이터:', response.data);
+        setStatistics(response.data);
+      } else {
+        throw new Error('통계 데이터를 가져올 수 없습니다');
       }
-      const data = await response.json();
-      setStatistics(data);
     } catch (e) {
       console.error('통계 데이터 로드 실패:', e);
       setError(`통계 데이터 로드 실패: ${e.message}`);
@@ -59,24 +71,35 @@ const FraudStatistics = () => {
   // 거래 데이터 로드
   const loadTransactions = async () => {
     try {
-      const response = await fetch(`/api/ai/transactions?size=100`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      console.log('거래 데이터 로드 시작...');
+      console.log('사용자 상태:', user ? '로그인됨' : '로그인 안됨');
+      
+      const response = await GET('/ai/transactions?size=100', {}, true, 'main');
+      console.log('거래 API 응답:', response);
+      
+      if (response && response.data) {
+        console.log('거래 데이터:', response.data);
+        setTransactions(response.data.transactions || []);
+      } else {
+        console.log('거래 데이터 없음');
+        setTransactions([]);
       }
-      const data = await response.json();
-      setTransactions(data.transactions || []);
     } catch (e) {
       console.error('거래 데이터 로드 실패:', e);
+      setTransactions([]);
     }
   };
 
   useEffect(() => {
+    console.log('FraudStatistics 컴포넌트 마운트됨');
+    console.log('사용자 상태:', user ? '로그인됨' : '로그인 안됨');
     loadStatistics();
     loadTransactions();
-  }, []);
+  }, [user]);
 
   // 전체 데이터 새로고침
   const refreshAllData = async () => {
+    console.log('데이터 새로고침 시작...');
     setLoading(true);
     setError(null);
     try {
@@ -524,6 +547,15 @@ const FraudStatistics = () => {
     },
   };
 
+  // 로그인하지 않은 사용자 처리
+  if (!user || !user.accessToken) {
+    return (
+      <div className={styles.errorContainer}>
+        <p className={styles.errorMessage}>로그인이 필요합니다. 로그인 후 다시 시도해주세요.</p>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
@@ -537,7 +569,7 @@ const FraudStatistics = () => {
     return (
       <div className={styles.errorContainer}>
         <p className={styles.errorMessage}>{error}</p>
-        <button onClick={loadStatistics} className={styles.retryButton}>
+        <button onClick={refreshAllData} className={styles.retryButton}>
           다시 시도
         </button>
       </div>
