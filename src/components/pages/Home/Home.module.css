@@ -246,6 +246,32 @@
   margin-bottom: 3rem;
 }
 
+.quickRoutinesRow {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.quickRoutinesCard {
+  flex: 0 0 auto;
+  width: 300px;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+  .quickRoutinesCard {
+    width: 280px;
+  }
+}
+
+@media (max-width: 576px) {
+  .quickRoutinesCard {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
 .tipSection {
   margin: 20px 0;
 }
