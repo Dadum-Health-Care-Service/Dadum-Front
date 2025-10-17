@@ -1,9 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import CardComponent from '../../../common/CardComponent';
 import ButtonComponent from '../../../common/ButtonComponent';
+import { useApi } from '../../../../utils/api/useApi';
+import { AuthContext } from '../../../../context/AuthContext';
 import styles from './PerformanceMonitor.module.css';
 
 const PerformanceMonitor = () => {
+  const { GET } = useApi();
+  const { user } = useContext(AuthContext);
   const [performanceData, setPerformanceData] = useState(null);
   const [metrics, setMetrics] = useState(null);
   const [healthStatus, setHealthStatus] = useState(null);
@@ -17,12 +21,15 @@ const PerformanceMonitor = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/ai/health');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      console.log('성능 데이터 로드 시작...');
+      const response = await GET('/ai/health', {}, true, 'main');
+      console.log('성능 데이터 응답:', response);
+      
+      if (response && response.data) {
+        setPerformanceData(response.data);
+      } else {
+        throw new Error('성능 데이터를 가져올 수 없습니다');
       }
-      const data = await response.json();
-      setPerformanceData(data);
     } catch (e) {
       console.error('성능 데이터 로드 실패:', e);
       setError(`성능 데이터 로드 실패: ${e.message}`);
@@ -36,12 +43,15 @@ const PerformanceMonitor = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/ai/statistics`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      console.log('메트릭 데이터 로드 시작...');
+      const response = await GET('/ai/statistics', {}, true, 'main');
+      console.log('메트릭 데이터 응답:', response);
+      
+      if (response && response.data) {
+        setMetrics(response.data);
+      } else {
+        throw new Error('메트릭 데이터를 가져올 수 없습니다');
       }
-      const data = await response.json();
-      setMetrics(data);
     } catch (e) {
       console.error('메트릭 로드 실패:', e);
       setError(`메트릭 로드 실패: ${e.message}`);
@@ -52,15 +62,17 @@ const PerformanceMonitor = () => {
 
   // 건강도 체크
   const loadHealthStatus = async () => {
-    setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/ai/health');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      console.log('건강도 체크 시작...');
+      const response = await GET('/ai/health', {}, true, 'main');
+      console.log('건강도 체크 응답:', response);
+      
+      if (response && response.data) {
+        setHealthStatus(response.data);
+      } else {
+        throw new Error('건강도 데이터를 가져올 수 없습니다');
       }
-      const data = await response.json();
-      setHealthStatus(data);
     } catch (e) {
       console.error('건강도 체크 실패:', e);
       setError(`건강도 체크 실패: ${e.message}`);
@@ -237,25 +249,25 @@ const PerformanceMonitor = () => {
             <div className={styles.metricItem}>
               <span className={styles.metricLabel}>총 거래 수:</span>
               <span className={styles.metricValue}>
-                {metrics.totalTransactions?.toLocaleString() || 0}
+                {metrics.total_transactions?.toLocaleString() || 0}
               </span>
             </div>
             <div className={styles.metricItem}>
               <span className={styles.metricLabel}>이상거래 수:</span>
               <span className={styles.metricValue}>
-                {metrics.anomalyCount?.toLocaleString() || 0}
+                {metrics.anomaly_transactions?.toLocaleString() || 0}
               </span>
             </div>
             <div className={styles.metricItem}>
               <span className={styles.metricLabel}>정상 거래 수:</span>
               <span className={styles.metricValue}>
-                {metrics.normalCount?.toLocaleString() || 0}
+                {metrics.normal_transactions?.toLocaleString() || 0}
               </span>
             </div>
             <div className={styles.metricItem}>
-              <span className={styles.metricLabel}>평균 위험도:</span>
+              <span className={styles.metricLabel}>이상거래 비율:</span>
               <span className={styles.metricValue}>
-                {metrics.averageRiskScore?.toFixed(1) || 0}%
+                {metrics.anomaly_rate ? (metrics.anomaly_rate * 100).toFixed(1) : 0}%
               </span>
             </div>
             <div className={styles.metricItem}>

@@ -156,12 +156,13 @@ const RealTimeMonitor = () => {
         // 통계 데이터 업데이트 (useApi 사용)
         try {
           const statsResponse = await GET('/ai/statistics', {}, true, 'main');
-          if (statsResponse.status === 'fulfilled') {
-            const stats = statsResponse.value.data;
+          console.log('실시간 모니터링 통계 응답:', statsResponse);
+          if (statsResponse && statsResponse.data) {
+            const stats = statsResponse.data;
             setMonitoringStats(prev => ({
               ...prev,
-              totalTransactions: stats.totalTransactions || 0,
-              anomalyCount: stats.anomalyCount || 0
+              totalTransactions: stats.total_transactions || 0,
+              anomalyCount: stats.anomaly_transactions || 0
             }));
           }
         } catch (error) {
@@ -171,8 +172,9 @@ const RealTimeMonitor = () => {
         // 최근 거래 데이터 확인 (useApi 사용)
         try {
           const transactionsResponse = await GET('/ai/transactions?size=5', {}, true, 'main');
-          if (transactionsResponse.status === 'fulfilled') {
-            const data = transactionsResponse.value.data;
+          console.log('실시간 모니터링 거래 응답:', transactionsResponse);
+          if (transactionsResponse && transactionsResponse.data) {
+            const data = transactionsResponse.data;
             const recentTransactions = data.transactions || [];
             
             // 새로운 이상거래 확인

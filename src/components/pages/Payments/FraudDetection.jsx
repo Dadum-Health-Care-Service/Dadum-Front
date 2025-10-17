@@ -1,11 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import ContainerComponent from '@/components/common/ContainerComponent';
 import ButtonComponent from '@/components/common/ButtonComponent';
 import InputComponent from '@/components/common/InputComponent';
 import CardComponent from '@/components/common/CardComponent';
+import { useApi } from '../../../utils/api/useApi';
+import { AuthContext } from '../../../context/AuthContext';
 import styles from './FraudDetection.module.css';
 
 const FraudDetection = ({ hideHeader = false }) => {
+  const { GET, POST } = useApi();
+  const { user } = useContext(AuthContext);
   const [transactions, setTransactions] = useState([]);
   const [riskScores, setRiskScores] = useState({});
   const [loading, setLoading] = useState(false);
@@ -19,18 +23,22 @@ const FraudDetection = ({ hideHeader = false }) => {
   });
 
   useEffect(() => {
-    loadAIServiceStatus();
-    loadModelStatus();
-  }, []);
+    if (user && user.accessToken) {
+      loadAIServiceStatus();
+      loadModelStatus();
+    }
+  }, [user]);
 
   const loadAIServiceStatus = async () => {
     try {
-      const response = await fetch('/api/ai/health');
-      if (response.ok) {
-        const data = await response.json();
-        setAiServiceStatus(data);
+      console.log('AI 서비스 상태 확인 시작...');
+      const response = await GET('/ai/health', {}, true, 'main');
+      console.log('AI 서비스 상태 응답:', response);
+      
+      if (response && response.data) {
+        setAiServiceStatus(response.data);
       } else {
-        console.error('AI 서비스 상태 확인 실패:', response.status);
+        console.error('AI 서비스 상태 확인 실패');
         setAiServiceStatus({ ai_service_healthy: false, status: 'unhealthy' });
       }
     } catch (error) {
@@ -41,12 +49,14 @@ const FraudDetection = ({ hideHeader = false }) => {
 
   const loadModelStatus = async () => {
     try {
-      const response = await fetch('/api/ai/model-status');
-      if (response.ok) {
-        const data = await response.json();
-        setModelStatus(data);
+      console.log('AI 모델 상태 확인 시작...');
+      const response = await GET('/ai/model-status', {}, true, 'main');
+      console.log('AI 모델 상태 응답:', response);
+      
+      if (response && response.data) {
+        setModelStatus(response.data);
       } else {
-        console.error('모델 상태 확인 실패:', response.status);
+        console.error('모델 상태 확인 실패');
         setModelStatus({ is_trained: false, error: '모델 상태 확인 실패' });
       }
     } catch (error) {
@@ -58,17 +68,30 @@ const FraudDetection = ({ hideHeader = false }) => {
   const detectFraud = async (transaction) => {
     setLoading(true);
     try {
-      const response = await fetch('/api/ai/detect-fraud', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(transaction)
-      });
-      const result = await response.json();
-      setRiskScores(prev => ({ ...prev, [transaction.transactionId]: result }));
-      
-      // 이상거래 발생 시 알림
-      if (result.isAnomaly) {
-        showFraudAlert(result);
+      if (!user || !user.accessToken) {
+        console.log("사용자가 로그인하지 않음");
+        setRiskScores(prev => ({ 
+          ...prev, 
+          [transaction.transactionId]: { 
+            riskScore: 0, 
+            isAnomaly: false, 
+            error: '로그인이 필요합니다',
+            recommendation: '로그인 후 다시 시도해주세요.'
+          } 
+        }));
+        return;
+      }
+
+      const response = await POST('/ai/detect-fraud', transaction, true, 'main');
+      if (response && response.data) {
+        setRiskScores(prev => ({ ...prev, [transaction.transactionId]: response.data }));
+        
+        // 이상거래 발생 시 알림
+        if (response.data.isAnomaly) {
+          showFraudAlert(response.data);
+        }
+      } else {
+        throw new Error('AI 탐지 응답이 없습니다');
       }
     } catch (error) {
       console.error('AI 탐지 실패:', error);
@@ -92,6 +115,11 @@ const FraudDetection = ({ hideHeader = false }) => {
       return;
     }
 
+    if (!user || !user.accessToken) {
+      alert('로그인이 필요합니다. 로그인 후 다시 시도해주세요.');
+      return;
+    }
+
     setLoading(true);
     try {
       // 고유한 거래 ID 생성 (타임스탬프 + 랜덤)
@@ -100,23 +128,23 @@ const FraudDetection = ({ hideHeader = false }) => {
       console.log('=== AI 탐지 요청 시작 ===');
       console.log('요청 데이터:', { ...testTransaction, transactionId: uniqueTransactionId });
       
-      const response = await fetch(`/api/ai/detect-fraud-simple?transactionId=${uniqueTransactionId}&amount=${testTransaction.amount}&userId=${testTransaction.userId}`, {
-        method: 'POST'
-      });
+      const response = await POST(`/ai/detect-fraud-simple?transactionId=${uniqueTransactionId}&amount=${testTransaction.amount}&userId=${testTransaction.userId}`, {}, true, 'main');
       
       console.log('=== 백엔드 응답 ===');
-      console.log('Status:', response.status);
-      console.log('OK:', response.ok);
+      console.log('응답:', response);
       
-      const result = await response.json();
-      console.log('=== AI 분석 결과 ===');
-      console.log('결과:', result);
-      
-      setRiskScores(prev => ({ ...prev, [testTransaction.transactionId]: result }));
-      
-      // 이상거래 발생 시 알림
-      if (result.isAnomaly) {
-        showFraudAlert(result);
+      if (response && response.data) {
+        console.log('=== AI 분석 결과 ===');
+        console.log('결과:', response.data);
+        
+        setRiskScores(prev => ({ ...prev, [testTransaction.transactionId]: response.data }));
+        
+        // 이상거래 발생 시 알림
+        if (response.data.isAnomaly) {
+          showFraudAlert(response.data);
+        }
+      } else {
+        throw new Error('AI 탐지 응답이 없습니다');
       }
     } catch (error) {
       console.error('AI 탐지 실패:', error);
@@ -135,20 +163,22 @@ const FraudDetection = ({ hideHeader = false }) => {
   };
 
   const trainModel = async () => {
+    if (!user || !user.accessToken) {
+      alert('로그인이 필요합니다. 로그인 후 다시 시도해주세요.');
+      return;
+    }
+
     setLoading(true);
     try {
-      const response = await fetch('/api/ai/train-model', {
-        method: 'POST'
-      });
-      const result = await response.json();
-      if (result.success) {
+      const response = await POST('/ai/train-model', {}, true, 'main');
+      if (response && response.data && response.data.success) {
         alert('AI 모델 훈련이 시작되었습니다. 잠시 후 상태를 확인해주세요.');
         // 3초 후 모델 상태 다시 확인
         setTimeout(() => {
           loadModelStatus();
         }, 3000);
       } else {
-        alert('AI 모델 훈련에 실패했습니다: ' + result.message);
+        alert('AI 모델 훈련에 실패했습니다: ' + (response?.data?.message || '알 수 없는 오류'));
       }
     } catch (error) {
       console.error('모델 훈련 실패:', error);

@@ -30,36 +30,8 @@ export default function OrderHistory() {
     try {
       // 사용자 로그인 확인
       if (!user || !user.accessToken) {
-        console.log("사용자가 로그인하지 않음 - 샘플 데이터 사용");
-        
-        // 임시로 샘플 데이터 사용 (API 호출 대신)
-        const sampleOrders = [
-          {
-            id: 1,
-            orderNumber: "ORD-2024-001",
-            productName: "프리미엄 요가매트",
-            productCategory: "운동기구",
-            quantity: 1,
-            totalAmount: 45000,
-            status: "DELIVERED",
-            orderDate: "2024-01-15T10:30:00Z",
-            deliveryDate: "2024-01-17T14:20:00Z",
-            merchantUid: "merchant_001"
-          },
-          {
-            id: 2,
-            orderNumber: "ORD-2024-002", 
-            productName: "스마트 웨이트",
-            productCategory: "운동기구",
-            quantity: 1,
-            totalAmount: 120000,
-            status: "SHIPPED",
-            orderDate: "2024-01-20T15:45:00Z",
-            merchantUid: "merchant_002"
-          }
-        ];
-        
-        setOrders(sampleOrders);
+        console.log("사용자가 로그인하지 않음");
+        setOrders([]);
         setError('');
         setLoading(false);
         return;
@@ -67,13 +39,22 @@ export default function OrderHistory() {
 
       // 실제 API 호출 (useApi 사용)
       console.log("실제 API로 주문 내역 조회 중...");
-      const response = await GET('/orders', {}, true, 'main');
+      console.log("사용자 정보:", user);
+      console.log("Access Token:", user.accessToken);
       
-      if (response.status === 'fulfilled') {
-        setOrders(response.value.data || []);
+      const response = await GET('/orders', {}, true, 'main');
+      console.log("API 응답:", response);
+      
+      // axios 응답을 직접 처리
+      if (response && response.data) {
+        console.log("응답 데이터:", response.data);
+        // 백엔드 응답 구조에 맞게 수정
+        const ordersData = response.data.orders || response.data || [];
+        setOrders(ordersData);
         setError('');
       } else {
-        throw new Error(response.reason || '주문 내역 조회 실패');
+        console.error("API 오류: 응답 데이터가 없습니다");
+        throw new Error('주문 내역 조회 실패');
       }
       
       setLoading(false);
@@ -98,15 +79,15 @@ export default function OrderHistory() {
         return;
       }
 
-      // 결제 취소 API 호출 (useApi 사용)
-      const response = await DELETE(`/payments/${order.merchantUid || order.orderNumber}/cancel`, {}, true, 'main');
+      // 주문 취소 API 호출 (useApi 사용)
+      const response = await DELETE(`/orders/${order.id}/cancel`, {}, true, 'main');
 
-      if (response.status === 'fulfilled') {
-        alert('결제가 성공적으로 취소되었습니다.\n환불은 3-5일 내에 처리됩니다.');
+      if (response && response.data) {
+        alert('주문이 성공적으로 취소되었습니다.');
         // 주문 내역 새로고침
         fetchOrders();
       } else {
-        throw new Error(response.reason || '결제 취소 실패');
+        throw new Error('주문 취소 실패');
       }
       
     } catch (error) {
@@ -157,19 +138,19 @@ export default function OrderHistory() {
 
       // 환불 요청 API 호출 (useApi 사용)
       const response = await POST(
-        `/payments/${selectedOrder.merchantUid || selectedOrder.orderNumber}/refund`,
+        `/orders/${selectedOrder.id}/refund`,
         refundRequest,
         true,
         'main'
       );
 
-      if (response.status === 'fulfilled') {
+      if (response && response.data) {
         alert('환불 요청이 성공적으로 접수되었습니다.\n검토 후 3-5일 내에 처리됩니다.');
         // 모달 닫기 및 주문 내역 새로고침
         closeRefundModal();
         fetchOrders();
       } else {
-        throw new Error(response.reason || '환불 요청 실패');
+        throw new Error('환불 요청 실패');
       }
       
     } catch (error) {
@@ -254,19 +235,26 @@ export default function OrderHistory() {
         {/* 주문 내역 */}
         {orders.length === 0 ? (
           <div className={styles.emptyState}>
-            <h4 className={styles.emptyStateTitle}>😔 주문 내역이 없습니다</h4>
-            <p className={styles.emptyStateText}>첫 번째 주문을 시작해보세요!</p>
-            <ButtonComponent 
-              variant="primary" 
-              onClick={() => navigate('/shop')}
-              className={styles.shopButton}
-            >
-              쇼핑하러 가기
-            </ButtonComponent>
+            <h4 className={styles.emptyStateTitle}>📋 주문 내역이 없습니다</h4>
+            <p className={styles.emptyStateText}>
+              {!user || !user.accessToken 
+                ? '로그인 후 주문 내역을 확인할 수 있습니다.' 
+                : '아직 주문한 상품이 없습니다. 첫 번째 주문을 시작해보세요!'
+              }
+            </p>
+            {user && user.accessToken && (
+              <ButtonComponent 
+                variant="primary" 
+                onClick={() => window.location.href = '/shop'}
+                className={styles.shopButton}
+              >
+                쇼핑하러 가기
+              </ButtonComponent>
+            )}
           </div>
         ) : (
           <div className={styles.ordersGrid}>
-            {orders.map((order) => (
+            {Array.isArray(orders) && orders.map((order) => (
               <div key={order.id} className={styles.orderCard}>
                 <div className={styles.orderCardHeader}>
                   <span className={styles.orderNumber}>주문번호</span>
