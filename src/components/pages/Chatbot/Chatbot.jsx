@@ -237,8 +237,8 @@ const Chatbot = ({ className = "", onMessageSend }) => {
 
   // 타이핑 효과 함수
   const typeMessage = async (message, messageId) => {
-    const charsPerMs = 60; // 글자당 60ms
-    const baseDelay = 500; // 기본 지연 500ms
+    const charsPerMs = 30; // 글자당 30ms (더 빠르게)
+    const baseDelay = 300; // 기본 지연 300ms (더 빠르게)
     const totalDelay = (message.length * charsPerMs) + baseDelay;
     
     // 기본 지연 시간 (생각하는 시간)

@@ -267,6 +267,8 @@
 /* 반응형 디자인 - 모든 화면에서 동일한 스타일 */
 .modal-overlay {
   padding: 16px;
+  /* 하단 내비게이션 바와의 간격 확보 */
+  padding-bottom: 80px;
 }
 
 .modal-header {
@@ -289,6 +291,8 @@
 @media (max-width: 480px) {
   .modal-overlay {
     padding: 8px;
+    /* 모바일에서 하단 여백 증가 - 내비게이션 바와의 간격 확보 */
+    padding-bottom: 120px;
   }
   
   .modal {

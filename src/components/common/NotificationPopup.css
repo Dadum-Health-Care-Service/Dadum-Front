@@ -1,0 +1,158 @@
+/* ModalComponent를 사용하므로 컨테이너와 팝업 스타일 제거 */
+
+/* 알림 콘텐츠 */
+.notification-popup__content {
+  max-height: 400px;
+  overflow-y: hidden; /* 세로 스크롤바도 숨김 */
+  overflow-x: hidden; /* 가로 스크롤바 숨김 */
+  padding: 8px 0;
+}
+
+/* 스크롤바 제거됨 */
+
+/* 알림 아이템 */
+.notification-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 16px 24px;
+  border-bottom: 1px solid #f8f8f8;
+  position: relative;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  /* 가로 오버플로우 방지 */
+  min-width: 0;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+.notification-item:hover {
+  background: #f9f9f9;
+  transform: translateX(2px);
+}
+
+.notification-item:active {
+  transform: translateX(0) scale(0.98);
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+
+.notification-item__content {
+  flex-grow: 1;
+  min-width: 0; /* flex 아이템이 축소될 수 있도록 */
+  overflow: hidden; /* 가로 오버플로우 숨김 */
+}
+
+.notification-item__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.notification-item__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+  /* 가로 오버플로우 방지 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.notification-item__time {
+  font-size: 12px;
+  color: #999;
+  white-space: nowrap;
+}
+
+.notification-item__message {
+  font-size: 14px;
+  color: #555;
+  line-height: 1.4;
+  margin: 0;
+  /* 가로 오버플로우 방지 */
+  word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* 읽지 않음 배지 */
+.notification-item__badge {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 8px;
+  height: 8px;
+  background: #2563eb;
+  border-radius: 50%;
+}
+
+/* 빈 상태 */
+.notification-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  text-align: center;
+}
+
+
+.notification-empty__message {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+/* 액션 버튼 */
+.notification-popup__action {
+  background: linear-gradient(135deg, #2563eb 0%, #4facfe 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.notification-popup__action:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+}
+
+.notification-popup__action:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* 반응형 */
+@media (max-width: 600px) {
+  .notification-item {
+    padding: 12px 16px;
+  }
+
+  .notification-item__icon {
+    margin-right: 12px;
+  }
+
+  .notification-item__title {
+    font-size: 14px;
+  }
+
+  .notification-item__message {
+    font-size: 13px;
+  }
+
+  .notification-item__badge {
+    top: 16px;
+    right: 16px;
+  }
+}
