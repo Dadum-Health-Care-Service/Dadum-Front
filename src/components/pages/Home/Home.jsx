@@ -237,8 +237,8 @@ const Home = () => {
           )}
 
           {!loading && userRoutines.length === 0 && (
-            <Row>
-              <Col xs={12} className="mb-3">
+            <Row className="justify-content-center">
+              <Col lg={4} md={6} className="mb-3">
                 <CardComponent
                   title="등록된 루틴이 없습니다"
                   details="나에게 맞는 루틴을 생성해 시작해 보세요."
