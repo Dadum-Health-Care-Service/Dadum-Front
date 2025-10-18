@@ -115,7 +115,7 @@ export default function BarChart({ barData, isMobile }) {
         barData.length === 0 ? (
           <div
             style={{
-              minHeight: '200px',
+              minHeight: '300px',
               background: 'transparent',
               display: 'flex',
               justifyContent: 'center',
@@ -132,7 +132,7 @@ export default function BarChart({ barData, isMobile }) {
             data={data}
             options={options}
             style={{ 
-              minHeight: '200px', 
+              minHeight: '300px', 
               minWidth: '200px',
               background: 'transparent' 
             }}
@@ -141,7 +141,7 @@ export default function BarChart({ barData, isMobile }) {
       ) : barData === undefined ? (
         <div
           style={{
-            minHeight: '200px',
+            minHeight: '300px',
             background: 'transparent',
             display: 'flex',
             justifyContent: 'center',
@@ -153,7 +153,7 @@ export default function BarChart({ barData, isMobile }) {
       ) : (
         <div
           style={{
-            minHeight: '200px',
+            minHeight: '300px',
             background: 'transparent',
             display: 'flex',
             justifyContent: 'center',

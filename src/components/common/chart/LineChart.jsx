@@ -179,7 +179,7 @@ export default function LineChart({ lineData, lineState }) {
         lineData.length === 0 ? (
           <div
             style={{
-              minHeight: '200px',
+              minHeight: '300px',
               background: 'transparent',
               display: 'flex',
               justifyContent: 'center',
@@ -192,12 +192,12 @@ export default function LineChart({ lineData, lineState }) {
             기간 내 운동 기록이 없어요
           </div>
         ) : (
-          <Line data={data} options={options} style={{ minHeight: '200px', minWidth:'200px' }} />
+          <Line data={data} options={options} style={{ minHeight: '300px', minWidth:'200px' }} />
         )
       ) : lineData === undefined ? (
         <div
           style={{
-            minHeight: '200px',
+            minHeight: '300px',
             background: 'transparent',
             display: 'flex',
             justifyContent: 'center',
@@ -209,7 +209,7 @@ export default function LineChart({ lineData, lineState }) {
       ) : (
         <div
           style={{
-            minHeight: '200px',
+            minHeight: '300px',
             background: 'transparent',
             display: 'flex',
             justifyContent: 'center',
