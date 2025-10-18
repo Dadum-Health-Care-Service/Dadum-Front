@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
-import { useApi } from '../../../../utils/api/useApi';
-import { AuthContext } from '../../../../context/AuthContext';
-import CardComponent from '../../../common/CardComponent';
-import ButtonComponent from '../../../common/ButtonComponent';
-import MonitorCard from './MonitorCard';
-import styles from './RealTimeMonitor.module.css';
+import React, { useState, useEffect, useRef, useContext } from "react";
+import { useApi } from "../../../../utils/api/useApi";
+import { AuthContext } from "../../../../context/AuthContext";
+import CardComponent from "../../../common/CardComponent";
+import ButtonComponent from "../../../common/ButtonComponent";
+import MonitorCard from "./MonitorCard";
+import styles from "./RealTimeMonitor.module.css";
 
 const RealTimeMonitor = () => {
   const { GET } = useApi();
@@ -15,7 +15,7 @@ const RealTimeMonitor = () => {
     totalTransactions: 0,
     anomalyCount: 0,
     lastAlert: null,
-    connectionTime: null
+    connectionTime: null,
   });
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [refreshInterval, setRefreshInterval] = useState(5000); // 5초
@@ -27,87 +27,93 @@ const RealTimeMonitor = () => {
   const connectWebSocket = () => {
     try {
       // SockJS와 STOMP가 로드되었는지 확인
-      if (typeof window.SockJS === 'undefined') {
-        console.error('SockJS가 로드되지 않았습니다. 폴링 모드로 전환합니다.');
-        startPolling();
-        return;
-      }
-      
-      if (typeof window.Stomp === 'undefined') {
-        console.error('STOMP가 로드되지 않았습니다. 폴링 모드로 전환합니다.');
+      if (typeof window.SockJS === "undefined") {
+        console.error("SockJS가 로드되지 않았습니다. 폴링 모드로 전환합니다.");
         startPolling();
         return;
       }
 
-      const socket = new window.SockJS('/ws/fraud-monitor');
+      if (typeof window.Stomp === "undefined") {
+        console.error("STOMP가 로드되지 않았습니다. 폴링 모드로 전환합니다.");
+        startPolling();
+        return;
+      }
+
+      const socket = new window.SockJS("/ws/fraud-monitor");
       const stompClient = window.Stomp.over(socket);
-      
+
       stompClient.debug = false; // 디버그 로그 비활성화
-      
-      stompClient.connect({}, (frame) => {
-        console.log('WebSocket 연결됨:', frame);
-        setIsConnected(true);
-        setMonitoringStats(prev => ({
-          ...prev,
-          connectionTime: new Date().toLocaleString()
-        }));
-        
-        // 이상거래 알림 구독
-        stompClient.subscribe('/topic/fraud-alerts', (message) => {
-          try {
-            const data = JSON.parse(message.body);
-            handleRealtimeData(data);
-          } catch (e) {
-            console.error('WebSocket 메시지 파싱 오류:', e);
+
+      stompClient.connect(
+        {},
+        (frame) => {
+          console.log("WebSocket 연결됨:", frame);
+          setIsConnected(true);
+          setMonitoringStats((prev) => ({
+            ...prev,
+            connectionTime: new Date().toLocaleString(),
+          }));
+
+          // 이상거래 알림 구독
+          stompClient.subscribe("/topic/fraud-alerts", (message) => {
+            try {
+              const data = JSON.parse(message.body);
+              handleRealtimeData(data);
+            } catch (e) {
+              console.error("WebSocket 메시지 파싱 오류:", e);
+            }
+          });
+
+          // 통계 업데이트 구독
+          stompClient.subscribe("/topic/stats-updates", (message) => {
+            try {
+              const data = JSON.parse(message.body);
+              handleRealtimeData(data);
+            } catch (e) {
+              console.error("통계 업데이트 파싱 오류:", e);
+            }
+          });
+
+          // 시스템 상태 구독
+          stompClient.subscribe("/topic/system-status", (message) => {
+            try {
+              const data = JSON.parse(message.body);
+              handleRealtimeData(data);
+            } catch (e) {
+              console.error("시스템 상태 파싱 오류:", e);
+            }
+          });
+
+          // 연결 확인 메시지 전송
+          stompClient.send(
+            "/app/fraud-monitor/connect",
+            {},
+            JSON.stringify({
+              type: "connection_request",
+              timestamp: new Date().toISOString(),
+            })
+          );
+        },
+        (error) => {
+          console.error("WebSocket 연결 실패:", error);
+          setIsConnected(false);
+          // 자동 재연결 시도
+          if (autoRefresh) {
+            setTimeout(connectWebSocket, 3000);
           }
-        });
-        
-        // 통계 업데이트 구독
-        stompClient.subscribe('/topic/stats-updates', (message) => {
-          try {
-            const data = JSON.parse(message.body);
-            handleRealtimeData(data);
-          } catch (e) {
-            console.error('통계 업데이트 파싱 오류:', e);
-          }
-        });
-        
-        // 시스템 상태 구독
-        stompClient.subscribe('/topic/system-status', (message) => {
-          try {
-            const data = JSON.parse(message.body);
-            handleRealtimeData(data);
-          } catch (e) {
-            console.error('시스템 상태 파싱 오류:', e);
-          }
-        });
-        
-        // 연결 확인 메시지 전송
-        stompClient.send('/app/fraud-monitor/connect', {}, JSON.stringify({
-          type: 'connection_request',
-          timestamp: new Date().toISOString()
-        }));
-        
-      }, (error) => {
-        console.error('WebSocket 연결 실패:', error);
-        setIsConnected(false);
-        // 자동 재연결 시도
-        if (autoRefresh) {
-          setTimeout(connectWebSocket, 3000);
         }
-      });
-      
+      );
+
       stompClientRef.current = stompClient;
-      
     } catch (error) {
-      console.error('WebSocket 연결 실패:', error);
+      console.error("WebSocket 연결 실패:", error);
       setIsConnected(false);
     }
   };
 
   // 실시간 데이터 처리
   const handleRealtimeData = (data) => {
-    if (data.type === 'fraud_alert') {
+    if (data.type === "fraud_alert") {
       const newAlert = {
         id: Date.now(),
         timestamp: new Date().toLocaleString(),
@@ -116,25 +122,30 @@ const RealTimeMonitor = () => {
         amount: data.amount,
         riskScore: data.riskScore,
         message: data.message,
-        severity: data.riskScore >= 80 ? 'high' : data.riskScore >= 60 ? 'medium' : 'low'
+        severity:
+          data.riskScore >= 80
+            ? "high"
+            : data.riskScore >= 60
+            ? "medium"
+            : "low",
       };
-      
-      setAlerts(prev => [newAlert, ...prev.slice(0, 49)]); // 최대 50개 유지
-      
+
+      setAlerts((prev) => [newAlert, ...prev.slice(0, 49)]); // 최대 50개 유지
+
       // 브라우저 알림
-      if (Notification.permission === 'granted') {
-        new Notification('🚨 이상거래 감지!', {
+      if (Notification.permission === "granted") {
+        new Notification("🚨 이상거래 감지!", {
           body: `거래 ID: ${data.transactionId}\n위험도: ${data.riskScore}%`,
-          icon: '/img/userAvatar.png',
-          tag: 'fraud-alert'
+          icon: "/img/userAvatar.png",
+          tag: "fraud-alert",
         });
       }
-    } else if (data.type === 'stats_update') {
-      setMonitoringStats(prev => ({
+    } else if (data.type === "stats_update") {
+      setMonitoringStats((prev) => ({
         ...prev,
         totalTransactions: data.totalTransactions || prev.totalTransactions,
         anomalyCount: data.anomalyCount || prev.anomalyCount,
-        lastAlert: data.lastAlert || prev.lastAlert
+        lastAlert: data.lastAlert || prev.lastAlert,
       }));
     }
   };
@@ -149,41 +160,46 @@ const RealTimeMonitor = () => {
       try {
         // 사용자 로그인 확인
         if (!user || !user.accessToken) {
-          console.log('사용자가 로그인하지 않음 - 폴링 중단');
+          console.log("사용자가 로그인하지 않음 - 폴링 중단");
           return;
         }
 
         // 통계 데이터 업데이트 (useApi 사용)
         try {
-          const statsResponse = await GET('/ai/statistics', {}, true, 'main');
-          console.log('실시간 모니터링 통계 응답:', statsResponse);
+          const statsResponse = await GET("/ai/statistics", {}, true, "main");
+          console.log("실시간 모니터링 통계 응답:", statsResponse);
           if (statsResponse && statsResponse.data) {
             const stats = statsResponse.data;
-            setMonitoringStats(prev => ({
+            setMonitoringStats((prev) => ({
               ...prev,
               totalTransactions: stats.total_transactions || 0,
-              anomalyCount: stats.anomaly_transactions || 0
+              anomalyCount: stats.anomaly_transactions || 0,
             }));
           }
         } catch (error) {
-          console.error('통계 데이터 업데이트 실패:', error);
+          console.error("통계 데이터 업데이트 실패:", error);
         }
 
         // 최근 거래 데이터 확인 (useApi 사용)
         try {
-          const transactionsResponse = await GET('/ai/transactions?size=5', {}, true, 'main');
-          console.log('실시간 모니터링 거래 응답:', transactionsResponse);
+          const transactionsResponse = await GET(
+            "/ai/transactions?size=5",
+            {},
+            true,
+            "main"
+          );
+          console.log("실시간 모니터링 거래 응답:", transactionsResponse);
           if (transactionsResponse && transactionsResponse.data) {
             const data = transactionsResponse.data;
             const recentTransactions = data.transactions || [];
-            
+
             // 새로운 이상거래 확인
-            recentTransactions.forEach(transaction => {
+            recentTransactions.forEach((transaction) => {
               if (transaction.isAnomaly && transaction.createdAt) {
                 const alertTime = new Date(transaction.createdAt);
                 const now = new Date();
                 const timeDiff = now - alertTime;
-                
+
                 // 1분 이내의 새로운 이상거래만 알림
                 if (timeDiff < 60000) {
                   const newAlert = {
@@ -193,13 +209,21 @@ const RealTimeMonitor = () => {
                     userId: transaction.userId,
                     amount: transaction.amount,
                     riskScore: transaction.riskScore,
-                    message: transaction.recommendation || '이상거래가 감지되었습니다.',
-                    severity: transaction.riskScore >= 80 ? 'high' : 
-                             transaction.riskScore >= 60 ? 'medium' : 'low'
+                    message:
+                      transaction.recommendation ||
+                      "이상거래가 감지되었습니다.",
+                    severity:
+                      transaction.riskScore >= 80
+                        ? "high"
+                        : transaction.riskScore >= 60
+                        ? "medium"
+                        : "low",
                   };
-                  
-                  setAlerts(prev => {
-                    const exists = prev.some(alert => alert.id === newAlert.id);
+
+                  setAlerts((prev) => {
+                    const exists = prev.some(
+                      (alert) => alert.id === newAlert.id
+                    );
                     if (!exists) {
                       return [newAlert, ...prev.slice(0, 49)];
                     }
@@ -210,12 +234,22 @@ const RealTimeMonitor = () => {
             });
           }
         } catch (error) {
-          console.error('거래 데이터 업데이트 실패:', error);
+          console.error("거래 데이터 업데이트 실패:", error);
         }
       } catch (error) {
-        console.error('폴링 데이터 업데이트 실패:', error);
+        console.error("폴링 데이터 업데이트 실패:", error);
       }
     }, refreshInterval);
+  };
+
+  // 알림 권한 요청
+  const requestmission = async () => {
+    if ("Notification" in window) {
+      const permission = await Notification.requestPermission();
+      if (permission === "granted") {
+        console.log("알림 권한이 허용되었습니다.");
+      }
+    }
   };
 
   // 연결 시작/중지
@@ -247,7 +281,7 @@ const RealTimeMonitor = () => {
 
   // 특정 알림 지우기
   const removeAlert = (alertId) => {
-    setAlerts(prev => prev.filter(alert => alert.id !== alertId));
+    setAlerts((prev) => prev.filter((alert) => alert.id !== alertId));
   };
 
   useEffect(() => {
@@ -269,19 +303,27 @@ const RealTimeMonitor = () => {
 
   const getSeverityColor = (severity) => {
     switch (severity) {
-      case 'high': return styles.highSeverity;
-      case 'medium': return styles.mediumSeverity;
-      case 'low': return styles.lowSeverity;
-      default: return styles.lowSeverity;
+      case "high":
+        return styles.highSeverity;
+      case "medium":
+        return styles.mediumSeverity;
+      case "low":
+        return styles.lowSeverity;
+      default:
+        return styles.lowSeverity;
     }
   };
 
   const getSeverityIcon = (severity) => {
     switch (severity) {
-      case 'high': return '🚨';
-      case 'medium': return '⚠️';
-      case 'low': return '🔍';
-      default: return '🔍';
+      case "high":
+        return "🚨";
+      case "medium":
+        return "⚠️";
+      case "low":
+        return "🔍";
+      default:
+        return "🔍";
     }
   };
 
@@ -291,20 +333,26 @@ const RealTimeMonitor = () => {
         <div className={styles.headerContent}>
           <div className={styles.titleSection}>
             <h2 className={styles.title}>⚡ 실시간 이상거래 모니터링</h2>
-            <p className={styles.subtitle}>AI 기반 실시간 이상거래 탐지 및 알림 시스템</p>
+            <p className={styles.subtitle}>
+              AI 기반 실시간 이상거래 탐지 및 알림 시스템
+            </p>
           </div>
           <div className={styles.controls}>
             <div className={styles.connectionStatus}>
-              <span className={`${styles.statusIndicator} ${isConnected ? styles.connected : styles.disconnected}`}>
-                {isConnected ? '🟢 연결됨' : '🔴 연결 끊김'}
+              <span
+                className={`${styles.statusIndicator} ${
+                  isConnected ? styles.connected : styles.disconnected
+                }`}
+              >
+                {isConnected ? "🟢 연결됨" : "🔴 연결 끊김"}
               </span>
             </div>
-            <ButtonComponent 
+            <ButtonComponent
               onClick={toggleConnection}
-              variant={isConnected ? 'secondary' : 'primary'}
+              variant={isConnected ? "secondary" : "primary"}
               size="small"
             >
-              {isConnected ? '모니터링 중지' : '모니터링 시작'}
+              {isConnected ? "모니터링 중지" : "모니터링 시작"}
             </ButtonComponent>
           </div>
         </div>
@@ -319,10 +367,10 @@ const RealTimeMonitor = () => {
                 type="checkbox"
                 checked={autoRefresh}
                 onChange={(e) => setAutoRefresh(e.target.checked)}
-                style={{ 
-                  width: '18px', 
-                  height: '18px',
-                  touchAction: 'manipulation'
+                style={{
+                  width: "18px",
+                  height: "18px",
+                  touchAction: "manipulation",
                 }}
               />
               자동 새로고침
@@ -335,10 +383,10 @@ const RealTimeMonitor = () => {
                 value={refreshInterval}
                 onChange={(e) => setRefreshInterval(Number(e.target.value))}
                 disabled={!autoRefresh}
-                style={{ 
-                  fontSize: '16px', // iOS 줌 방지
-                  touchAction: 'manipulation',
-                  padding: '8px 12px'
+                style={{
+                  fontSize: "16px", // iOS 줌 방지
+                  touchAction: "manipulation",
+                  padding: "8px 12px",
                 }}
               >
                 <option value={1000}>1초</option>
@@ -347,6 +395,9 @@ const RealTimeMonitor = () => {
                 <option value={10000}>10초</option>
               </select>
             </label>
+          </div>
+          <div className={styles.settingItem}>
+            <ButtonComponent size="small">알림 권한 설정</ButtonComponent>
           </div>
         </div>
       </CardComponent>
@@ -362,7 +413,7 @@ const RealTimeMonitor = () => {
           trend="up"
           trendValue="+5분"
         />
-        
+
         <MonitorCard
           title="이상거래 탐지"
           value={monitoringStats.anomalyCount.toLocaleString()}
@@ -372,21 +423,22 @@ const RealTimeMonitor = () => {
           trend="up"
           trendValue="실시간"
         />
-        
+
         <MonitorCard
           title="마지막 알림"
-          value={monitoringStats.lastAlert || '없음'}
+          value={monitoringStats.lastAlert || "없음"}
           subtitle="최근 이상거래 알림 시간"
           icon="🔔"
           status={monitoringStats.lastAlert ? "warning" : "normal"}
         />
-        
+
         <MonitorCard
           title="연결 상태"
-          value={isConnected ? '연결됨' : '연결 안됨'}
-          subtitle={isConnected ? 
-            `연결 시간: ${monitoringStats.connectionTime || '방금 전'}` : 
-            'WebSocket 연결 필요'
+          value={isConnected ? "연결됨" : "연결 안됨"}
+          subtitle={
+            isConnected
+              ? `연결 시간: ${monitoringStats.connectionTime || "방금 전"}`
+              : "WebSocket 연결 필요"
           }
           icon={isConnected ? "🟢" : "🔴"}
           status={isConnected ? "success" : "error"}
@@ -394,12 +446,12 @@ const RealTimeMonitor = () => {
       </div>
 
       {/* 실시간 알림 목록 */}
-      <CardComponent 
+      <CardComponent
         title={`실시간 알림 (${alerts.length}개)`}
         className={styles.alertsCard}
       >
         <div className={styles.alertsHeader}>
-          <ButtonComponent 
+          <ButtonComponent
             onClick={clearAlerts}
             variant="secondary"
             size="small"
@@ -408,7 +460,7 @@ const RealTimeMonitor = () => {
             모든 알림 지우기
           </ButtonComponent>
         </div>
-        
+
         <div className={styles.alertsList}>
           {alerts.length === 0 ? (
             <div className={styles.noAlerts}>
@@ -416,13 +468,18 @@ const RealTimeMonitor = () => {
             </div>
           ) : (
             alerts.map((alert) => (
-              <div key={alert.id} className={`${styles.alertItem} ${getSeverityColor(alert.severity)}`}>
+              <div
+                key={alert.id}
+                className={`${styles.alertItem} ${getSeverityColor(
+                  alert.severity
+                )}`}
+              >
                 <div className={styles.alertHeader}>
                   <span className={styles.alertIcon}>
                     {getSeverityIcon(alert.severity)}
                   </span>
                   <span className={styles.alertTime}>{alert.timestamp}</span>
-                  <button 
+                  <button
                     onClick={() => removeAlert(alert.id)}
                     className={styles.removeButton}
                   >
@@ -438,9 +495,7 @@ const RealTimeMonitor = () => {
                     <div>금액: {alert.amount?.toLocaleString()}원</div>
                     <div>위험도: {alert.riskScore}%</div>
                   </div>
-                  <div className={styles.alertMessage}>
-                    {alert.message}
-                  </div>
+                  <div className={styles.alertMessage}>{alert.message}</div>
                 </div>
               </div>
             ))
