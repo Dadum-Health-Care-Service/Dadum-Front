@@ -2,7 +2,7 @@ import axios from "axios";
 
 const main = "http://localhost:8080/api/v1";
 //const main = "/security"; //보안서버 경유용
-const ai = "http://localhost:8000";
+const ai = "/ml"; // 프록시 경로 사용
 const security = "/security";
 const passwordless = "/passwordless";
 const kakao = "https://kauth.kakao.com";
@@ -67,6 +67,14 @@ function POST(URL, data = {}, accessToken, isAuth = true, source = "main") {
         withCredentials: false,
       });
     }
+    
+    // FormData인 경우 Content-Type 헤더를 설정하지 않음 (브라우저가 자동 설정)
+    if (data instanceof FormData) {
+      return axios.post(host[source] + URL, data, {
+        headers: headers,
+      });
+    }
+    
     return axios.post(host[source] + URL, data, {
       headers: headers,
     });
