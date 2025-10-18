@@ -23,13 +23,15 @@ const redKeyMap = {
     kcal : '칼로리 소모량',
     reSet:'총 세트 수',
     setNum:'세트별 횟수',
-    volume:'운동 볼륨',
-    routime: '총 운동 시간',
-    exVolume:'특정 종목 수행 수',
+    volum:'운동 볼륨',
+    rouTime: '총 운동 시간',
+    exVolum:'특정 종목 수행 수',
 };
 
 const toLocalDateTime = date => {
-    return date.toISOString().slice(0,19);
+    const offsetMs = 9 * 60 * 60 * 1000; // UTC+9
+    const koreaTime = new Date(date.getTime() + offsetMs);
+    return koreaTime.toISOString().slice(0, 19);
 };
 
 const dataToChart = (type, data)=>{
@@ -100,15 +102,13 @@ export default function RoutineStatPage(){
     const [selectMenu, setSelectMenu]=useState('muscle');
 
     const [mobile,setMobile]=useState(window.innerWidth <= 450);
-   
+
     const fetchRoutineData = async (type, last) =>{
-        const today = new Date();
         const interval = type === 'week' ? 7 : 30;
 
         const endDate = new Date();
-
         if (last) {
-            endDate.setDate(endDate.getDate() - interval); 
+            endDate.setDate(endDate.getDate()); 
         }
 
         const startDate = new Date(endDate);
@@ -119,10 +119,10 @@ export default function RoutineStatPage(){
                 startDate: toLocalDateTime(startDate), 
                 endDate: toLocalDateTime(endDate)
             });
+            console.log('fetch Data:',res.data);
             return res.data;
         } catch (e){
             console.log(`fetch${type}Data Error:`,e);
-            return undefined;
         }
     };
 
@@ -130,11 +130,11 @@ export default function RoutineStatPage(){
         const handleResize = ()=>setMobile(window.innerWidth <=450);
         window.addEventListener('resize',handleResize);
         return ()=> window.removeEventListener('resize',handleResize);
-    },[]);
+    },[mobile]);
 
     useEffect(()=>{
         if(!user?.usersId) {
-            showConfirmModal('사용자 정보를 찾을 수 없습니다','네트워크 에러','확인을 누르시면 로그아웃 됩니다',()=>{dispatch('LOGOUT');});
+            showConfirmModal('사용자 정보를 찾을 수 없습니다','네트워크 에러','확인을 누르시면 로그아웃 됩니다',()=>{dispatch({ type: "LOGOUT" });});
             return;
         };
 
@@ -214,7 +214,14 @@ export default function RoutineStatPage(){
         return (
             <Container className={styles['stats-logs']}>
                 {originData.map((data, i) => (
-                    <Card key={i} style={{ width: '100%', marginBottom: '10px' }}>
+                    <Card key={i} style={{ 
+                        minHeight: '200px', 
+                        minWidth: '200px',
+                        height:'100%',
+                        width:'100%',
+                        marginBottom: '10px'
+                        }}
+                    >
                         <Card.Header>{`루틴 ${data.tStart.substring(0, 10)} ${data.tStart.substring(11, 16)} ~ ${data.tEnd.substring(11, 16)}`}</Card.Header>
                         <Card.Body>
                             <div className={styles['red-details']}>
@@ -222,7 +229,7 @@ export default function RoutineStatPage(){
                                     if (entry[0] === 'rrId') return null;
                                     return (
                                         <div className={styles['red-detail']} key={entry[0]}>
-                                            <div className={styles['red-key']}>{RED_KEY_MAP[entry[0]]}</div>
+                                            <div className={styles['red-key']}>{redKeyMap[entry[0]]}</div>
                                             <div className={styles['red-value']}>{entry[1]}</div>
                                         </div>
                                     );
@@ -241,7 +248,7 @@ export default function RoutineStatPage(){
     };
 
     return (
-        <ContainerComponent variant='filled' className='mb-4'>
+        <ContainerComponent variant='elevated' className='mb-4'>
             <div className={styles.stats}>
                 <div className={styles['stats-title']}>
                     <h1 style={{ fontWeight: 'bold' }}>
@@ -264,11 +271,12 @@ export default function RoutineStatPage(){
                     </div>
                 </div>
 
-                <div className={!mobile ? styles['stats-container'] : undefined}>
-                    <div className={!mobile ? styles['chart-container'] : undefined}>
-                        
-                        <div className={!mobile ? styles['shadow-overlay'] : undefined}>
-                            <div className={!mobile ? styles['stats-chart'] : undefined}>
+                
+                <ContainerComponent variant='filled' className='p-3'>
+                    <div className='d-flex flex-column'>
+                        {/* 1. 칼로리 소모량 (Bar Chart) */}
+                        <div className={mobile ? styles['shadow-overlay-mobile'] : styles['shadow-overlay']}>
+                            <div className={mobile ? styles['stats-chart-mobile'] : styles['stats-chart']}>
                                 <div className={styles['chart-title']}>
                                     <div className={styles['title-container']}>
                                         <h2 className={styles['stats-h2']}>
@@ -283,11 +291,12 @@ export default function RoutineStatPage(){
                             </div>
                         </div>
 
-                        <div className={!mobile ? styles['shadow-overlay'] : undefined}>
-                            <div className={!mobile ? styles['stats-chart'] : undefined}>
+                        {/* 2. 성장 추이 (Line Chart) */}
+                        <div className={mobile ? styles['shadow-overlay-mobile'] : styles['shadow-overlay']}>
+                            <div className={mobile ? styles['stats-chart-mobile'] : styles['stats-chart']}>
                                 <div className={styles['chart-title']}>
                                     <div className={styles['title-container']}>
-                                        <div className={styles['title-dropdown']}>
+                                        <div className={mobile ? styles['title-dropdown-mobile'] : styles['title-dropdown']}>
                                             <div className={styles['title']}>
                                                 <h2 className={styles['stats-h2']}>
                                                     이번 {toggle === 'week' ? '주' : '달'} <span className={styles['stats-span']}>{keyMap[selectMenu]}</span> 성장 추이
@@ -296,15 +305,15 @@ export default function RoutineStatPage(){
                                                     저번{toggle === 'week' ? '주' : '달'}보다 {redCalcMap[selectMenu]} 더 성장했어요
                                                 </h5>
                                             </div>
-                                            <Dropdown>
+                                            <Dropdown className="pb-2">
                                                 <Dropdown.Toggle 
                                                     style={{
                                                         minWidth: mobile ? '70px' : '100px', 
                                                         fontSize: mobile ? '9px' : 'inherit', 
                                                         ...({
-                                                                backgroundColor: '#ffc800', 
-                                                                border: 'none', 
-                                                                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.15)',
+                                                            backgroundColor: '#3d8bfd', 
+                                                            border: 'none', 
+                                                            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.15)',
                                                         })
                                                     }}
                                                 >
@@ -331,8 +340,9 @@ export default function RoutineStatPage(){
                             </div>
                         </div>
 
-                        <div className={!mobile ? styles['shadow-overlay'] : undefined}>
-                            <div className={!mobile ? styles['stats-chart-side'] : undefined}>
+                        {/* 3. 운동 트렌드 & 퍼포먼스 (Doughnut Charts) */}
+                        <div className={mobile ? styles['shadow-overlay-mobile'] : styles['shadow-overlay']}>
+                            <div className={mobile ? styles['stats-chart-mobile'] : styles['stats-chart-side']}>
                                 <div className={styles['chart-title']}>
                                     <h2 className={styles['stats-h2']}>이번 {toggle === 'week' ? '주' : '달'} 운동 <span className={styles['stats-span']}>트렌드</span></h2>
                                     <h5 className={styles['stats-h5']}>
@@ -351,21 +361,27 @@ export default function RoutineStatPage(){
                             </div>
                         </div>
 
-                        <div className={!mobile ? styles['shadow-overlay'] : undefined}>
-                            <div className={!mobile ? styles['stats-chart'] : undefined}>
+                        {/* 4. 운동 퍼포먼스 로그 (Log Section) */}
+                        <div className={mobile ? styles['shadow-overlay-mobile'] : styles['shadow-overlay']}>
+                            <div className={mobile ? styles['stats-chart-mobile'] : styles['stats-chart']}>
                                 <div className={styles['chart-title']}>
                                     <h2 className={styles['stats-h2']}>이번 {toggle === 'week' ? '주' : '달'} <span className={styles['stats-span']}>운동 퍼포먼스</span> 로그</h2>
                                     <h5 className={styles['stats-h5']}>
                                         이번 {toggle === 'week' ? '주' : '달'} 운동의 더 상세한 데이터를 볼 수 있어요
                                     </h5>
                                 </div>
-                                <Card>
+                                <Card
+                                    style={{
+                                        width: '100%',
+                                        position: 'relative'
+                                    }}
+                                >
                                     <LogSection />
                                 </Card>
                             </div>
                         </div>
                     </div>
-                </div>
+                </ContainerComponent>    
             </div>
         </ContainerComponent>
     );

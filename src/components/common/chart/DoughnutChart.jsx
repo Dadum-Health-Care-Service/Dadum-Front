@@ -103,7 +103,8 @@ export default function DoughnutChart({ doughnutData, isMobile, isPolar }) {
                   return entries[1];
                 })
               : [],
-            borderColor: 'rgba(0, 0, 0, 1)',
+            borderColor: 'rgba(0, 0, 0, 0.5)',
+            borderWidth:1,
 
             backgroundColor: sortedDoughnutData
               ? sortedDoughnutData.map(entries => {
@@ -117,7 +118,7 @@ export default function DoughnutChart({ doughnutData, isMobile, isPolar }) {
                         (maxLightness - minLightness) * (1 - Math.min(ratio * 10, 2))) *
                         3
                     : minLightness + (maxLightness - minLightness) * (1 - Math.min(ratio * 10, 1)); // 값이 클수록 더 진하게 (50%~100% 밝기)
-                  return `hsl(45, 100%, ${lightness}%,${isPolar ? 0.65 : 1})`; // 노란색(hue 45) 계열
+                  return `hsl(220, 90%, ${lightness}%,${isPolar ? 0.8 : 1})`; // 파란색(hue 220) 계열
                 })
               : [],
             fill: false,
@@ -130,11 +131,11 @@ export default function DoughnutChart({ doughnutData, isMobile, isPolar }) {
   return (
     <Card
       style={{
-        width: '90%',
-        height: '100%',
+        width: '100%',
         position: 'relative',
         overflow: 'hidden',
-        zIndex: '0!important',
+        padding:'20px',
+        zIndex:'0',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -144,7 +145,7 @@ export default function DoughnutChart({ doughnutData, isMobile, isPolar }) {
         Object.values(doughnutData).length === 0 ? (
           <div
             style={{
-              minHeight: '300px',
+              minHeight: '200px',
               background: 'transparent',
               display: 'flex',
               justifyContent: 'center',
@@ -161,20 +162,20 @@ export default function DoughnutChart({ doughnutData, isMobile, isPolar }) {
             type="polarArea"
             data={chartData}
             options={options}
-            style={{ minHeight: '300px', background: 'transparent' }}
+            style={{ minHeight: '200px', minWidth:'200px', background: 'transparent' }}
           />
         ) : (
           <Chart
             type="doughnut"
             data={chartData}
             options={options}
-            style={{ minHeight: '300px', background: 'transparent' }}
+            style={{ minHeight: '300px', minWidth:'200px', background: 'transparent' }}
           />
         )
       ) : doughnutData === undefined ? (
         <div
           style={{
-            minHeight: '300px',
+            minHeight: '200px',
             background: 'transparent',
             display: 'flex',
             justifyContent: 'center',
@@ -186,7 +187,7 @@ export default function DoughnutChart({ doughnutData, isMobile, isPolar }) {
       ) : (
         <div
           style={{
-            minHeight: '300px',
+            minHeight: '200px',
             background: 'transparent',
             display: 'flex',
             justifyContent: 'center',

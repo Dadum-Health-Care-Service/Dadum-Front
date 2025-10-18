@@ -116,7 +116,7 @@ function AppContent() {
           alignItems: "center",
         }}
       >
-        {user && <GNB isMobile={isMobile} isNotify={isNotify} />}
+        {showGNB && <GNB isMobile={isMobile} isNotify={isNotify} />}
         <div style={{ width: "100%", maxWidth: "1360px" }}>
           <Routes>
             <Route path="/" element={user ? <Home /> : <MainView />}></Route>

@@ -28,7 +28,7 @@ export default function BarChart({ barData, isMobile }) {
   );
   
   const rowData = barData?.map(data => {
-    return data.date.substring(0, 10);
+    return data?.data?.substring(0, 10);
   });
   const chartRow = rowData?.filter((data, index) => {
     return rowData.indexOf(data) === index;
@@ -38,16 +38,16 @@ export default function BarChart({ barData, isMobile }) {
     return acc;
   }, {});
   barData?.forEach(data => {
-    chartData[data.date.substring(0, 10)].push(data.kcal);
+    chartData[data?.data?.substring(0, 10)].push(data.kcal);
   });
 
   const maxLength = chartData ? Math.max(...Object.values(chartData).map(arr => arr.length)) : null;
 
-  //색상용 (노랑)
-  const baseHue = 45;
-  const baseSaturation = 100;
-  const maxLightness = 80;
-  const minLightness = 50;
+  //색상용 (파랑)
+  const baseHue = 220;
+  const baseSaturation = 80;
+  const maxLightness = 70;
+  const minLightness = 40;
 
   const stackedBarDatasets = Array.from({ length: maxLength }, (_, i) => {
     const ratio = 1 - i / (maxLength - 1 || 1);
@@ -69,8 +69,9 @@ export default function BarChart({ barData, isMobile }) {
       const sum = values.reduce((a, b) => a + b, 0);
       return values.length ? sum / values.length : 0;
     }),
-    borderColor: 'rgba(0, 0, 0, 1)',
-    backgroundColor: '#ffc800',
+    borderColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: '#3d8bfd',
+    borderWidth:2,
     fill: false,
     tension: 0,
     yAxisID: 'y',
@@ -100,12 +101,11 @@ export default function BarChart({ barData, isMobile }) {
   return (
     <Card
       style={{
-        width: '90%',
-        height: '100%',
-        zIndex: '10',
+        width: '100%',
         position: 'relative',
         overflow: 'hidden',
-        zIndex: '0!important',
+        padding:'20px',
+        zIndex:'0',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -115,7 +115,7 @@ export default function BarChart({ barData, isMobile }) {
         barData.length === 0 ? (
           <div
             style={{
-              minHeight: '300px',
+              minHeight: '200px',
               background: 'transparent',
               display: 'flex',
               justifyContent: 'center',
@@ -131,13 +131,17 @@ export default function BarChart({ barData, isMobile }) {
           <Chart
             data={data}
             options={options}
-            style={{ minHeight: '300px', background: 'transparent' }}
+            style={{ 
+              minHeight: '200px', 
+              minWidth: '200px',
+              background: 'transparent' 
+            }}
           />
         )
       ) : barData === undefined ? (
         <div
           style={{
-            minHeight: '300px',
+            minHeight: '200px',
             background: 'transparent',
             display: 'flex',
             justifyContent: 'center',
@@ -149,7 +153,7 @@ export default function BarChart({ barData, isMobile }) {
       ) : (
         <div
           style={{
-            minHeight: '300px',
+            minHeight: '200px',
             background: 'transparent',
             display: 'flex',
             justifyContent: 'center',

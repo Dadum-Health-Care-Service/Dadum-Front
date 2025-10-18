@@ -9,6 +9,8 @@ import {
   PointElement,
   LineElement,
   Filler,
+  plugins,
+  scales,
 } from 'chart.js';
 import { useState } from 'react';
 import { Card } from 'react-bootstrap';
@@ -28,9 +30,8 @@ export default function LineChart({ lineData, lineState }) {
     LineElement,
     Filler,
   );
-  const [selectDataSet, setSelectDataSet] = useState(null);
   const rowData = lineData?.map(data => {
-    return data.date.substring(0, 10);
+    return data?.data?.substring(0, 10);
   });
   const chartRow = rowData?.filter((data, index) => {
     return rowData.indexOf(data) === index;
@@ -61,7 +62,7 @@ export default function LineChart({ lineData, lineState }) {
         chartData[row] = [];
       });
       lineData?.forEach(data => {
-        chartData[data.date.substring(0, 10)].push(data.muscle);
+        chartData[data?.data?.substring(0, 10)].push(data.muscle);
       });
       maxLength = chartData ? Math.max(...Object.values(chartData).map(arr => arr.length)) : null;
       lineDataSets = {
@@ -72,8 +73,9 @@ export default function LineChart({ lineData, lineState }) {
           const sum = values.reduce((a, b) => a + b, 0);
           return sum;
         }),
-        borderColor: 'rgba(0, 0, 0, 1)',
-        backgroundColor: '#ffc80086',
+        borderColor: 'rgba(0, 0, 0, 0.5)',
+        borderWidth:2,
+        backgroundColor: '#3d8afd99',
         fill: true,
         tension: 0.4,
         yAxisID: 'y',
@@ -85,7 +87,7 @@ export default function LineChart({ lineData, lineState }) {
         chartData[row] = [];
       });
       lineData?.forEach(data => {
-        chartData[data.date.substring(0, 10)].push(data.setTotal);
+        chartData[data?.data?.substring(0, 10)].push(data.setTotal);
       });
       maxLength = chartData ? Math.max(...Object.values(chartData).map(arr => arr.length)) : null;
       lineDataSets = {
@@ -96,8 +98,9 @@ export default function LineChart({ lineData, lineState }) {
           const sum = values.reduce((a, b) => a + b, 0);
           return sum;
         }),
-        borderColor: 'rgba(0, 0, 0, 1)',
-        backgroundColor: '#ffc80086',
+        borderColor: 'rgba(0, 0, 0, 0.5)',
+        borderWidth:2,
+        backgroundColor: '#3d8afd99',
         fill: true,
         tension: 0.4,
         yAxisID: 'y',
@@ -109,7 +112,7 @@ export default function LineChart({ lineData, lineState }) {
         chartData[row] = [];
       });
       lineData?.forEach(data => {
-        chartData[data.date.substring(0, 10)].push(data.volumeTotal);
+        chartData[data?.data?.substring(0, 10)].push(data.volumeTotal);
       });
       maxLength = chartData ? Math.max(...Object.values(chartData).map(arr => arr.length)) : null;
       lineDataSets = {
@@ -120,8 +123,9 @@ export default function LineChart({ lineData, lineState }) {
           const sum = values.reduce((a, b) => a + b, 0);
           return sum;
         }),
-        borderColor: 'rgba(0, 0, 0, 1)',
-        backgroundColor: '#ffc80086',
+        borderColor: 'rgba(0, 0, 0, 0.5)',
+        borderWidth:2,
+        backgroundColor: '#3d8afd99',
         fill: true,
         tension: 0.4,
         yAxisID: 'y',
@@ -132,7 +136,7 @@ export default function LineChart({ lineData, lineState }) {
         chartData[row] = [];
       });
       lineData?.forEach(data => {
-        chartData[data.date.substring(0, 10)].push(data.rouTime);
+        chartData[data?.data?.substring(0, 10)].push(data.rouTime);
       });
       maxLength = chartData ? Math.max(...Object.values(chartData).map(arr => arr.length)) : null;
       lineDataSets = {
@@ -143,8 +147,9 @@ export default function LineChart({ lineData, lineState }) {
           const sum = values.reduce((a, b) => a + b, 0);
           return sum / 60;
         }),
-        borderColor: 'rgba(0, 0, 0, 1)',
-        backgroundColor: '#ffc80086',
+        borderColor: 'rgba(0, 0, 0, 0.5)',
+        borderWidth:2,
+        backgroundColor: '#3d8afd99',
         fill: true,
         tension: 0.4,
         yAxisID: 'y',
@@ -160,12 +165,11 @@ export default function LineChart({ lineData, lineState }) {
   return (
     <Card
       style={{
-        width: '90%',
-        height: '100%',
-        zIndex: '10',
+        width: '100%',
         position: 'relative',
         overflow: 'hidden',
-        zIndex: '0!important',
+        padding:'20px',
+        zIndex:'0',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -175,7 +179,7 @@ export default function LineChart({ lineData, lineState }) {
         lineData.length === 0 ? (
           <div
             style={{
-              minHeight: '300px',
+              minHeight: '200px',
               background: 'transparent',
               display: 'flex',
               justifyContent: 'center',
@@ -188,12 +192,12 @@ export default function LineChart({ lineData, lineState }) {
             기간 내 운동 기록이 없어요
           </div>
         ) : (
-          <Line data={data} options={options} style={{ minHeight: '300px' }} />
+          <Line data={data} options={options} style={{ minHeight: '200px', minWidth:'200px' }} />
         )
       ) : lineData === undefined ? (
         <div
           style={{
-            minHeight: '300px',
+            minHeight: '200px',
             background: 'transparent',
             display: 'flex',
             justifyContent: 'center',
@@ -205,7 +209,7 @@ export default function LineChart({ lineData, lineState }) {
       ) : (
         <div
           style={{
-            minHeight: '300px',
+            minHeight: '200px',
             background: 'transparent',
             display: 'flex',
             justifyContent: 'center',

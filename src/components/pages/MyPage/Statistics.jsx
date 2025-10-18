@@ -90,7 +90,7 @@ export default function Statistics(){
 
     useEffect(()=>{
         if (!user || !user.usersId) {
-            showConfirmModal('사용자 정보를 찾을 수 없습니다','네트워크 에러','확인을 누르시면 로그아웃 됩니다',()=>{dispatch('LOGOUT');});
+            showConfirmModal('사용자 정보를 찾을 수 없습니다','네트워크 에러','확인을 누르시면 로그아웃 됩니다',()=>{dispatch({ type: "LOGOUT" });});
             return; 
         };
         const fetchHealthData = async ()=>{
