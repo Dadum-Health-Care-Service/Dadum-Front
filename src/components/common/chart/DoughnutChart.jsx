@@ -139,13 +139,14 @@ export default function DoughnutChart({ doughnutData, isMobile, isPolar }) {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
+        marginBottom:'1rem'
       }}
     >
       {doughnutData && chartData ? (
         Object.values(doughnutData).length === 0 ? (
           <div
             style={{
-              minHeight: '200px',
+              minHeight: '300px',
               background: 'transparent',
               display: 'flex',
               justifyContent: 'center',
@@ -162,7 +163,7 @@ export default function DoughnutChart({ doughnutData, isMobile, isPolar }) {
             type="polarArea"
             data={chartData}
             options={options}
-            style={{ minHeight: '200px', minWidth:'200px', background: 'transparent' }}
+            style={{ minHeight: '300px', minWidth:'200px', background: 'transparent' }}
           />
         ) : (
           <Chart
@@ -175,7 +176,7 @@ export default function DoughnutChart({ doughnutData, isMobile, isPolar }) {
       ) : doughnutData === undefined ? (
         <div
           style={{
-            minHeight: '200px',
+            minHeight: '300px',
             background: 'transparent',
             display: 'flex',
             justifyContent: 'center',
@@ -187,7 +188,7 @@ export default function DoughnutChart({ doughnutData, isMobile, isPolar }) {
       ) : (
         <div
           style={{
-            minHeight: '200px',
+            minHeight: '300px',
             background: 'transparent',
             display: 'flex',
             justifyContent: 'center',

@@ -212,7 +212,7 @@ export default function RoutineStatPage(){
         }
 
         return (
-            <Container className={styles['stats-logs']}>
+            <div className={styles['stats-logs']}>
                 {originData.map((data, i) => (
                     <Card key={i} style={{ 
                         minHeight: '200px', 
@@ -235,15 +235,17 @@ export default function RoutineStatPage(){
                                     );
                                 })}
                             </div>
-                            {data.routineEndDetails.map((red, index) => (
-                                <Badge key={index} bg="undefined" className={styles['red-badge']}>
-                                    {red.srName}
-                                </Badge>
-                            ))}
+                            <div className='pt-3'>
+                                {data.routineEndDetails.map((red, index) => (
+                                    <Badge key={index} bg="undefined" className={styles['red-badge']}>
+                                        {red.srName}
+                                    </Badge>
+                                ))}
+                            </div>
                         </Card.Body>
                     </Card>
                 ))}
-            </Container>
+            </div>
         );
     };
 
@@ -272,8 +274,8 @@ export default function RoutineStatPage(){
                 </div>
 
                 
-                <ContainerComponent variant='filled' className='p-3'>
-                    <div className='d-flex flex-column'>
+                <ContainerComponent variant='filled' className={mobile ? '' : 'p-3'}>
+                    <div className='d-flex flex-column' style={{gap:'1rem'}}>
                         {/* 1. 칼로리 소모량 (Bar Chart) */}
                         <div className={mobile ? styles['shadow-overlay-mobile'] : styles['shadow-overlay']}>
                             <div className={mobile ? styles['stats-chart-mobile'] : styles['stats-chart']}>
@@ -370,14 +372,7 @@ export default function RoutineStatPage(){
                                         이번 {toggle === 'week' ? '주' : '달'} 운동의 더 상세한 데이터를 볼 수 있어요
                                     </h5>
                                 </div>
-                                <Card
-                                    style={{
-                                        width: '100%',
-                                        position: 'relative'
-                                    }}
-                                >
-                                    <LogSection />
-                                </Card>
+                                <LogSection />
                             </div>
                         </div>
                     </div>
