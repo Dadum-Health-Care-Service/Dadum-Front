@@ -394,7 +394,7 @@ const Home = () => {
         <Container>
           <Row className="align-items-center">
             <Col md={7}>
-              <h1 className={styles.heroTitle}>종합 건강 서비스 다듬</h1>
+              <h1 className={styles.heroTitle}>AI 기반 운동 분석 및 루틴 관리 서비스</h1>
               <p className={styles.heroSub}>실시간 자세 분석과 AI 칼로리 인식으로 운동을 더 정확하게.</p>
               <div className={styles.heroFeatures}>
                 {["실시간 자세 분석", "AI 칼로리 인식", "운동 루틴 관리", "건강 챗봇 상담"].map((feature, i) => (

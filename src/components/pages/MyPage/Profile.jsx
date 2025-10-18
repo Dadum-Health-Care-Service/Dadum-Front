@@ -47,7 +47,7 @@ export default function Profile() {
     //저장된 user정보가 없을때 알림 모달 띄우고 에러 페이지 렌더
     if (!user || !user.usersId) {
       setError("사용자 정보를 찾을 수 없습니다.");
-      showConfirmModal('사용자 정보를 찾을 수 없습니다','네트워크 에러','확인을 누르시면 로그아웃 됩니다',()=>{dispatch('LOGOUT');});
+      showConfirmModal('사용자 정보를 찾을 수 없습니다','네트워크 에러','확인을 누르시면 로그아웃 됩니다',()=>{dispatch({ type: "LOGOUT" });});
       //로딩상태x
       setLoading(false);
       return;
@@ -103,10 +103,7 @@ export default function Profile() {
         //에러 발생시 에러상태 저장 및 확인 모달 띄우기
         console.log(e.response?.data, e);
         setError("프로필을 읽어오는 중 오류가 발생하였습니다");
-        showBasicModal(
-          "프로필을 읽어오는 중 오류가 발생하였습니다",
-          "네트워크 에러"
-        );
+        showConfirmModal('프로필을 읽어오는 중 오류가 발생하였습니다','네트워크 에러','확인을 누르시면 로그아웃 됩니다',()=>{dispatch({ type: "LOGOUT" });});
       } finally {
         //조회 성공 여부와 관계없이 로딩상태 없애기
         setLoading(false);
