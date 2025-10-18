@@ -128,7 +128,7 @@ const Chatbot = ({ className = "", onMessageSend }) => {
           ],
         }),
       });
-      
+
       if (!response.ok)
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
 
@@ -150,7 +150,8 @@ const Chatbot = ({ className = "", onMessageSend }) => {
         // 본문 만들 때 DONE 관련 토막은 싹 제거
         let body = eventBuffer
           .filter(
-            (p) => !(/\bdata:\s*\[DONE\]\b/i.test(p) || /\[\s*DONE\s*\]/i.test(p))
+            (p) =>
+              !(/\bdata:\s*\[DONE\]\b/i.test(p) || /\[\s*DONE\s*\]/i.test(p))
           )
           .join("");
 
@@ -189,12 +190,12 @@ const Chatbot = ({ className = "", onMessageSend }) => {
           if (m) {
             // 캡처된 본문에서 BOM만 제거하고 공백은 그대로 유지
             let payload = m[1].replace(/^\uFEFF/, "");
-            
+
             // data:data: 중복 제거
             if (payload.startsWith("data: ")) {
               payload = payload.substring(6);
             }
-            
+
             eventBuffer.push(payload);
             continue;
           }
@@ -239,23 +240,21 @@ const Chatbot = ({ className = "", onMessageSend }) => {
   const typeMessage = async (message, messageId) => {
     const charsPerMs = 30; // 글자당 30ms (더 빠르게)
     const baseDelay = 300; // 기본 지연 300ms (더 빠르게)
-    const totalDelay = (message.length * charsPerMs) + baseDelay;
-    
+    const totalDelay = message.length * charsPerMs + baseDelay;
+
     // 기본 지연 시간 (생각하는 시간)
-    await new Promise(resolve => setTimeout(resolve, baseDelay));
-    
+    await new Promise((resolve) => setTimeout(resolve, baseDelay));
+
     // 타이핑 효과로 한 글자씩 표시
     for (let i = 0; i <= message.length; i++) {
       const currentText = message.substring(0, i);
-      
+
       setMessages((prev) =>
-        prev.map((m) =>
-          m.id === messageId ? { ...m, text: currentText } : m
-        )
+        prev.map((m) => (m.id === messageId ? { ...m, text: currentText } : m))
       );
-      
+
       if (i < message.length) {
-        await new Promise(resolve => setTimeout(resolve, charsPerMs));
+        await new Promise((resolve) => setTimeout(resolve, charsPerMs));
       }
     }
   };
