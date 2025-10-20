@@ -198,7 +198,7 @@
 }
 
 .buyButton {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #2F6BFF 0%, #0A66FF 100%);
   border: none;
   color: white;
   font-weight: 600;
@@ -208,15 +208,15 @@
 }
 
 .buyButton:hover {
-  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+  background: linear-gradient(135deg, #0A66FF 0%, #0052CC 100%);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 .wishlistButton {
   background: transparent;
-  border: 2px solid #667eea;
-  color: #667eea;
+  border: 2px solid #2F6BFF;
+  color: #2F6BFF;
   font-weight: 600;
   padding: 10px;
   border-radius: 8px;
@@ -224,10 +224,10 @@
 }
 
 .wishlistButton:hover {
-  background: #667eea;
+  background: #2F6BFF;
   color: white;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(47, 107, 255, 0.3);
 }
 
 .emptyState {

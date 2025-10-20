@@ -1,15 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ButtonComponent from "../../../common/ButtonComponent";
-import ModalComponent from "../../../common/ModalComponent";
-import ProductDetail from "./ProductDetail";
 import { GET } from "../../../../utils/api/api";
 import styles from "./Shop.module.css";
 
 export default function Shop() {
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [isProductModalOpen, setProductModalOpen] = useState(false);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -25,7 +21,7 @@ export default function Shop() {
   const loadProducts = async () => {
     try {
       setLoading(true);
-      const response = await GET('/seller/products/public/active', {}, null, false);
+      const response = await GET('/shop/products', {}, null, false);
       setProducts(response.data || []);
     } catch (error) {
       console.error('상품 목록 로드 실패:', error);
@@ -49,30 +45,22 @@ export default function Shop() {
   };
 
   const handleProductClick = (product) => {
-    setSelectedProduct(product);
-    setProductModalOpen(true);
-  };
-
-  const handleCloseProductModal = () => {
-    setProductModalOpen(false);
-    setSelectedProduct(null);
+    // 상품 상세 페이지로 이동
+    navigate(`/shop/product/${product.id || product.productId}`);
   };
 
   const handleBuyNow = (product) => {
-    // ProductDetail에서 구매하기 버튼을 눌렀을 때의 처리
+    // 구매하기 버튼 클릭 시 바로 주문 페이지로 이동
     console.log("구매하기:", product);
-    // OrderPage로 이동하기 위해 상품 정보를 저장하고 페이지 이동
-    // 상품 정보를 localStorage에 저장하여 OrderPage에서 사용할 수 있도록 함
     const productForOrder = {
-      id: product.productId,
-      name: product.productName,
+      id: product.id || product.productId,
+      name: product.name || product.productName,
       price: product.price,
-      image: product.imageData || product.imageUrl,
+      image: product.image,
       description: product.description,
       stock: product.stock
     };
     localStorage.setItem("selectedProduct", JSON.stringify(productForOrder));
-    // OrderPage로 이동
     navigate('/order');
   };
 
@@ -120,19 +108,27 @@ export default function Shop() {
           </div>
         ) : (
           filteredProducts.map((product) => (
-            <div key={product.productId} className={styles.productCard}>
+            <div 
+              key={product.id || product.productId} 
+              className={styles.productCard}
+              onClick={() => handleProductClick(product)}
+              style={{ cursor: 'pointer' }}
+            >
               <div className={styles.productImageContainer}>
                 <img
-                  src={product.imageData || product.imageUrl || "https://via.placeholder.com/300x200?text=No+Image"}
-                  alt={product.productName}
+                  src={product.image || "https://picsum.photos/300/200?random=999"}
+                  alt={product.name || product.productName}
                   className={styles.productImage}
+                  onError={(e) => {
+                    e.target.src = "https://picsum.photos/300/200?random=999";
+                  }}
                 />
                 {product.stock > 0 && (
                   <span className={styles.productBadge}>재고있음</span>
                 )}
               </div>
               <div className={styles.productContent}>
-                <h3 className={styles.productTitle}>{product.productName}</h3>
+                <h3 className={styles.productTitle}>{product.name || product.productName}</h3>
                 <p className={styles.productDescription}>{product.description}</p>
                 <div className={styles.priceContainer}>
                   <span className={styles.currentPrice}>
@@ -146,7 +142,10 @@ export default function Shop() {
                 <ButtonComponent
                   variant="primary"
                   fullWidth
-                  onClick={() => handleProductClick(product)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleProductClick(product);
+                  }}
                   className={styles.buyButton}
                 >
                   💳 구매하기
@@ -154,6 +153,7 @@ export default function Shop() {
                 <ButtonComponent
                   variant="outline"
                   fullWidth
+                  onClick={(e) => e.stopPropagation()}
                   className={styles.wishlistButton}
                 >
                   💝 위시리스트
@@ -175,21 +175,6 @@ export default function Shop() {
         </div>
       )}
 
-      {/* ProductDetail 모달 */}
-      <ModalComponent
-        isOpen={isProductModalOpen}
-        onClose={handleCloseProductModal}
-        size="large"
-        title="상품 상세 정보"
-      >
-        {selectedProduct && (
-          <ProductDetail
-            product={selectedProduct}
-            onClose={handleCloseProductModal}
-            onBuyNow={handleBuyNow}
-          />
-        )}
-      </ModalComponent>
     </div>
   );
 }
