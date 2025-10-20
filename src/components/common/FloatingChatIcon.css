@@ -12,7 +12,7 @@
 /* Floating Chat Wrapper */
 .floating-chat-wrapper {
   position: fixed;
-  bottom: 150px; /* 글쓰기 버튼과 충분한 간격 확보 */
+  bottom: 110px; /* 글쓰기 버튼과 충분한 간격 확보 */
   right: 20px;
   z-index: 1000;
   display: flex;
@@ -239,7 +239,12 @@
 /* 매우 작은 화면 */
 @media (max-width: 480px) {
   .floating-chat-wrapper {
-    bottom: 160px; /* 매우 작은 화면에서도 충분한 간격 확보 */
+    bottom: 110px; /* 매우 작은 화면에서도 충분한 간격 확보 */
+  }
+
+  /* 모바일기준 소셜페이지에서 글쓰기버튼과 충분한 간격 확보 */
+  .floating-chat-wrapper.social-override {
+    bottom: 170px; 
   }
   
   .floating-chat-icon {
