@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import './FloatingChatIcon.css';
 import NotificationPopup from './NotificationPopup';
+import { useLocation } from 'react-router-dom';
 
 const FloatingChatIcon = ({ 
   isOpen = false,
@@ -11,6 +12,10 @@ const FloatingChatIcon = ({
   const [isHovered, setIsHovered] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const longPressTimer = useRef(null);
+  const location=useLocation();
+  
+  const socialWrapper = location.pathname==='/social'?'social-override':'';
+
 
   const getSizeClass = () => {
     switch (size) {
@@ -106,7 +111,7 @@ const FloatingChatIcon = ({
       )}
       
       <div 
-        className="floating-chat-wrapper"
+        className={`floating-chat-wrapper ${socialWrapper}`}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onTouchStart={handleTouchStart}
