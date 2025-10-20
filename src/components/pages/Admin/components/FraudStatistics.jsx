@@ -830,41 +830,87 @@ const FraudStatistics = () => {
           {transactions.length === 0 ? (
             <p>거래 내역이 없습니다.</p>
           ) : (
-            <div className={styles.transactionTable}>
-              <div className={styles.tableHeader}>
-                <div>거래 ID</div>
-                <div>사용자</div>
-                <div>금액</div>
-                <div>위험도</div>
-                <div>상태</div>
-                <div>시간</div>
-              </div>
-              {transactions.slice(0, 10).map((transaction) => (
-                <div key={transaction.id} className={styles.tableRow}>
-                  <div className={styles.transactionId}>{transaction.transactionId}</div>
-                  <div>{transaction.userId}</div>
-                  <div>{transaction.amount?.toLocaleString()}원</div>
-                  <div className={styles.riskScore}>
-                    <span 
-                      className={`${styles.riskBadge} ${transaction.riskScore >= 80 ? styles.highRisk :
-                        transaction.riskScore >= 60 ? styles.mediumRisk :
-                        transaction.riskScore >= 40 ? styles.lowRisk : styles.safeRisk
-                      }`}
-                    >
-                      {transaction.riskScore?.toFixed(1)}%
-                    </span>
-                  </div>
-                  <div className={styles.status}>
-                    <span className={transaction.isAnomaly ? styles.anomaly : styles.normal}>
-                      {transaction.isAnomaly ? '🚨 이상' : '✅ 정상'}
-                    </span>
-                  </div>
-                  <div className={styles.timestamp}>
-                    {new Date(transaction.createdAt).toLocaleString()}
-                  </div>
+            <>
+              {/* 데스크톱 테이블 */}
+              <div className={styles.desktopTransactionTable}>
+                <div className={styles.tableHeader}>
+                  <div>거래 ID</div>
+                  <div>사용자</div>
+                  <div>금액</div>
+                  <div>위험도</div>
+                  <div>상태</div>
+                  <div>시간</div>
                 </div>
-              ))}
-            </div>
+                {transactions.slice(0, 10).map((transaction) => (
+                  <div key={transaction.id} className={styles.tableRow}>
+                    <div className={styles.transactionId}>{transaction.transactionId}</div>
+                    <div>{transaction.userId}</div>
+                    <div>{transaction.amount?.toLocaleString()}원</div>
+                    <div className={styles.riskScore}>
+                      <span 
+                        className={`${styles.riskBadge} ${transaction.riskScore >= 80 ? styles.highRisk :
+                          transaction.riskScore >= 60 ? styles.mediumRisk :
+                          transaction.riskScore >= 40 ? styles.lowRisk : styles.safeRisk
+                        }`}
+                      >
+                        {transaction.riskScore?.toFixed(1)}%
+                      </span>
+                    </div>
+                    <div className={styles.status}>
+                      <span className={transaction.isAnomaly ? styles.anomaly : styles.normal}>
+                        {transaction.isAnomaly ? '🚨 이상' : '✅ 정상'}
+                      </span>
+                    </div>
+                    <div className={styles.timestamp}>
+                      {new Date(transaction.createdAt).toLocaleString()}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* 모바일 카드 */}
+              <div className={styles.mobileTransactionCards}>
+                {transactions.slice(0, 10).map((transaction) => (
+                  <div key={transaction.id} className={styles.transactionCard}>
+                    <div className={styles.cardHeader}>
+                      <div className={styles.transactionId}>{transaction.transactionId}</div>
+                      <div className={styles.status}>
+                        <span className={transaction.isAnomaly ? styles.anomaly : styles.normal}>
+                          {transaction.isAnomaly ? '🚨 이상' : '✅ 정상'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className={styles.cardContent}>
+                      <div className={styles.cardRow}>
+                        <span className={styles.cardLabel}>사용자:</span>
+                        <span className={styles.cardValue}>{transaction.userId}</span>
+                      </div>
+                      <div className={styles.cardRow}>
+                        <span className={styles.cardLabel}>금액:</span>
+                        <span className={styles.cardValue}>{transaction.amount?.toLocaleString()}원</span>
+                      </div>
+                      <div className={styles.cardRow}>
+                        <span className={styles.cardLabel}>위험도:</span>
+                        <span 
+                          className={`${styles.riskBadge} ${transaction.riskScore >= 80 ? styles.highRisk :
+                            transaction.riskScore >= 60 ? styles.mediumRisk :
+                            transaction.riskScore >= 40 ? styles.lowRisk : styles.safeRisk
+                          }`}
+                        >
+                          {transaction.riskScore?.toFixed(1)}%
+                        </span>
+                      </div>
+                      <div className={styles.cardRow}>
+                        <span className={styles.cardLabel}>시간:</span>
+                        <span className={styles.cardValue}>
+                          {new Date(transaction.createdAt).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
       </CardComponent>

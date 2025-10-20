@@ -351,14 +351,68 @@
   overflow-y: auto;
 }
 
-.transactionTable {
+/* 데스크톱 테이블 */
+.desktopTransactionTable {
   display: flex;
   flex-direction: column;
 }
 
+/* 모바일 카드 */
+.mobileTransactionCards {
+  display: none;
+}
+
+.transactionCard {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  padding: 16px;
+  transition: all 0.2s ease;
+}
+
+.transactionCard:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e0;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cardRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.cardLabel {
+  font-weight: 600;
+  color: #4a5568;
+  min-width: 60px;
+}
+
+.cardValue {
+  color: #2d3748;
+  text-align: right;
+  flex: 1;
+}
+
 .tableHeader {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1.5fr;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr 2fr;
   gap: 16px;
   padding: 12px 16px;
   background-color: #f7fafc;
@@ -368,9 +422,16 @@
   font-size: 14px;
 }
 
+.tableHeader > div:nth-child(1) { text-align: left; }   /* 거래 ID */
+.tableHeader > div:nth-child(2) { text-align: left; }   /* 사용자 */
+.tableHeader > div:nth-child(3) { text-align: right; }  /* 금액 */
+.tableHeader > div:nth-child(4) { text-align: center; } /* 위험도 */
+.tableHeader > div:nth-child(5) { text-align: center; } /* 상태 */
+.tableHeader > div:nth-child(6) { text-align: left; }   /* 시간 */
+
 .tableRow {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1.5fr;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr 2fr;
   gap: 16px;
   padding: 12px 16px;
   border-bottom: 1px solid #f1f5f9;
@@ -378,6 +439,13 @@
   font-size: 14px;
   transition: background-color 0.2s;
 }
+
+.tableRow > div:nth-child(1) { text-align: left; }   /* 거래 ID */
+.tableRow > div:nth-child(2) { text-align: left; }   /* 사용자 */
+.tableRow > div:nth-child(3) { text-align: right; }  /* 금액 */
+.tableRow > div:nth-child(4) { text-align: center; } /* 위험도 */
+.tableRow > div:nth-child(5) { text-align: center; } /* 상태 */
+.tableRow > div:nth-child(6) { text-align: left; }   /* 시간 */
 
 .tableRow:hover {
   background-color: #f8fafc;
@@ -556,17 +624,12 @@
     max-height: 300px;
   }
 
-  .tableHeader,
-  .tableRow {
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-    font-size: 11px;
-    padding: 8px 4px;
+  .desktopTransactionTable {
+    display: none !important;
   }
-
-  .tableHeader div:nth-child(n+3),
-  .tableRow div:nth-child(n+3) {
-    display: none;
+  
+  .mobileTransactionCards {
+    display: block !important;
   }
 
   .transactionId {
@@ -611,17 +674,25 @@
     padding: 4px;
   }
 
-  .tableHeader,
-  .tableRow {
-    grid-template-columns: 1fr;
-    gap: 4px;
-    font-size: 10px;
-    padding: 6px 2px;
+  .desktopTransactionTable {
+    display: none !important;
   }
-
-  .tableHeader div:nth-child(n+2),
-  .tableRow div:nth-child(n+2) {
-    display: none;
+  
+  .mobileTransactionCards {
+    display: block !important;
+  }
+  
+  .transactionCard {
+    padding: 12px;
+    margin-bottom: 8px;
+  }
+  
+  .cardRow {
+    font-size: 12px;
+  }
+  
+  .cardLabel {
+    min-width: 50px;
   }
 
   .transactionId {
