@@ -60,8 +60,7 @@ export default function MyPage() {
   };
 
   // 사용자가 SELLER 역할을 가지고 있는지 확인
-  console.log("현재 사용자 정보:", user);
-  console.log("사용자 역할:", user?.roles);
+  console.log(`현재 사용자 정보: ${user?.usersId} ${user?.email}, 사용자 역할: ${user?.roles}`);
 
   // 백엔드에서 실제 사용자 역할을 가져와서 확인
   const checkUserRoles = async () => {

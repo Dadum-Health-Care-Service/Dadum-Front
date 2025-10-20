@@ -33,8 +33,13 @@ const RealTimeMonitor = () => {
         return;
       }
 
-      const socket = new window.SockJS("/ws/fraud-monitor");
+      if (typeof window.Stomp === "undefined") {
+        console.error("STOMP가 로드되지 않았습니다. 폴링 모드로 전환합니다.");
+        startPolling();
+        return;
+      }
 
+      const socket = new window.SockJS("/ws/fraud-monitor");
       const stompClient = window.Stomp.over(socket);
 
       stompClient.debug = false; // 디버그 로그 비활성화
@@ -280,9 +285,6 @@ const RealTimeMonitor = () => {
   };
 
   useEffect(() => {
-    // 컴포넌트 마운트 시 알림 권한 요청
-    //requestNotificationPermission();
-
     // 사용자 로그인 확인 후 자동 시작
     if (user && user.accessToken && autoRefresh) {
       startPolling();

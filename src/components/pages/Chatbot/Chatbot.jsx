@@ -104,7 +104,7 @@ const Chatbot = ({ className = "", onMessageSend }) => {
   // 타이핑 효과가 있는 응답 처리
   const streamChatResponse = async (userMessage, streamingId) => {
     try {
-      const response = await fetch("http://localhost:8080/api/chat/stream", {
+      const response = await fetch("/security/chat/stream", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

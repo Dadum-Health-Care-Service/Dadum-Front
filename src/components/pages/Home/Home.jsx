@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Container, Row, Col, Badge, ProgressBar } from "react-bootstrap";
+import { Container, Row, Col, Badge } from "react-bootstrap";
 import ContainerComponent from "../../common/ContainerComponent";
 import { FaPlay, FaClock, FaStar, FaFire, FaCheckCircle, FaSun, FaCloud, FaCloudRain, FaSnowflake, FaWind } from "react-icons/fa";
 import styles from "./Home.module.css";
@@ -8,6 +8,7 @@ import CardComponent from "../../common/CardComponent";
 import ButtonComponent from "../../common/ButtonComponent";
 import FitnessNewsFeed from "../News/FitnessNewsFeed";
 import { useApi } from "../../../utils/api/useApi";
+import axios from "axios";
 const Home = () => {
   const navigate = useNavigate();
   const [userStats, setUserStats] = useState({
@@ -17,7 +18,6 @@ const Home = () => {
   });
   const [userRoutines, setUserRoutines] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [dailyTip, setDailyTip] = useState("");
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
   const [weather, setWeather] = useState(null);
   const [weatherLoading, setWeatherLoading] = useState(true);
@@ -78,7 +78,6 @@ const Home = () => {
   const fetchWeather = useCallback(async () => {
     setWeatherLoading(true);
     try {
-      // OpenWeatherMap API 키 (환경 변수에서 가져오기)
       const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
       
       // 사용자 위치 가져오기
@@ -115,13 +114,16 @@ const Home = () => {
         const location = await getLocation();
         console.log('사용자 위치:', location);
         
-        // OpenWeatherMap API 호출 (위도/경도 기반)
-        const response = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?lat=${location.lat}&lon=${location.lon}&appid=${API_KEY}&units=metric&lang=kr`
+        // OpenWeatherMap API 호출 (위도/경도 기반) - axios 사용
+        const response = await axios.get(
+          `https://api.openweathermap.org/data/2.5/weather?lat=${location.lat}&lon=${location.lon}&appid=${API_KEY}&units=metric&lang=kr`,
+          {
+            withCredentials: false
+          }
         );
         
-        if (response.ok) {
-          const data = await response.json();
+        if (response.status === 200) {
+          const data = response.data;
           console.log('날씨 데이터:', data);
           
           // 날씨 상태 매핑
@@ -153,22 +155,23 @@ const Home = () => {
               condition = 'Clear';
           }
           
-          // 카카오 API로 정확한 주소 가져오기
+          // 카카오 API로 정확한 주소 가져오기 - axios 사용
           let locationName = '현재 위치';
           try {
             const KAKAO_API_KEY = import.meta.env.VITE_KAKAO_API_KEY;
             if (KAKAO_API_KEY) {
-              const kakaoResponse = await fetch(
+              const kakaoResponse = await axios.get(
                 `https://dapi.kakao.com/v2/local/geo/coord2address.json?x=${location.lon}&y=${location.lat}`,
                 {
                   headers: {
                     Authorization: `KakaoAK ${KAKAO_API_KEY}`
-                  }
+                  },
+                  withCredentials: false
                 }
               );
               
-              if (kakaoResponse.ok) {
-                const kakaoData = await kakaoResponse.json();
+              if (kakaoResponse.status === 200) {
+                const kakaoData = kakaoResponse.data;
                 console.log('카카오 주소 데이터:', kakaoData);
                 
                 if (kakaoData.documents && kakaoData.documents.length > 0) {
@@ -354,36 +357,6 @@ const Home = () => {
       document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, [fetchUserData]);
-
-  // 오늘의 팁 랜덤 선택
-  useEffect(() => {
-    const tips = [
-      "짧게라도 매일 하는 게 장기적으로 가장 큰 변화를 만듭니다.",
-      "운동 후 30분 내 단백질 섭취는 근육 회복에 큰 도움이 됩니다.",
-      "오늘은 완벽하지 않아도 괜찮습니다. 꾸준함이 곧 완벽함입니다.",
-      "세트 사이 휴식은 60~90초가 적당합니다. 집중을 유지해 보세요.",
-      "수분 부족은 운동 효율을 떨어뜨립니다. 루틴 전후로 물을 꼭 챙기세요.",
-      "오늘은 강도보다 '폼'을 우선하세요. 올바른 자세가 부상을 막습니다.",
-      "아침 운동은 하루 종일 활력 넘치는 하루를 만들어줍니다.",
-      "스트레칭은 운동 전후 필수입니다. 유연성 향상에 도움이 됩니다.",
-      "충분한 수면은 운동 성과와 회복에 중요한 역할을 합니다.",
-      "작은 목표부터 시작하세요. 성취감이 동기부여로 이어집니다.",
-      "운동 일지를 써보세요. 발전 과정을 확인할 수 있습니다.",
-      "친구와 함께 운동하면 지속력이 높아집니다.",
-      "운동 전 가벼운 워밍업으로 부상을 예방하세요.",
-      "운동 후 쿨다운으로 심박수를 천천히 낮춰주세요.",
-      "균형 잡힌 식단과 함께하는 운동이 최고의 효과를 냅니다.",
-    ];
-    
-    // 더 확실한 랜덤 선택을 위해 시간 기반 시드 추가
-    const now = new Date();
-    const timeSeed = now.getTime() + Math.random();
-    const randomIndex = Math.floor((timeSeed % 1000) / 1000 * tips.length);
-    const randomTip = tips[randomIndex];
-    
-    console.log("선택된 팁 인덱스:", randomIndex, "팁:", randomTip);
-    setDailyTip(randomTip);
-  }, []);
 
   const startRoutine = (routineId) => {
     // 루틴 페이지로 이동
