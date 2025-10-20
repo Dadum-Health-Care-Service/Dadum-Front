@@ -8,6 +8,7 @@ export default function ToggleComponent({
   isNotify = false,
   viewNotify = null,
   notifyIndex = -1,
+  onChange = null,
   children,
 }) {
   const [active, setActive] = useState(0);
@@ -16,6 +17,7 @@ export default function ToggleComponent({
     if (index === notifyIndex) {
       viewNotify(false);
     }
+    if (onChange) onChange(index);
   };
 
   const getVariantClass = () => {

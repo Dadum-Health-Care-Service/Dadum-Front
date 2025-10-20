@@ -1,41 +1,24 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import ContainerComponent from "../../../../common/ContainerComponent";
 import ButtonComponent from "../../../../common/ButtonComponent";
 import InputComponent from "../../../../common/InputComponent";
 import ToggleComponent from "../../../../common/ToggleComponent";
+import { useApi } from "../../../../../utils/api/useApi";
+import IPManagement from "./components/IPManagement";
 import styles from "./Security.module.css";
 
 export default function Security() {
   const [logs, setLogs] = useState([]);
-  const [blockedIPs, setBlockedIPs] = useState([
-    {
-      id: 1,
-      ip: "192.168.1.100",
-      reason: "의심스러운 활동",
-      blockedAt: "2024-01-15 14:30:25",
-      status: "blocked",
-    },
-    {
-      id: 2,
-      ip: "10.0.0.50",
-      reason: "무차별 대입 공격",
-      blockedAt: "2024-01-15 13:45:12",
-      status: "blocked",
-    },
-    {
-      id: 3,
-      ip: "172.16.0.25",
-      reason: "스팸 요청",
-      blockedAt: "2024-01-15 12:20:08",
-      status: "blocked",
-    },
-  ]);
-  const [newIP, setNewIP] = useState("");
-  const [newReason, setNewReason] = useState("");
+  const [blockedIPs, setBlockedIPs] = useState([]);
+  const [ip, setIp] = useState("");
+  const [reason, setReason] = useState("");
+  const ipInputRef = useRef(null);
+  const reasonInputRef = useRef(null);
   const logContainerRef = useRef(null);
   let ws = null;
   let reconnectAttempts = 0;
   const maxReconnectAttempts = 3;
+  const { GET, POST } = useApi();
 
   function connectWebSocket() {
     console.log("connectWebSocket");
@@ -62,8 +45,31 @@ export default function Security() {
     };
 
     ws.onmessage = function (event) {
-      const data = JSON.parse(event.data);
-      setLogs((prev) => [...prev, data.log_data.raw_log]);
+      let parsed;
+      try {
+        parsed = JSON.parse(event.data);
+      } catch (e) {
+        // 문자열 그대로 오는 경우 대비
+        parsed = { log_data: { raw_log: event.data } };
+      }
+
+      const raw = parsed?.log_data?.raw_log;
+      const safeText =
+        typeof raw === "string"
+          ? raw
+          : (() => {
+              try {
+                return JSON.stringify(raw);
+              } catch (_) {
+                return String(raw);
+              }
+            })();
+
+      setLogs((prev) => {
+        const next = [...prev, safeText];
+        // 너무 많아지지 않도록 최근 1000개만 유지
+        return next.length > 1000 ? next.slice(-1000) : next;
+      });
     };
 
     ws.onerror = function (error) {
@@ -71,7 +77,13 @@ export default function Security() {
     };
   }
 
+  const fetchBlockedIPs = async () => {
+    const res = await GET("/firewall/blocked-details", {}, false);
+    setBlockedIPs(res.data.blockedDetails);
+  };
+
   useEffect(() => {
+    fetchBlockedIPs();
     connectWebSocket();
   }, []);
 
@@ -82,22 +94,32 @@ export default function Security() {
   }, [logs]);
 
   const handleBlockIP = () => {
-    if (newIP && newReason) {
-      const newBlockedIP = {
-        id: Date.now(),
-        ip: newIP,
-        reason: newReason,
-        blockedAt: new Date().toLocaleString(),
-        status: "blocked",
+    if (ip && reason) {
+      const blockIp = async () => {
+        const newBlockedIP = {
+          ipAddress: ip,
+          reason: reason,
+        };
+        const res = await POST("/firewall/block", newBlockedIP, false);
+        setBlockedIPs((prev) => [...prev, newBlockedIP]);
+        setIp("");
+        setReason("");
       };
-      setBlockedIPs((prev) => [...prev, newBlockedIP]);
-      setNewIP("");
-      setNewReason("");
+      blockIp();
     }
   };
 
-  const handleUnblockIP = (id) => {
-    setBlockedIPs((prev) => prev.filter((ip) => ip.id !== id));
+  const handleUnblockIP = (ipAddress) => {
+    const unblockIp = async () => {
+      const unblockedIP = {
+        ipAddress: ipAddress,
+      };
+      const res = await POST("/firewall/unblock", unblockedIP, false);
+      setBlockedIPs((prev) => prev.filter((ip) => ip.ipAddress !== ipAddress));
+      setIp("");
+      setReason("");
+    };
+    unblockIp();
   };
 
   const LogMonitoring = () => (
@@ -128,78 +150,6 @@ export default function Security() {
     </div>
   );
 
-  const IPManagement = () => (
-    <div className={styles["ip-section"]}>
-      <div className={styles["ip-header"]}>
-        <h3>IP 차단 관리</h3>
-        <div className={styles["ip-stats"]}>
-          <span className={styles["stat-item"]}>
-            총 차단: <strong>{blockedIPs.length}</strong>
-          </span>
-        </div>
-      </div>
-
-      {/* IP 차단 추가 */}
-      <div className={styles["add-ip-form"]}>
-        <h4>새 IP 차단</h4>
-        <div className={styles["form-row"]}>
-          <InputComponent
-            placeholder="IP 주소 (예: 192.168.1.100)"
-            value={newIP}
-            onChange={(e) => setNewIP(e.target.value)}
-            className={styles["ip-input"]}
-          />
-          <InputComponent
-            placeholder="차단 사유"
-            value={newReason}
-            onChange={(e) => setNewReason(e.target.value)}
-            className={styles["reason-input"]}
-          />
-          <ButtonComponent
-            variant="primary"
-            onClick={handleBlockIP}
-            disabled={!newIP || !newReason}
-          >
-            차단
-          </ButtonComponent>
-        </div>
-      </div>
-
-      {/* 차단된 IP 목록 */}
-      <div className={styles["blocked-ips"]}>
-        <h4>차단된 IP 목록</h4>
-        {blockedIPs.length === 0 ? (
-          <div className={styles["no-ips"]}>
-            <p>차단된 IP가 없습니다.</p>
-          </div>
-        ) : (
-          <div className={styles["ip-list"]}>
-            {blockedIPs.map((ip) => (
-              <div key={ip.id} className={styles["ip-item"]}>
-                <div className={styles["ip-info"]}>
-                  <div className={styles["ip-address"]}>{ip.ip}</div>
-                  <div className={styles["ip-details"]}>
-                    <span className={styles["ip-reason"]}>{ip.reason}</span>
-                    <span className={styles["ip-time"]}>{ip.blockedAt}</span>
-                  </div>
-                </div>
-                <div className={styles["ip-actions"]}>
-                  <ButtonComponent
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => handleUnblockIP(ip.id)}
-                  >
-                    해제
-                  </ButtonComponent>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
   return (
     <div className={styles["security-container"]}>
       <ToggleComponent
@@ -207,8 +157,26 @@ export default function Security() {
         isNotify={null}
         viewNotify={() => {}}
         notifyIndex={0}
+        onChange={(idx) => {
+          if (idx === 1) {
+            fetchBlockedIPs();
+          }
+        }}
       >
-        {[<LogMonitoring />, <IPManagement />]}
+        {[
+          <LogMonitoring />,
+          <IPManagement
+            blockedIPs={blockedIPs}
+            ipInputRef={ipInputRef}
+            reasonInputRef={reasonInputRef}
+            ip={ip}
+            reason={reason}
+            setIp={setIp}
+            setReason={setReason}
+            handleBlockIP={handleBlockIP}
+            handleUnblockIP={handleUnblockIP}
+          />,
+        ]}
       </ToggleComponent>
     </div>
   );

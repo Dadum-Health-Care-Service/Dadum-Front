@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import ModalComponent from "../../common/ModalComponent";
 import ButtonComponent from "../../common/ButtonComponent";
 import InputComponent from "../../common/InputComponent";
@@ -15,9 +15,11 @@ import RealTimeMonitor from "./components/RealTimeMonitor";
 import SystemTest from "./components/SystemTest";
 import PerformanceMonitor from "./components/PerformanceMonitor";
 import TransactionManagement from "./TransactionManagement";
+import { AuthContext } from "../../../context/AuthContext";
 
 // 메인 Admin 컴포넌트
 const Admin = ({ isMobile, isNotify, setIsNotify }) => {
+  const { dispatch } = useContext(AuthContext);
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -120,16 +122,6 @@ const Admin = ({ isMobile, isNotify, setIsNotify }) => {
             </ContainerComponent>
           </>
         );
-      case "contents":
-        return (
-          <>
-            <SectionHeader
-              title="콘텐츠 관리"
-              description="게시물과 자산을 관리합니다"
-            />
-            <Placeholder label="콘텐츠 관리" />
-          </>
-        );
       case "transactions":
         return (
           <>
@@ -165,26 +157,6 @@ const Admin = ({ isMobile, isNotify, setIsNotify }) => {
               />
             </ContainerComponent>
             <Placeholder label="실시간 페이지 통계" />
-          </>
-        );
-      case "settings":
-        return (
-          <>
-            <SectionHeader
-              title="시스템 설정"
-              description="환경 설정과 통합을 관리합니다"
-            />
-            <Placeholder label="시스템 설정" />
-          </>
-        );
-      case "support":
-        return (
-          <>
-            <SectionHeader
-              title="고객 지원 관리"
-              description="문의와 티켓을 처리합니다"
-            />
-            <Placeholder label="고객 지원 관리" />
           </>
         );
       case "security":
@@ -257,19 +229,31 @@ const Admin = ({ isMobile, isNotify, setIsNotify }) => {
         관리자
       </div>
       <div style={{ display: "grid", gap: 4 }}>
+        <div style={{ fontSize: 12, color: "#64748b", padding: "6px 8px" }}>
+          관리 및 통계
+        </div>
         <SidebarLink id="dashboard" label="대시보드" emoji="📊" />
         <SidebarLink id="users" label="사용자 관리" emoji="👥" />
-        <SidebarLink id="contents" label="콘텐츠 관리" emoji="🗂️" />
         <SidebarLink id="transactions" label="거래 관리" emoji="💳" />
         <SidebarLink id="reports" label="실시간 페이지 통계" emoji="📈" />
-        <SidebarLink id="settings" label="시스템 설정" emoji="⚙️" />
-        <SidebarLink id="support" label="고객 지원 관리" emoji="💬" />
         <SidebarLink id="security" label="보안 관리" emoji="🔐" />
-        <div style={{ height: 8 }} />
-        <div style={{ fontSize: 12, color: "#64748b", padding: "6px 8px" }}>
-          데모
-        </div>
-        <SidebarLink id="ui" label="UI / 모달" emoji="🧩" />
+        {isMobile && (
+          <>
+            <div style={{ fontSize: 12, color: "#64748b", padding: "6px 8px" }}>
+              로그아웃
+            </div>
+            <div style={{ height: 8 }} />
+
+            <ButtonComponent
+              onClick={() => {
+                dispatch({ type: "LOGOUT" });
+                navigate("/login");
+              }}
+            >
+              {"로그아웃"}
+            </ButtonComponent>
+          </>
+        )}
       </div>
     </aside>
   );

@@ -59,9 +59,39 @@ export default function RoutineDetailModal({
       title: routine?.routineName,
       setId: routine?.setId,
       usersId: routine?.usersId,
-      totalTime: "50분",
-      totalSets: "15세트",
-      estimatedCalories: "400kcal",
+      totalTime: `${routine?.saveRoutineDto.reduce(
+        (acc, curr) => acc + curr.set.reduce((acc, curr) => acc + curr.rest, 0),
+        0
+      )}분`,
+      totalSets: `${routine?.saveRoutineDto.reduce(
+        (acc, curr) => acc + curr.set.length,
+        0
+      )}세트`,
+      estimatedCalories: (() => {
+        // 총 운동 볼륨 계산 (weight × reps)
+        const totalVolume = routine?.saveRoutineDto.reduce(
+          (acc, curr) =>
+            acc +
+            curr.set.reduce((acc, curr) => acc + curr.weight * curr.many, 0),
+          0
+        );
+
+        // 예상 운동 시간 (분 단위) - 세트당 평균 2분으로 가정
+        const estimatedTimeMinutes = routine?.saveRoutineDto.reduce(
+          (acc, curr) => acc + curr.set.length * 2,
+          0
+        );
+
+        // 시간 기반 칼로리 (분당 4kcal)
+        const timeBasedKcal = estimatedTimeMinutes * 4;
+
+        // 볼륨 기반 칼로리 (1kg 들어올림당 0.01kcal)
+        const volumeBasedKcal = totalVolume * 0.01;
+
+        const estimatedKcal = Math.round(timeBasedKcal + volumeBasedKcal);
+
+        return `${estimatedKcal}kcal`;
+      })(),
       exercises: routine?.saveRoutineDto
         .map((exercise) => {
           return {
@@ -103,37 +133,71 @@ export default function RoutineDetailModal({
       setWorkoutData((prev) => {
         const updatedData = {
           ...prev,
-          exercises: prev.exercises
-            .filter((exercise) =>
-              workoutExercises.includes(korEngDict[exercise.name])
-            )
-            .concat(
-              workoutExercises
-                .filter(
-                  (exercise) =>
-                    !prev.exercises.some((e) => {
-                      return e.name === engKorDict[exercise];
-                    })
-                )
-                .map((exercise) => {
-                  console.log(exercise);
-                  return {
-                    id: Date.now() + Math.random(), // 임시 고유 ID
-                    name: engKorDict[exercise],
-                    category: engKorDict[exercise],
-                    sets: [
-                      {
-                        id: 0,
-                        srsId: null,
-                        weight: 0,
-                        many: 0,
-                        rest: 0,
-                      },
-                    ],
-                  };
-                })
-            ),
+          
+          exercises: workoutExercises.map((exercise, index) => {
+            if (
+              prev.exercises[index] &&
+              engKorDict[exercise] === prev.exercises[index].name
+            ) {
+              return prev.exercises[index];
+            } else {
+              return {
+                id: Date.now() + Math.random(), // 임시 고유 ID
+                name: engKorDict[exercise],
+                category: engKorDict[exercise],
+                sets: [
+                  {
+                    id: 0,
+                    srsId: null,
+                    weight: 0,
+                    many: 0,
+                    rest: 0,
+                  },
+                ],
+              };
+            }
+          }),
         };
+        // console.log(newData);
+        // const updatedData = {
+        //   ...prev,
+        //   exercises: prev.exercises
+        //     .filter((exercise, index) => {
+        //       console.log(exercise, index);
+        //       const existingExercise = prev.exercises[index];
+        //       console.log(workoutExercises);
+        //       return (
+        //         existingExercise &&
+        //         existingExercise.name === engKorDict[workoutExercises[index]]
+        //       );
+        //     })
+        //     .concat(
+        //       workoutExercises
+        //         .filter(
+        //           (exercise) =>
+        //             !prev.exercises.some((e) => {
+        //               return e.name === engKorDict[exercise];
+        //             })
+        //         )
+        //         .map((exercise) => {
+        //           console.log(exercise);
+        //           return {
+        //             id: Date.now() + Math.random(), // 임시 고유 ID
+        //             name: engKorDict[exercise],
+        //             category: engKorDict[exercise],
+        //             sets: [
+        //               {
+        //                 id: 0,
+        //                 srsId: null,
+        //                 weight: 0,
+        //                 many: 0,
+        //                 rest: 0,
+        //               },
+        //             ],
+        //           };
+        //         })
+        //     ),
+        // };
         workoutDataRef.current = updatedData;
         return updatedData;
       });
@@ -288,6 +352,7 @@ export default function RoutineDetailModal({
                 <ButtonComponent
                   variant="secondary"
                   onClick={() => {
+                    console.log(exercise.id);
                     showConfirmModal(
                       "운동을 삭제하시겠습니까?",
                       "운동 삭제",
@@ -408,7 +473,7 @@ export default function RoutineDetailModal({
         {!(isRunning && setId === routine?.setId) ? (
           <div className={styles["workout-summary"]}>
             <div className={styles["summary-card"]}>
-              <div className={styles["summary-label"]}>총 운동 시간</div>
+              <div className={styles["summary-label"]}>총 휴식 시간</div>
               <div className={styles["summary-value"]}>
                 {workoutData.totalTime}
               </div>
@@ -492,6 +557,7 @@ export default function RoutineDetailModal({
     });
   };
   const deleteExercise = (exerciseId) => {
+    console.log(workoutData, exerciseId);
     setWorkoutData((prev) => {
       const updatedData = {
         ...prev,
@@ -499,17 +565,21 @@ export default function RoutineDetailModal({
           (exercise) => exercise.id !== exerciseId
         ),
       };
+      console.log(updatedData);
       workoutDataRef.current = updatedData;
       return updatedData;
     });
+
     setWorkoutExercises((prev) => {
-      return prev.filter(
-        (exercise) =>
-          exercise !==
-          korEngDict[
-            workoutData.exercises.find((e) => e.id === exerciseId).name
-          ]
-      );
+      const updatedData = {
+        ...workoutData,
+        exercises: workoutData.exercises.filter(
+          (exercise) => exercise.id !== exerciseId
+        ),
+      };
+      return updatedData.exercises.map((exercise) => {
+        return korEngDict[exercise.name];
+      });
     });
   };
 
