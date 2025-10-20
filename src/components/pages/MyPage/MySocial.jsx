@@ -63,7 +63,7 @@ export default function MySocial(){
                     const commentsWithPostTitle = await Promise.all(
                         comments.map(async comment =>{
                             const postRes = await GET(`/posts/${comment.postId}`);
-                            return {...comment,postTitle:postRes.data.postTitle};
+                            return {...comment,postTitle:postRes.data.postContent.length > 10 ? `${postRes.data.postContent.substring(0,10)}...` : postRes.data.postContent};
                         }),
                     );
                     setCommentData(commentsWithPostTitle);
@@ -86,10 +86,12 @@ export default function MySocial(){
         if(loading){
             return <div>로딩 중 ...</div>;
         }
+        console.log(postData);
+        console.log(commentData);
         switch(selectedType){
             case "posts":{
                 return (
-                    <ListComponent variant="elevated">
+                    <ListComponent variant="elevated" className="mb-3">
                         <ListComponent.Header>나의 글</ListComponent.Header>
                         <ListGroup.Item
                             action
@@ -98,10 +100,9 @@ export default function MySocial(){
                         >
                             <div style={{
                                 display:'grid',
-                                gridTemplateColumns:"0.2fr 0.5fr 1fr 0.5fr"
+                                gridTemplateColumns:"0.5fr 1fr 0.5fr"
                             }}>
                                 <div>ID</div>
-                                <div>제목</div>
                                 <div>내용</div>
                                 <div>등록일</div>
                             </div>
@@ -113,16 +114,16 @@ export default function MySocial(){
                                     <ListGroup.Item
                                         key={i}
                                         action
-                                        onClick={()=>navigate('/')}
+                                        onClick={()=>navigate(`/social`)}
+                                        className="mx-2 my-1"
                                     >
                                         <div style={{
                                             display:'grid',
-                                            gridTemplateColumns:'0.2fr 0.5fr 1fr 0.5fr',
-                                            fontSize:'0.9rem'
+                                            gridTemplateColumns:'0.5fr 1fr 0.5fr',
+                                            fontSize:'0.9rem',
                                         }}>
                                             <React.Fragment>
                                                 <div>{post.postId}</div>
-                                                <div>{post.postTitle}</div>
                                                 <div>{post.postContent}</div>
                                                 <div>{post.postRegDate.slice(0,10)}</div>
                                             </React.Fragment>
@@ -145,7 +146,8 @@ export default function MySocial(){
                                 commentData.map(comment=>{
                                     return (
                                         <Link
-                                            to={`/post/${comment.postId}`}
+                                            key={comment.commentId}
+                                            to={`/social`}
                                             className="list-group-item list-group-item-action py-3 lh-tight"
                                         >
                                             <div className="d-flex w-100 align-items-center justify-content-between">
@@ -222,7 +224,7 @@ export default function MySocial(){
                         </ListComponent>
                     </div>
                 </div>
-                <div className="pt-3">
+                <div className="py-3">
                     {renderContent()}
                 </div>
             </div>
