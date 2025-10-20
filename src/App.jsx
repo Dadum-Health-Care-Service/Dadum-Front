@@ -43,19 +43,23 @@ import { AuthProvider, AuthContext } from "./context/AuthContext.jsx";
 import { RunProvider } from "./context/RunContext.jsx";
 import { RoutineProvider } from "./context/RoutineContext.jsx";
 import { SuggestProvider } from "./context/SuggestContext.jsx";
-import { ModalProvider } from "./context/ModalContext.jsx";
+import { ModalProvider, useModal } from "./context/ModalContext.jsx";
 
 //Utils
 import { handleAllowNotification } from "./utils/webpush/notificationPermission";
 import GoogleTagManager from "./utils/tagmanager/GoogleTagManager.jsx";
 import usePageView from "./utils/tagmanager/PageView.jsx";
 import "./utils/webpush/foregroundMessage";
+import { useApi } from "./utils/api/useApi.jsx";
 
 function AppContent() {
-  const { user } = useContext(AuthContext);
+  const { user, dispatch } = useContext(AuthContext);
   const [isMobile, setIsMobile] = useState(false);
   const [isNotify, setIsNotify] = useState(false);
   const location = useLocation();
+  const { GET } = useApi();
+  const { showBasicModal }= useModal();
+
   usePageView();
   useEffect(() => {
     // Firebase 연결 상태 확인
@@ -94,12 +98,24 @@ function AppContent() {
   }, []);
 
   useEffect(() => {
-    // Service Worker 등록 및 알림 권한 요청
+    // Service Worker 등록 및 알림 권한 요청 + 유효한 user상태인지 확인
     if (user) {
       //console.log("handleAllowNotification");
       handleAllowNotification(user.accessToken);
+      const checkUser = async ()=>{
+        try{
+          const res = await GET(`/users/${user.usersId}`,{},false);
+          console.log('사용자 이메일: ',res.data.email);
+        } catch (e) {
+          console.log(e);
+          console.err('저장된 user의 정보와 일치하는 사용자가 없어 로그아웃 되었습니다');
+          dispatch({ type: "LOGOUT" });
+        }
+      };
+      checkUser();
     }
   }, [user]);
+
   const noGNBpaths = ["/login", "/signup", "/findid", "/findpw"];
   const showGNB = user && !noGNBpaths.includes(location.pathname);
   const pagePadding =
