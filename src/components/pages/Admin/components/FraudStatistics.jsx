@@ -213,11 +213,15 @@ const FraudStatistics = () => {
     }
 
     const dailyData = statistics.transactionsByDayOfWeek;
-    const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+    // 대한민국 표준: 월요일부터 시작
+    const dayNames = ['월', '화', '수', '목', '금', '토', '일'];
     const labels = dayNames;
     const data = Array.from({ length: 7 }, (_, i) => {
       // 백엔드 데이터 형식: [[dayOfWeek, count], [dayOfWeek, count], ...]
-      const dayData = dailyData.find(d => d[0] === i);
+      // 0=일요일, 1=월요일, 2=화요일, ... 6=토요일
+      // 프론트엔드에서는 월요일부터 시작하므로 인덱스 조정
+      const backendDayIndex = i === 6 ? 0 : i + 1; // 일요일은 0, 나머지는 +1
+      const dayData = dailyData.find(d => d[0] === backendDayIndex);
       return dayData ? dayData[1] : 0;
     });
 
@@ -617,8 +621,7 @@ const FraudStatistics = () => {
       <div className={styles.summaryCards}>
         <StatCard
           title="총 거래 수"
-          value={statistics?.totalTransactions?.toLocaleString() || '0'}
-          subtitle={statistics?.totalTransactions ? "실제 데이터" : "데모 데이터"}
+          value={statistics?.total_transactions?.toLocaleString() || '0'}
           icon="💳"
           trend="up"
           trendValue="+12%"
@@ -627,8 +630,7 @@ const FraudStatistics = () => {
         
         <StatCard
           title="이상거래 탐지"
-          value={statistics?.anomalyCount?.toLocaleString() || '0'}
-          subtitle="AI가 탐지한 이상거래"
+          value={statistics?.anomaly_transactions?.toLocaleString() || '0'}
           icon="🚨"
           trend="down"
           trendValue="-5%"
@@ -637,8 +639,7 @@ const FraudStatistics = () => {
         
         <StatCard
           title="정상 거래"
-          value={statistics?.normalCount?.toLocaleString() || '0'}
-          subtitle="검증된 정상 거래"
+          value={statistics?.normal_transactions?.toLocaleString() || '0'}
           icon="✅"
           trend="up"
           trendValue="+8%"
@@ -647,8 +648,7 @@ const FraudStatistics = () => {
         
         <StatCard
           title="평균 위험도"
-          value={`${statistics?.averageRiskScore?.toFixed(1) || 0}%`}
-          subtitle="AI 모델 성능"
+          value={`${(statistics?.anomaly_rate * 100)?.toFixed(1) || 0}%`}
           icon="🎯"
           trend="up"
           trendValue="+2.1%"
@@ -660,7 +660,7 @@ const FraudStatistics = () => {
       <div className={styles.chartsGrid}>
         <ChartCard 
           title="⏰ 시간대별 거래 현황" 
-          description={`24시간 동안의 거래 패턴을 확인하세요. Y축은 거래 건수를 나타냅니다. ${statistics?.transactionsByHour ? '(실제 데이터)' : '(데모 데이터)'}`}
+          description={`24시간 동안의 거래 패턴을 확인하세요. Y축은 거래 건수를 나타냅니다.`}
           loading={loading}
           error={error}
         >
@@ -669,7 +669,7 @@ const FraudStatistics = () => {
 
         <ChartCard 
           title="📅 요일별 거래 현황" 
-          description={`요일별 거래량 분포를 확인하세요. Y축은 거래 건수를 나타냅니다. ${statistics?.transactionsByDayOfWeek ? '(실제 데이터)' : '(데모 데이터)'}`}
+          description={`요일별 거래량 분포를 확인하세요. Y축은 거래 건수를 나타냅니다.`}
           loading={loading}
           error={error}
         >
@@ -678,7 +678,7 @@ const FraudStatistics = () => {
 
         <ChartCard 
           title="🎯 위험도 분포" 
-          description={`AI가 분석한 거래 위험도 분포입니다 ${statistics?.riskDistribution ? '(실제 데이터)' : '(데모 데이터)'}`}
+          description={`AI가 분석한 거래 위험도 분포입니다`}
           loading={loading}
           error={error}
         >
