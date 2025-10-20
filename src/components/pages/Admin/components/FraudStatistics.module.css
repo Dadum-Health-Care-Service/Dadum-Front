@@ -3,6 +3,150 @@
   padding: 20px;
   background-color: #f8fafc;
   min-height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 모바일 패딩 조정 */
+@media (max-width: 768px) {
+  .statisticsContainer {
+    padding: 12px;
+  }
+}
+
+/* 통계 표와 위험도 분포 행 */
+.statsRow {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* 통계 표 스타일 */
+.statsTableCard {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  flex: 1;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 모바일 카드 패딩 조정 */
+@media (max-width: 768px) {
+  .statsTableCard {
+    padding: 16px;
+  }
+}
+
+/* 위험도 분포 카드 */
+.riskDistributionCard {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  flex: 1;
+  min-width: 300px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 모바일 위험도 분포 카드 */
+@media (max-width: 768px) {
+  .riskDistributionCard {
+    padding: 16px;
+    min-width: auto;
+  }
+}
+
+.riskDistributionTitle {
+  margin: 0 0 20px 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.riskDistributionContent {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+.statsTableTitle {
+  margin: 0 0 20px 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.statsTable {
+  width: 100%;
+}
+
+.tableRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f3f4f6;
+  gap: 20px;
+}
+
+.tableRow:last-child {
+  border-bottom: none;
+}
+
+.tableLabel {
+  font-size: 15px;
+  font-weight: 500;
+  color: #6b7280;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.tableValue {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  text-align: right;
+  min-width: 80px;
+}
+
+/* 반응형 테이블 */
+.desktopTable {
+  display: block;
+  width: 100%;
+}
+
+.mobileCards {
+  display: none;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .statsRow {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .riskDistributionCard {
+    min-width: auto;
+  }
+  
+  .riskDistributionContent {
+    height: 250px;
+  }
+  
+  .desktopTable {
+    display: none !important;
+  }
+  
+  .mobileCards {
+    display: block !important;
+  }
 }
 
 .header {
@@ -12,6 +156,16 @@
   margin-bottom: 2rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   border: 1px solid #e5e7eb;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 모바일 헤더 패딩 조정 */
+@media (max-width: 768px) {
+  .header {
+    padding: 16px;
+    margin-bottom: 1rem;
+  }
 }
 
 .headerContent {

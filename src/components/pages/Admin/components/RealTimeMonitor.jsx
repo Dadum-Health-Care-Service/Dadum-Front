@@ -332,9 +332,9 @@ const RealTimeMonitor = () => {
       <div className={styles.header}>
         <div className={styles.headerContent}>
           <div className={styles.titleSection}>
-            <h2 className={styles.title}>⚡ 실시간 이상거래 모니터링</h2>
+            <h2 className={styles.title}>⚡ 실시간 모니터링</h2>
             <p className={styles.subtitle}>
-              AI 기반 실시간 이상거래 탐지 및 알림 시스템
+              AI 기반 이상거래 탐지 시스템
             </p>
           </div>
           <div className={styles.controls}>
@@ -350,9 +350,10 @@ const RealTimeMonitor = () => {
             <ButtonComponent
               onClick={toggleConnection}
               variant={isConnected ? "secondary" : "primary"}
-              size="small"
+              size="medium"
+              className={styles.monitorButton}
             >
-              {isConnected ? "모니터링 중지" : "모니터링 시작"}
+              {isConnected ? "중지" : "시작"}
             </ButtonComponent>
           </div>
         </div>

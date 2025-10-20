@@ -204,7 +204,11 @@
 /* 반응형 디자인 */
 @media (max-width: 768px) {
   .fraudDetection {
-    padding: 15px;
+    padding: 10px;
+    margin: 0;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
   }
   
   .fraudDetection h2 {
@@ -237,20 +241,44 @@
     align-items: flex-start;
     gap: 5px;
   }
+  
+  .resultItem {
+    margin-bottom: 15px;
+    padding: 15px;
+  }
+  
+  .riskIndicator {
+    width: 100%;
+    text-align: center;
+    margin-top: 10px;
+  }
 }
 
 @media (max-width: 480px) {
   .fraudDetection {
-    padding: 10px;
+    padding: 8px;
+    margin: 0;
+    width: 100%;
+    box-sizing: border-box;
   }
   
   .resultItem {
-    padding: 15px;
+    padding: 12px;
+    margin-bottom: 10px;
   }
   
   .riskIndicator {
     min-width: auto;
     font-size: 0.8rem;
     padding: 6px 12px;
+    width: 100%;
+  }
+  
+  .testForm {
+    gap: 8px;
+  }
+  
+  .statusGrid {
+    gap: 8px;
   }
 }

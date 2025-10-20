@@ -56,13 +56,61 @@
 
 /* 모바일 반응형 */
 @media (max-width: 768px) {
+  .transactionManagement {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .tabContainer {
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  
   .tabList {
     flex-direction: column;
     gap: 0.25rem;
+    padding: 0.75rem;
   }
   
   .tab {
     justify-content: center;
     padding: 1rem;
+    font-size: 13px;
+  }
+  
+  .content {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+}
+
+@media (max-width: 480px) {
+  .transactionManagement {
+    padding: 0;
+    margin: 0;
+  }
+  
+  .tabList {
+    padding: 0.5rem;
+  }
+  
+  .tab {
+    padding: 0.75rem;
+    font-size: 12px;
+  }
+  
+  .tabIcon {
+    font-size: 14px;
+  }
+  
+  .content {
+    padding: 0;
+    margin: 0;
   }
 }

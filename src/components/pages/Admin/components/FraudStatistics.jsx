@@ -18,6 +18,7 @@ import StatCard from './StatCard';
 import ChartCard from './ChartCard';
 import { useApi } from '../../../../utils/api/useApi';
 import { AuthContext } from '../../../../context/AuthContext';
+
 import styles from './FraudStatistics.module.css';
 
 // Chart.js 등록
@@ -357,10 +358,10 @@ const FraudStatistics = () => {
         cornerRadius: 8,
         displayColors: true,
         callbacks: {
-          title: function(context) {
+          title: function (context) {
             return context[0].label;
           },
-          label: function(context) {
+          label: function (context) {
             return `${context.dataset.label}: ${context.parsed.y}건`;
           },
         },
@@ -388,7 +389,7 @@ const FraudStatistics = () => {
       y: {
         beginAtZero: true,
         min: 0,
-        max: function(context) {
+        max: function (context) {
           // 데이터의 최대값을 찾아서 10% 여유를 두고 설정
           const data = context.chart.data.datasets[0].data;
           const maxValue = Math.max(...data);
@@ -401,10 +402,10 @@ const FraudStatistics = () => {
           font: {
             size: 11,
           },
-          callback: function(value) {
+          callback: function (value) {
             return Math.round(value) + '건';
           },
-          stepSize: function(context) {
+          stepSize: function (context) {
             const maxValue = Math.max(...context.chart.data.datasets[0].data);
             return Math.ceil(maxValue / 5); // 5개 구간으로 나누기
           },
@@ -451,10 +452,10 @@ const FraudStatistics = () => {
         cornerRadius: 8,
         displayColors: true,
         callbacks: {
-          title: function(context) {
+          title: function (context) {
             return context[0].label;
           },
-          label: function(context) {
+          label: function (context) {
             return `${context.dataset.label}: ${context.parsed.y}건`;
           },
         },
@@ -482,7 +483,7 @@ const FraudStatistics = () => {
       y: {
         beginAtZero: true,
         min: 0,
-        max: function(context) {
+        max: function (context) {
           // 데이터의 최대값을 찾아서 10% 여유를 두고 설정
           const data = context.chart.data.datasets[0].data;
           const maxValue = Math.max(...data);
@@ -495,10 +496,10 @@ const FraudStatistics = () => {
           font: {
             size: 11,
           },
-          callback: function(value) {
+          callback: function (value) {
             return Math.round(value) + '건';
           },
-          stepSize: function(context) {
+          stepSize: function (context) {
             const maxValue = Math.max(...context.chart.data.datasets[0].data);
             return Math.ceil(maxValue / 5); // 5개 구간으로 나누기
           },
@@ -541,7 +542,7 @@ const FraudStatistics = () => {
         cornerRadius: 8,
         displayColors: true,
         callbacks: {
-          label: function(context) {
+          label: function (context) {
             const total = context.dataset.data.reduce((a, b) => a + b, 0);
             const percentage = ((context.parsed / total) * 100).toFixed(1);
             return `${context.label}: ${context.parsed}건 (${percentage}%)`;
@@ -585,7 +586,7 @@ const FraudStatistics = () => {
       <div className={styles.header}>
         <div className={styles.headerContent}>
           <div className={styles.titleSection}>
-            <h2 className={styles.title}>📊 AI 이상거래 통계 대시보드</h2>
+            <h2 className={styles.title}>📊 AI 이상거래 통계</h2>
             <p className={styles.subtitle}>실시간 이상거래 탐지 현황과 AI 모델 성능을 확인하세요</p>
           </div>
           <div className={styles.controlsSection}>
@@ -617,43 +618,188 @@ const FraudStatistics = () => {
         </div>
       </div>
 
-      {/* 개선된 요약 카드들 */}
-      <div className={styles.summaryCards}>
-        <StatCard
-          title="총 거래 수"
-          value={statistics?.total_transactions?.toLocaleString() || '0'}
-          icon="💳"
-          trend="up"
-          trendValue="+12%"
-          color="blue"
-        />
-        
-        <StatCard
-          title="이상거래 탐지"
-          value={statistics?.anomaly_transactions?.toLocaleString() || '0'}
-          icon="🚨"
-          trend="down"
-          trendValue="-5%"
-          color="red"
-        />
-        
-        <StatCard
-          title="정상 거래"
-          value={statistics?.normal_transactions?.toLocaleString() || '0'}
-          icon="✅"
-          trend="up"
-          trendValue="+8%"
-          color="green"
-        />
-        
-        <StatCard
-          title="평균 위험도"
-          value={`${(statistics?.anomaly_rate * 100)?.toFixed(1) || 0}%`}
-          icon="🎯"
-          trend="up"
-          trendValue="+2.1%"
-          color="orange"
-        />
+      {/* 통계 요약 표와 위험도 분포 */}
+      <div className={styles.statsRow}>
+        <div className={styles.statsTableCard}>
+          <h3 className={styles.statsTableTitle}>📊 AI 이상거래 통계</h3>
+          
+          {/* 데스크톱 테이블 레이아웃 */}
+          <div className={styles.desktopTable}>
+            <table style={{
+              width: '100%',
+              borderCollapse: 'collapse',
+              tableLayout: 'fixed',
+              minWidth: '0'
+            }}>
+              <tbody>
+                <tr>
+                  <td style={{
+                    textAlign: 'left',
+                    padding: '8px 0',
+                    borderBottom: '1px solid #e5e7eb',
+                    width: '60%',
+                    wordWrap: 'break-word'
+                  }}>총 거래 수</td>
+                  <td style={{
+                    textAlign: 'right',
+                    padding: '8px 0',
+                    borderBottom: '1px solid #e5e7eb',
+                    width: '40%'
+                  }}>{statistics?.total_transactions?.toLocaleString() || '0'}</td>
+                </tr>
+                <tr>
+                  <td style={{
+                    textAlign: 'left',
+                    padding: '8px 0',
+                    borderBottom: '1px solid #e5e7eb',
+                    width: '60%',
+                    wordWrap: 'break-word'
+                  }}>정상 거래 수</td>
+                  <td style={{
+                    textAlign: 'right',
+                    padding: '8px 0',
+                    borderBottom: '1px solid #e5e7eb',
+                    width: '40%'
+                  }}>{statistics?.normal_transactions?.toLocaleString() || '0'}</td>
+                </tr>
+                <tr>
+                  <td style={{
+                    textAlign: 'left',
+                    padding: '8px 0',
+                    borderBottom: '1px solid #e5e7eb',
+                    width: '60%',
+                    wordWrap: 'break-word'
+                  }}>이상거래 탐지 수</td>
+                  <td style={{
+                    textAlign: 'right',
+                    padding: '8px 0',
+                    borderBottom: '1px solid #e5e7eb',
+                    width: '40%'
+                  }}>{statistics?.anomaly_transactions?.toLocaleString() || '0'}</td>
+                </tr>
+                <tr>
+                  <td style={{
+                    textAlign: 'left',
+                    padding: '8px 0',
+                    width: '60%',
+                    wordWrap: 'break-word'
+                  }}>평균 위험도</td>
+                  <td style={{
+                    textAlign: 'right',
+                    padding: '8px 0',
+                    width: '40%'
+                  }}>{`${(statistics?.anomaly_rate * 100)?.toFixed(2) || 0}%`}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {/* 모바일 카드형 레이아웃 */}
+          <div className={styles.mobileCards}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '12px 0',
+              borderBottom: '1px solid #e5e7eb',
+              width: '100%',
+              boxSizing: 'border-box'
+            }}>
+              <span style={{
+                fontSize: '14px',
+                color: '#6b7280',
+                flex: '1',
+                minWidth: '0',
+                wordWrap: 'break-word'
+              }}>총 거래 수</span>
+              <span style={{
+                fontSize: '16px',
+                fontWeight: '600',
+                color: '#111827',
+                marginLeft: '12px',
+                flexShrink: '0'
+              }}>{statistics?.total_transactions?.toLocaleString() || '0'}</span>
+            </div>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '12px 0',
+              borderBottom: '1px solid #e5e7eb',
+              width: '100%',
+              boxSizing: 'border-box'
+            }}>
+              <span style={{
+                fontSize: '14px',
+                color: '#6b7280',
+                flex: '1',
+                minWidth: '0',
+                wordWrap: 'break-word'
+              }}>정상 거래 수</span>
+              <span style={{
+                fontSize: '16px',
+                fontWeight: '600',
+                color: '#111827',
+                marginLeft: '12px',
+                flexShrink: '0'
+              }}>{statistics?.normal_transactions?.toLocaleString() || '0'}</span>
+            </div>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '12px 0',
+              borderBottom: '1px solid #e5e7eb',
+              width: '100%',
+              boxSizing: 'border-box'
+            }}>
+              <span style={{
+                fontSize: '14px',
+                color: '#6b7280',
+                flex: '1',
+                minWidth: '0',
+                wordWrap: 'break-word'
+              }}>이상거래 탐지 수</span>
+              <span style={{
+                fontSize: '16px',
+                fontWeight: '600',
+                color: '#111827',
+                marginLeft: '12px',
+                flexShrink: '0'
+              }}>{statistics?.anomaly_transactions?.toLocaleString() || '0'}</span>
+            </div>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '12px 0',
+              width: '100%',
+              boxSizing: 'border-box'
+            }}>
+              <span style={{
+                fontSize: '14px',
+                color: '#6b7280',
+                flex: '1',
+                minWidth: '0',
+                wordWrap: 'break-word'
+              }}>평균 위험도</span>
+              <span style={{
+                fontSize: '16px',
+                fontWeight: '600',
+                color: '#111827',
+                marginLeft: '12px',
+                flexShrink: '0'
+              }}>{`${(statistics?.anomaly_rate * 100)?.toFixed(2) || 0}%`}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.riskDistributionCard}>
+          <h3 className={styles.riskDistributionTitle}>🎯 위험도 분포</h3>
+          <div className={styles.riskDistributionContent}>
+            <Doughnut data={getRiskDistributionData()} options={doughnutOptions} />
+          </div>
+        </div>
       </div>
 
       {/* 개선된 차트들 */}
@@ -676,14 +822,6 @@ const FraudStatistics = () => {
           <Bar data={getDailyChartData()} options={dailyChartOptions} />
         </ChartCard>
 
-        <ChartCard 
-          title="🎯 위험도 분포" 
-          description={`AI가 분석한 거래 위험도 분포입니다`}
-          loading={loading}
-          error={error}
-        >
-          <Doughnut data={getRiskDistributionData()} options={doughnutOptions} />
-        </ChartCard>
       </div>
 
       {/* 최근 거래 목록 */}
@@ -708,8 +846,7 @@ const FraudStatistics = () => {
                   <div>{transaction.amount?.toLocaleString()}원</div>
                   <div className={styles.riskScore}>
                     <span 
-                      className={`${styles.riskBadge} ${
-                        transaction.riskScore >= 80 ? styles.highRisk :
+                      className={`${styles.riskBadge} ${transaction.riskScore >= 80 ? styles.highRisk :
                         transaction.riskScore >= 60 ? styles.mediumRisk :
                         transaction.riskScore >= 40 ? styles.lowRisk : styles.safeRisk
                       }`}
