@@ -260,9 +260,41 @@
 
 .locationInfo {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
   gap: 15px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.locationDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.locationSource {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.addressText {
+  font-size: 0.9rem;
+  color: #2c3e50;
+  font-weight: 600;
+  margin: 4px 0;
+  padding: 4px 8px;
+  background-color: rgba(52, 152, 219, 0.1);
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.locationButtons {
+  display: flex;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
@@ -278,6 +310,114 @@
 .refreshButton {
   font-size: 0.9rem;
   padding: 8px 16px;
+}
+
+.addressButton {
+  font-size: 0.9rem;
+  padding: 8px 16px;
+}
+
+/* 주소 입력 모달 */
+.addressInputModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.addressInputContent {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  max-width: 500px;
+  width: 90%;
+  text-align: center;
+}
+
+.addressInputContent h4 {
+  margin: 0 0 10px 0;
+  color: #2c3e50;
+  font-size: 1.3rem;
+}
+
+.addressInputContent p {
+  margin: 0 0 20px 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.addressInput {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  margin-bottom: 20px;
+  transition: border-color 0.3s ease;
+}
+
+.addressInput:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.addressInputButtons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.addressForm {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.addressRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.zipCodeInput {
+  flex: 1;
+  padding: 12px 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: #f8f9fa;
+}
+
+.detailAddressInput {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.detailAddressInput:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .locationButtons {
+    flex-direction: column;
+    gap: 8px;
+  }
 }
 
 .categoryFilter {

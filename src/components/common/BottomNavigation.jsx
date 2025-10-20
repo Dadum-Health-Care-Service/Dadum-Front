@@ -9,7 +9,8 @@ import {
   FaCamera,
   FaUtensils,
   FaShoppingBag,
-} from "react-icons/fa"; // ← FaShoppingBag 추가
+  FaMapMarkerAlt,
+} from "react-icons/fa"; // ← FaMapMarkerAlt 추가
 import styles from "./BottomNavigation.module.css";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useContext } from "react";
@@ -24,6 +25,7 @@ const NAVIGATION_TABS = [
   { to: "/calorie", label: "칼로리", icon: FaUtensils },
   { to: "/daily", label: "요약", icon: FaChartBar },
   { to: "/social", label: "소셜", icon: FaComments },
+  { to: "/place", label: "플레이스", icon: FaMapMarkerAlt },
   { to: "/mypage", label: "마이페이지", icon: FaUser },
   { to: "/admin", label: "관리자", icon: FaUser },
 ];

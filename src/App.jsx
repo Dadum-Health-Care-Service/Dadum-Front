@@ -96,6 +96,7 @@ function AppContent() {
                   }
                 ></Route>
                 <Route path="/social" element={<Social />}></Route>
+                <Route path="/place" element={<MapPage />}></Route>
                 <Route path="/mypage/*" element={<MyPage />}></Route>
                 <Route
                   path="/admin"

@@ -74,6 +74,12 @@ export default function GNB({ isMobile }) {
                 >
                   소셜
                 </HeaderComponent.MenuItem>
+                <HeaderComponent.MenuItem
+                  active={isActive("/place")}
+                  onClick={() => navigate("/place")}
+                >
+                  플레이스
+                </HeaderComponent.MenuItem>
                 {user?.roles?.includes("SUPER_ADMIN") ? (
                   <HeaderComponent.MenuItem
                     active={isActive("/admin")}
