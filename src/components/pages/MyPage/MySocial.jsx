@@ -86,8 +86,6 @@ export default function MySocial(){
         if(loading){
             return <div>로딩 중 ...</div>;
         }
-        console.log(postData);
-        console.log(commentData);
         switch(selectedType){
             case "posts":{
                 return (
