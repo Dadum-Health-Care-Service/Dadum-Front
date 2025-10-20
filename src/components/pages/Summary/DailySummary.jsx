@@ -263,23 +263,27 @@ export default function DailySummary() {
         id = await fetchUsersIdFromSTS();
       }
       
+      console.log('[DailySummary] Loading daily data for:', { userId: id, date: d });
       const res = await GET(`/summary/daily?user_id=${id}&date=${d}`, {}, true, 'ai');
       const j = res.data;
+      console.log('[DailySummary] Received data:', j);
       
       if (res.status === 200) {
         setTotals(
           j.totals || { calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0, fiber_g: 0 }
         );
         setMeals(j.meals || []);
+        console.log('[DailySummary] Set meals:', j.meals?.length || 0, 'items');
         setEditGrams({});
         setEditLabel({});
         setDailyText("");
         setSummaryModel("");
         setHealthHint("");
       } else {
-      
+        console.warn('[DailySummary] Unexpected status:', res.status);
       }
     } catch (error) {
+      console.error('[DailySummary] Error loading daily data:', error);
       setTotals({ calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0, fiber_g: 0 });
       setMeals([]);
     } finally {
