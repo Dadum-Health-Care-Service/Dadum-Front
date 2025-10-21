@@ -1,6 +1,8 @@
 // src/components/pages/social/social.jsx
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
+import { Row, Col } from "react-bootstrap";
+import ParticipatedGatheringsSidebar from "./components/ParticipatedGatheringsSidebar";
 import "./social.css";
 
 /* -----------------------------
@@ -189,8 +191,16 @@ export default function Social() {
         </div>
       </div>
 
-      {/* 피드 */}
-      <div className="m-feed">
+      {/* 메인 콘텐츠 */}
+      <Row className="g-4">
+        {/* 왼쪽: 참여한 모임 사이드바 */}
+        <Col lg={4} md={12}>
+          <ParticipatedGatheringsSidebar />
+        </Col>
+
+        {/* 오른쪽: 소셜 피드 */}
+        <Col lg={8} md={12}>
+          <div className="m-feed">
         {filtered.map((p) => (
           <article key={p.id} className="m-card">
             <header className="m-card-head">
@@ -221,7 +231,9 @@ export default function Social() {
             </footer>
           </article>
         ))}
-      </div>
+          </div>
+        </Col>
+      </Row>
 
       {/* 글쓰기 FAB */}
       <button className="compose-fab" type="button" onClick={() => setComposeOpen(true)}>

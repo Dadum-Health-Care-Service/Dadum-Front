@@ -283,6 +283,7 @@ export const useKakaoMap = () => {
     createCurrentPositionMarker,
     getCoordinatesFromAddress,
     getAddressFromCoordinates,
+    convertLocationToAddress,
     initializeLocation,
     setUserAddressLocation
   };
