@@ -1,10 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect, useContext } from 'react';
+import { useApi } from '../../../../utils/api/useApi';
+import { AuthContext } from '../../../../context/AuthContext';
 import ButtonComponent from '../../../common/ButtonComponent';
 import ModalComponent from '../../../common/ModalComponent';
 import styles from './OrderHistory.module.css';
 
 export default function OrderHistory() {
+  console.log("OrderHistory 컴포넌트 렌더링됨");
+  const { GET, DELETE, POST } = useApi();
+  const { user } = useContext(AuthContext);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -18,74 +22,45 @@ export default function OrderHistory() {
   const [additionalInfo, setAdditionalInfo] = useState('');
 
   useEffect(() => {
+    console.log("OrderHistory useEffect 실행됨");
     fetchOrders();
   }, []);
 
   const fetchOrders = async () => {
     try {
-      // 토큰 검사
-      let token = localStorage.getItem('accessToken');
-      const userInfo = localStorage.getItem('user');
-      
-      // user 객체에서 토큰 추출 시도
-      if (!token && userInfo) {
-        try {
-          const user = JSON.parse(userInfo);
-          if (user.accessToken) {
-            token = user.accessToken;
-          }
-        } catch (e) {
-          // 토큰 파싱 실패 시 무시
-        }
-      }
-      
-      if (!token) {
-        console.error('❌ Access Token이 없습니다!');
-        setError('로그인이 필요합니다. (토큰 없음)');
+      // 사용자 로그인 확인
+      if (!user || !user.accessToken) {
+        console.log("사용자가 로그인하지 않음");
+        setOrders([]);
+        setError('');
         setLoading(false);
         return;
       }
 
-      // 토큰 형식 검사
-      if (!token.startsWith('Bearer ') && !token.includes('.')) {
-        console.error('❌ 토큰 형식이 올바르지 않습니다:', token);
-        setError('토큰 형식이 올바르지 않습니다. 다시 로그인해주세요.');
-        setLoading(false);
-        return;
+      // 실제 API 호출 (useApi 사용)
+      console.log("실제 API로 주문 내역 조회 중...");
+      console.log("사용자 정보:", user);
+      console.log("Access Token:", user.accessToken);
+      
+      const response = await GET('/orders', {}, true, 'main');
+      console.log("API 응답:", response);
+      
+      // axios 응답을 직접 처리
+      if (response && response.data) {
+        console.log("응답 데이터:", response.data);
+        // 백엔드 응답 구조에 맞게 수정
+        const ordersData = response.data.orders || response.data || [];
+        setOrders(ordersData);
+        setError('');
+      } else {
+        console.error("API 오류: 응답 데이터가 없습니다");
+        throw new Error('주문 내역 조회 실패');
       }
-
-      const response = await axios.get(
-        'http://localhost:8080/api/v1/payments/user/orders',
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-      setOrders(response.data);
+      
       setLoading(false);
     } catch (error) {
       console.error('❌ 주문 내역 조회 실패:', error);
-      
-      // 에러 상세 정보
-      if (error.response) {
-        console.error('📡 서버 응답:', error.response.status, error.response.data);
-        if (error.response.status === 401) {
-          setError('인증이 만료되었습니다. 다시 로그인해주세요.');
-        } else if (error.response.status === 403) {
-          setError('접근 권한이 없습니다.');
-        } else {
-          setError(`서버 오류: ${error.response.status}`);
-        }
-      } else if (error.request) {
-        console.error('🌐 네트워크 오류:', error.request);
-        setError('서버에 연결할 수 없습니다. 백엔드가 실행 중인지 확인해주세요.');
-      } else {
-        console.error('💻 클라이언트 오류:', error.message);
-        setError('주문 내역을 불러올 수 없습니다.');
-      }
-      
+      setError('주문 내역을 불러오는데 실패했습니다.');
       setLoading(false);
     }
   };
@@ -98,43 +73,22 @@ export default function OrderHistory() {
 
     setLoading(true);
     try {
-      let token = localStorage.getItem('accessToken');
-      if (!token) {
-        const userInfo = localStorage.getItem('user');
-        if (userInfo) {
-          try {
-            const user = JSON.parse(userInfo);
-            if (user.accessToken) {
-              token = user.accessToken;
-            }
-          } catch (e) {
-            console.error('User 객체 파싱 실패:', e);
-          }
-        }
-      }
-      
-      if (!token) {
+      if (!user || !user.accessToken) {
         setError('로그인이 필요합니다.');
         setLoading(false);
         return;
       }
 
-      // 결제 취소 API 호출
-      const response = await axios.delete(
-        `http://localhost:8080/api/v1/payments/${order.merchantUid || order.orderNumber}/cancel`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      // 주문 취소 API 호출 (useApi 사용)
+      const response = await DELETE(`/orders/${order.id}/cancel`, {}, true, 'main');
 
-
-      alert('결제가 성공적으로 취소되었습니다.\n환불은 3-5일 내에 처리됩니다.');
-      
-      // 주문 내역 새로고침
-      fetchOrders();
+      if (response && response.data) {
+        alert('주문이 성공적으로 취소되었습니다.');
+        // 주문 내역 새로고침
+        fetchOrders();
+      } else {
+        throw new Error('주문 취소 실패');
+      }
       
     } catch (error) {
       console.error('결제 취소 실패:', error);
@@ -169,22 +123,7 @@ export default function OrderHistory() {
 
     setLoading(true);
     try {
-      let token = localStorage.getItem('accessToken');
-      if (!token) {
-        const userInfo = localStorage.getItem('user');
-        if (userInfo) {
-          try {
-            const user = JSON.parse(userInfo);
-            if (user.accessToken) {
-              token = user.accessToken;
-            }
-          } catch (e) {
-            console.error('User 객체 파싱 실패:', e);
-          }
-        }
-      }
-      
-      if (!token) {
+      if (!user || !user.accessToken) {
         setError('로그인이 필요합니다.');
         setLoading(false);
         return;
@@ -197,22 +136,22 @@ export default function OrderHistory() {
         additionalInfo: additionalInfo
       };
 
-      // 환불 요청 API 호출
-      const response = await axios.post(
-        `http://localhost:8080/api/v1/payments/${selectedOrder.merchantUid || selectedOrder.orderNumber}/refund`,
+      // 환불 요청 API 호출 (useApi 사용)
+      const response = await POST(
+        `/orders/${selectedOrder.id}/refund`,
         refundRequest,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
+        true,
+        'main'
       );
-      alert('환불 요청이 성공적으로 접수되었습니다.\n검토 후 3-5일 내에 처리됩니다.');
-      
-      // 모달 닫기 및 주문 내역 새로고침
-      closeRefundModal();
-      fetchOrders();
+
+      if (response && response.data) {
+        alert('환불 요청이 성공적으로 접수되었습니다.\n검토 후 3-5일 내에 처리됩니다.');
+        // 모달 닫기 및 주문 내역 새로고침
+        closeRefundModal();
+        fetchOrders();
+      } else {
+        throw new Error('환불 요청 실패');
+      }
       
     } catch (error) {
       console.error('환불 요청 실패:', error);
@@ -284,21 +223,7 @@ export default function OrderHistory() {
               variant="outline" 
               size="small"
               onClick={() => {
-                let token = localStorage.getItem('accessToken');
-                const user = localStorage.getItem('user');
-                
-                // user 객체에서 토큰 추출 시도
-                if (!token && user) {
-                  try {
-                    const userObj = JSON.parse(user);
-                    if (userObj.accessToken) {
-                      token = userObj.accessToken;
-                    }
-                  } catch (e) {
-                    console.error('User 객체 파싱 실패:', e);
-                  }
-                }
-                alert(`직접 토큰: ${localStorage.getItem('accessToken') ? '있음' : '없음'}\n사용자: ${user ? '있음' : '없음'}\n최종 토큰: ${token ? '있음' : '없음'}`);
+                alert(`사용자: ${user ? '있음' : '없음'}\n토큰: ${user?.accessToken ? '있음' : '없음'}\n사용자 ID: ${user?.usersId || '없음'}`);
               }}
               className={styles.debugButton}
             >
@@ -310,20 +235,27 @@ export default function OrderHistory() {
         {/* 주문 내역 */}
         {orders.length === 0 ? (
           <div className={styles.emptyState}>
-            <h4 className={styles.emptyStateTitle}>😔 주문 내역이 없습니다</h4>
-            <p className={styles.emptyStateText}>첫 번째 주문을 시작해보세요!</p>
-            <ButtonComponent 
-              variant="primary" 
-              onClick={() => window.dispatchEvent(new CustomEvent('tabChange', { detail: 'shop' }))}
-              className={styles.shopButton}
-            >
-              쇼핑하러 가기
-            </ButtonComponent>
+            <h4 className={styles.emptyStateTitle}>📋 주문 내역이 없습니다</h4>
+            <p className={styles.emptyStateText}>
+              {!user || !user.accessToken 
+                ? '로그인 후 주문 내역을 확인할 수 있습니다.' 
+                : '아직 주문한 상품이 없습니다. 첫 번째 주문을 시작해보세요!'
+              }
+            </p>
+            {user && user.accessToken && (
+              <ButtonComponent 
+                variant="primary" 
+                onClick={() => window.location.href = '/shop'}
+                className={styles.shopButton}
+              >
+                쇼핑하러 가기
+              </ButtonComponent>
+            )}
           </div>
         ) : (
           <div className={styles.ordersGrid}>
-            {orders.map((order) => (
-              <div key={order.orderId} className={styles.orderCard}>
+            {Array.isArray(orders) && orders.map((order) => (
+              <div key={order.id} className={styles.orderCard}>
                 <div className={styles.orderCardHeader}>
                   <span className={styles.orderNumber}>주문번호</span>
                   <span>{order.orderNumber}</span>

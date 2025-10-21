@@ -1,22 +1,30 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../../context/AuthContext";
 import HeaderComponent from "../../common/HeaderComponent";
 import ButtonComponent from "../../common/ButtonComponent";
 import BottomNavigation from "../../common/BottomNavigation";
+import NotificationDot from "../../common/NotificationDot";
 import Chatbot from "../Chatbot/Chatbot";
+import { RunContext } from "../../../context/RunContext";
+import TotalTimer from "../../common/TotalTimer";
 
-export default function GNB({ isMobile }) {
+export default function GNB({ isMobile, isNotify }) {
   const { user, dispatch } = useContext(AuthContext);
+  const { isRunning, seconds } = useContext(RunContext);
   const navigate = useNavigate();
   const location = useLocation();
-
+  console.log("isNotify", isNotify, isNotify === "REQUEST_ROLE");
   const isActive = (pathname) => location.pathname === pathname;
 
   const handleLogoutClick = (e) => {
     e.preventDefault();
     dispatch({ type: "LOGOUT" });
   };
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   return (
     <>
@@ -35,6 +43,23 @@ export default function GNB({ isMobile }) {
 
             <HeaderComponent.Section>
               <HeaderComponent.Navigation>
+                <HeaderComponent.MenuItem>
+                  {isRunning && (
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                      }}
+                    >
+                      <img
+                        src={"/img/RunningRoutine.gif"}
+                        style={{ width: "30px", height: "30px" }}
+                      />
+                      <TotalTimer seconds={seconds} type="DETAIL" />
+                    </div>
+                  )}
+                </HeaderComponent.MenuItem>
                 <HeaderComponent.MenuItem
                   active={isActive("/routine")}
                   onClick={() => navigate("/routine")}
@@ -83,9 +108,12 @@ export default function GNB({ isMobile }) {
                 {user?.roles?.includes("SUPER_ADMIN") ? (
                   <HeaderComponent.MenuItem
                     active={isActive("/admin")}
-                    onClick={() => navigate("/admin")}
+                    onClick={() => {
+                      navigate("/admin");
+                    }}
+                    style={{ position: "relative" }}
                   >
-                    관리자
+                    관리자{isNotify && <NotificationDot />}
                   </HeaderComponent.MenuItem>
                 ) : (
                   <HeaderComponent.MenuItem
@@ -108,7 +136,7 @@ export default function GNB({ isMobile }) {
         )}
 
         {/* 모바일 환경에서만 하단 네비게이션 표시 */}
-        {isMobile && <BottomNavigation />}
+        {isMobile && <BottomNavigation isNotify={isNotify} />}
 
         {/* 플로팅 챗봇 - 모든 페이지에서 사용 가능 */}
         <Chatbot

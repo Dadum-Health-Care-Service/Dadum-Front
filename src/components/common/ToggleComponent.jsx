@@ -1,14 +1,23 @@
 import { useState } from "react";
 import styles from "./ToggleComponent.module.css";
+import NotificationDot from "./NotificationDot";
 
 export default function ToggleComponent({
   content,
   variant = "primary",
+  isNotify = false,
+  viewNotify = null,
+  notifyIndex = -1,
+  onChange = null,
   children,
 }) {
   const [active, setActive] = useState(0);
   const handleClick = (index) => {
     setActive(index);
+    if (index === notifyIndex) {
+      viewNotify(false);
+    }
+    if (onChange) onChange(index);
   };
 
   const getVariantClass = () => {
@@ -34,6 +43,7 @@ export default function ToggleComponent({
               onClick={() => handleClick(index)}
             >
               {item}
+              {isNotify && notifyIndex === index && <NotificationDot />}
             </button>
           ))}
         </div>

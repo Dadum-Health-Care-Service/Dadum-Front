@@ -1,14 +1,27 @@
 import React, { useState, useRef } from 'react';
 import ButtonComponent from '../../common/ButtonComponent';
+import ModalComponent from '../../common/ModalComponent';
+import CardComponent from '../../common/CardComponent';
+import ContainerComponent from '../../common/ContainerComponent';
+import { useApi } from '../../../utils/api/useApi';
+import { useAuth } from '../../../context/AuthContext';
+import styles from './CalorieCam.module.css';
 
 const CalorieCam = () => {
   console.log("CalorieCam 컴포넌트가 렌더링되었습니다!");
   
+  const { POST } = useApi();
+  const { user } = useAuth();
+  
+  // ML 서버 베이스 URL 설정 (DailySummary와 동일)
+  const ML_BASE = import.meta.env.VITE_API_URL || "/ml";
   const [imageFile, setImageFile] = useState(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState('');
   const [analysisResult, setAnalysisResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [saveMessage, setSaveMessage] = useState('');
   const fileInputRef = useRef(null);
 
   const handleFileChange = (e) => {
@@ -37,8 +50,16 @@ const CalorieCam = () => {
     }
   };
 
+  const closeSaveModal = () => {
+    setShowSaveModal(false);
+    setSaveMessage('');
+  };
+
   const analyzeImage = async () => {
-    if (!imageFile) return;
+    if (!imageFile) {
+      setErrorMsg('이미지를 먼저 업로드해주세요.');
+      return;
+    }
 
     setIsLoading(true);
     setErrorMsg('');
@@ -46,32 +67,19 @@ const CalorieCam = () => {
 
     try {
       const formData = new FormData();
-      formData.append('file', imageFile); // 'image' 대신 'file' 사용
-      formData.append('assume_grams', '200'); // 기본 그램 수
-      formData.append('gramsBoost', '1.0'); // 그램 부스트
-
-      console.log('분석 요청 시작...');
+      formData.append('file', imageFile);
+      formData.append('assume_grams', '200');
+      formData.append('gramsBoost', '1.0');
+      
+      console.log('이미지 분석 요청 시작...');
       console.log('FormData 내용:', {
         file: imageFile.name,
         assume_grams: '200',
         gramsBoost: '1.0'
       });
       
-      const response = await fetch('/ml/analyze', {
-        method: 'POST',
-        body: formData,
-      });
-
-      console.log('응답 상태:', response.status);
-      console.log('응답 헤더:', Object.fromEntries(response.headers.entries()));
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('에러 응답:', errorText);
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
+      const response = await POST('/analyze', formData, false, 'ai');
+      const result = response.data;
       console.log('분석 결과:', result);
       
       // 원래 백엔드 응답 형식에 맞게 변환
@@ -108,7 +116,31 @@ const CalorieCam = () => {
       
     } catch (error) {
       console.error('분석 중 오류 발생:', error);
-      setErrorMsg('이미지 분석 중 오류가 발생했습니다. 다시 시도해주세요.');
+      console.error('오류 상세:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        config: error.config,
+        isFoodNameSearch: !!foodName
+      });
+      
+      let errorMessage = foodName 
+        ? '음식 정보를 불러오는 중 오류가 발생했습니다. 다시 시도해주세요.'
+        : '이미지 분석 중 오류가 발생했습니다. 다시 시도해주세요.';
+      
+      if (error.response?.status === 413) {
+        errorMessage = '이미지 파일이 너무 큽니다. 더 작은 이미지를 선택해주세요.';
+      } else if (error.response?.status === 400) {
+        errorMessage = foodName
+          ? '해당 음식 정보를 찾을 수 없습니다. 다른 음식을 선택해주세요.'
+          : '이미지 형식이 올바르지 않습니다. JPG, PNG 형식의 이미지를 선택해주세요.';
+      } else if (error.response?.status === 500) {
+        errorMessage = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+      } else if (error.code === 'NETWORK_ERROR') {
+        errorMessage = '네트워크 연결을 확인해주세요.';
+      }
+      
+      setErrorMsg(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -117,8 +149,17 @@ const CalorieCam = () => {
   // 자동 저장 함수 (원래 로직)
   const saveMealLogAutomatically = async (analysisData) => {
     try {
+      // 사용자 ID 가져오기
+      let userId = user?.usersId || localStorage.getItem("usersId");
+      if (!userId) {
+        console.error('사용자 ID를 찾을 수 없습니다.');
+        setSaveMessage('사용자 정보를 찾을 수 없습니다. 다시 로그인해주세요.');
+        setShowSaveModal(true);
+        return;
+      }
+
       const mealLogData = {
-        user_id: 'demo',
+        user_id: String(userId),
         timestamp: new Date().toISOString(),
         label: analysisData.label,
         grams: Math.round(analysisData.grams),
@@ -126,252 +167,245 @@ const CalorieCam = () => {
         protein_g: Math.round(analysisData.protein_g * 10) / 10,
         carbs_g: Math.round(analysisData.carbs_g * 10) / 10,
         fat_g: Math.round(analysisData.fat_g * 10) / 10,
-        fiber_g: Math.round(analysisData.fiber_g * 10) / 10,
-        meta: analysisData.meta
+        fiber_g: Math.round(analysisData.fiber_g * 10) / 10
       };
 
-      console.log('자동 저장 시작:', mealLogData);
+      console.log('[CalorieCam] 자동 저장 시작:', mealLogData);
 
-      const response = await fetch('/ml/meal-log', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(mealLogData),
-      });
-
-      if (response.ok) {
-        const savedMeal = await response.json();
-        console.log('식사 로그 자동 저장 완료:', savedMeal);
-        alert(`식사 정보가 자동으로 저장되었습니다!\n음식: ${savedMeal.label}\n칼로리: ${savedMeal.calories}kcal`);
-      } else {
-        const errorData = await response.json();
-        console.error('자동 저장 실패:', errorData);
-        alert('자동 저장에 실패했습니다. 수동으로 저장해주세요.');
-      }
+      const response = await POST('/meal-log', mealLogData, true, 'ai');
+      const savedMeal = response.data;
+      console.log('[CalorieCam] 식사 로그 자동 저장 완료:', savedMeal);
+      setSaveMessage(`식사 정보가 저장되었습니다!\n음식: ${savedMeal.label}\n칼로리: ${savedMeal.calories}kcal`);
+      setShowSaveModal(true);
     } catch (error) {
-      console.error('자동 저장 중 오류:', error);
-      alert('자동 저장 중 오류가 발생했습니다. 수동으로 저장해주세요.');
-    }
-  };
-
-  const saveMealData = async () => {
-    if (!analysisResult) return;
-
-    try {
-      // analysisResult에서 원본 분석 데이터를 추출
-      const originalData = analysisResult.meta?.originalAnalysis || {
-        calories: analysisResult.calories,
-        protein_g: parseFloat(analysisResult.nutrients['단백질'].replace('g', '')),
-        carbs_g: parseFloat(analysisResult.nutrients['탄수화물'].replace('g', '')),
-        fat_g: parseFloat(analysisResult.nutrients['지방'].replace('g', '')),
-        fiber_g: parseFloat(analysisResult.nutrients['식이섬유'].replace('g', ''))
-      };
-
-      const mealLogData = {
-        user_id: 'demo',
-        timestamp: new Date().toISOString(),
-        label: analysisResult.foodName,
-        grams: analysisResult.grams,
-        calories: originalData.calories,
-        protein_g: originalData.protein_g,
-        carbs_g: originalData.carbs_g,
-        fat_g: originalData.fat_g,
-        fiber_g: originalData.fiber_g,
-        meta: analysisResult.meta
-      };
-
-      console.log('수동 저장 시작:', mealLogData);
-
-      const response = await fetch('/ml/meal-log', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(mealLogData),
-      });
-
-      if (response.ok) {
-        const savedMeal = await response.json();
-        console.log('식사 로그 수동 저장 완료:', savedMeal);
-        alert(`식사 정보가 저장되었습니다!\n음식: ${savedMeal.label}\n칼로리: ${savedMeal.calories}kcal`);
-      } else {
-        const errorData = await response.json();
-        console.error('수동 저장 실패:', errorData);
-        alert(`저장 실패: ${errorData?.detail || response.statusText}`);
-      }
-    } catch (error) {
-      console.error('저장 중 오류:', error);
-      alert('식사 정보 저장 중 오류가 발생했습니다.');
+      console.error('[CalorieCam] 자동 저장 중 오류:', error);
+      setSaveMessage('저장 중 오류가 발생했습니다. 다시 시도해주세요.');
+      setShowSaveModal(true);
     }
   };
 
   return (
-    <div className="container py-5">
-      <div className="row justify-content-center">
-        <div className="col-md-8">
-          <div className="text-center mb-4">
-            <h2 className="fw-bold text-primary mb-2">
-              칼로리 캠
-            </h2>
-            <p className="text-muted">음식 사진을 찍어서 칼로리와 영양소를 분석해보세요</p>
-          </div>
+    <div className={styles.calorieCamPage}>
 
-          <div className="card shadow-sm mb-4">
-            <div className="card-body text-center p-5">
-              {!imagePreviewUrl ? (
-                <div>
-                  <h5 className="text-muted mb-4">음식 사진을 업로드하세요</h5>
-                  <ButtonComponent 
-                    variant="primary"
-                    size="lg"
-                    onClick={handleUploadClick}
-                  >
-                    사진 업로드
-                  </ButtonComponent>
-                </div>
-              ) : (
-                <div>
-                  <img
-                    src={imagePreviewUrl}
-                    alt="업로드된 음식"
-                    className="img-fluid rounded mb-3"
-                    style={{ maxHeight: "300px", objectFit: "cover" }}
-                  />
-                  <div className="d-flex gap-2 justify-content-center">
-                    <ButtonComponent 
-                      variant="outline-secondary"
-                      onClick={resetImage}
-                    >
-                      다른 사진 선택
-                    </ButtonComponent>
-                    <ButtonComponent 
-                      variant="success"
-                      onClick={analyzeImage}
-                      disabled={isLoading}
-                    >
-                      {isLoading ? '분석 중...' : '분석하기'}
-                    </ButtonComponent>
-                  </div>
-                </div>
-              )}
+      {/* Main Content */}
+      <div className={styles.mainContent}>
+        {/* AI Tag */}
+        <div className={styles.aiTag}>
+          <span>칼로리 기록</span>
+        </div>
 
-              {/* 숨겨진 파일 입력 */}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                style={{ display: "none" }}
-                onChange={handleFileChange}
-              />
+        {/* Main Headline */}
+        <h1 className={styles.mainHeadline}>
+          음식 사진으로 <span className={styles.highlight}>칼로리</span>를 쉽게 기록
+        </h1>
+
+        {/* Description */}
+        <p className={styles.description}>
+          사진을 업로드하고 분석 결과를 확인하여 건강한 식습관을 관리하세요
+        </p>
+
+        {/* Upload Section */}
+        <ContainerComponent 
+          variant="outlined" 
+          className={styles.uploadContainer}
+          onClick={handleUploadClick}
+        >
+          {!imagePreviewUrl ? (
+            <div className={styles.uploadArea}>
+              <div className={styles.uploadIcon}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 14L12 9L17 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M12 9V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <h3 className={styles.uploadTitle}>음식 사진을 업로드하세요</h3>
+              <p className={styles.uploadSubtitle}>드래그 앤 드롭 또는 클릭하여 선택</p>
+              <ButtonComponent 
+                variant="primary"
+                size="large"
+                className={styles.selectButton}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleUploadClick();
+                }}
+              >
+                사진 선택
+              </ButtonComponent>
             </div>
-          </div>
-
-          {/* 로딩 상태 */}
-          {isLoading && (
-            <div className="card shadow-sm mb-4">
-              <div className="card-body text-center py-4">
-                <div className="spinner-border text-primary mb-3" role="status">
-                  <span className="visually-hidden">로딩 중...</span>
-                </div>
-                <p className="text-muted">이미지를 분석하고 있습니다...</p>
+          ) : (
+            <div className={styles.imagePreview}>
+              <img
+                src={imagePreviewUrl}
+                alt="업로드된 음식"
+                className={styles.previewImage}
+              />
+              <div className={styles.imageActions}>
+                <ButtonComponent 
+                  variant="outline"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleUploadClick();
+                  }}
+                >
+                  다른 사진 선택
+                </ButtonComponent>
+                <ButtonComponent 
+                  variant="primary"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    analyzeImage();
+                  }}
+                  disabled={isLoading}
+                >
+                  {isLoading ? '분석 중...' : '음식 분석하기'}
+                </ButtonComponent>
               </div>
             </div>
           )}
 
-          {/* 에러 메시지 */}
-          {errorMsg && (
-            <div className="alert alert-danger mb-4">
+          {/* Hidden file input */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: "none" }}
+            onChange={handleFileChange}
+          />
+        </ContainerComponent>
+
+        {/* Loading State */}
+        {isLoading && (
+          <ContainerComponent variant="default" className={styles.loadingContainer}>
+            <div className={styles.loadingContent}>
+              <div className={styles.spinner}></div>
+              <p>음식 정보를 분석하고 있습니다...</p>
+            </div>
+          </ContainerComponent>
+        )}
+
+        {/* Error Message */}
+        {errorMsg && (
+          <ContainerComponent variant="outlined" className={styles.errorContainer}>
+            <div className={styles.errorContent}>
               <strong>오류:</strong> {errorMsg}
             </div>
-          )}
+          </ContainerComponent>
+        )}
 
-          {/* 분석 결과 */}
-          {analysisResult && (
-            <div className="card shadow-sm mb-4">
-              <div className="card-body">
-                <h5 className="fw-bold mb-3">분석 결과</h5>
-                
-                <div className="row g-3 mb-3">
-                  <div className="col-md-4">
-                    <div className="bg-light p-3 rounded">
-                      <h6 className="text-primary mb-2">음식명</h6>
-                      <p className="mb-0 fw-bold">{analysisResult.foodName}</p>
-                    </div>
-                  </div>
-                  <div className="col-md-4">
-                    <div className="bg-light p-3 rounded">
-                      <h6 className="text-primary mb-2">칼로리</h6>
-                      <p className="mb-0 fw-bold">{analysisResult.calories} kcal</p>
-                    </div>
-                  </div>
-                  <div className="col-md-4">
-                    <div className="bg-light p-3 rounded">
-                      <h6 className="text-primary mb-2">예상 중량</h6>
-                      <p className="mb-0 fw-bold">{analysisResult.grams}g</p>
-                    </div>
-                  </div>
-                </div>
-
-                {analysisResult.confidence && (
-                  <div className="mb-3">
-                    <div className="bg-info bg-opacity-10 p-2 rounded">
-                      <small className="text-muted">AI 신뢰도: {(analysisResult.confidence * 100).toFixed(1)}%</small>
-                    </div>
-                  </div>
-                )}
-
-                {analysisResult.nutrients && (
-                  <div className="mb-3">
-                    <h6 className="text-primary mb-2">영양소 정보</h6>
-                    <div className="row g-2">
-                      {Object.entries(analysisResult.nutrients).map(([key, value]) => (
-                        <div key={key} className="col-6 col-md-4">
-                          <div className="bg-light p-2 rounded text-center">
-                            <small className="text-muted d-block">{key}</small>
-                            <span className="fw-bold">{value}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {analysisResult.alternatives && analysisResult.alternatives.length > 0 && (
-                  <div className="mb-3">
-                    <h6 className="text-primary mb-2">대안 음식</h6>
-                    <div className="d-flex flex-wrap gap-2">
-                      {analysisResult.alternatives.map((alt, index) => (
-                        <span key={index} className="badge bg-secondary">
-                          {alt}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="text-center mt-4">
-                  <ButtonComponent 
-                    variant="primary"
-                    onClick={saveMealData}
-                  >
-                    식사 정보 저장
-                  </ButtonComponent>
-                </div>
+        {/* Analysis Result */}
+        {analysisResult && (
+          <ContainerComponent variant="default" className={styles.resultContainer}>
+            <h3 className={styles.resultTitle}>분석 결과</h3>
+            
+            <div className={styles.resultGrid}>
+              <div className={styles.resultItem}>
+                <h4>음식명</h4>
+                <p>{analysisResult.foodName}</p>
+              </div>
+              <div className={styles.resultItem}>
+                <h4>칼로리</h4>
+                <p>{analysisResult.calories} kcal</p>
+              </div>
+              <div className={styles.resultItem}>
+                <h4>예상 중량</h4>
+                <p>{analysisResult.grams}g</p>
               </div>
             </div>
-          )}
 
-          <div className="alert alert-info">
-            <h6 className="alert-heading">💡 사용 방법</h6>
-            <ul className="mb-0">
-              <li>음식이 잘 보이도록 사진을 찍어주세요</li>
-              <li>조명이 충분한 곳에서 촬영하면 더 정확합니다</li>
-              <li>한 번에 하나의 음식만 분석할 수 있습니다</li>
-            </ul>
+            {analysisResult.nutrients && (
+              <div className={styles.nutrients}>
+                <h4>영양소 정보</h4>
+                <div className={styles.nutrientGrid}>
+                  {Object.entries(analysisResult.nutrients).map(([key, value]) => (
+                    <div key={key} className={styles.nutrientItem}>
+                      <small>{key}</small>
+                      <span>{value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </ContainerComponent>
+        )}
+
+        {/* Features Section */}
+        <div className={styles.featuresSection}>
+          <h2 className={styles.sectionTitle}>주요 기능</h2>
+          <div className={styles.featuresGrid}>
+            <CardComponent className={styles.featureCard}>
+              <h3>쉬운 확인</h3>
+              <p>사진을 업로드하고 간단하게 칼로리를 확인할 수 있습니다</p>
+            </CardComponent>
+            <CardComponent className={styles.featureCard}>
+              <h3>상세한 기록</h3>
+              <p>칼로리, 단백질, 탄수화물, 지방 등 상세한 정보를 기록합니다</p>
+            </CardComponent>
+            <CardComponent className={styles.featureCard}>
+              <h3>건강 추적</h3>
+              <p>일일 섭취량을 기록하고 건강한 식습관을 관리하세요</p>
+            </CardComponent>
+          </div>
+        </div>
+
+        {/* How to Use Section */}
+        <div className={styles.howToUseSection}>
+          <h2 className={styles.sectionTitle}>사용 방법</h2>
+          <div className={styles.stepsGrid}>
+            <CardComponent className={styles.stepCard}>
+              <div className={styles.stepNumber}>1</div>
+              <h3>음식 사진 촬영</h3>
+              <p>기록하고 싶은 음식의 사진을 명확하게 촬영해주세요</p>
+            </CardComponent>
+            
+            <CardComponent className={styles.stepCard}>
+              <div className={styles.stepNumber}>2</div>
+              <h3>결과 확인</h3>
+              <p>분석된 칼로리와 영양소를 확인하고 건강 목표를 관리하세요</p>
+            </CardComponent>
           </div>
         </div>
       </div>
+
+      {/* Save Complete Modal */}
+      <ModalComponent
+        isOpen={showSaveModal}
+        onClose={closeSaveModal}
+        title="저장 완료"
+        size={ModalComponent.SIZES.SMALL}
+        variant={ModalComponent.VARIANTS.LIGHT}
+        closeOnOverlayClick={true}
+      >
+        <ModalComponent.Section>
+          <div style={{ textAlign: 'center', padding: '20px 0' }}>
+            <div style={{ 
+              fontSize: '48px', 
+              marginBottom: '16px',
+              color: '#28a745'
+            }}>
+              ✓
+            </div>
+            <p style={{ 
+              fontSize: '16px', 
+              color: '#666', 
+              margin: '0 0 10px 0',
+              lineHeight: '1.5',
+              whiteSpace: 'pre-line'
+            }}>
+              {saveMessage}
+            </p>
+          </div>
+        </ModalComponent.Section>
+        <ModalComponent.Actions align="center">
+          <ButtonComponent
+            variant="primary"
+            size="medium"
+            onClick={closeSaveModal}
+          >
+            확인
+          </ButtonComponent>
+        </ModalComponent.Actions>
+      </ModalComponent>
     </div>
   );
 };

@@ -1,88 +1,39 @@
-// src/pages/DailySummary.jsx
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import ButtonComponent from "../../common/ButtonComponent";
+import ModalComponent from "../../common/ModalComponent";
+import ContainerComponent from "../../common/ContainerComponent";
+import { useApi } from "../../../utils/api/useApi";
+import { useAuth } from "../../../context/AuthContext";
+import ActivityStats from "./components/ActivityStats";
+import NutritionStats from "./components/NutritionStats";
+import WatchDetails from "./components/WatchDetails";
+import MealDetails from "./components/MealDetails";
 import "./DailySummary.css";
 
-/**
- *  전역 axios 설정
- * - 스프링 세션/쿠키 인증을 쓰는 경우 필요한 옵션
- * - 필요 없으면 이 줄 삭제해도 됩니다.
- */
-axios.defaults.withCredentials = true;
-
-/**
- *  ML 서버 베이스
- * - dev: Vite 프록시를 이용해 /ml → 127.0.0.1:8000 로 라우팅
- * - prod: VITE_API_URL 환경변수 사용
- */
-const ML_BASE = import.meta.env.VITE_API_URL || "/ml";
 const SUMMARY_MODEL = import.meta.env.VITE_SUMMARY_MODEL || "llm"; 
-
-/**
- *  ML 서버에서 쓰는 user_id (식단 저장용)
- * - 로그인 연동 전까지는 임시로 demo 사용
- */
-const USER_ID = "demo";
-
-/* ----------------- 유틸 ----------------- */
 const fmtDate = (d) => d.toISOString().slice(0, 10);
 const addDays = (d, n) => {
   const x = new Date(d);
   x.setDate(x.getDate() + n);
   return x;
 };
-
-/* -----------------  더미 유저 하드코딩 유틸 -----------------
- * - 이미 localStorage에 값이 있으면 그대로 둠 (덮어쓰지 않음)
- */
-const ensureDummyUser = () => {
-  const DUMMY_USERS_ID = "21";             
-  const DUMMY_EMAIL   = "test@test.com";   
-
-  if (!localStorage.getItem("usersId") && DUMMY_USERS_ID) {
-    localStorage.setItem("usersId", DUMMY_USERS_ID);
-  }
-  if (!localStorage.getItem("email") && DUMMY_EMAIL) {
-    localStorage.setItem("email", DUMMY_EMAIL);
-  }
-};
-
-
-/* -----------------  백엔드 응답 → 화면용 정규화 -----------------
- * 백엔드가 stepData/heartRateData/distanceWalked 등으로 내려줄 때
- * 화면에서 쓰는 키(recordTime, steps, caloriesKcal, distanceKm, heartRateAvg, id)로 변환
- */
 const normalizeHealthItems = (rawArr = [], usersIdForKey = "u") => {
   if (!Array.isArray(rawArr)) return [];
 
   return rawArr.map((x, idx) => {
-    // steps: 배열 합 or 단일 값
     const steps = Array.isArray(x.stepData)
       ? x.stepData.reduce((a, b) => a + Number(b || 0), 0)
       : Number(x.steps ?? 0);
 
-    // 심박: 배열 평균 or 단일 값
     const hrArr = Array.isArray(x.heartRateData) ? x.heartRateData : [];
     const heartRateAvg = hrArr.length
-      ? Math.round(
-          hrArr.reduce((a, b) => a + Number(b?.bpm || 0), 0) / hrArr.length
-        )
+      ? Math.round(hrArr.reduce((a, b) => a + Number(b?.bpm || 0), 0) / hrArr.length)
       : Number(x.heartRateAvg ?? 0);
 
-    // 기록 시각: 심박 첫 타임스탬프 or 기존 값
     const recordTime = hrArr[0]?.time || x.recordTime || null;
-
-    // 칼로리/거리: 다양한 키 대응
-    const caloriesKcal = Number(
-      x.caloriesBurnedData ?? x.activeCaloriesBurned ?? x.calories ?? 0
-    );
+    const caloriesKcal = Number(x.caloriesBurnedData ?? x.activeCaloriesBurned ?? x.calories ?? x.caloriesKcal ?? 0);
     const distanceKm = Number(x.distanceWalked ?? x.distanceKm ?? 0);
-
-    // React key 경고 방지용 id
-    const id =
-      x.id ??
-      (recordTime ? `${usersIdForKey}-${recordTime}-${idx}` : `${usersIdForKey}-${idx}`);
+    const id = x.id ?? (recordTime ? `${usersIdForKey}-${recordTime}-${idx}` : `${usersIdForKey}-${idx}`);
 
     return {
       id,
@@ -96,10 +47,23 @@ const normalizeHealthItems = (rawArr = [], usersIdForKey = "u") => {
   });
 };
 
+// 중복 제거 유틸리티 (recordTime+steps+distance 기준)
+const dedupeHealthItems = (items = []) => {
+  const seen = new Set();
+  const unique = [];
+  for (const it of items) {
+    const key = [it.recordTime || '', it.steps || 0, it.distanceKm || 0, it.caloriesKcal || 0].join('|');
+    if (!seen.has(key)) {
+      seen.add(key);
+      unique.push(it);
+    }
+  }
+  return unique;
+};
 
-/* ----------------- 컴포넌트 ----------------- */
 export default function DailySummary() {
-  // 날짜/요약/합계/목록
+  const { GET, POST, PUT, DELETE } = useApi();
+  const { user } = useAuth();
   const [date, setDate] = useState(() => fmtDate(new Date()));
   const [totals, setTotals] = useState({
     calories: 0,
@@ -110,36 +74,44 @@ export default function DailySummary() {
   });
   const [meals, setMeals] = useState([]);
   const [loading, setLoading] = useState(false);
-
-  // 편집 상태
   const [editGrams, setEditGrams] = useState({});
   const [editLabel, setEditLabel] = useState({});
-
-  // 문장 요약/모델
+  const [selectedMeals, setSelectedMeals] = useState([]);
   const [dailyText, setDailyText] = useState("");
   const [summaryModel, setSummaryModel] = useState("");
-
-  // 건강지표 요약 텍스트
   const [healthHint, setHealthHint] = useState("");
-
-  // STS(스프링) 쪽 usersId (워치/건강데이터용)
   const [usersId, setUsersId] = useState("");
   const [healthItems, setHealthItems] = useState([]);
+  const [healthHints, setHealthHints] = useState([]);
   const [showDetails, setShowDetails] = useState(false);
+  const [showNoDataModal, setShowNoDataModal] = useState(false);
+  const [noDataModalType, setNoDataModalType] = useState('server'); 
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteMealId, setDeleteMealId] = useState(null);
+  const [showAlertModal, setShowAlertModal] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState("success");
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [saveMealId, setSaveMealId] = useState(null);
+  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
+  
+  useEffect(() => {
+  }, [showNoDataModal]);
 
-  /* ---------- helpers ---------- */
+  useEffect(() => {
+    if (user?.usersId && !usersId) {
+      setUsersId(String(user.usersId));
+    }
+  }, [user, usersId]);
+
   const findById = (id) => meals.find((m) => m.id === id) || {};
-
-  // 워치 데이터를 LLM 분석용으로 정리
   const prepareWatchDataForLLM = (items = []) => {
     if (!items || items.length === 0) return null;
     
-    // 최근 데이터 집계
     const totalSteps = items.reduce((sum, item) => sum + Number(item.steps || 0), 0);
     const totalCalories = items.reduce((sum, item) => sum + Number(item.caloriesKcal || 0), 0);
     const totalDistance = items.reduce((sum, item) => sum + Number(item.distanceKm || 0), 0);
     
-    // 심박수 평균 계산
     const heartRates = items
       .map(item => Number(item.heartRateAvg || 0))
       .filter(hr => hr > 0);
@@ -147,8 +119,8 @@ export default function DailySummary() {
       ? Math.round(heartRates.reduce((a, b) => a + b, 0) / heartRates.length)
       : 0;
     
-    // 최신 기록 시간
     const latestRecord = items[0]?.recordTime ? new Date(items[0].recordTime).toLocaleString() : null;
+    
     
     return {
       totalSteps,
@@ -157,77 +129,95 @@ export default function DailySummary() {
       avgHeartRate,
       latestRecord,
       dataCount: items.length,
-      // LLM이 이해하기 쉬운 형태로 변환
-      summary: `오늘 총 걸음수: ${totalSteps.toLocaleString()}보, 소모 칼로리: ${totalCalories}kcal, 이동거리: ${totalDistance.toFixed(1)}km, 평균 심박수: ${avgHeartRate}bpm`
+      summary: `오늘 총 걸음수: ${totalSteps.toLocaleString()}보, 소모 칼로리: ${totalCalories}kcal, 이동거리: ${totalDistance.toFixed(1)}km, 평균 심박수: ${avgHeartRate}bpm`,
+      // LLM이 질병 발병 가능성과 운동 추천을 할 수 있도록 더 자세한 정보 제공
+      activityLevel: totalSteps >= 10000 ? "high" : totalSteps >= 5000 ? "moderate" : "low",
+      heartRateStatus: avgHeartRate > 100 ? "elevated" : avgHeartRate > 60 ? "normal" : "low",
+      calorieBurnStatus: totalCalories > 800 ? "high" : totalCalories > 400 ? "moderate" : "low"
     };
   };
 
-  /* ---------- STS에서 usersId 읽기 ---------- */
-  /**
-   * 아래 엔드포인트는 예시입니다.
-   * 실제 사용하는 스프링 API로 바꿔주세요.
-   *   - 예시1) /api/v1/users/me  (현재 로그인 유저)
-   *   - 예시2) /api/v1/health/{username 또는 usersId}
-   *
-   * Vite 프록시를 쓰고 있다면 'http://localhost:8080' 대신
-   * 프론트에서 '/api/...'로 호출해도 됩니다.
-   */
+  // API functions
   const fetchUsersIdFromSTS = async () => {
     try {
+      
+      if (user?.usersId) {
+        setUsersId(String(user.usersId));
+        return String(user.usersId);
+      }
+
+      
       const savedEmail =
         localStorage.getItem("usersEmail") || localStorage.getItem("email");
       if (savedEmail) {
-        const res = await axios.get(
-          `/api/v1/users/email/${encodeURIComponent(savedEmail)}`
+        const res = await GET(
+          `/users/email/${encodeURIComponent(savedEmail)}`,
+          {},
+          true,
+          'main'
         );
-        console.log("[STS users email] res:", res); // 사용자 응답 전체 확인
-        const id = res?.data?.usersId ?? res?.data?.id; // DTO 키가 usersId
+        const id = res?.data?.usersId ?? res?.data?.id;
         if (id) {
           setUsersId(String(id));
           return String(id);
         }
       }
     } catch (e) {
-      console.warn("usersId 조회 실패:", e?.response?.data || e.message);
     }
-    // 이메일이 없거나 조회 실패 시 빈 문자열 반환(데모 호출로 인한 401 회피)
+    
     setUsersId("");
     return "";
   };
 
-  // Dadum-Back에서 건강데이터 바로 불러오기(프록시 사용)
+  
   const fetchHealthDirect = async (id) => {
     if (!id) return;
+    
+    if (healthItems.length > 0) {
+      return;
+    }
+    
     try {
-      const res = await axios.get(`/api/v1/health/${id}`);
-      console.log(res)
+      const startTime = Date.now();
+      
+      const res = await GET(`/health/${id}`, {}, true, 'main');
+      
+      const endTime = Date.now();
+      
       const arr = Array.isArray(res.data) ? res.data : [];
-      // [ADD] 백엔드 스키마를 화면용으로 정규화 (가능하면 정규화 사용, 아니면 원본 유지)
       const normalized = normalizeHealthItems(arr, String(id));
-      setHealthItems(normalized.length ? normalized : arr); // [ADD]
+      const unique = dedupeHealthItems(normalized.length ? normalized : arr);
+      setHealthItems(unique);
     } catch (e) {
-      console.warn("health GET 실패:", e?.response?.data || e.message);
-      setHealthItems([]);
+      if (e?.response?.status === 500) {
+        // 서버 데이터베이스 연결 오류
+        setNoDataModalType('server');
+      } else {
+        // 기타 오류 (네트워크 등)
+        setNoDataModalType('server');
+      }
+      setShowNoDataModal(true);
     }
   };
 
-  // 직접 배열을 반환하는 raw fetch (요약 생성 시 동기 계산용)
+  
+
   const fetchHealthRaw = async (id) => {
     if (!id) return [];
     try {
-      const res = await axios.get(`/api/v1/health/${id}`);
+      const res = await GET(`/health/${id}`, {}, true, 'main');
       const arr = Array.isArray(res.data) ? res.data : [];
-      //  요약 계산도 정규화된 데이터를 사용
       const normalized = normalizeHealthItems(arr, String(id));
-      return normalized.length ? normalized : arr; // [ADD]
+      const unique = dedupeHealthItems(normalized.length ? normalized : arr);
+      return unique;
     } catch (e) {
-      console.warn("health GET 실패:", e?.response?.data || e.message);
+      if (e?.response?.status === 500) {
+        return [];
+      }
       return [];
     }
   };
 
-
-  // 워치 정보 표시: usersId 해석 → 워치 데이터 조회 → 워치 정보 열기
   const handleShowDetails = async () => {
     let id = usersId || localStorage.getItem("usersId");
     if (!id) {
@@ -238,96 +228,168 @@ export default function DailySummary() {
       return;
     }
     setUsersId(String(id));
-    await fetchHealthDirect(id); // 워치 데이터만 조회
-    setShowDetails(true);
+    
+    try {
+      const startTime = Date.now();
+      
+      // 테스트용: 하드코딩된 워치 데이터 사용
+      const currentHealthItems = await fetchHealthRaw(id);
+      
+      const endTime = Date.now();
+      
+      if (!currentHealthItems || currentHealthItems.length === 0) {
+        setNoDataModalType('no-data');
+        setShowNoDataModal(true);
+        return;
+      }
+      
+      setHealthItems(currentHealthItems);
+      setShowDetails(true);
+    } catch (e) {
+      if (e?.response?.status === 500) {
+        setNoDataModalType('server');
+      } else {
+        setNoDataModalType('server');
+      }
+      setShowNoDataModal(true);
+    }
   };
 
-  /* ---------- ML: 하루 합계/목록 불러오기 ---------- */
   const loadDaily = async (d) => {
     setLoading(true);
     try {
-      const res = await fetch(`${ML_BASE}/summary/daily?user_id=${USER_ID}&date=${d}`);
-      const j = await res.json();
-      if (res.ok) {
+      let id = usersId || localStorage.getItem("usersId");
+      if (!id) {
+        id = await fetchUsersIdFromSTS();
+      }
+      
+      console.log('[DailySummary] Loading daily data for:', { userId: id, date: d });
+      const res = await GET(`/summary/daily?user_id=${id}&date=${d}`, {}, true, 'ai');
+      const j = res.data;
+      console.log('[DailySummary] Received data:', j);
+      
+      if (res.status === 200) {
         setTotals(
           j.totals || { calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0, fiber_g: 0 }
         );
         setMeals(j.meals || []);
+        console.log('[DailySummary] Set meals:', j.meals?.length || 0, 'items');
         setEditGrams({});
         setEditLabel({});
         setDailyText("");
         setSummaryModel("");
         setHealthHint("");
       } else {
-        console.error("daily load 실패:", j);
+        console.warn('[DailySummary] Unexpected status:', res.status);
       }
+    } catch (error) {
+      console.error('[DailySummary] Error loading daily data:', error);
+      setTotals({ calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0, fiber_g: 0 });
+      setMeals([]);
     } finally {
       setLoading(false);
     }
   };
 
-  /* ----------  더미 유저 자동 세팅 ---------- */
   useEffect(() => {
-    ensureDummyUser();
-  }, []);
+    let mounted = true;
   
-
-  /* ---------- 최초 로딩 ---------- */
-  useEffect(() => {
     (async () => {
-      // 1) localStorage에 usersId가 있으면 우선 사용
+      if (user?.usersId && mounted) {
+        setUsersId(String(user.usersId));
+      } else {
       const storedId = localStorage.getItem("usersId");
-      if (storedId) {
+        if (storedId && mounted) {
         setUsersId(String(storedId));
       } else {
-        // 2) 없으면 이메일로 조회 시도
         const id = await fetchUsersIdFromSTS();
-        console.log("확정 usersId:", id);
-        if (id) {
+          if (id && mounted) {
           setUsersId(id);
         }
       }
-      await loadDaily(fmtDate(new Date()));
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+      }
+    })().catch(err => {
+    });
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  /* ---------- 날짜 변경 시 재로딩 ---------- */
   useEffect(() => {
+    if (usersId) {
     loadDaily(date);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [date]);
-
-  // usersId 바뀌면 건강데이터 재조회
-  useEffect(() => {
-    fetchHealthDirect(usersId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }
   }, [usersId]);
 
-  /* ---------- 행 저장(이름+중량 동시) ---------- */
-  const saveRow = async (mealId) => {
-    const prev = findById(mealId);
-    const nextGrams = Number(editGrams[mealId] ?? prev.grams);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadDaily(date);
+    }, 1000);
 
-    const nextLabelRaw = (editLabel[mealId] ?? prev.label) || "";
+    return () => clearTimeout(timer);
+  }, [usersId]);
+
+  useEffect(() => {
+    loadDaily(date);
+  }, [date]);
+
+  useEffect(() => {
+    let hasRefreshed = false;
+    
+    const handleFocus = () => {
+      if (!hasRefreshed && usersId) {
+        hasRefreshed = true;
+        loadDaily(date);
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden && !hasRefreshed && usersId) {
+        hasRefreshed = true;
+        loadDaily(date);
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [usersId, date]);
+
+  const handleSaveClick = (mealId) => {
+    setSaveMealId(mealId);
+    setShowSaveModal(true);
+  };
+
+  const confirmSave = async () => {
+    if (!saveMealId) return;
+    const prev = findById(saveMealId);
+    const nextGrams = Number(editGrams[saveMealId] ?? prev.grams);
+
+    const nextLabelRaw = (editLabel[saveMealId] ?? prev.label) || "";
     const nextLabel = String(nextLabelRaw).trim();
 
-    if (!Number.isFinite(nextGrams) || nextGrams <= 0) return;
+    if (!Number.isFinite(nextGrams) || nextGrams <= 0) {
+      showAlert("올바른 중량을 입력해주세요.", "error");
+      setShowSaveModal(false);
+      setSaveMealId(null);
+      return;
+    }
 
     const body = {
       grams: nextGrams,
       ...(nextLabel && nextLabel !== prev.label ? { label: nextLabel } : {}),
     };
 
-    const res = await fetch(`${ML_BASE}/meal-log/${mealId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    const data = await res.json();
+    const res = await PUT(`/meal-log/${saveMealId}`, body, true, 'ai');
+    const data = res.data;
 
-    if (res.ok) {
-      setMeals((arr) => arr.map((m) => (m.id === mealId ? data : m)));
+    if (res.status === 200) {
+      setMeals((arr) => arr.map((m) => (m.id === saveMealId ? data : m)));
       setTotals((t) => ({
         calories: t.calories - (prev.calories || 0) + data.calories,
         protein_g: t.protein_g - (prev.protein_g || 0) + data.protein_g,
@@ -335,25 +397,40 @@ export default function DailySummary() {
         fat_g: t.fat_g - (prev.fat_g || 0) + data.fat_g,
         fiber_g: t.fiber_g - (prev.fiber_g || 0) + data.fiber_g,
       }));
-      setDailyText(""); // 수정 후 다시 생성하도록 비움
+      setDailyText(""); 
       setSummaryModel("");
       setHealthHint("");
+      
+      showAlert("식사 정보가 저장되었습니다.", "success");
     } else {
-      alert(`저장 실패: ${data?.detail || res.statusText}`);
+      showAlert(`저장 실패: ${data?.detail || res.statusText}`, "error");
     }
+    
+    setShowSaveModal(false);
+    setSaveMealId(null);
   };
 
-  /* ---------- 행 삭제 ---------- */
-  const deleteRow = async (mealId) => {
-    const prev = findById(mealId);
+  const cancelSave = () => {
+    setShowSaveModal(false);
+    setSaveMealId(null);
+  };
+
+  const handleDeleteClick = (mealId) => {
+    setDeleteMealId(mealId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteMealId) return;
+    
+    const prev = findById(deleteMealId);
     if (!prev?.id) return;
-    if (!confirm("이 항목을 삭제할까요?")) return;
 
-    const res = await fetch(`${ML_BASE}/meal-log/${mealId}`, { method: "DELETE" });
-    const data = await res.json();
+    const res = await DELETE(`/meal-log/${deleteMealId}`, {}, true, 'ai');
+    const data = res.data;
 
-    if (res.ok) {
-      setMeals((arr) => arr.filter((m) => m.id !== mealId));
+    if (res.status === 200) {
+      setMeals((arr) => arr.filter((m) => m.id !== deleteMealId));
       setTotals((t) => ({
         calories: t.calories - (prev.calories || 0),
         protein_g: t.protein_g - (prev.protein_g || 0),
@@ -361,165 +438,256 @@ export default function DailySummary() {
         fat_g: t.fat_g - (prev.fat_g || 0),
         fiber_g: t.fiber_g - (prev.fiber_g || 0),
       }));
-      setDailyText(""); // 다시 생성하도록
+      setDailyText(""); 
       setSummaryModel("");
       setHealthHint("");
+      
+      showAlert("항목이 성공적으로 삭제되었습니다.", "success");
     } else {
-      alert(`삭제 실패: ${data?.detail || res.statusText}`);
+      showAlert(`삭제 실패: ${data?.detail || res.statusText}`, "error");
+    }
+    
+    setShowDeleteModal(false);
+    setDeleteMealId(null);
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
+    setDeleteMealId(null);
+  };
+
+  const toggleMealSelection = (mealId) => {
+    setSelectedMeals(prev => 
+      prev.includes(mealId) 
+        ? prev.filter(id => id !== mealId)
+        : [...prev, mealId]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedMeals.length === meals.length) {
+      setSelectedMeals([]);
+    } else {
+      setSelectedMeals(meals.map(m => m.id));
     }
   };
 
-  /* ---------- 프론트엔드 자체 분석 (API 호출 없이 종합 분석) ---------- */
-  const generateLocalAnalysis = () => {
-    // 1) 워치 데이터 분석
-    const watchSummary = [];
-    if (healthItems && healthItems.length > 0) {
-      const totalSteps = healthItems.reduce((sum, item) => sum + Number(item.steps || 0), 0);
-      const totalCaloriesBurned = healthItems.reduce((sum, item) => sum + Number(item.caloriesKcal || 0), 0);
-      const totalDistance = healthItems.reduce((sum, item) => sum + Number(item.distanceKm || 0), 0);
-      
-      const heartRates = healthItems
-        .map(item => Number(item.heartRateAvg || 0))
-        .filter(hr => hr > 0);
-      const avgHeartRate = heartRates.length > 0 
-        ? Math.round(heartRates.reduce((a, b) => a + b, 0) / heartRates.length)
-        : 0;
-      
-      watchSummary.push(`• 걸음수: ${totalSteps.toLocaleString()}보`);
-      watchSummary.push(`• 이동거리: ${totalDistance.toFixed(1)}km`);
-      watchSummary.push(`• 소모 칼로리: ${totalCaloriesBurned}kcal`);
-      if (avgHeartRate > 0) {
-        watchSummary.push(`• 평균 심박수: ${avgHeartRate}bpm`);
-      }
+  const bulkDelete = () => {
+    if (selectedMeals.length === 0) {
+      showAlert("삭제할 항목을 선택해주세요.", "warning");
+      return;
     }
-    
-    // 2) 식단 데이터 분석
-    const mealSummary = [];
-    if (meals && meals.length > 0) {
-      mealSummary.push(`• 총 ${meals.length}끼 식사 기록`);
-      mealSummary.push(`• 섭취 칼로리: ${totals.calories}kcal`);
-      mealSummary.push(`• 단백질: ${totals.protein_g}g | 탄수화물: ${totals.carbs_g}g | 지방: ${totals.fat_g}g`);
+
+    setShowBulkDeleteModal(true);
+  };
+
+  const confirmBulkDelete = async () => {
+    try {
+      const deleteCount = selectedMeals.length;
       
-      // 칼로리 수지 분석
-      if (healthItems && healthItems.length > 0) {
-        const burned = healthItems.reduce((sum, item) => sum + Number(item.caloriesKcal || 0), 0);
-        const balance = totals.calories - burned;
-        const balanceText = balance > 0 ? `+${balance}` : `${balance}`;
-        mealSummary.push(`• 칼로리 수지: ${balanceText}kcal (섭취 - 소모)`);
-      }
-    } else {
-      mealSummary.push("• 아직 등록된 식사가 없습니다.");
-    }
-    
-    // 3) 건강 조언 생성 (규칙 기반)
-    const advice = [];
-    
-    // 활동량 평가
-    if (healthItems && healthItems.length > 0) {
-      const totalSteps = healthItems.reduce((sum, item) => sum + Number(item.steps || 0), 0);
-      if (totalSteps < 5000) {
-        advice.push("오늘 활동량이 부족합니다. 가벼운 산책이나 스트레칭을 추천합니다.");
-      } else if (totalSteps >= 10000) {
-        advice.push("훌륭합니다! 오늘 활동량 목표를 달성했습니다.");
-      } else {
-        advice.push("적당한 활동량을 유지하고 있습니다. 조금만 더 움직이면 1만보 달성입니다.");
-      }
-    }
-    
-    // 영양 균형 평가
-    if (meals && meals.length > 0) {
-      const proteinRatio = (totals.protein_g * 4) / Math.max(1, totals.calories) * 100;
-      const carbsRatio = (totals.carbs_g * 4) / Math.max(1, totals.calories) * 100;
-      const fatRatio = (totals.fat_g * 9) / Math.max(1, totals.calories) * 100;
-      
-      if (proteinRatio < 15) {
-        advice.push("단백질이 부족합니다. 달걀, 두부, 살코기 섭취를 늘려보세요.");
-      }
-      if (totals.fiber_g < 15) {
-        advice.push("식이섬유가 부족합니다. 샐러드, 과일, 통곡물을 더 드세요.");
-      }
-      if (carbsRatio > 70) {
-        advice.push("탄수화물 비중이 높습니다. 단백질과 채소를 늘려 균형을 맞추세요.");
-      }
-      if (fatRatio > 35) {
-        advice.push("지방 비중이 높습니다. 튀김이나 기름진 음식을 줄여보세요.");
-      }
-      
-      // 칼로리 수지 평가
-      if (healthItems && healthItems.length > 0) {
-        const burned = healthItems.reduce((sum, item) => sum + Number(item.caloriesKcal || 0), 0);
-        const balance = totals.calories - burned;
-        if (balance > 500) {
-          advice.push("섭취 칼로리가 소모량보다 많습니다. 활동량을 늘리거나 식사량을 조절하세요.");
-        } else if (balance < -500) {
-          advice.push("소모 칼로리가 섭취량보다 많습니다. 충분한 영양 섭취에 유의하세요.");
+      for (const mealId of selectedMeals) {
+        const prev = findById(mealId);
+        if (!prev?.id) continue;
+
+        const res = await DELETE(`/meal-log/${mealId}`, {}, true, 'ai');
+        
+        if (res.status === 200) {
+          setMeals((arr) => arr.filter((m) => m.id !== mealId));
+          setTotals((t) => ({
+            calories: t.calories - (prev.calories || 0),
+            protein_g: t.protein_g - (prev.protein_g || 0),
+            carbs_g: t.carbs_g - (prev.carbs_g || 0),
+            fat_g: t.fat_g - (prev.fat_g || 0),
+            fiber_g: t.fiber_g - (prev.fiber_g || 0),
+          }));
         }
       }
+      
+      setSelectedMeals([]);
+      setDailyText("");
+      setSummaryModel("");
+      setHealthHint("");
+      setShowBulkDeleteModal(false);
+      showAlert(`${deleteCount}개 항목이 삭제되었습니다.`, "success");
+    } catch (error) {
+      showAlert("일괄 삭제 중 오류가 발생했습니다.", "error");
+      setShowBulkDeleteModal(false);
+    }
+  };
+
+  const cancelBulkDelete = () => {
+    setShowBulkDeleteModal(false);
+  };
+
+  const bulkSave = async () => {
+    if (selectedMeals.length === 0) {
+      showAlert("저장할 항목을 선택해주세요.", "warning");
+      return;
+    }
+
+    try {
+      const saveCount = selectedMeals.length;
+      
+      for (const mealId of selectedMeals) {
+        const prev = findById(mealId);
+        if (!prev?.id) continue;
+
+        const nextGrams = Number(editGrams[mealId] ?? prev.grams);
+        const nextLabelRaw = (editLabel[mealId] ?? prev.label) || "";
+        const nextLabel = nextLabelRaw.trim().toLowerCase();
+
+        if (nextGrams === prev.grams && (!nextLabel || nextLabel === prev.label)) {
+          continue;
+        }
+
+        const body = {
+          grams: nextGrams,
+          ...(nextLabel && nextLabel !== prev.label ? { label: nextLabel } : {}),
+        };
+
+        const res = await PUT(`/meal-log/${mealId}`, body, true, 'ai');
+        const data = res.data;
+
+        if (res.status === 200) {
+          setMeals((arr) => arr.map((m) => (m.id === mealId ? data : m)));
+          setTotals((t) => ({
+            calories: t.calories - (prev.calories || 0) + data.calories,
+            protein_g: t.protein_g - (prev.protein_g || 0) + data.protein_g,
+            carbs_g: t.carbs_g - (prev.carbs_g || 0) + data.carbs_g,
+            fat_g: t.fat_g - (prev.fat_g || 0) + data.fat_g,
+            fiber_g: t.fiber_g - (prev.fiber_g || 0) + data.fiber_g,
+          }));
+      } else {
+          
+        }
+      }
+      
+      setSelectedMeals([]);
+      setDailyText("");
+      setSummaryModel("");
+      setHealthHint("");
+      showAlert(`${saveCount}개 항목이 저장되었습니다.`, "success");
+    } catch (error) {
+      
+      showAlert("일괄 저장 중 오류가 발생했습니다.", "error");
+    }
+  };
+  const showAlert = (message, type = "success") => {
+    setAlertMessage(message);
+    setAlertType(type);
+    setShowAlertModal(true);
+  };
+
+  const closeAlert = () => {
+    setShowAlertModal(false);
+    setAlertMessage("");
+  };
+  const generateLocalAnalysis = () => {
+    // 데이터가 없을 때 안내 메시지
+    if ((!meals || meals.length === 0) && (!healthItems || healthItems.length === 0)) {
+      return {
+        watchSummary: "",
+        mealSummary: "",
+        // 식단 조언 영역에 노출될 요약 텍스트는 식단 입력 안내로 설정
+        advice: "오늘의 식단을 입력해주세요. 칼로리 페이지에서 사진으로 식사를 기록할 수 있습니다."
+      };
     }
     
-    // 전반적인 평가가 없으면 긍정 메시지
-    if (advice.length === 0) {
-      advice.push("오늘 하루 영양과 활동량의 균형이 좋습니다. 계속 유지하세요.");
+    if (!meals || meals.length === 0) {
+      return {
+        watchSummary: "",
+        mealSummary: "",
+        advice: "워치 데이터를 동기화해주세요. 더 정확한 건강 분석을 위해 활동량 데이터가 필요합니다."
+      };
     }
     
+    if (!healthItems || healthItems.length === 0) {
+      return {
+        watchSummary: "",
+        mealSummary: "",
+        advice: "워치 데이터를 동기화해주세요. 더 정확한 건강 분석을 위해 활동량 데이터가 필요합니다."
+      };
+    }
+    
+    // 데이터가 있을 때는 간단한 메시지만 표시
     return {
-      watchSummary: watchSummary.join('\n'),
-      mealSummary: mealSummary.join('\n'),
-      advice: advice.join('\n\n')
+      watchSummary: "",
+      mealSummary: "",
+      advice: "AI 건강 분석을 사용할 수 없습니다. 잠시 후 다시 시도해주세요."
     };
   };
 
-  /* ---------- 요약 생성 (LLM 우선, 실패 시 로컬 분석) ---------- */
   const generateSummary = async () => {
     setDailyText("분석 중…");
     setSummaryModel("");
     setHealthHint("");
     
     try {
-      // usersId 확인 및 워치 데이터 최신화
       let id = usersId || localStorage.getItem("usersId");
       if (!id) {
         id = await fetchUsersIdFromSTS();
       }
       
       if (id) {
+        // 실시간 워치 데이터 조회
         const latestHealthItems = await fetchHealthRaw(id);
+        if (latestHealthItems.length > 0) {
         setHealthItems(latestHealthItems);
+        }
 
-        // LLM 요약 시도
+        if ((!meals || meals.length === 0) && (!latestHealthItems || latestHealthItems.length === 0)) {
+        } else {
         const watchData = prepareWatchDataForLLM(latestHealthItems);
         try {
-          const res = await fetch(`${ML_BASE}/summary/analyze`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              user_id: USER_ID,
+            const res = await POST(`/summary/analyze`, {
+                user_id: id,
               date,
-              model: SUMMARY_MODEL,
-              use_llm: SUMMARY_MODEL === "llm",
+                model: "llm", // 강제로 llm 사용
+                use_llm: true, // 강제로 llm 사용
               watch_data: watchData,
               include_exercise_recommendation: true,
-            }),
-          });
-          const j = await res.json();
-          if (res.ok && (j.summary || j.summary === "")) {
+              }, true, 'ai');
+            const j = res.data;
+            
+            
+            if (res.status === 200 && (j.summary || j.summary === "")) {
             setDailyText(j.summary || "");
             setSummaryModel(j.model_used || "llm");
             setHealthHint(watchData ? watchData.summary : "");
-            return; // LLM 결과 사용 완료
+              
+              // LLM에서 제공하는 건강 리스크 힌트가 있다면 저장
+              if (j.health_hints && Array.isArray(j.health_hints)) {
+                setHealthHints(j.health_hints);
+              } else if (j.risk_hints && Array.isArray(j.risk_hints)) {
+                setHealthHints(j.risk_hints);
+              } else if (j.hints && Array.isArray(j.hints)) {
+                setHealthHints(j.hints);
+              } else {
+                // 요약 텍스트에서 문장 단위로 나눠 힌트로 사용 (fallback)
+                if (typeof j.summary === 'string' && j.summary.trim().length > 0) {
+                  const splitted = j.summary
+                    .split(/(?<=[.!?])\s+/) // 문장 경계 기준 분리
+                    .map(s => s.trim())
+                    .filter(Boolean);
+                  if (splitted.length > 0) {
+                    setHealthHints(splitted);
+                  }
+                }
+              }
+              
+              return;
           }
         } catch (e) {
-          console.warn("LLM 요약 실패, 로컬 분석으로 대체", e);
+            // LLM 요약 실패, 로컬 분석으로 대체
+          }
         }
       }
       
-      // 잠시 대기 (데이터 업데이트 반영)
       await new Promise(resolve => setTimeout(resolve, 300));
       
       // 프론트엔드 자체 분석 수행
       const analysis = generateLocalAnalysis();
       
-      // 결과 조합 (AI 섹션은 조언만 표시)
       const fullSummary = analysis.advice || "";
       
       setDailyText(fullSummary);
@@ -527,13 +695,12 @@ export default function DailySummary() {
       setSummaryModel("local-analysis");
       
     } catch (e) {
-      console.error("분석 실패:", e);
+      // 분석 실패
       setDailyText(`분석 중 오류가 발생했습니다: ${e.message}`);
     }
   };
 
-  /* ---------- UI ---------- */
-  // 영양소 비율 계산
+  // Calculation functions
   const calculateNutritionRatios = () => {
     if (!totals || totals.calories === 0) return null;
     
@@ -549,9 +716,6 @@ export default function DailySummary() {
     };
   };
 
-  const ratios = calculateNutritionRatios();
-
-  // 활동량 계산
   const calculateActivityStats = () => {
     if (!healthItems || healthItems.length === 0) return null;
     
@@ -573,10 +737,12 @@ export default function DailySummary() {
     };
   };
 
+  // Calculated values
+  const ratios = calculateNutritionRatios();
   const activityStats = calculateActivityStats();
-  const calorieBalance = activityStats ? totals.calories - activityStats.totalCaloriesBurned : 0;
+  const calorieBalance = activityStats ? totals.calories - activityStats.totalCaloriesBurned : totals.calories;
 
-  // 하이라이트 인사이트(칩) 생성
+  // UI helper functions
   const buildInsightChips = () => {
     const chips = [];
     if (activityStats) {
@@ -601,7 +767,6 @@ export default function DailySummary() {
     return chips.slice(0, 4);
   };
 
-  // 분석 텍스트 정리: 줄단위 → 불릿 목록
   const toBulletedLines = (text) => {
     if (!text) return [];
     return String(text)
@@ -611,7 +776,6 @@ export default function DailySummary() {
       .slice(0, 8);
   };
 
-  // 건강 조언 가시성 톤 분류
   const adviceTone = (line) => {
     const warnKeys = ["부족", "높", "위험", "주의", "줄이", "증가", "과다", "불균형", "부담", "초과"];
     const goodKeys = ["유지", "좋", "적정", "안정", "달성", "양호", "괜찮"];
@@ -621,7 +785,67 @@ export default function DailySummary() {
     return "";
   };
 
-  // 활동 현황 칩
+  // 식단 기반 간단 팁 1-2줄 생성 (LLM 결과와 함께 노출)
+  const buildDietTips = () => {
+    if (!totals || !totals.calories) return [];
+    const tips = [];
+    const proteinPct = ((totals.protein_g * 4) / totals.calories) * 100;
+    const fatPct = ((totals.fat_g * 9) / totals.calories) * 100;
+    const fiberG = totals.fiber_g || 0;
+
+    if (proteinPct < 15) {
+      tips.push("단백질 비율이 낮아요. 달걀·두부·살코기 등 고단백 식품을 추가하세요.");
+    }
+    if (fatPct > 35) {
+      tips.push("지방 비중이 높습니다. 튀김·가공육 대신 구이·찜 조리로 바꿔보세요.");
+    }
+    if (fiberG < 20) {
+      tips.push("식이섬유가 부족해요. 채소·과일·통곡물을 한 끼에 한 가지씩 추가하세요.");
+    }
+
+    return tips.slice(0, 2);
+  };
+
+  // LLM 조언과 로컬 팁 병합 시 중복 제거
+  const mergeAdviceWithoutDuplicates = (llmLines, dietTips) => {
+    const normalize = (s) => String(s)
+      .toLowerCase()
+      .replace(/[\s.,!?:;·–—~…]/g, "")
+      .replace(/\u00A0/g, "");
+
+    const unique = [];
+    const seen = new Set();
+    const seenCategory = new Set();
+
+    const categorize = (s) => {
+      const t = String(s);
+      // 간단한 의미 기반 카테고리로 유사 문구 중복 제거
+      if (t.includes("지방") && (t.includes("높") || t.includes("과다"))) return "fat-high";
+      if (t.includes("탄수") && (t.includes("높") || t.includes("과다"))) return "carb-high";
+      if (t.includes("단백질") && (t.includes("낮") || t.includes("부족"))) return "protein-low";
+      if (t.includes("칼로리") && t.includes("높")) return "calorie-high";
+      if (t.includes("식이섬유") && (t.includes("부족") || t.includes("낮"))) return "fiber-low";
+      return "";
+    };
+
+    const pushIfNew = (line) => {
+      const n = normalize(line);
+      if (n.length === 0) return;
+      // 의미 카테고리 중복 우선 제거
+      const cat = categorize(line);
+      if (cat && seenCategory.has(cat)) return;
+      // 포함 관계까지 간단히 체크
+      if ([...seen].some((x) => n.includes(x) || x.includes(n))) return;
+      seen.add(n);
+      if (cat) seenCategory.add(cat);
+      unique.push(line);
+    };
+
+    llmLines.forEach(pushIfNew);
+    dietTips.forEach(pushIfNew);
+    return unique;
+  };
+
   const buildActivityChips = () => {
     if (!activityStats) return [];
     const chips = [];
@@ -632,73 +856,138 @@ export default function DailySummary() {
     return chips;
   };
 
-  // 운동 추천(간단 휴리스틱)
   const buildExerciseRecommendations = () => {
-    const rec = [];
-    if (activityStats) {
-      if (activityStats.totalSteps < 6000) rec.push("빠른 걷기 30분 또는 가벼운 조깅 20분");
-      else if (activityStats.totalSteps < 10000) rec.push("빠른 걷기 15분 + 스트레칭 10분");
-      else rec.push("휴식 겸 스트레칭 10분, 가벼운 코어 운동 10분");
-    }
-    if (ratios) {
-      if (ratios.protein < 15) rec.push("상/하체 근력운동 20분 (스쿼트·푸시업·플랭크)");
-      if (ratios.fat > 35) rec.push("인터벌 자전거/런 15분으로 지질 대사 개선");
-    }
-    return rec.slice(0, 3);
-  };
+    // 워치 데이터가 없어도 기본 운동 추천은 제공
+    const recommendations = [];
 
-  // 식단 기반 리스크 힌트(간단 휴리스틱)
-  const buildRiskHints = () => {
-    const risk = [];
-    if (totals) {
-      const surplus = calorieBalance > 300;
-      const lowFiber = totals.fiber_g < 15;
-      const highFat = (totals.fat_g * 9) / Math.max(1, totals.calories) * 100 > 35;
-      const highCarb = (totals.carbs_g * 4) / Math.max(1, totals.calories) * 100 > 70;
-      if (surplus && highFat) risk.push("지방간/대사증후군 위험 증가 (칼로리·지방 과다)");
-      if (highCarb && activityStats && activityStats.totalSteps < 6000) risk.push("인슐린 저항성 위험 (탄수화물 높고 활동량 낮음)");
-      if (lowFiber) risk.push("변비/지질 이상 위험 (식이섬유 부족)");
+    // 활동 데이터 기반 추천
+    if (activityStats) {
+      const steps = Number(activityStats.totalSteps || 0);
+      if (steps < 5000) {
+        recommendations.push("매일 30분 빠른 걷기, 주 3회 근력 운동(스쿼트·푸시업·플랭크)을 시작해보세요.");
+      } else if (steps < 10000) {
+        recommendations.push("현재 활동량을 유지하고, 주 2-3회 근력 운동과 유연성 운동을 추가하세요.");
+      } else {
+        recommendations.push("활동량이 충분합니다. 근력·유연성 운동을 병행해 전신 균형을 유지하세요.");
+      }
+    } else {
+      // 워치 데이터가 없는 경우에도 기본 가이드 제공
+      recommendations.push("매일 30분 이상 걷기 또는 자전거/수영 등 유산소 운동을 실천하세요.");
+      recommendations.push("주 2-3회 전신 근력 운동(하체·상체·코어)을 병행하세요.");
     }
-    return risk.slice(0, 3);
+
+    return recommendations;
+  };
+  const buildRiskHints = () => {
+    // 워치/식단 데이터 모두 없는 경우: 건강 리스크에는 워치 동기화 메시지
+    if ((!meals || meals.length === 0) && (!healthItems || healthItems.length === 0)) {
+      return ["워치 데이터를 동기화해주세요. 더 정확한 건강 분석을 위해 활동량 데이터가 필요합니다."];
+    }
+
+    if (!totals || totals.calories === 0) {
+      // 식단만 없는 경우에는 식단 입력 안내를 유지
+      return ["오늘의 식단을 입력해주세요. 칼로리 페이지에서 사진으로 식사를 기록할 수 있습니다."];
+    }
+    
+    // 질병 발병 가능성 중심의 리스크 메시지 생성
+    const hints = [];
+    
+    // 워치 데이터 기반 질병 위험 분석
+    if (healthItems && healthItems.length > 0) {
+      const totalSteps = healthItems.reduce((sum, item) => sum + Number(item.steps || 0), 0);
+      const totalCaloriesBurned = healthItems.reduce((sum, item) => sum + Number(item.caloriesKcal || 0), 0);
+      const avgHeartRate = healthItems.reduce((sum, item) => sum + Number(item.heartRateAvg || 0), 0) / healthItems.length;
+      
+      // 활동량 기반 질병 위험 분석
+      if (totalSteps < 5000) {
+        hints.push("활동량 부족으로 대사증후군 및 심혈관 질환 위험이 높습니다.");
+      }
+      
+      // 심박수 기반 분석
+      if (avgHeartRate > 100) {
+        hints.push("평균 심박수가 높아 스트레스나 과도한 운동으로 인한 심혈관 부담이 있을 수 있습니다.");
+      } else if (avgHeartRate < 60) {
+        hints.push("낮은 심박수는 좋은 심혈관 건강을 나타내지만, 극도로 낮다면 의사 상담을 권장합니다.");
+      }
+      
+      // 칼로리 균형 분석
+      const calorieBalance = totals.calories - totalCaloriesBurned;
+      if (calorieBalance > 500) {
+        hints.push("섭취 칼로리가 소모량보다 많아 체중 증가 및 당뇨병 위험이 있습니다.");
+      } else if (calorieBalance < -500) {
+        hints.push("칼로리 부족으로 근육 감소 위험이 있습니다.");
+      }
+    }
+    
+    // 영양소 기반 질병 위험 분석
+    const fatRatio = (totals.fat_g * 9) / Math.max(1, totals.calories) * 100;
+    const proteinRatio = (totals.protein_g * 4) / Math.max(1, totals.calories) * 100;
+    const carbsRatio = (totals.carbs_g * 4) / Math.max(1, totals.calories) * 100;
+    
+    if (fatRatio > 35) {
+      hints.push("고지방 식단으로 인한 심혈관 질환 및 지방간 위험이 높습니다.");
+    }
+    
+    if (proteinRatio < 15) {
+      hints.push("단백질 부족으로 근육 감소 및 면역력 저하 위험이 있습니다.");
+    }
+    
+    if (carbsRatio > 70) {
+      hints.push("고탄수화물 식단으로 인한 당뇨병 및 인슐린 저항성 위험이 있습니다.");
+    }
+    
+    if (totals.fiber_g && totals.fiber_g < 15) {
+      hints.push("식이섬유 부족으로 대장암 및 심혈관 질환 위험이 있습니다.");
+    }
+    
+    return hints.length > 0 ? hints : ["오늘 하루 영양과 활동량의 균형이 좋습니다. 계속 유지하세요."];
   };
 
   return (
     <div className="report-container">
-      {/* 보고서 헤더 */}
-      <div className="report-header">
-        <h1>건강 종합 보고서</h1>
+      <ContainerComponent className="report-header">
+        <h1 style={{ margin: '0 0 8px 0', fontSize: '28px', fontWeight: '700', color: '#0A66FF' }}>
+          건강 종합 보고서
+        </h1>
         <div className="date">
-          <div className="d-flex align-items-center gap-2 flex-wrap">
-            <button
-              className="btn btn-light btn-sm"
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <ButtonComponent
+              variant="outline"
+              size="small"
               onClick={() => setDate(fmtDate(addDays(new Date(date), -1)))}
             >
               ← 이전
-            </button>
+            </ButtonComponent>
             <input
               type="date"
-              className="form-control form-control-sm"
-              style={{ width: 160 }}
+              style={{ 
+                width: 160, 
+                padding: '6px 12px',
+                borderRadius: '8px',
+                border: '1px solid #D6E4FF',
+                fontSize: '14px'
+              }}
               value={date}
               onChange={(e) => setDate(e.target.value)}
             />
-            <button
-              className="btn btn-light btn-sm"
+            <ButtonComponent
+              variant="outline"
+              size="small"
               onClick={() => setDate(fmtDate(addDays(new Date(date), +1)))}
             >
               다음 →
-            </button>
-            <button
-              className="btn btn-light btn-sm"
+            </ButtonComponent>
+            <ButtonComponent
+              variant="outline"
+              size="small"
               onClick={() => setDate(fmtDate(new Date()))}
             >
               오늘
-            </button>
+            </ButtonComponent>
           </div>
         </div>
-      </div>
+      </ContainerComponent>
 
-      {/* 액션 버튼 */}
       <div className="report-actions">
         <ButtonComponent
           variant="primary"
@@ -707,26 +996,33 @@ export default function DailySummary() {
         >
           종합 분석 생성
         </ButtonComponent>
+      </div>
+
+      <ContainerComponent className="report-section">
+        <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#212121', margin: '0 0 16px 0', paddingBottom: '12px', borderBottom: '2px solid #D6E4FF' }}>
+          나의 워치 정보
+        </h2>
+        <div style={{ textAlign: 'center', padding: '40px 20px' }}>
         <ButtonComponent
-          variant="outline"
+          variant="primary"
           size="large"
           onClick={handleShowDetails}
         >
-          상세 워치 정보
+            워치 데이터 조회
         </ButtonComponent>
       </div>
+      </ContainerComponent>
 
-      {/* AI 분석 결과 */}
       {dailyText && dailyText !== "요약이 없습니다." && dailyText !== "분석 중…" && (
-        <div className="report-section">
-          <h2>AI 건강 분석 보고서</h2>
-          {/* 인사이트 칩 */}
+        <ContainerComponent className="report-section">
+          <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#212121', margin: '0 0 16px 0', paddingBottom: '12px', borderBottom: '2px solid #D6E4FF' }}>
+            AI 건강 분석 보고서
+          </h2>
           <div className="insights">
             {buildInsightChips().map((c, idx) => (
               <span key={idx} className={`chip ${c.tone}`}>{c.text}</span>
             ))}
           </div>
-          {/* 활동 현황 칩 */}
           {activityStats && (
             <>
               <div className="subttl">활동 현황</div>
@@ -741,10 +1037,9 @@ export default function DailySummary() {
             </>
           )}
 
-          {/* 운동 추천 */}
           {buildExerciseRecommendations().length > 0 && (
             <>
-              <div className="subttl">운동 추천</div>
+              <div className="subttl"> 운동추천</div>
               <ul style={{ paddingLeft: 18, marginTop: 0 }}>
                 {buildExerciseRecommendations().map((r, i) => (
                   <li key={i}>{r}</li>
@@ -753,10 +1048,9 @@ export default function DailySummary() {
             </>
           )}
 
-          {/* 리스크 힌트 */}
           {buildRiskHints().length > 0 && (
             <>
-              <div className="subttl">건강 리스크 힌트</div>
+              <div className="subttl">건강 리스크</div>
               <ul style={{ paddingLeft: 18, marginTop: 0 }}>
                 {buildRiskHints().map((r, i) => (
                   <li key={i}>{r}</li>
@@ -767,14 +1061,12 @@ export default function DailySummary() {
           <div style={{ 
             whiteSpace: "pre-wrap", 
             lineHeight: 1.8, 
-            color: "#2d3748",
+            color: "#000000",
             fontSize: "15px"
           }}>
-            {/* 불릿으로 정리된 조언 (운동/리스크 톤과 유사하게 강조) */}
-            {/* 섹션 제목 스타일 */}
-            <div className="subttl" style={{ marginBottom: 6 }}>건강 조언</div>
+            <div className="subttl" style={{ marginBottom: 6 }}>식단 조언</div>
             <ul style={{ paddingLeft: 18, margin: 0 }}>
-              {toBulletedLines(dailyText).map((line, idx) => (
+              {mergeAdviceWithoutDuplicates(toBulletedLines(dailyText), buildDietTips()).map((line, idx) => (
                 <li key={idx} className={`advice-line ${adviceTone(line)}`}>{line}</li>
               ))}
             </ul>
@@ -784,267 +1076,229 @@ export default function DailySummary() {
               워치 데이터 {healthItems.length}건 기반 분석
             </div>
           )}
-        </div>
+        </ContainerComponent>
       )}
 
-      {/* 활동량 요약 */}
-      {activityStats && (
-        <div className="report-section">
-          <h2>활동량 현황</h2>
-          <div className="summary-grid">
-            <div className="summary-card primary">
-              <div className="summary-card-label">걸음수</div>
-              <div className="summary-card-value">{activityStats.totalSteps.toLocaleString()}</div>
-              <div className="summary-card-unit">/ 10,000 보</div>
-            </div>
-            <div className="summary-card primary">
-              <div className="summary-card-label">이동 거리</div>
-              <div className="summary-card-value">{activityStats.totalDistance.toFixed(1)}</div>
-              <div className="summary-card-unit">km</div>
-            </div>
-            <div className="summary-card primary">
-              <div className="summary-card-label">소모 칼로리</div>
-              <div className="summary-card-value">{activityStats.totalCaloriesBurned}</div>
-              <div className="summary-card-unit">kcal</div>
-            </div>
-            {activityStats.avgHeartRate > 0 && (
-              <div className="summary-card primary">
-                <div className="summary-card-label">평균 심박수</div>
-                <div className="summary-card-value">{activityStats.avgHeartRate}</div>
-                <div className="summary-card-unit">bpm</div>
-              </div>
+      <ActivityStats activityStats={activityStats} />
+
+      <NutritionStats 
+        totals={totals} 
+        ratios={ratios} 
+        calorieBalance={calorieBalance} 
+        meals={meals}
+        activityStats={activityStats}
+      />
+
+      {showDetails && healthItems && healthItems.length > 0 && (
+        <WatchDetails healthItems={healthItems} />
+      )}
+
+      {meals && meals.length > 0 && (
+        <MealDetails 
+          meals={meals}
+          loading={loading}
+          selectedMeals={selectedMeals}
+          editGrams={editGrams}
+          editLabel={editLabel}
+          toggleMealSelection={toggleMealSelection}
+          toggleSelectAll={toggleSelectAll}
+          bulkSave={bulkSave}
+          bulkDelete={bulkDelete}
+          handleSaveClick={handleSaveClick}
+          handleDeleteClick={handleDeleteClick}
+          setEditGrams={setEditGrams}
+          setEditLabel={setEditLabel}
+          setTotals={setTotals}
+          totals={totals}
+          setSelectedMeals={setSelectedMeals}
+        />
+      )}
+
+
+      <ModalComponent
+        isOpen={showNoDataModal}
+        onClose={() => setShowNoDataModal(false)}
+        title={noDataModalType === 'server' ? "서버 연결 오류" : "워치 정보 없음"}
+        size={ModalComponent.SIZES.SMALL}
+        variant={ModalComponent.VARIANTS.DEFAULT}
+      >
+        <ModalComponent.Section>
+          <div style={{ textAlign: 'center', padding: '20px 0' }}>
+            {noDataModalType === 'server' ? (
+              <>
+                <p style={{ fontSize: '16px', color: '#666', margin: '0 0 20px 0' }}>
+                  서버 연결에 문제가 있습니다.
+                </p>
+                <p style={{ fontSize: '14px', color: '#999', margin: 0 }}>
+                  잠시 후 다시 시도해주세요.
+                </p>
+              </>
+            ) : (
+              <>
+            <p style={{ fontSize: '16px', color: '#666', margin: '0 0 20px 0' }}>
+              워치 정보가 없습니다.
+            </p>
+            <p style={{ fontSize: '14px', color: '#999', margin: 0 }}>
+                  워치를 연결하고 데이터를 동기화해주세요.
+            </p>
+              </>
             )}
           </div>
-          
-          {/* 걸음수 진행바 */}
-          <div className="stat-bar">
-            <div className="stat-bar-label">목표 달성률</div>
-            <div className="stat-bar-visual">
-              <div 
-                className="stat-bar-fill" 
-                style={{ width: `${activityStats.stepsProgress}%` }}
-              >
-                {activityStats.stepsProgress >= 15 && `${Math.round(activityStats.stepsProgress)}%`}
-              </div>
+        </ModalComponent.Section>
+        <ModalComponent.Actions align="center">
+          <ButtonComponent
+            variant="primary"
+            size="medium"
+            onClick={() => setShowNoDataModal(false)}
+            style={{ marginRight: '8px' }}
+          >
+            확인
+          </ButtonComponent>
+          <ButtonComponent
+            variant="secondary"
+            size="medium"
+            onClick={() => setShowNoDataModal(false)}
+          >
+            닫기
+          </ButtonComponent>
+        </ModalComponent.Actions>
+      </ModalComponent>
+
+      <ModalComponent
+        isOpen={showSaveModal}
+        onClose={cancelSave}
+        title="식사 정보 저장"
+        size={ModalComponent.SIZES.SMALL}
+        closeOnOverlayClick={true}
+      >
+        <ModalComponent.Section>
+          <p style={{ fontSize: '16px', color: '#666', margin: '0 0 20px 0', textAlign: 'center' }}>
+            식사 정보를 저장하시겠습니까?
+          </p>
+        </ModalComponent.Section>
+        <ModalComponent.Actions align="center">
+          <ButtonComponent
+            variant="primary"
+            size="medium"
+            onClick={confirmSave}
+            style={{ marginRight: '8px' }}
+          >
+            저장
+          </ButtonComponent>
+          <ButtonComponent
+            variant="secondary"
+            size="medium"
+            onClick={cancelSave}
+          >
+            취소
+          </ButtonComponent>
+        </ModalComponent.Actions>
+      </ModalComponent>
+
+      <ModalComponent
+        isOpen={showDeleteModal}
+        onClose={cancelDelete}
+        title="항목 삭제"
+        size={ModalComponent.SIZES.SMALL}
+        closeOnOverlayClick={true}
+      >
+        <ModalComponent.Section>
+          <p style={{ fontSize: '16px', color: '#666', margin: '0 0 20px 0', textAlign: 'center' }}>
+            이 항목을 삭제하시겠습니까?
+          </p>
+          <p style={{ fontSize: '14px', color: '#999', margin: 0, textAlign: 'center' }}>
+            삭제된 항목은 복구할 수 없습니다.
+          </p>
+        </ModalComponent.Section>
+        <ModalComponent.Actions align="center">
+          <ButtonComponent
+            variant="danger"
+            size="medium"
+            onClick={confirmDelete}
+            style={{ marginRight: '8px' }}
+          >
+            삭제
+          </ButtonComponent>
+          <ButtonComponent
+            variant="secondary"
+            size="medium"
+            onClick={cancelDelete}
+          >
+            취소
+          </ButtonComponent>
+        </ModalComponent.Actions>
+      </ModalComponent>
+
+      <ModalComponent
+        isOpen={showBulkDeleteModal}
+        onClose={cancelBulkDelete}
+        title="선택 항목 삭제"
+        size={ModalComponent.SIZES.SMALL}
+        closeOnOverlayClick={true}
+      >
+        <ModalComponent.Section>
+          <p style={{ fontSize: '16px', color: '#666', margin: '0 0 20px 0', textAlign: 'center' }}>
+            선택된 <strong style={{ color: '#dc2626' }}>{selectedMeals.length}개</strong> 항목을 삭제하시겠습니까?
+          </p>
+          <p style={{ fontSize: '14px', color: '#999', margin: 0, textAlign: 'center' }}>
+            삭제된 항목은 복구할 수 없습니다.
+          </p>
+        </ModalComponent.Section>
+        <ModalComponent.Actions align="center">
+          <ButtonComponent
+            variant="danger"
+            size="medium"
+            onClick={confirmBulkDelete}
+            style={{ marginRight: '8px' }}
+          >
+            삭제
+          </ButtonComponent>
+          <ButtonComponent
+            variant="secondary"
+            size="medium"
+            onClick={cancelBulkDelete}
+          >
+            취소
+          </ButtonComponent>
+        </ModalComponent.Actions>
+      </ModalComponent>
+
+      <ModalComponent
+        isOpen={showAlertModal}
+        onClose={closeAlert}
+        title={alertType === "success" ? "성공" : "오류"}
+        size={ModalComponent.SIZES.SMALL}
+        closeOnOverlayClick={true}
+      >
+        <ModalComponent.Section>
+          <div style={{ textAlign: 'center', padding: '20px 0' }}>
+            <div style={{ 
+              fontSize: '48px', 
+              marginBottom: '16px',
+              color: alertType === "success" ? '#28a745' : '#dc3545'
+            }}>
+              {alertType === "success" ? '✓' : '⚠'}
             </div>
-            <div className="stat-bar-value">{Math.round(activityStats.stepsProgress)}%</div>
+            <p style={{ 
+              fontSize: '16px', 
+              color: '#666', 
+              margin: '0 0 10px 0',
+              lineHeight: '1.5'
+            }}>
+              {alertMessage}
+            </p>
           </div>
-        </div>
-      )}
-
-      {/* 식단 요약 */}
-      {meals && meals.length > 0 && (
-        <div className="report-section">
-          <h2>식단 현황</h2>
-          <div className="summary-grid">
-            <div className="summary-card primary">
-              <div className="summary-card-label">총 칼로리</div>
-              <div className="summary-card-value">{totals.calories}</div>
-              <div className="summary-card-unit">kcal</div>
-            </div>
-            <div className="summary-card primary">
-              <div className="summary-card-label">단백질</div>
-              <div className="summary-card-value">{totals.protein_g}</div>
-              <div className="summary-card-unit">g ({ratios?.protein || 0}%)</div>
-            </div>
-            <div className="summary-card primary">
-              <div className="summary-card-label">탄수화물</div>
-              <div className="summary-card-value">{totals.carbs_g}</div>
-              <div className="summary-card-unit">g ({ratios?.carbs || 0}%)</div>
-            </div>
-            <div className="summary-card primary">
-              <div className="summary-card-label">지방</div>
-              <div className="summary-card-value">{totals.fat_g}</div>
-              <div className="summary-card-unit">g ({ratios?.fat || 0}%)</div>
-            </div>
-          </div>
-
-          {/* 칼로리 수지 */}
-          {activityStats && (
-            <div className="stat-bar">
-              <div className="stat-bar-label">칼로리 수지</div>
-              <div className="stat-bar-visual">
-                <div 
-                  className="stat-bar-fill" 
-                  style={{ 
-                    width: `${Math.min(100, Math.abs(calorieBalance) / 30)}%`,
-                    background: calorieBalance > 0 
-                      ? 'linear-gradient(90deg, #ed8936 0%, #dd6b20 100%)'
-                      : 'linear-gradient(90deg, #48bb78 0%, #38a169 100%)'
-                  }}
-                >
-                </div>
-              </div>
-              <div className="stat-bar-value">
-                {calorieBalance > 0 ? '+' : ''}{calorieBalance}kcal
-              </div>
-            </div>
-          )}
-
-          {/* 영양소 비율 바 */}
-          {ratios && (
-            <>
-              <div className="stat-bar">
-                <div className="stat-bar-label">단백질 비율</div>
-                <div className="stat-bar-visual">
-                  <div className="stat-bar-fill" style={{ width: `${ratios.protein}%` }}>
-                    {ratios.protein >= 15 && `${ratios.protein}%`}
-                  </div>
-                </div>
-                <div className="stat-bar-value">{ratios.protein}%</div>
-              </div>
-              <div className="stat-bar">
-                <div className="stat-bar-label">탄수화물 비율</div>
-                <div className="stat-bar-visual">
-                  <div className="stat-bar-fill" style={{ width: `${ratios.carbs}%` }}>
-                    {ratios.carbs >= 15 && `${ratios.carbs}%`}
-                  </div>
-                </div>
-                <div className="stat-bar-value">{ratios.carbs}%</div>
-              </div>
-              <div className="stat-bar">
-                <div className="stat-bar-label">지방 비율</div>
-                <div className="stat-bar-visual">
-                  <div className="stat-bar-fill" style={{ width: `${ratios.fat}%` }}>
-                    {ratios.fat >= 15 && `${ratios.fat}%`}
-                  </div>
-                </div>
-                <div className="stat-bar-value">{ratios.fat}%</div>
-              </div>
-            </>
-          )}
-
-          <div className="mt-3" style={{ fontSize: "14px", color: "#718096" }}>
-            총 {meals.length}끼 식사 기록
-          </div>
-        </div>
-      )}
-
-      {/* 워치 정보 상세 패널 */}
-      {showDetails && healthItems && healthItems.length > 0 && (
-        <div className="report-section">
-          <h2>워치 데이터 상세</h2>
-          <div className="table-responsive">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>기록시각</th>
-                  <th>걸음수</th>
-                  <th>칼로리</th>
-                  <th>거리</th>
-                  <th>심박수</th>
-                </tr>
-              </thead>
-              <tbody>
-                {healthItems.slice(0, 20).map((h) => (
-                  <tr key={h.id}>
-                    <td>{h.recordTime ? new Date(h.recordTime).toLocaleString() : "-"}</td>
-                    <td>{h.steps ? h.steps.toLocaleString() : "-"} 보</td>
-                    <td>{h.caloriesKcal ?? "-"} kcal</td>
-                    <td>{h.distanceKm ?? "-"} km</td>
-                    <td>{h.heartRateAvg ?? "-"} bpm</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="mt-2" style={{ fontSize: "13px", color: "#718096" }}>
-            총 {healthItems.length}건의 워치 데이터
-          </div>
-        </div>
-      )}
-
-      {/* 식사 기록 */}
-      {meals && meals.length > 0 && (
-        <div className="report-section">
-          <h2>식사 기록 상세</h2>
-          <div className="table-responsive">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>시간</th>
-                  <th>음식</th>
-                  <th>중량</th>
-                  <th>칼로리</th>
-                  <th>단백질</th>
-                  <th>탄수화물</th>
-                  <th>지방</th>
-                  <th>식이섬유</th>
-                  <th>작업</th>
-                </tr>
-              </thead>
-              <tbody>
-                {meals.map((m) => (
-                  <tr key={m.id}>
-                    <td>
-                      {new Date(m.timestamp).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </td>
-                    <td>
-                      <input
-                        type="text"
-                        className="form-control form-control-sm text-capitalize"
-                        style={{ minWidth: "150px" }}
-                        value={editLabel[m.id] ?? m.label ?? ""}
-                        onChange={(e) =>
-                          setEditLabel((s) => ({ ...s, [m.id]: e.target.value }))
-                        }
-                        onKeyDown={(e) => e.key === "Enter" && saveRow(m.id)}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        className="form-control form-control-sm"
-                        style={{ width: "80px" }}
-                        min={1}
-                        step={10}
-                        value={editGrams[m.id] ?? m.grams}
-                        onChange={(e) =>
-                          setEditGrams((s) => ({ ...s, [m.id]: e.target.value }))
-                        }
-                        onKeyDown={(e) => e.key === "Enter" && saveRow(m.id)}
-                      />
-                    </td>
-                    <td>{m.calories} kcal</td>
-                    <td>{m.protein_g}g</td>
-                    <td>{m.carbs_g}g</td>
-                    <td>{m.fat_g}g</td>
-                    <td>{m.fiber_g}g</td>
-                    <td>
-                      <div className="d-flex gap-1">
-                        <button className="btn btn-primary btn-sm" onClick={() => saveRow(m.id)}>
-                          저장
-                        </button>
-                        <button
-                          className="btn btn-outline-danger btn-sm"
-                          onClick={() => deleteRow(m.id)}
-                        >
-                          삭제
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          {loading && <div className="mt-2" style={{ fontSize: "13px", color: "#718096" }}>불러오는 중…</div>}
-        </div>
-      )}
-
-      {/* 빈 상태 메시지 */}
-      {(!meals || meals.length === 0) && (!healthItems || healthItems.length === 0) && (
-        <div className="empty-state">
-          <div className="empty-state-icon">📊</div>
-          <div className="empty-state-text">
-            아직 등록된 데이터가 없습니다.<br />
-            식사 기록이나 워치 데이터를 추가해보세요.
-          </div>
-        </div>
-      )}
+        </ModalComponent.Section>
+        <ModalComponent.Actions align="center">
+          <ButtonComponent
+            variant={alertType === "success" ? "primary" : "danger"}
+            size="medium"
+            onClick={closeAlert}
+          >
+            확인
+          </ButtonComponent>
+        </ModalComponent.Actions>
+      </ModalComponent>
     </div>
   );
 }

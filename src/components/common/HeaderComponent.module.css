@@ -248,6 +248,15 @@
   cursor: not-allowed;
   pointer-events: none;
 }
+.header-menu-item-notify {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8px;
+  height: 8px;
+  background-color: #ff0000;
+  border-radius: 50%;
+}
 
 /* 반응형 디자인 */
 @media (max-width: 768px) {
@@ -299,6 +308,7 @@
   .header-menu-item {
     padding: 6px 12px;
     font-size: 13px;
+    position: relative;
   }
 }
 
@@ -369,50 +379,4 @@
   }
 }
 
-/* 다크 모드 지원 */
-@media (prefers-color-scheme: dark) {
-  .elevated,
-  .outlined {
-    background: #1f2937;
-    border-color: #4b5563;
-  }
-
-  .filled {
-    background: #374151;
-  }
-
-  .header-title {
-    color: #f9fafb;
-  }
-
-  .header-subtitle {
-    color: #d1d5db;
-  }
-
-  .header-brand-name {
-    color: #2563eb;
-  }
-
-  .header-logo {
-    color: #2563eb;
-    background: transparent;
-  }
-
-  .header-menu-item {
-    color: #2563eb;
-  }
-
-  .header-menu-item:hover:not(.header-menu-item--disabled) {
-    background: rgba(79, 172, 254, 0.15);
-    color: #2563eb;
-  }
-
-  .header-menu-item--active {
-    background: rgba(79, 172, 254, 0.2);
-    color: #2563eb;
-  }
-
-  .header-menu-item--active:hover {
-    background: rgba(79, 172, 254, 0.25);
-  }
-}
+/* 다크 모드 비활성화: 강제로 라이트 스타일 유지 */

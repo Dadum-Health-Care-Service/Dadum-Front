@@ -1,26 +1,133 @@
-/* FloatingChatIcon 스타일 */
-.floating-chat-icon {
+/* 모바일 터치 영역 감지용 backdrop */
+.floating-backdrop-touch {
   position: fixed;
-  bottom: 100px; /* 하단 네비게이션 위에 위치 */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+  background: transparent;
+}
+
+/* Floating Chat Wrapper */
+.floating-chat-wrapper {
+  position: fixed;
+  bottom: 110px; /* 글쓰기 버튼과 충분한 간격 확보 */
   right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+
+
+/* 알림 아이콘 - 스르륵 위로 올라옴 */
+.floating-notification-icon {
+  position: absolute;
+  bottom: 60px; /* 챗봇 아이콘과 더 가깝게 */
+  right: 6px; /* 챗봇 아이콘과 정렬 */
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2563eb 0%, #4facfe 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4), 
+              0 0 0 1px rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  overflow: hidden;
+  z-index: 1001;
+  /* 스르륵 효과 - 기본 상태 */
+  opacity: 0 !important;
+  transform: translateY(20px) !important;
+  transition: all 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+  pointer-events: all; /* 마우스 이벤트 항상 활성화 */
+  visibility: hidden; /* 숨김 처리는 visibility로 */
+}
+
+.floating-notification-icon__svg {
+  width: 24px;
+  height: 24px;
+  stroke: currentColor;
+  fill: none;
+}
+
+.floating-notification-icon:hover {
+  transform: scale(1.1);
+  box-shadow: 0 8px 30px rgba(37, 99, 235, 0.7);
+  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+}
+
+.floating-notification-icon:active {
+  transform: scale(0.95);
+  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.5);
+}
+
+/* 스르륵 위로 올라오는 효과 - show 클래스 */
+.floating-notification-icon.show {
+  opacity: 1 !important;
+  transform: translateY(-10px) !important;
+  visibility: visible; /* 보이게 처리 */
+}
+
+/* 리플 효과 */
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.floating-notification-icon::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.floating-notification-icon:active::before {
+  width: 100px;
+  height: 100px;
+}
+
+/* 기존 챗봇 아이콘 */
+.floating-chat-icon {
   width: 60px;
   height: 60px;
   border-radius: 50%;
   border: none;
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #4facfe 100%);
   color: white;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 20px rgba(79, 172, 254, 0.4);
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 1000;
 }
 
 .floating-chat-icon:hover {
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 8px 30px rgba(79, 172, 254, 0.6);
+  transform: scale(1.05);
+  box-shadow: 0 8px 30px rgba(37, 99, 235, 0.6);
+}
+
+/* 호버 시 아이콘 변형 효과 - 연결자와 함께 */
+.floating-chat-wrapper:hover .floating-chat-icon {
+  transform: scale(0.96);
+  box-shadow: 0 6px 25px rgba(37, 99, 235, 0.6);
 }
 
 .floating-chat-icon:active {
@@ -29,8 +136,8 @@
 
 .floating-chat-icon:focus {
   outline: none;
-  box-shadow: 0 4px 20px rgba(79, 172, 254, 0.4),
-    0 0 0 3px rgba(79, 172, 254, 0.2);
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4),
+    0 0 0 3px rgba(37, 99, 235, 0.2);
 }
 
 /* 크기별 스타일 */
@@ -57,17 +164,17 @@
 
 /* 열린 상태 스타일 */
 .floating-icon--open {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-  box-shadow: 0 4px 20px rgba(255, 107, 107, 0.4);
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+  box-shadow: 0 4px 20px rgba(220, 38, 38, 0.4);
 }
 
 .floating-icon--open:hover {
-  box-shadow: 0 8px 30px rgba(255, 107, 107, 0.6);
+  box-shadow: 0 8px 30px rgba(220, 38, 38, 0.6);
 }
 
 .floating-icon--open:focus {
-  box-shadow: 0 4px 20px rgba(255, 107, 107, 0.4),
-    0 0 0 3px rgba(255, 107, 107, 0.2);
+  box-shadow: 0 4px 20px rgba(220, 38, 38, 0.4),
+    0 0 0 3px rgba(220, 38, 38, 0.2);
 }
 
 /* 아이콘 내용 */
@@ -101,48 +208,13 @@
   height: 24px;
 }
 
-/* 알림 배지 */
-.floating-icon__badge {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  background: #ff4757;
-  color: white;
-  border-radius: 50%;
-  min-width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 600;
-  border: 2px solid white;
-  animation: pulse 2s infinite;
-}
-
-.floating-icon__badge-text {
-  line-height: 1;
-  padding: 0 4px;
-}
-
-/* 펄스 애니메이션 */
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7);
-  }
-  70% {
-    transform: scale(1.1);
-    box-shadow: 0 0 0 10px rgba(255, 71, 87, 0);
-  }
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(255, 71, 87, 0);
-  }
-}
 
 /* 모바일 반응형 */
 @media (max-width: 768px) {
+  .floating-chat-wrapper {
+    bottom: 140px; /* 글쓰기 버튼과 충분한 간격 확보 */
+  }
+  
   .floating-chat-icon {
     bottom: 90px; /* 모바일에서 하단 네비게이션과의 간격 조정 */
     right: 16px;
@@ -166,6 +238,15 @@
 
 /* 매우 작은 화면 */
 @media (max-width: 480px) {
+  .floating-chat-wrapper {
+    bottom: 110px; /* 매우 작은 화면에서도 충분한 간격 확보 */
+  }
+
+  /* 모바일기준 소셜페이지에서 글쓰기버튼과 충분한 간격 확보 */
+  .floating-chat-wrapper.social-override {
+    bottom: 170px; 
+  }
+  
   .floating-chat-icon {
     width: 56px;
     height: 56px;
@@ -185,18 +266,15 @@
     transition: none;
   }
 
-  .floating-icon__badge {
-    animation: none;
-  }
 }
 
 /* 다크 모드 지원 (선택사항) */
 @media (prefers-color-scheme: dark) {
   .floating-chat-icon {
-    box-shadow: 0 4px 20px rgba(79, 172, 254, 0.6);
+    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.6);
   }
 
   .floating-chat-icon:hover {
-    box-shadow: 0 8px 30px rgba(79, 172, 254, 0.8);
+    box-shadow: 0 8px 30px rgba(37, 99, 235, 0.8);
   }
 }

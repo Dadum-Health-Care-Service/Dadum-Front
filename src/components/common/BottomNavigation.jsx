@@ -15,6 +15,8 @@ import styles from "./BottomNavigation.module.css";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
+import NotificationDot from "./NotificationDot";
+import { RunContext } from "../../context/RunContext";
 
 // 탭 설정을 상수로 분리
 const NAVIGATION_TABS = [
@@ -31,13 +33,18 @@ const NAVIGATION_TABS = [
 ];
 
 // 개별 탭 아이템 컴포넌트
-const NavigationTab = ({ tab }) => {
+const NavigationTab = ({ tab, isNotify }) => {
   const navigate = useNavigate();
   const location = useLocation();
-
+  const { isRunning } = useContext(RunContext);
   const IconComponent = tab.icon;
 
-  const isActive = location.pathname === tab.to;
+  const isActive =
+    location.pathname.startsWith('/mypage') 
+    ? tab.to === '/mypage' 
+    : location.pathname === '/shop' || location.pathname === '/orders'
+    ? tab.to === '/shop'
+    : location.pathname === tab.to;
 
   const handleClick = () => {
     navigate(tab.to);
@@ -52,7 +59,19 @@ const NavigationTab = ({ tab }) => {
   return (
     <Nav.Item className={styles.navItem}>
       <Nav.Link className={getNavLinkClassName()} onClick={handleClick}>
-        <IconComponent className={styles.icon} />
+        {isRunning && tab.to === "/routine" ? (
+          <img
+            src={"/img/RunningRoutine.gif"}
+            style={{
+              width: "20px",
+              height: "23px",
+              color: location.pathname === "/routine" ? "#2563eb" : "grey",
+            }}
+          />
+        ) : (
+          <IconComponent className={styles.icon} />
+        )}
+
         <span className={styles.label}>{tab.label}</span>
       </Nav.Link>
     </Nav.Item>
@@ -60,17 +79,22 @@ const NavigationTab = ({ tab }) => {
 };
 
 // 메인 BottomNavigation 컴포넌트
-const BottomNavigation = () => {
+const BottomNavigation = ({ isNotify }) => {
   const { user } = useContext(AuthContext);
   const renderNavigationTabs = () => {
     return NAVIGATION_TABS.filter((tab) => {
-      if (user.roles.includes("SUPER_ADMIN")) {
+      if (user.roles?.includes("SUPER_ADMIN")) {
         return tab.to !== "/mypage";
       } else {
         return tab.to !== "/admin";
       }
       return true;
-    }).map((tab) => <NavigationTab key={tab.to} tab={tab} />);
+    }).map((tab, i) => (
+      <React.Fragment key={i}>
+        <NavigationTab key={tab.to} tab={tab} />
+        {isNotify === "REQUEST_ROLE" && <NotificationDot />}
+      </React.Fragment>
+    ));
   };
 
   return (

@@ -1,0 +1,256 @@
+.fraudDetection {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.fraudDetection h2 {
+  color: #333;
+  margin-bottom: 30px;
+  text-align: center;
+  font-size: 2rem;
+}
+
+/* 상태 카드 */
+.statusCard {
+  margin-bottom: 20px;
+}
+
+.statusGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  align-items: center;
+}
+
+.statusItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.statusLabel {
+  font-weight: 600;
+  color: #555;
+}
+
+.statusValue {
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.healthy {
+  background: #d4edda;
+  color: #155724;
+}
+
+.unhealthy {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* 테스트 카드 */
+.testCard {
+  margin-bottom: 20px;
+}
+
+
+.testForm {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+  align-items: end;
+}
+
+.detectButton {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.detectButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.detectButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 결과 카드 */
+.resultsCard {
+  margin-bottom: 20px;
+}
+
+.resultsList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.resultItem {
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.resultHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.resultHeader h4 {
+  margin: 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.riskIndicator {
+  padding: 8px 16px;
+  border-radius: 20px;
+  color: white;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-align: center;
+  min-width: 120px;
+}
+
+.resultDetails {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.detailLabel {
+  font-weight: 600;
+  color: #555;
+}
+
+.detailValue {
+  font-weight: 700;
+  color: #333;
+}
+
+.recommendation {
+  grid-column: 1 / -1;
+  background: #e3f2fd;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+  border-left: 4px solid #2196f3;
+}
+
+.error {
+  grid-column: 1 / -1;
+  background: #ffebee;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+  border-left: 4px solid #f44336;
+  color: #c62828;
+}
+
+/* 도움말 카드 */
+.helpCard {
+  margin-bottom: 20px;
+}
+
+.helpContent h4 {
+  color: #333;
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+}
+
+.helpContent ul {
+  margin: 0 0 20px 0;
+  padding-left: 20px;
+}
+
+.helpContent li {
+  margin-bottom: 8px;
+  line-height: 1.5;
+  color: #555;
+}
+
+.helpContent strong {
+  color: #333;
+  font-weight: 600;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .fraudDetection {
+    padding: 15px;
+  }
+  
+  .fraudDetection h2 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+  
+  .statusGrid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .testForm {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .resultHeader {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+  
+  .resultDetails {
+    grid-template-columns: 1fr;
+  }
+  
+  .detailRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .fraudDetection {
+    padding: 10px;
+  }
+  
+  .resultItem {
+    padding: 15px;
+  }
+  
+  .riskIndicator {
+    min-width: auto;
+    font-size: 0.8rem;
+    padding: 6px 12px;
+  }
+}
