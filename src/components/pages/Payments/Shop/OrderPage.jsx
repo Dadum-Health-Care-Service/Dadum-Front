@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import PaymentModal from '../PaymentModal';
 import AddressSearch from '../AddressSearch';
 import { AuthContext } from '../../../../context/AuthContext';
-// import './OrderPage.css'; // CSS 파일이 없으므로 주석 처리
+import styles from './OrderPage.module.css';
 
 export default function OrderPage() {
   const { user } = useContext(AuthContext);
@@ -244,125 +244,127 @@ export default function OrderPage() {
   }
 
   return (
-    <div className="order-page-container">
-      <Container className="py-5">
+    <div className={styles.orderPageContainer}>
+      <Container fluid className="py-5">
         {/* 뒤로가기 버튼 */}
         <div className="mb-4">
-          <Button variant="outline-secondary" onClick={handleBackToProduct}>
+          <Button className={styles.backButton} onClick={handleBackToProduct}>
             ← 상품 목록 페이지로 돌아가기
           </Button>
         </div>
 
         {/* 로그인 상태 안내 */}
         {user ? (
-          <Alert variant="info" className="mb-4">
-            <strong>{user.email}</strong>님의 정보로 주문 페이지가 구성되었습니다.
+          <Alert className={`${styles.userInfoAlert} mb-4`}>
+            <div className="alert-heading">주문자 정보</div>
+            <div className="alert-text">
+              <strong>{user.email}</strong>님의 정보로 주문 페이지가 구성되었습니다.
+            </div>
           </Alert>
         ) : (
-          <Alert variant="warning" className="mb-4">
-            로그인하지 않았습니다. <Button variant="link" className="p-0" onClick={() => navigate('/login')}>로그인</Button>하여 개인 정보를 자동으로 입력할 수 있습니다.
+          <Alert className={`${styles.warningAlert} mb-4`}>
+            <div className="alert-heading">로그인 안내</div>
+            <div className="alert-text">
+              로그인하지 않았습니다. <Button variant="link" className="p-0" onClick={() => navigate('/login')}>로그인</Button>하여 개인 정보를 자동으로 입력할 수 있습니다.
+            </div>
           </Alert>
         )}
 
-        <Row>
-          <Col lg={8}>
+        <Row className="g-4">
+          <Col lg={8} md={12}>
             {/* 주문자 정보 */}
-            <Card className="mb-4">
-              <Card.Header>
-                <h5 className="mb-0">주문자정보</h5>
+            <Card className={styles.ordererInfoCard}>
+              <Card.Header className={styles.ordererInfoHeader}>
+                <h5 className={styles.ordererInfoTitle}>주문자정보</h5>
               </Card.Header>
-              <Card.Body>
+              <Card.Body className={styles.ordererInfoBody}>
                 <Row>
-                  <Col md={4}>
+                  <Col md={4} sm={12}>
                     <Form.Group className="mb-3">
-                      <Form.Label>이름</Form.Label>
+                      <Form.Label className={styles.formLabel}>이름</Form.Label>
                       <Form.Control
                         type="text"
+                        className={styles.formControl}
                         value={ordererInfo.name}
                         onChange={(e) => handleInputChange('orderer', 'name', e.target.value)}
                         placeholder={user ? "자동 입력됨" : "이름을 입력하세요"}
                       />
                     </Form.Group>
                   </Col>
-                  <Col md={8}>
+                  <Col md={8} sm={12}>
                     <Form.Group className="mb-3">
-                      <Form.Label>이메일</Form.Label>
-                      <Row>
-                        <Col xs={5}>
-                          <Form.Control
-                            type="text"
-                            value={ordererInfo.email.split('@')[0] || ''}
-                            onChange={(e) => {
-                              const domain = ordererInfo.email.split('@')[1] || 'gmail.com';
-                              handleInputChange('orderer', 'email', `${e.target.value}@${domain}`);
-                            }}
-                            placeholder={user ? "자동 입력됨" : "이메일을 입력하세요"}
-                          />
-                        </Col>
-                        <Col xs={1} className="text-center d-flex align-items-center">
-                          @
-                        </Col>
-                        <Col xs={6}>
-                          <Form.Select
-                            value={ordererInfo.email.split('@')[1] || 'gmail.com'}
-                            onChange={(e) => {
-                              const username = ordererInfo.email.split('@')[0] || '';
-                              handleInputChange('orderer', 'email', `${username}@${e.target.value}`);
-                            }}
-                          >
-                            <option value="gmail.com">gmail.com</option>
-                            <option value="naver.com">naver.com</option>
-                            <option value="daum.net">daum.net</option>
-                            <option value="hanmail.net">hanmail.net</option>
-                          </Form.Select>
-                        </Col>
-                      </Row>
+                      <Form.Label className={styles.formLabel}>연락처</Form.Label>
+                      <Form.Control
+                        type="tel"
+                        className={styles.formControl}
+                        value={ordererInfo.phone}
+                        onChange={(e) => handleInputChange('orderer', 'phone', e.target.value)}
+                        placeholder={user ? "자동 입력됨" : "전화번호 (-을 제외한 숫자만 입력해 주세요)"}
+                      />
                     </Form.Group>
                   </Col>
                 </Row>
-                                 <Row>
-                   <Col md={12}>
-                     <Form.Group className="mb-3">
-                       <Form.Label>연락처</Form.Label>
-                       <Form.Control
-                         type="tel"
-                         value={ordererInfo.phone}
-                         onChange={(e) => handleInputChange('orderer', 'phone', e.target.value)}
-                         placeholder={user ? "자동 입력됨" : "전화번호 (-을 제외한 숫자만 입력해 주세요)"}
-                       />
-                     </Form.Group>
-                   </Col>
-                 </Row>
                 <Row>
-                  <Col md={12}>
+                  <Col md={12} sm={12}>
                     <Form.Group className="mb-3">
-                      <Form.Label>주소</Form.Label>
-                      <Row>
-                        <Col xs={4}>
-                          <Form.Control
-                            type="text"
-                            placeholder="우편번호"
-                            value={ordererInfo.zipCode || ''}
-                            readOnly
-                          />
-                        </Col>
-                        <Col xs={8}>
-                          <AddressSearch 
-                            onAddressSelect={(addressData) => handleAddressSelect(addressData, 'orderer')}
-                            buttonText="우편번호"
-                          />
-                        </Col>
-                      </Row>
+                      <Form.Label className={styles.formLabel}>이메일</Form.Label>
+                      <div className={styles.emailInputGroup}>
+                        <Form.Control
+                          type="text"
+                          className={`${styles.formControl} ${styles.emailInput}`}
+                          value={ordererInfo.email.split('@')[0] || ''}
+                          onChange={(e) => {
+                            const domain = ordererInfo.email.split('@')[1] || 'gmail.com';
+                            handleInputChange('orderer', 'email', `${e.target.value}@${domain}`);
+                          }}
+                          placeholder={user ? "자동 입력됨" : "이메일을 입력하세요"}
+                        />
+                        <span className={styles.emailAt}>@</span>
+                        <Form.Select
+                          className={`${styles.formControl} ${styles.emailSelect}`}
+                          value={ordererInfo.email.split('@')[1] || 'gmail.com'}
+                          onChange={(e) => {
+                            const username = ordererInfo.email.split('@')[0] || '';
+                            handleInputChange('orderer', 'email', `${username}@${e.target.value}`);
+                          }}
+                        >
+                          <option value="gmail.com">gmail.com</option>
+                          <option value="naver.com">naver.com</option>
+                          <option value="daum.net">daum.net</option>
+                          <option value="hanmail.net">hanmail.net</option>
+                        </Form.Select>
+                      </div>
+                    </Form.Group>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col md={12} sm={12}>
+                    <Form.Group className="mb-3">
+                      <Form.Label className={styles.formLabel}>주소</Form.Label>
+                      <div className={styles.addressInputGroup}>
+                        <Form.Control
+                          type="text"
+                          className={`${styles.formControl} ${styles.zipCodeInput}`}
+                          placeholder="우편번호"
+                          value={ordererInfo.zipCode || ''}
+                          readOnly
+                        />
+                        <AddressSearch 
+                          onAddressSelect={(addressData) => handleAddressSelect(addressData, 'orderer')}
+                          buttonText="우편번호"
+                          className={styles.addressSearchButton}
+                        />
+                      </div>
                       <Form.Control
                         type="text"
-                        className="mt-2"
+                        className={`${styles.formControl} ${styles.addressInput}`}
                         placeholder="기본주소"
                         value={ordererInfo.address || ''}
                         readOnly
                       />
                       <Form.Control
                         type="text"
-                        className="mt-2"
+                        className={`${styles.formControl} ${styles.detailAddressInput}`}
                         placeholder="상세주소"
                         value={ordererInfo.detailAddress || ''}
                         onChange={(e) => handleInputChange('orderer', 'detailAddress', e.target.value)}
@@ -374,28 +376,30 @@ export default function OrderPage() {
             </Card>
 
             {/* 배송 정보 */}
-            <Card className="mb-4">
-              <Card.Header>
-                <h5 className="mb-0">배송 정보</h5>
+            <Card className={styles.deliveryInfoCard}>
+              <Card.Header className={styles.deliveryInfoHeader}>
+                <h5 className={styles.deliveryInfoTitle}>배송 정보</h5>
               </Card.Header>
-              <Card.Body>
+              <Card.Body className={styles.deliveryInfoBody}>
                 <Row>
-                  <Col md={6}>
+                  <Col md={6} sm={12}>
                     <Form.Group className="mb-3">
-                      <Form.Label>이름</Form.Label>
+                      <Form.Label className={styles.formLabel}>이름</Form.Label>
                       <Form.Control
                         type="text"
+                        className={styles.formControl}
                         value={deliveryInfo.name}
                         onChange={(e) => handleInputChange('delivery', 'name', e.target.value)}
                         placeholder={user ? "자동 입력됨" : "수취인 이름을 입력하세요"}
                       />
                     </Form.Group>
                   </Col>
-                  <Col md={6}>
+                  <Col md={6} sm={12}>
                     <Form.Group className="mb-3">
-                      <Form.Label>연락처 1</Form.Label>
+                      <Form.Label className={styles.formLabel}>연락처 1</Form.Label>
                       <Form.Control
                         type="tel"
+                        className={styles.formControl}
                         value={deliveryInfo.contact1}
                         onChange={(e) => handleInputChange('delivery', 'contact1', e.target.value)}
                         placeholder={user ? "자동 입력됨" : "전화번호 (-을 제외한 숫자만 입력해 주세요)"}
@@ -404,11 +408,12 @@ export default function OrderPage() {
                   </Col>
                 </Row>
                 <Row>
-                  <Col md={6}>
+                  <Col md={6} sm={12}>
                     <Form.Group className="mb-3">
-                      <Form.Label>연락처 2</Form.Label>
+                      <Form.Label className={styles.formLabel}>연락처 2</Form.Label>
                       <Form.Control
                         type="tel"
+                        className={styles.formControl}
                         value={deliveryInfo.contact2}
                         onChange={(e) => handleInputChange('delivery', 'contact2', e.target.value)}
                         placeholder="전화번호 (-을 제외한 숫자만 입력해 주세요)"
@@ -417,109 +422,114 @@ export default function OrderPage() {
                   </Col>
                 </Row>
                 <Row>
-                  <Col md={12}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>배송지 선택</Form.Label>
-                      <div className="mb-2">
-                        <Form.Check
-                          inline
-                          type="radio"
-                          name="deliveryType"
-                          id="domestic"
-                          label="국내배송"
-                          checked={deliveryInfo.deliveryType === 'domestic'}
-                          onChange={() => handleInputChange('delivery', 'deliveryType', 'domestic')}
-                        />
-                        <Form.Check
-                          inline
-                          type="radio"
-                          name="deliveryType"
-                          id="overseas"
-                          label="해외배송"
-                          checked={deliveryInfo.deliveryType === 'overseas'}
-                          onChange={() => handleInputChange('delivery', 'deliveryType', 'overseas')}
-                        />
+                  <Col md={12} sm={12}>
+                    <Form.Group className={`${styles.deliveryTypeGroup} mb-3`}>
+                      <Form.Label className={styles.deliveryTypeLabel}>배송지 선택</Form.Label>
+                      <div className={styles.deliveryTypeOptions}>
+                        <div className={styles.deliveryTypeRadio}>
+                          <Form.Check
+                            type="radio"
+                            name="deliveryType"
+                            id="domestic"
+                            checked={deliveryInfo.deliveryType === 'domestic'}
+                            onChange={() => handleInputChange('delivery', 'deliveryType', 'domestic')}
+                          />
+                          <label htmlFor="domestic">국내배송</label>
+                        </div>
+                        <div className={styles.deliveryTypeRadio}>
+                          <Form.Check
+                            type="radio"
+                            name="deliveryType"
+                            id="overseas"
+                            checked={deliveryInfo.deliveryType === 'overseas'}
+                            onChange={() => handleInputChange('delivery', 'deliveryType', 'overseas')}
+                          />
+                          <label htmlFor="overseas">해외배송</label>
+                        </div>
                       </div>
-                      <div>
-                        <Form.Check
-                          inline
-                          type="radio"
-                          name="addressType"
-                          id="home"
-                          label="자택"
-                          checked={deliveryInfo.addressType === 'home'}
-                          onChange={() => handleInputChange('delivery', 'addressType', 'home')}
-                        />
-                        <Form.Check
-                          inline
-                          type="radio"
-                          name="addressType"
-                          id="company"
-                          label="회사"
-                          checked={deliveryInfo.addressType === 'company'}
-                          onChange={() => handleInputChange('delivery', 'addressType', 'company')}
-                        />
-                        <Form.Check
-                          inline
-                          type="radio"
-                          name="addressType"
-                          id="recent"
-                          label="최근 배송지"
-                          checked={deliveryInfo.addressType === 'recent'}
-                          onChange={() => handleInputChange('delivery', 'addressType', 'recent')}
-                        />
-                        <Form.Check
-                          inline
-                          type="radio"
-                          name="addressType"
-                          id="list"
-                          label="배송지 목록"
-                          checked={deliveryInfo.addressType === 'list'}
-                          onChange={() => handleInputChange('delivery', 'addressType', 'list')}
-                        />
-                        <Form.Check
-                          inline
-                          type="radio"
-                          name="addressType"
-                          id="new"
-                          label="신규 배송지"
-                          checked={deliveryInfo.addressType === 'new'}
-                          onChange={() => handleInputChange('delivery', 'addressType', 'new')}
-                        />
+                      <div className={styles.addressTypeOptions}>
+                        <div className={styles.addressTypeRadio}>
+                          <Form.Check
+                            type="radio"
+                            name="addressType"
+                            id="home"
+                            checked={deliveryInfo.addressType === 'home'}
+                            onChange={() => handleInputChange('delivery', 'addressType', 'home')}
+                          />
+                          <label htmlFor="home">자택</label>
+                        </div>
+                        <div className={styles.addressTypeRadio}>
+                          <Form.Check
+                            type="radio"
+                            name="addressType"
+                            id="company"
+                            checked={deliveryInfo.addressType === 'company'}
+                            onChange={() => handleInputChange('delivery', 'addressType', 'company')}
+                          />
+                          <label htmlFor="company">회사</label>
+                        </div>
+                        <div className={styles.addressTypeRadio}>
+                          <Form.Check
+                            type="radio"
+                            name="addressType"
+                            id="recent"
+                            checked={deliveryInfo.addressType === 'recent'}
+                            onChange={() => handleInputChange('delivery', 'addressType', 'recent')}
+                          />
+                          <label htmlFor="recent">최근 배송지</label>
+                        </div>
+                        <div className={styles.addressTypeRadio}>
+                          <Form.Check
+                            type="radio"
+                            name="addressType"
+                            id="list"
+                            checked={deliveryInfo.addressType === 'list'}
+                            onChange={() => handleInputChange('delivery', 'addressType', 'list')}
+                          />
+                          <label htmlFor="list">배송지 목록</label>
+                        </div>
+                        <div className={styles.addressTypeRadio}>
+                          <Form.Check
+                            type="radio"
+                            name="addressType"
+                            id="new"
+                            checked={deliveryInfo.addressType === 'new'}
+                            onChange={() => handleInputChange('delivery', 'addressType', 'new')}
+                          />
+                          <label htmlFor="new">신규 배송지</label>
+                        </div>
                       </div>
                     </Form.Group>
                   </Col>
                 </Row>
                 <Row>
-                  <Col md={12}>
+                  <Col md={12} sm={12}>
                     <Form.Group className="mb-3">
-                      <Form.Label>주소</Form.Label>
-                      <Row>
-                        <Col xs={4}>
-                          <Form.Control
-                            type="text"
-                            placeholder="우편번호"
-                            value={deliveryInfo.zipCode || ''}
-                            readOnly
-                          />
-                        </Col>
-                        <Col xs={8}>
-                          <AddressSearch 
-                            onAddressSelect={(addressData) => handleAddressSelect(addressData, 'delivery')}
-                            buttonText="우편번호"
-                          />
-                        </Col>
-                      </Row>
+                      <Form.Label className={styles.formLabel}>주소</Form.Label>
+                      <div className={styles.addressInputGroup}>
+                        <Form.Control
+                          type="text"
+                          className={`${styles.formControl} ${styles.zipCodeInput}`}
+                          placeholder="우편번호"
+                          value={deliveryInfo.zipCode || ''}
+                          readOnly
+                        />
+                        <AddressSearch 
+                          onAddressSelect={(addressData) => handleAddressSelect(addressData, 'delivery')}
+                          buttonText="우편번호"
+                          className={styles.addressSearchButton}
+                        />
+                      </div>
                       <Form.Control
                         type="text"
-                        className="mt-2"
+                        className={`${styles.formControl} ${styles.addressInput}`}
                         placeholder="기본주소"
                         value={deliveryInfo.address || ''}
                         readOnly
                       />
                       <Form.Control
                         type="text"
-                        className="mt-2"
+                        className={`${styles.formControl} ${styles.detailAddressInput}`}
                         placeholder="상세주소"
                         value={deliveryInfo.detailAddress || ''}
                         onChange={(e) => handleInputChange('delivery', 'detailAddress', e.target.value)}
@@ -528,64 +538,66 @@ export default function OrderPage() {
                   </Col>
                 </Row>
                 <Row>
-                  <Col md={12}>
+                  <Col md={12} sm={12}>
                     <Form.Group className="mb-3">
-                      <Form.Label>배송메세지 (100자내외)</Form.Label>
+                      <Form.Label className={styles.formLabel}>배송메세지 (100자내외)</Form.Label>
                       <Form.Control
                         as="textarea"
                         rows={3}
+                        className={styles.deliveryMessageTextarea}
                         value={deliveryInfo.deliveryMessage}
                         onChange={(e) => handleInputChange('delivery', 'deliveryMessage', e.target.value)}
                         placeholder="배송 관련 메시지를 입력해주세요"
                       />
-                      <small className="text-muted">
+                      <small className={styles.deliveryMessageHelp}>
                         0/200 bytes (* 영문/숫자 기준 200자, 한글 기준 100자까지 입력 가능합니다.)
                       </small>
-                      <div className="mt-2">
-                        <small className="text-danger">
-                          * 배송기사님이 확인하는 메세지입니다<br/>
-                          (ex: 부재시 경비실에 보관해 주세요. 배송전 연락주세요. 등)<br/>
-                          * 추가 요청 사항은 게시글 또는 고객센터로 문의주시시기 바랍니다
-                        </small>
+                      <div className={styles.deliveryMessageWarning}>
+                        * 배송기사님이 확인하는 메세지입니다<br/>
+                        (ex: 부재시 경비실에 보관해 주세요. 배송전 연락주세요. 등)<br/>
+                        * 추가 요청 사항은 게시글 또는 고객센터로 문의주시시기 바랍니다
                       </div>
                     </Form.Group>
                   </Col>
                 </Row>
                 <Row>
-                  <Col md={12}>
+                  <Col md={12} sm={12}>
                     <Form.Group className="mb-3">
-                      <Form.Label>무통장 입금자명</Form.Label>
+                      <Form.Label className={styles.formLabel}>무통장 입금자명</Form.Label>
                       <Form.Control
                         type="text"
+                        className={styles.depositorNameInput}
                         value={deliveryInfo.depositorName}
                         onChange={(e) => handleInputChange('delivery', 'depositorName', e.target.value)}
                         placeholder="입금자명을 입력해주세요"
                       />
-                      <small className="text-muted">(주문자와 같을경우 생략 가능)</small>
+                      <small className={styles.depositorNameHelp}>(주문자와 같을경우 생략 가능)</small>
                     </Form.Group>
                   </Col>
                 </Row>
                 <Row>
-                  <Col md={12}>
-                    <Form.Check
-                      type="checkbox"
-                      id="saveAddress"
-                      label="해당 배송지 정보를 나의 회원정보로 등록합니다."
-                    />
+                  <Col md={12} sm={12}>
+                    <div className={styles.saveAddressCheckbox}>
+                      <Form.Check
+                        type="checkbox"
+                        id="saveAddress"
+                      />
+                      <label htmlFor="saveAddress">해당 배송지 정보를 나의 회원정보로 등록합니다.</label>
+                    </div>
                   </Col>
                 </Row>
               </Card.Body>
             </Card>
 
             {/* 주문자 동의 */}
-            <Card className="mb-4">
-              <Card.Header>
-                <h5 className="mb-0">주문자 동의</h5>
+            <Card className={styles.agreementCard}>
+              <Card.Header className={styles.agreementHeader}>
+                <h5 className={styles.agreementTitle}>주문자 동의</h5>
               </Card.Header>
-              <Card.Body>
+              <Card.Body className={styles.agreementBody}>
                 <div className="mb-4">
                   <h6>개인정보 수집·이용</h6>
-                  <Table bordered>
+                  <Table bordered className={styles.privacyTable}>
                     <thead>
                       <tr>
                         <th>목적</th>
@@ -613,110 +625,109 @@ export default function OrderPage() {
                 </div>
                 <div>
                   <h6>주문동의</h6>
-                  <Form.Check
-                    type="checkbox"
-                    id="allAgree"
-                    label="전체 동의"
-                    checked={agreements.allAgree}
-                    onChange={() => handleAgreementChange('allAgree')}
-                    className="mb-2"
-                  />
-                  <Form.Check
-                    type="checkbox"
-                    id="personalInfo"
-                    label="[개인정보 수집·이용] 동의"
-                    checked={agreements.personalInfo}
-                    onChange={() => handleAgreementChange('personalInfo')}
-                    className="mb-2"
-                  />
-                  <Form.Check
-                    type="checkbox"
-                    id="orderAgree"
-                    label="주문 / 결제 정보를 확인하여 구매 진행에 동의합니다."
-                    checked={agreements.orderAgree}
-                    onChange={() => handleAgreementChange('orderAgree')}
-                  />
+                  <div className={styles.agreementCheckboxes}>
+                    <div className={`${styles.agreementCheckbox} ${styles.allAgreeCheckbox}`}>
+                      <Form.Check
+                        type="checkbox"
+                        id="allAgree"
+                        checked={agreements.allAgree}
+                        onChange={() => handleAgreementChange('allAgree')}
+                      />
+                      <label htmlFor="allAgree">전체 동의</label>
+                    </div>
+                    <div className={styles.agreementCheckbox}>
+                      <Form.Check
+                        type="checkbox"
+                        id="personalInfo"
+                        checked={agreements.personalInfo}
+                        onChange={() => handleAgreementChange('personalInfo')}
+                      />
+                      <label htmlFor="personalInfo">[개인정보 수집·이용] 동의</label>
+                    </div>
+                    <div className={styles.agreementCheckbox}>
+                      <Form.Check
+                        type="checkbox"
+                        id="orderAgree"
+                        checked={agreements.orderAgree}
+                        onChange={() => handleAgreementChange('orderAgree')}
+                      />
+                      <label htmlFor="orderAgree">주문 / 결제 정보를 확인하여 구매 진행에 동의합니다.</label>
+                    </div>
+                  </div>
                 </div>
               </Card.Body>
             </Card>
           </Col>
 
-          <Col lg={4}>
+          <Col lg={4} md={12}>
             {/* 주문 상품 할인적용 */}
-            <Card className="mb-4">
-              <Card.Header>
-                <h5 className="mb-0">주문상품 할인적용</h5>
+            <Card className={styles.discountCard}>
+              <Card.Header className={styles.discountHeader}>
+                <h5 className={styles.discountTitle}>주문상품 할인적용</h5>
               </Card.Header>
-              <Card.Body>
-                <div className="price-breakdown">
-                  <div className="d-flex justify-content-between mb-2">
-                    <span>상품금액</span>
-                    <span>{product.price.toLocaleString()}원</span>
+              <Card.Body className={styles.discountBody}>
+                <div className={styles.priceBreakdown}>
+                  <div className={styles.priceItem}>
+                    <span className={styles.priceLabel}>상품금액</span>
+                    <span className={styles.priceValue}>{product.price.toLocaleString()}원</span>
                   </div>
-                  <div className="d-flex justify-content-between mb-2">
-                    <span>할인금액</span>
-                    <span className="text-danger">-{discountInfo.deposit.toLocaleString()}원</span>
+                  <div className={styles.priceItem}>
+                    <span className={styles.priceLabel}>할인금액</span>
+                    <span className={`${styles.priceValue} ${styles.discountValue}`}>-{discountInfo.deposit.toLocaleString()}원</span>
                   </div>
-                  <div className="d-flex justify-content-between mb-2">
-                    <span>추가금액</span>
-                    <span>0원</span>
+                  <div className={styles.priceItem}>
+                    <span className={styles.priceLabel}>추가금액</span>
+                    <span className={styles.priceValue}>0원</span>
                   </div>
-                  <hr />
-                  <div className="d-flex justify-content-between mb-3">
-                    <strong>결제 예정금액</strong>
-                    <strong className="text-danger fs-5">{calculateTotalAmount().toLocaleString()}원</strong>
+                  <div className={styles.priceItem}>
+                    <span className={styles.priceLabel}>결제 예정금액</span>
+                    <span className={`${styles.priceValue} ${styles.totalAmount}`}>{calculateTotalAmount().toLocaleString()}원</span>
                   </div>
                 </div>
 
-                <div className="mb-3">
+                <div className={styles.depositSection}>
                   <Form.Group>
-                    <Form.Label>예치금 사용</Form.Label>
-                    <Row>
-                      <Col xs={8}>
-                        <Form.Control
-                          type="number"
-                          value={discountInfo.deposit}
-                          onChange={(e) => handleInputChange('discount', 'deposit', parseInt(e.target.value) || 0)}
-                          min="0"
-                          max={product.price}
-                        />
-                      </Col>
-                      <Col xs={4}>
+                    <Form.Label className={styles.depositLabel}>예치금 사용</Form.Label>
+                    <div className={styles.depositInputGroup}>
+                      <Form.Control
+                        type="number"
+                        className={styles.depositInput}
+                        value={discountInfo.deposit}
+                        onChange={(e) => handleInputChange('discount', 'deposit', parseInt(e.target.value) || 0)}
+                        min="0"
+                        max={product.price}
+                      />
+                      <div className={styles.depositCheckbox}>
                         <Form.Check
                           type="checkbox"
                           id="useAllDeposit"
-                          label="전액사용"
                         />
-                      </Col>
-                    </Row>
-                    <small className="text-danger">(사용가능 예치금: {discountInfo.availableDeposit.toLocaleString()}원)</small>
+                        <label htmlFor="useAllDeposit">전액사용</label>
+                      </div>
+                    </div>
+                    <small className={styles.depositHelp}>(사용가능 예치금: {discountInfo.availableDeposit.toLocaleString()}원)</small>
                   </Form.Group>
                 </div>
 
-                <div className="mb-3">
+                <div className={styles.couponSection}>
                   <Form.Group>
-                    <Form.Label>쿠폰 사용</Form.Label>
-                    <Row>
-                      <Col xs={8}>
-                        <Form.Control
-                          type="text"
-                          value={discountInfo.coupon}
-                          onChange={(e) => handleInputChange('discount', 'coupon', e.target.value)}
-                          placeholder="쿠폰 코드 입력"
-                        />
-                      </Col>
-                      <Col xs={4}>
-                        <Button variant="secondary" size="sm">쿠폰선택</Button>
-                      </Col>
-                    </Row>
+                    <Form.Label className={styles.couponLabel}>쿠폰 사용</Form.Label>
+                    <div className={styles.couponInputGroup}>
+                      <Form.Control
+                        type="text"
+                        className={styles.couponInput}
+                        value={discountInfo.coupon}
+                        onChange={(e) => handleInputChange('discount', 'coupon', e.target.value)}
+                        placeholder="쿠폰 코드 입력"
+                      />
+                      <Button className={styles.couponButton}>쿠폰선택</Button>
+                    </div>
                   </Form.Group>
                 </div>
 
                 <div className="text-center">
                   <Button
-                    variant="warning"
-                    size="lg"
-                    className="w-100"
+                    className={styles.paymentButton}
                     onClick={handleProceedToPayment}
                     disabled={!agreements.personalInfo || !agreements.orderAgree}
                   >
@@ -724,24 +735,22 @@ export default function OrderPage() {
                   </Button>
                 </div>
 
-                <div className="mt-3">
-                  <small className="text-danger">
-                    # 배송준비기간은 재고 유무에 따라 주문일로부터 1~3일 소요되며,<br/>
-                    재고가 없는 경우 별도 안내드립니다.
-                  </small>
+                <div className={styles.deliveryNotice}>
+                  # 배송준비기간은 재고 유무에 따라 주문일로부터 1~3일 소요되며,<br/>
+                  재고가 없는 경우 별도 안내드립니다.
                 </div>
               </Card.Body>
             </Card>
 
             {/* 사이드 네비게이션 */}
-            <div className="side-navigation">
-              <Button variant="dark" className="w-100 mb-2">
+            <div className={styles.sideNavigation}>
+              <Button className={`${styles.sideNavButton} ${styles.talkButton}`}>
                 💬 TALK
               </Button>
-              <Button variant="outline-secondary" className="w-100 mb-2">
+              <Button className={`${styles.sideNavButton} ${styles.infoButton}`}>
                 매장 안내
               </Button>
-              <Button variant="outline-secondary" className="w-100 mb-2">
+              <Button className={`${styles.sideNavButton} ${styles.infoButton}`}>
                 교환
               </Button>
             </div>
