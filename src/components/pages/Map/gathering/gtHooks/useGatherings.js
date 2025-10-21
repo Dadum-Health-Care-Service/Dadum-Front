@@ -21,15 +21,6 @@ export const useGatherings = () => {
       const response = await GET('/gatherings', params, false); // 인증 비활성화
       
       if (response.data.success) {
-        console.log('=== API 응답 디버깅 ===');
-        console.log('전체 응답:', response.data);
-        console.log('모임 목록:', response.data.gatherings);
-        if (response.data.gatherings && response.data.gatherings.length > 0) {
-          console.log('첫 번째 모임 데이터:', response.data.gatherings[0]);
-          console.log('첫 번째 모임 scheduleType:', response.data.gatherings[0].scheduleType);
-          console.log('첫 번째 모임 scheduleDetails:', response.data.gatherings[0].scheduleDetails);
-          console.log('첫 번째 모임 nextMeetingDate:', response.data.gatherings[0].nextMeetingDate);
-        }
         setGatherings(response.data.gatherings || []);
         return response.data.gatherings || [];
       } else {
@@ -37,7 +28,6 @@ export const useGatherings = () => {
       }
     } catch (err) {
       setError(err.response?.data?.error || err.message || '모임 목록을 불러오는데 실패했습니다.');
-      console.error('모임 목록 조회 실패:', err);
       throw err;
     } finally {
       setLoading(false);
@@ -65,7 +55,6 @@ export const useGatherings = () => {
       }
     } catch (err) {
       setError(err.response?.data?.error || err.message || '모임 생성에 실패했습니다.');
-      console.error('모임 생성 실패:', err);
       throw err;
     } finally {
       setLoading(false);
@@ -94,7 +83,6 @@ export const useGatherings = () => {
       }
     } catch (err) {
       setError(err.response?.data?.error || err.message || '모임 수정에 실패했습니다.');
-      console.error('모임 수정 실패:', err);
       throw err;
     } finally {
       setLoading(false);
@@ -121,7 +109,6 @@ export const useGatherings = () => {
       }
     } catch (err) {
       setError(err.response?.data?.error || err.message || '모임 삭제에 실패했습니다.');
-      console.error('모임 삭제 실패:', err);
       throw err;
     } finally {
       setLoading(false);
@@ -152,7 +139,6 @@ export const useGatherings = () => {
       }
     } catch (err) {
       setError(err.response?.data?.error || err.message || '모임 참여에 실패했습니다.');
-      console.error('모임 참여 실패:', err);
       throw err;
     } finally {
       setLoading(false);
@@ -183,7 +169,6 @@ export const useGatherings = () => {
       }
     } catch (err) {
       setError(err.response?.data?.error || err.message || '모임 나가기에 실패했습니다.');
-      console.error('모임 나가기 실패:', err);
       throw err;
     } finally {
       setLoading(false);
@@ -212,7 +197,6 @@ export const useGatherings = () => {
       }
     } catch (err) {
       setError(err.response?.data?.error || err.message || '참여자 수 동기화에 실패했습니다.');
-      console.error('참여자 수 동기화 실패:', err);
       throw err;
     } finally {
       setLoading(false);

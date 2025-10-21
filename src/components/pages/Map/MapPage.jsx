@@ -22,7 +22,7 @@ export default function MapPage() {
     userAddress,
     locationSource,
     addressInfo,
-    loadKakaoMapScript,
+    ensureReady,
     initMap,
     getCurrentLocation,
     createCurrentPositionMarker,
@@ -91,14 +91,16 @@ export default function MapPage() {
 
   // 카카오맵 초기화
   useEffect(() => {
-    loadKakaoMapScript().then(() => {
+    console.log('🚀 ensureReady 호출 시작');
+    ensureReady().then(() => {
+      console.log('✅ ensureReady 완료');
       if (mapRef.current) {
         initMap(mapRef.current);
       }
     }).catch((error) => {
-      console.error('카카오맵 로드 실패:', error);
+      console.error('❌ 카카오맵 로드 실패:', error);
     });
-  }, [loadKakaoMapScript, initMap]);
+  }, [ensureReady, initMap]);
 
   // 사용자 위치 초기화 (우선순위: 주소 → GPS → 강남역)
   useEffect(() => {
@@ -243,19 +245,29 @@ export default function MapPage() {
     try {
       // 좌표를 주소로 변환
       const address = await convertLocationToAddress({ lat, lng });
-
-      // 클릭한 위치 정보 저장
+      
+      console.log('🔍 주소 변환 결과:', address);
+      
+      // 주소 정보가 없을 때 좌표 기반 임시 주소 생성
+      let finalAddress = address.address || address.roadAddress;
+      
+      console.log('📍 최종 주소:', finalAddress);
+      
+      if (!finalAddress) {
+        // 좌표 기반 임시 주소 생성
+        finalAddress = `위도: ${lat.toFixed(6)}, 경도: ${lng.toFixed(6)}`;
+        console.log('⚠️ 주소 변환 실패, 좌표 기반 주소 사용:', finalAddress);
+      }
+      
       setClickedLocation({
         latitude: lat,
         longitude: lng,
-        address: address.address || address.roadAddress || '주소 정보 없음'
+        address: finalAddress
       });
 
       // 모임 생성 모달 표시
       setShowCreateFromMap(true);
     } catch (error) {
-      console.error('주소 변환 실패:', error);
-
       // 주소 변환 실패 시에도 모달 표시
       setClickedLocation({
         latitude: lat,

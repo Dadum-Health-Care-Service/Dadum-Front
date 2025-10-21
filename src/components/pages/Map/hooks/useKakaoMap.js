@@ -1,5 +1,23 @@
 import { useState, useCallback } from 'react';
 
+// 단순한 준비 가드 (index.html에서 이미 로드됨)
+function ensureReady() {
+  return new Promise((resolve, reject) => {
+    if (!window.kakao?.maps?.load) {
+      reject(new Error('SDK 미로드'));
+      return;
+    }
+    
+    window.kakao.maps.load(() => {
+      if (!window.kakao?.maps?.services?.Geocoder) {
+        reject(new Error('services 미포함'));
+        return;
+      }
+      resolve();
+    });
+  });
+}
+
 export const useKakaoMap = () => {
   const [mapInstance, setMapInstance] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -10,68 +28,15 @@ export const useKakaoMap = () => {
   const [locationSource, setLocationSource] = useState(null); // 위치 소스 (gps, address, default)
   const [addressInfo, setAddressInfo] = useState(null); // 좌표에서 변환된 주소 정보
 
-  // 카카오맵 스크립트 로드
-  const loadKakaoMapScript = useCallback(() => {
-    return new Promise((resolve, reject) => {
-      const scriptExists = document.querySelector('script[src*="dapi.kakao.com"]');
-
-
-      if (!scriptExists) {
-        const script = document.createElement('script');
-        // 임시로 하드코딩된 API 키 사용 (테스트용)
-        const apiKey = import.meta.env.VITE_KAKAO_JS_KEY || '90a6d8b34f968dff4707881c54949f46';
-        script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${apiKey}&libraries=services&autoload=false`;
-        script.async = true;
-        document.head.appendChild(script);
-
-        script.onload = () => {
-          if (window.kakao?.maps) {
-            window.kakao.maps.load(() => {
-              setIsLoaded(true);
-              resolve();
-            });
-          } else {
-            setTimeout(() => {
-              if (window.kakao?.maps) {
-                window.kakao.maps.load(() => {
-                  setIsLoaded(true);
-                  resolve();
-                });
-              } else {
-                reject(new Error('카카오맵 API를 사용할 수 없습니다.'));
-              }
-            }, 100);
-          }
-        };
-        script.onerror = (error) => {
-          console.error('❌ 카카오맵 스크립트 로드 실패:', error);
-          reject(new Error('카카오맵 스크립트 로드 실패'));
-        };
-      } else if (window.kakao?.maps) {
-        window.kakao.maps.load(() => {
-          setIsLoaded(true);
-          resolve();
-        });
-      } else {
-        // 기존 스크립트 제거 후 새로 로드
-        const existingScript = document.querySelector('script[src*="dapi.kakao.com"]');
-        if (existingScript) {
-          existingScript.remove();
-        }
-        // 재귀 호출로 새로 로드
-        loadKakaoMapScript().then(resolve).catch(reject);
-      }
-    });
+  // 공통 준비 가드
+  const ensureReadyCallback = useCallback(async () => {
+    await ensureReady();
+    setIsLoaded(true);
   }, []);
 
   // 지도 초기화
-  const initMap = useCallback((container, options = {}) => {
-    if (!window.kakao?.maps) {
-      console.error('카카오맵 API가 로드되지 않았습니다.');
-      return null;
-    }
-    
-    // 사용자 위치가 있으면 그 위치를 중심으로, 없으면 강남역을 기본으로
+  const initMap = useCallback(async (container, options = {}) => {
+    await ensureReady();
     const centerLat = userLocation?.lat || 37.4979; // 강남역
     const centerLng = userLocation?.lng || 127.0276; // 강남역
     
@@ -81,11 +46,10 @@ export const useKakaoMap = () => {
       ...options
     };
     
-    
     const map = new window.kakao.maps.Map(container, defaultOptions);
     setMapInstance(map);
     return map;
-  }, [userLocation]);
+  }, [ensureReady, userLocation]);
 
   // 현재 위치 가져오기
   const getCurrentLocation = useCallback(() => {
@@ -140,13 +104,9 @@ export const useKakaoMap = () => {
   }, []);
 
   // 주소를 좌표로 변환하는 함수
-  const getCoordinatesFromAddress = useCallback((address) => {
+  const getCoordinatesFromAddress = useCallback(async (address) => {
+    await ensureReady();
     return new Promise((resolve, reject) => {
-      if (!window.kakao?.maps?.services) {
-        reject(new Error('카카오맵 서비스가 로드되지 않았습니다.'));
-        return;
-      }
-
       const geocoder = new window.kakao.maps.services.Geocoder();
       
       geocoder.addressSearch(address, (result, status) => {
@@ -159,7 +119,6 @@ export const useKakaoMap = () => {
           };
           resolve(coords);
         } else {
-          console.error('❌ 주소 변환 실패:', status);
           reject(new Error('주소를 찾을 수 없습니다.'));
         }
       });
@@ -167,33 +126,48 @@ export const useKakaoMap = () => {
   }, []);
 
   // 좌표를 주소로 변환하는 함수 (역지오코딩)
-  const getAddressFromCoordinates = useCallback((lat, lng) => {
+  const getAddressFromCoordinates = useCallback(async (lat, lng) => {
+    await ensureReady();
     return new Promise((resolve, reject) => {
-      if (!window.kakao?.maps?.services) {
-        reject(new Error('카카오맵 서비스가 로드되지 않았습니다.'));
-        return;
+      try {
+        console.log('🔧 Geocoder 생성 시도:', {
+          services: !!window.kakao?.maps?.services,
+          Geocoder: !!window.kakao?.maps?.services?.Geocoder
+        });
+        
+        const geocoder = new window.kakao.maps.services.Geocoder();
+        const coord = new window.kakao.maps.LatLng(lat, lng);
+        
+        console.log('📍 좌표 변환 시도:', { lat, lng });
+        
+        geocoder.coord2Address(coord.getLng(), coord.getLat(), (result, status) => {
+          console.log('🔍 Geocoder 결과:', { result, status });
+          
+          if (status === window.kakao.maps.services.Status.OK && result && result.length > 0) {
+            const firstResult = result[0];
+            console.log('✅ 첫 번째 결과:', firstResult);
+            
+            const addressInfo = {
+              address: firstResult.address?.address_name || '',
+              roadAddress: firstResult.road_address?.address_name || '',
+              region1Depth: firstResult.address?.region_1depth_name || '',
+              region2Depth: firstResult.address?.region_2depth_name || '',
+              region3Depth: firstResult.address?.region_3depth_name || ''
+            };
+            console.log('🏠 최종 주소 정보:', addressInfo);
+            resolve(addressInfo);
+          } else {
+            console.log('❌ 주소 변환 실패:', { status, result });
+            reject(new Error(`주소를 찾을 수 없습니다. 상태: ${status}`));
+          }
+        });
+      } catch (error) {
+        console.log('💥 Geocoder 에러:', error);
+        reject(error);
       }
-
-      const geocoder = new window.kakao.maps.services.Geocoder();
-      const coord = new window.kakao.maps.LatLng(lat, lng);
-      
-      geocoder.coord2Address(coord.getLng(), coord.getLat(), (result, status) => {
-        if (status === window.kakao.maps.services.Status.OK) {
-          const addressInfo = {
-            address: result[0].address?.address_name || '',
-            roadAddress: result[0].road_address?.address_name || '',
-            region1Depth: result[0].address?.region_1depth_name || '',
-            region2Depth: result[0].address?.region_2depth_name || '',
-            region3Depth: result[0].address?.region_3depth_name || ''
-          };
-          resolve(addressInfo);
-        } else {
-          console.error('❌ 좌표 → 주소 변환 실패:', status);
-          reject(new Error('주소를 찾을 수 없습니다.'));
-        }
-      });
     });
   }, []);
+
 
   // 현재 위치 마커 이미지 생성
   const createCurrentPositionMarker = useCallback(() => {
@@ -224,6 +198,7 @@ export const useKakaoMap = () => {
     setError('');
 
     try {
+      await ensureReady(); // ★ 반드시 먼저
       // 1순위: 사용자 설정 주소 사용
       if (userAddress) {
         try {
@@ -277,7 +252,7 @@ export const useKakaoMap = () => {
     userAddress,
     locationSource,
     addressInfo,
-    loadKakaoMapScript,
+    ensureReady: ensureReadyCallback,
     initMap,
     getCurrentLocation,
     createCurrentPositionMarker,
