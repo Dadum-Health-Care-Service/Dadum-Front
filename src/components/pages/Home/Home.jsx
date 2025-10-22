@@ -9,6 +9,7 @@ import ButtonComponent from "../../common/ButtonComponent";
 import FitnessNewsFeed from "../News/FitnessNewsFeed";
 import { useApi } from "../../../utils/api/useApi";
 import { useAuth } from "../../../context/AuthContext";
+import axios from "axios";
 const Home = () => {
   const navigate = useNavigate();
   const [userStats, setUserStats] = useState({
@@ -109,10 +110,11 @@ const Home = () => {
       try {
         const location = await getLocation();
         
-        const response = await GET(
+        const response = await axios.get(
           `https://api.openweathermap.org/data/2.5/weather?lat=${location.lat}&lon=${location.lon}&appid=${API_KEY}&units=metric&lang=kr`,
-          {},
-          false
+          {
+            withCredentials: false
+          }
         );
         
         if (response.status === 200) {
@@ -150,11 +152,15 @@ const Home = () => {
           try {
             const KAKAO_API_KEY = import.meta.env.VITE_KAKAO_API_KEY;
             if (KAKAO_API_KEY) {
-              const kakaoResponse = await GET(
-                `https://dapi.kakao.com/v2/local/geo/coord2address.json?x=${location.lon}&y=${location.lat}`,
-                {},
-                false
-              );
+            const kakaoResponse = await axios.get(
+              `https://dapi.kakao.com/v2/local/geo/coord2address.json?x=${location.lon}&y=${location.lat}`,
+              {
+                headers: {
+                  Authorization: `KakaoAK ${KAKAO_API_KEY}`
+                },
+                withCredentials: false
+              }
+            );
               
               if (kakaoResponse.status === 200) {
                 const kakaoData = kakaoResponse.data;
