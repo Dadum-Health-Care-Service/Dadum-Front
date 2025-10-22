@@ -265,49 +265,17 @@ export default function Social() {
         {/* 오른쪽: 소셜 피드 */}
         <Col lg={8} md={12}>
           <div className="m-feed">
-        {filtered.map((p) => (
-          <article key={p.id} className="m-card">
-            <header className="m-card-head">
-              <span className="avatar" aria-hidden />
-              <div className="meta">
-                <div className="row1">
-                  <span className="name">{p.name}</span>
-                  <span className="sub">@{p.handle} · {p.time}</span>
-                </div>
-              </div>
-              <button className="more" aria-label="more">⋯</button>
-            </header>
-
-            <div className="m-card-body">
-              <p className="text">{p.body}</p>
-              <div className="tags">
-                {p.tags.map((t) => (
-                  <span key={t} className="chip">{t}</span>
-                ))}
-              </div>
-              <div className="media-skeleton" />
-            </div>
-
-            <footer className="m-card-actions">
-              <button className="icon-txt" type="button">💬 <span>{p.stats.comments}</span></button>
-              <button className="icon-txt" type="button">🔁 <span>{p.stats.reposts}</span></button>
-              <button className="icon-txt" type="button">❤️ <span>{p.stats.likes}</span></button>
-            </footer>
-          </article>
-        ))}
+            {loading ? (
+              <div className="loading">게시글을 불러오는 중...</div>
+            ) : (
+              filtered.map((p) => (
+                <PostCard key={p.postId} post={p} onAfterMutate={loadFeed} />
+              ))
+            )}
           </div>
         </Col>
       </Row>
 
-      <div className="m-feed">
-        {loading ? (
-          <div className="loading">게시글을 불러오는 중...</div>
-        ) : (
-          filtered.map((p) => (
-            <PostCard key={p.postId} post={p} onAfterMutate={loadFeed} />
-          ))
-        )}
-      </div>
 
       <button
         className="compose-fab"
