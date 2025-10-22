@@ -98,8 +98,8 @@ const Home = () => {
             },
             (error) => {
               console.warn('위치 정보 가져오기 실패:', error);
-              // 위치 정보 실패 시 서울 좌표 사용
-              resolve({ lat: 37.5665, lon: 126.9780 });
+              // 위치 정보 실패 시 강남역 좌표 사용
+              resolve({ lat: 37.4979, lon: 127.0276 });
             },
             {
               timeout: 5000,

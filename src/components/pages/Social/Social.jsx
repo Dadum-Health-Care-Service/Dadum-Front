@@ -1,4 +1,8 @@
-import React, { useEffect, useMemo, useState } from "react";
+// src/components/pages/social/social.jsx
+import React, { useMemo, useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
+import { Row, Col } from "react-bootstrap";
+import ParticipatedGatheringsSidebar from "./components/ParticipatedGatheringsSidebar";
 import "./Social.css";
 import PostCard from "./components/PostCard.jsx";
 import { useApi } from "../../../utils/api/useApi";
@@ -251,15 +255,27 @@ export default function Social() {
         </div>
       </div>
 
-      <div className="m-feed">
-        {loading ? (
-          <div className="loading">게시글을 불러오는 중...</div>
-        ) : (
-          filtered.map((p) => (
-            <PostCard key={p.postId} post={p} onAfterMutate={loadFeed} />
-          ))
-        )}
-      </div>
+      {/* 메인 콘텐츠 */}
+      <Row className="g-4">
+        {/* 왼쪽: 참여한 모임 사이드바 */}
+        <Col lg={4} md={12}>
+          <ParticipatedGatheringsSidebar />
+        </Col>
+
+        {/* 오른쪽: 소셜 피드 */}
+        <Col lg={8} md={12}>
+          <div className="m-feed">
+            {loading ? (
+              <div className="loading">게시글을 불러오는 중...</div>
+            ) : (
+              filtered.map((p) => (
+                <PostCard key={p.postId} post={p} onAfterMutate={loadFeed} />
+              ))
+            )}
+          </div>
+        </Col>
+      </Row>
+
 
       <button
         className="compose-fab"

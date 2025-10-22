@@ -10,6 +10,7 @@ import { app } from "../firebase";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import "./App.css";
+import ErrorBoundary from "./components/common/ErrorBoundary.jsx";
 
 // Pages
 import Home from "./components/pages/Home/Home.jsx";
@@ -173,7 +174,12 @@ function AppContent() {
                     </div>
                   }
                 ></Route>
-                <Route path="/social" element={<Social />}></Route>
+                <Route path="/social" element={
+                  <ErrorBoundary>
+                    <Social />
+                  </ErrorBoundary>
+                }></Route>
+                <Route path="/place" element={<MapPage />}></Route>
                 <Route path="/mypage/*" element={<MyPage />}></Route>
                 <Route path="/seller/*" element={<SellerMain />}></Route>
                 <Route
