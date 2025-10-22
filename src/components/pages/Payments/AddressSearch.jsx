@@ -1,10 +1,64 @@
 import { Button } from 'react-bootstrap';
+import { useEffect, useState } from 'react';
 
 const AddressSearch = ({ onAddressSelect, buttonText = "우편번호" }) => {
+  const [isApiLoaded, setIsApiLoaded] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Kakao Maps API 동적 로드
+  useEffect(() => {
+    const loadKakaoAPI = () => {
+      // 이미 로드되어 있는지 확인
+      if (window.daum && window.daum.Postcode) {
+        setIsApiLoaded(true);
+        return;
+      }
+
+      // 스크립트가 이미 로드 중인지 확인
+      if (document.querySelector('script[src*="postcode.v2.js"]')) {
+        // 이미 로드 중이면 완료를 기다림
+        const checkLoaded = () => {
+          if (window.daum && window.daum.Postcode) {
+            setIsApiLoaded(true);
+          } else {
+            setTimeout(checkLoaded, 100);
+          }
+        };
+        checkLoaded();
+        return;
+      }
+
+      // 동적으로 스크립트 로드
+      const script = document.createElement('script');
+      script.src = 'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+      script.async = true;
+      script.onload = () => {
+        setIsApiLoaded(true);
+        setIsLoading(false);
+      };
+      script.onerror = () => {
+        console.error('Kakao Maps API 로드 실패');
+        setIsLoading(false);
+        alert('주소 검색 서비스를 불러올 수 없습니다. 페이지를 새로고침해주세요.');
+      };
+      
+      document.head.appendChild(script);
+      setIsLoading(true);
+    };
+
+    loadKakaoAPI();
+  }, []);
+
   const handleAddressSearch = () => {
+    // API가 로드되지 않았거나 로딩 중인 경우
+    if (!isApiLoaded || isLoading) {
+      alert('주소 검색 서비스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
+
     // 다음 우편번호 API가 로드되었는지 확인
     if (!window.daum || !window.daum.Postcode) {
-      alert('주소 검색 서비스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+      alert('주소 검색 서비스를 불러올 수 없습니다. 페이지를 새로고침해주세요.');
       return;
     }
 
@@ -61,8 +115,9 @@ const AddressSearch = ({ onAddressSelect, buttonText = "우편번호" }) => {
       variant="outline-secondary" 
       onClick={handleAddressSearch}
       type="button"
+      disabled={!isApiLoaded || isLoading}
     >
-      {buttonText}
+      {isLoading ? '로딩 중...' : buttonText}
     </Button>
   );
 };

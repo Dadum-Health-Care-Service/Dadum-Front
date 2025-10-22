@@ -4,12 +4,14 @@ import ModalComponent from '../../common/ModalComponent';
 import CardComponent from '../../common/CardComponent';
 import ContainerComponent from '../../common/ContainerComponent';
 import { useApi } from '../../../utils/api/useApi';
+import { useAuth } from '../../../context/AuthContext';
 import styles from './CalorieCam.module.css';
 
 const CalorieCam = () => {
   console.log("CalorieCam 컴포넌트가 렌더링되었습니다!");
   
   const { POST } = useApi();
+  const { user } = useAuth();
   
   // ML 서버 베이스 URL 설정 (DailySummary와 동일)
   const ML_BASE = import.meta.env.VITE_API_URL || "/ml";
@@ -147,8 +149,17 @@ const CalorieCam = () => {
   // 자동 저장 함수 (원래 로직)
   const saveMealLogAutomatically = async (analysisData) => {
     try {
+      // 사용자 ID 가져오기
+      let userId = user?.usersId || localStorage.getItem("usersId");
+      if (!userId) {
+        console.error('사용자 ID를 찾을 수 없습니다.');
+        setSaveMessage('사용자 정보를 찾을 수 없습니다. 다시 로그인해주세요.');
+        setShowSaveModal(true);
+        return;
+      }
+
       const mealLogData = {
-        user_id: 'demo',
+        user_id: String(userId),
         timestamp: new Date().toISOString(),
         label: analysisData.label,
         grams: Math.round(analysisData.grams),
@@ -156,19 +167,18 @@ const CalorieCam = () => {
         protein_g: Math.round(analysisData.protein_g * 10) / 10,
         carbs_g: Math.round(analysisData.carbs_g * 10) / 10,
         fat_g: Math.round(analysisData.fat_g * 10) / 10,
-        fiber_g: Math.round(analysisData.fiber_g * 10) / 10,
-        meta: analysisData.meta
+        fiber_g: Math.round(analysisData.fiber_g * 10) / 10
       };
 
-      console.log('자동 저장 시작:', mealLogData);
+      console.log('[CalorieCam] 자동 저장 시작:', mealLogData);
 
-      const response = await POST('/meal-log', mealLogData, false, 'ai');
+      const response = await POST('/meal-log', mealLogData, true, 'ai');
       const savedMeal = response.data;
-      console.log('식사 로그 자동 저장 완료:', savedMeal);
+      console.log('[CalorieCam] 식사 로그 자동 저장 완료:', savedMeal);
       setSaveMessage(`식사 정보가 저장되었습니다!\n음식: ${savedMeal.label}\n칼로리: ${savedMeal.calories}kcal`);
       setShowSaveModal(true);
     } catch (error) {
-      console.error('자동 저장 중 오류:', error);
+      console.error('[CalorieCam] 자동 저장 중 오류:', error);
       setSaveMessage('저장 중 오류가 발생했습니다. 다시 시도해주세요.');
       setShowSaveModal(true);
     }
