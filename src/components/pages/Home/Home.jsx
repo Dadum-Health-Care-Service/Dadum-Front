@@ -9,7 +9,6 @@ import ButtonComponent from "../../common/ButtonComponent";
 import FitnessNewsFeed from "../News/FitnessNewsFeed";
 import { useApi } from "../../../utils/api/useApi";
 import { useAuth } from "../../../context/AuthContext";
-import axios from "axios";
 const Home = () => {
   const navigate = useNavigate();
   const [userStats, setUserStats] = useState({
@@ -26,7 +25,6 @@ const Home = () => {
   const { GET, POST } = useApi();
   const { user } = useAuth();
 
-  // 날씨 아이콘 매핑
   const getWeatherIcon = (condition) => {
     const conditionLower = condition?.toLowerCase() || '';
     if (conditionLower.includes('sun') || conditionLower.includes('clear')) return FaSun;
@@ -34,10 +32,9 @@ const Home = () => {
     if (conditionLower.includes('rain') || conditionLower.includes('shower')) return FaCloudRain;
     if (conditionLower.includes('snow')) return FaSnowflake;
     if (conditionLower.includes('wind')) return FaWind;
-    return FaSun; // 기본값
+    return FaSun;
   };
 
-  // 날씨에 따른 운동 추천
   const getExerciseRecommendation = (weather) => {
     if (!weather) return { exercise: "운동을 시작해보세요!", description: "좋은 하루 되세요." };
     
@@ -77,13 +74,11 @@ const Home = () => {
     }
   };
 
-  // 날씨 정보 가져오기 (OpenWeatherMap API 사용)
   const fetchWeather = useCallback(async () => {
     setWeatherLoading(true);
     try {
       const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
       
-      // 사용자 위치 가져오기
       const getLocation = () => {
         return new Promise((resolve, reject) => {
           if (!navigator.geolocation) {
@@ -100,12 +95,11 @@ const Home = () => {
             },
             (error) => {
               console.warn('위치 정보 가져오기 실패:', error);
-              // 위치 정보 실패 시 강남역 좌표 사용
               resolve({ lat: 37.4979, lon: 127.0276 });
             },
             {
               timeout: 5000,
-              maximumAge: 300000, // 5분간 캐시 사용
+              maximumAge: 300000,
               enableHighAccuracy: false
             }
           );
@@ -113,21 +107,17 @@ const Home = () => {
       };
       
       try {
-        // 사용자 위치 가져오기
         const location = await getLocation();
         
-        // OpenWeatherMap API 호출 (위도/경도 기반) - axios 사용
-        const response = await axios.get(
+        const response = await GET(
           `https://api.openweathermap.org/data/2.5/weather?lat=${location.lat}&lon=${location.lon}&appid=${API_KEY}&units=metric&lang=kr`,
-          {
-            withCredentials: false
-          }
+          {},
+          false
         );
         
         if (response.status === 200) {
           const data = response.data;
           
-          // 날씨 상태 매핑
           const weatherMain = data.weather[0].main;
           let condition = 'Clear';
           
@@ -156,19 +146,14 @@ const Home = () => {
               condition = 'Clear';
           }
           
-          // 카카오 API로 정확한 주소 가져오기 - axios 사용
           let locationName = '현재 위치';
           try {
             const KAKAO_API_KEY = import.meta.env.VITE_KAKAO_API_KEY;
             if (KAKAO_API_KEY) {
-              const kakaoResponse = await axios.get(
+              const kakaoResponse = await GET(
                 `https://dapi.kakao.com/v2/local/geo/coord2address.json?x=${location.lon}&y=${location.lat}`,
-                {
-                  headers: {
-                    Authorization: `KakaoAK ${KAKAO_API_KEY}`
-                  },
-                  withCredentials: false
-                }
+                {},
+                false
               );
               
               if (kakaoResponse.status === 200) {
@@ -177,16 +162,15 @@ const Home = () => {
                 if (kakaoData.documents && kakaoData.documents.length > 0) {
                   const address = kakaoData.documents[0].address;
                   if (address) {
-                    // 시/구/동 형식으로 표시
-                    const region = address.region_2depth_name || ''; // 구
-                    const dong = address.region_3depth_name || ''; // 동
+                    const region = address.region_2depth_name || '';
+                    const dong = address.region_3depth_name || '';
                     
                     if (dong) {
                       locationName = `${region} ${dong}`;
                     } else if (region) {
                       locationName = region;
                     } else {
-                      locationName = address.region_1depth_name || '현재 위치'; // 시/도
+                      locationName = address.region_1depth_name || '현재 위치';
                     }
                   }
                 }
@@ -196,7 +180,6 @@ const Home = () => {
             }
           } catch (kakaoError) {
             console.warn('카카오 주소 변환 실패:', kakaoError);
-            // 카카오 API 실패 시 OpenWeatherMap의 이름 사용
             if (data.name) {
               locationName = data.name;
             }
@@ -216,34 +199,33 @@ const Home = () => {
         console.warn('OpenWeatherMap API 호출 실패, 모의 데이터 사용:', apiError);
       }
       
-      // API 실패 시 계절에 맞는 모의 데이터 사용
       const currentMonth = new Date().getMonth() + 1;
       let mockWeather;
       
-      if (currentMonth >= 10 || currentMonth <= 2) { // 겨울 (10-2월) - 10월도 포함
+      if (currentMonth >= 10 || currentMonth <= 2) {
         mockWeather = {
-          temperature: Math.floor(Math.random() * 15) + 5, // 5-20도
+          temperature: Math.floor(Math.random() * 15) + 5,
           condition: ['Cloudy', 'Clear'][Math.floor(Math.random() * 2)],
           location: '서울특별시',
           humidity: Math.floor(Math.random() * 30) + 50
         };
-      } else if (currentMonth >= 3 && currentMonth <= 5) { // 봄 (3-5월)
+      } else if (currentMonth >= 3 && currentMonth <= 5) {
         mockWeather = {
-          temperature: Math.floor(Math.random() * 15) + 10, // 10-25도
+          temperature: Math.floor(Math.random() * 15) + 10,
           condition: ['Clear', 'Cloudy'][Math.floor(Math.random() * 2)],
           location: '서울특별시',
           humidity: Math.floor(Math.random() * 40) + 40
         };
-      } else if (currentMonth >= 6 && currentMonth <= 8) { // 여름 (6-8월)
+      } else if (currentMonth >= 6 && currentMonth <= 8) {
         mockWeather = {
-          temperature: Math.floor(Math.random() * 10) + 25, // 25-35도
+          temperature: Math.floor(Math.random() * 10) + 25,
           condition: ['Clear', 'Cloudy'][Math.floor(Math.random() * 2)],
           location: '서울특별시',
           humidity: Math.floor(Math.random() * 30) + 60
         };
-      } else { // 가을 (9월)
+      } else {
         mockWeather = {
-          temperature: Math.floor(Math.random() * 15) + 10, // 10-25도
+          temperature: Math.floor(Math.random() * 15) + 10,
           condition: ['Clear', 'Cloudy'][Math.floor(Math.random() * 2)],
           location: '서울특별시',
           humidity: Math.floor(Math.random() * 40) + 40
@@ -254,7 +236,6 @@ const Home = () => {
       
     } catch (error) {
       console.error('날씨 정보를 가져오는데 실패했습니다:', error);
-      // 최종 에러 시 현재 계절에 맞는 기본값
       const currentMonth = new Date().getMonth() + 1;
       const isWinter = currentMonth >= 10 || currentMonth <= 2;
       
@@ -269,7 +250,6 @@ const Home = () => {
     }
   }, []);
 
-  // 리뷰 데이터
   const reviews = [
     { stars: 5, text: "자세 분석 기능이 정말 정확해요. 혼자서도 올바른 자세로 운동할 수 있어서 좋습니다.", author: "김OO / 직장인" },
     { stars: 5, text: "운동 초보인데도 세트·휴식까지 자동으로 맞춰줘서 성취감이 생겼습니다.", author: "이OO / 대학생" },
@@ -282,7 +262,6 @@ const Home = () => {
   const fetchUserData = useCallback(async () => {
     setLoading(true);
     try {
-      // 루틴 목록 가져오기 (에러가 발생해도 앱이 정상 동작하도록 처리)
       const routinesRes = await GET("/routine/list", {}, true).catch(err => {
         console.warn("루틴 목록 조회 실패 (서버 에러 무시):", err.message);
         return { data: [] };
@@ -291,7 +270,6 @@ const Home = () => {
       const routineArray = routinesRes?.data || [];
       
       if (Array.isArray(routineArray) && routineArray.length > 0) {
-        // 루틴 데이터 변환
         const formattedRoutines = routineArray.map((routine, index) => {
           
           const exerciseCount = routine.saveRoutineDto?.length || 0;
@@ -305,11 +283,7 @@ const Home = () => {
         
         setUserRoutines(formattedRoutines);
         
-        // 루틴 완료 기록 조회하여 통계 계산
         try {
-          // POST /routine/result로 완료 기록 조회 (전체 기록)
-          // 빈 객체를 전달하여 모든 완료 기록 조회 (required=false이므로 날짜 필터 선택적)
-          
           const resultsRes = await POST("/routine/result", {}, true).catch(err => {
             console.warn("루틴 완료 기록 조회 실패:", err.message);
             return { data: [] };
@@ -318,7 +292,6 @@ const Home = () => {
           const results = resultsRes?.data || [];
           
           if (Array.isArray(results) && results.length > 0) {
-            // 오늘 완료된 루틴 개수 계산 (고유한 setId만 카운트)
             const today = new Date().toISOString().split('T')[0];
             
             const todayResults = results.filter(r => {
@@ -326,11 +299,9 @@ const Home = () => {
                 return false;
               }
               
-              // 여러 날짜 형식 지원
               const endDate = new Date(r.tEnd);
               const endDateStr = endDate.toISOString().split('T')[0];
               
-              // 한국 시간대 고려 (UTC+9)
               const koreanToday = new Date();
               koreanToday.setHours(koreanToday.getHours() + 9);
               const koreanTodayStr = koreanToday.toISOString().split('T')[0];
@@ -338,11 +309,9 @@ const Home = () => {
               return endDateStr === today || endDateStr === koreanTodayStr;
             });
             
-            // 오늘 완료된 고유 루틴 ID 추출 (setId 또는 id 사용)
             const uniqueRoutineIds = [...new Set(todayResults.map(r => r.setId || r.id))];
             setTodayCompletedCount(uniqueRoutineIds.length);
             
-            // 총 운동 시간 계산 (routineResult.rouTime: 초 단위)
             const totalSeconds = results.reduce((sum, record) => {
               const time = record.routineResult?.rouTime || 0;
               return sum + time;
@@ -362,7 +331,6 @@ const Home = () => {
             }
             
             
-            // 연속 달성 일수 계산
             const uniqueDates = [...new Set(results.map(r => {
               const date = r.tEnd || r.tStart;
               return date ? new Date(date).toISOString().split('T')[0] : null;
@@ -373,11 +341,9 @@ const Home = () => {
               const today = new Date().toISOString().split('T')[0];
               const latestDate = uniqueDates[0];
               
-              // 오늘 운동했는지 확인 (연속 달성의 시작점)
               if (latestDate === today) {
                 consecutiveDays = 1;
                 
-                // 연속된 날짜 계산 (어제부터 역순으로 확인)
                 for (let i = 1; i < uniqueDates.length; i++) {
                   const prevDate = new Date(uniqueDates[i - 1]);
                   const currDate = new Date(uniqueDates[i]);
@@ -386,11 +352,10 @@ const Home = () => {
                   if (diff === 1) {
                     consecutiveDays++;
                   } else {
-                    break; // 연속이 끊어지면 중단
+                    break;
                   }
                 }
               }
-              // 오늘 운동하지 않았으면 연속 달성은 0
             }
             
             setUserStats({
@@ -399,7 +364,6 @@ const Home = () => {
               totalTime: totalTimeStr
             });
           } else {
-            // 완료 기록이 없는 경우
             setTodayCompletedCount(0);
             setUserStats({
               consecutiveDays: 0,
@@ -437,7 +401,6 @@ const Home = () => {
     } finally {
       setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -445,12 +408,10 @@ const Home = () => {
     fetchWeather();
   }, [fetchUserData, fetchWeather]);
 
-  // 사용자 상태 변경 시 데이터 다시 불러오기
   useEffect(() => {
     if (user) {
       fetchUserData();
     } else {
-      // 로그아웃 시 데이터 초기화
       setUserRoutines([]);
       setTodayCompletedCount(0);
       setUserStats({
@@ -461,7 +422,6 @@ const Home = () => {
     }
   }, [user, fetchUserData]);
 
-  // 리뷰 자동 슬라이드 (5초마다)
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentReviewIndex((prevIndex) => (prevIndex + 2) % reviews.length);
@@ -470,7 +430,6 @@ const Home = () => {
     return () => clearInterval(interval);
   }, [reviews.length]);
 
-  // 화면으로 돌아오거나 탭이 활성화될 때 자동 새로고침
   useEffect(() => {
     const handleFocus = () => fetchUserData();
     const handleVisibility = () => {
@@ -485,15 +444,13 @@ const Home = () => {
   }, [fetchUserData]);
 
   const startRoutine = (routineId) => {
-    // 루틴 페이지로 이동
     navigate('/routine');
   };
 
-  // 시간대별 추천 데이터
   const getRecommendationsByTime = () => {
     const hour = new Date().getHours();
     
-    if (hour >= 6 && hour < 12) { // 아침 (6-12시)
+    if (hour >= 6 && hour < 12) {
       return {
         foods: [
           { name: "바나나", description: "에너지 보충, 운동 전 가벼운 식사" },
@@ -506,7 +463,7 @@ const Home = () => {
           { title: "충분한 수면", description: "7-9시간의 질 좋은 수면으로 회복" }
         ]
       };
-    } else if (hour >= 12 && hour < 18) { // 오후 (12-18시)
+    } else if (hour >= 12 && hour < 18) {
       return {
         foods: [
           { name: "계란", description: "완전한 단백질, 빠른 회복" },
@@ -519,7 +476,7 @@ const Home = () => {
           { title: "충분한 수분 섭취", description: "운동 후 500ml 이상의 물 마시기" }
         ]
       };
-    } else { // 저녁/밤 (18-6시)
+    } else {
       return {
         foods: [
           { name: "닭가슴살", description: "고단백, 저지방, 근육 회복" },
@@ -538,7 +495,6 @@ const Home = () => {
 
   return (
     <ContainerComponent className={styles.home}>
-      {/* Hero */}
       <section className={styles.hero}>
         <Container>
           <Row className="justify-content-center">
@@ -558,7 +514,6 @@ const Home = () => {
         </Container>
       </section>
 
-      {/* Today's Challenges */}
       <section className={styles.challengesSection}>
         <Container>
           <h3 className={styles.sectionTitle}>오늘의 도전 과제</h3>
@@ -630,7 +585,6 @@ const Home = () => {
         </Container>
       </section>
 
-      {/* Quick Routines */}
       <section className={styles.quickRoutines}>
         <Container>
           <div className={styles.sectionHeaderRow}>
@@ -700,7 +654,6 @@ const Home = () => {
         </Container>
       </section>
 
-      {/* Nutrition & Recovery Info */}
       <section className={styles.nutritionSection}>
         <Container>
           <h3 className={styles.sectionTitle}>영양 + 회복 정보</h3>
@@ -745,7 +698,6 @@ const Home = () => {
         </Container>
       </section>
 
-      {/* Weather Exercise Recommendation Section */}
       <section className={styles.tipSection}>
         <Container>
           <Row className="justify-content-center">
@@ -792,7 +744,6 @@ const Home = () => {
         </Container>
       </section>
 
-      {/* Testimonials */}
       <section className={styles.testimonialSection}>
         <Container>
           <h3 className={styles.sectionTitleSm}>What Our Clients Say</h3>
@@ -815,7 +766,6 @@ const Home = () => {
         </Container>
       </section>
 
-      {/* News Section */}
       <section className={styles.newsSection}>
         <Container>
           <FitnessNewsFeed />
