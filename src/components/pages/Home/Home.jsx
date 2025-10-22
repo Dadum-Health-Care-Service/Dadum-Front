@@ -8,6 +8,7 @@ import CardComponent from "../../common/CardComponent";
 import ButtonComponent from "../../common/ButtonComponent";
 import FitnessNewsFeed from "../News/FitnessNewsFeed";
 import { useApi } from "../../../utils/api/useApi";
+import { useAuth } from "../../../context/AuthContext";
 import axios from "axios";
 const Home = () => {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ const Home = () => {
   const [weather, setWeather] = useState(null);
   const [weatherLoading, setWeatherLoading] = useState(true);
   const { GET, POST } = useApi();
+  const { user } = useAuth();
 
   // 날씨 아이콘 매핑
   const getWeatherIcon = (condition) => {
@@ -442,6 +444,22 @@ const Home = () => {
     fetchUserData();
     fetchWeather();
   }, [fetchUserData, fetchWeather]);
+
+  // 사용자 상태 변경 시 데이터 다시 불러오기
+  useEffect(() => {
+    if (user) {
+      fetchUserData();
+    } else {
+      // 로그아웃 시 데이터 초기화
+      setUserRoutines([]);
+      setTodayCompletedCount(0);
+      setUserStats({
+        consecutiveDays: 0,
+        totalRoutines: 0,
+        totalTime: "0시간",
+      });
+    }
+  }, [user, fetchUserData]);
 
   // 리뷰 자동 슬라이드 (5초마다)
   useEffect(() => {
