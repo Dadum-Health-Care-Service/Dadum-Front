@@ -53,7 +53,7 @@ function POST(URL, data = {}, accessToken, isAuth = true, source = "main") {
       return axios.post(host[source] + URL, payload, {
         withCredentials: true,
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+          "Content-Type": "apcation/x-www-form-urlencoded;charset=UTF-8",
           "X-Requested-With": "XMLHttpRequest",
           Accept: "application/json",
         },
