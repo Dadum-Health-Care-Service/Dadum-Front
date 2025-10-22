@@ -60,7 +60,9 @@ export default function MyPage() {
   };
 
   // 사용자가 SELLER 역할을 가지고 있는지 확인
-  console.log(`현재 사용자 정보: ${user?.usersId} ${user?.email}, 사용자 역할: ${user?.roles}`);
+  console.log(
+    `현재 사용자 정보: ${user?.usersId} ${user?.email}, 사용자 역할: ${user?.roles}`
+  );
 
   // 백엔드에서 실제 사용자 역할을 가져와서 확인
   const checkUserRoles = async () => {
@@ -131,12 +133,6 @@ export default function MyPage() {
                   onClick={() => handleHeaderMenuClick("statistics")}
                 >
                   나의 기록
-                </HeaderComponent.MenuItem>
-                <HeaderComponent.MenuItem
-                  active={activeHeaderMenu === "achievements"}
-                  onClick={() => handleHeaderMenuClick("achievements")}
-                >
-                  업적
                 </HeaderComponent.MenuItem>
                 <HeaderComponent.MenuItem
                   active={activeHeaderMenu === "mysocial"}

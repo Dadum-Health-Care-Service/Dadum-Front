@@ -26,13 +26,13 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 messaging.onBackgroundMessage((payload) => {
-  //console.log("payload", payload);
-  // const notificationTitle = payload.notification.title;
-  // const notificationOptions = {
-  //   body: payload.notification.body,
-  //   //icon: payload.notification.icon,
-  // };
-  // self.registration.showNotification(notificationTitle, notificationOptions);
+  console.log("payload", payload);
+  const notificationTitle = payload.notification.title;
+  const notificationOptions = {
+    body: payload.notification.body,
+    icon: "/Dadum-icon.svg",
+  };
+  self.registration.showNotification(notificationTitle, notificationOptions);
 
   self.clients
     .matchAll({ type: "window", includeUncontrolled: true })
@@ -40,6 +40,8 @@ messaging.onBackgroundMessage((payload) => {
       clients.forEach((client) => {
         //console.log("client", client);
         if (payload.data.title.includes("권한 요청")) {
+          client.postMessage(payload);
+        } else {
           client.postMessage(payload);
         }
       });

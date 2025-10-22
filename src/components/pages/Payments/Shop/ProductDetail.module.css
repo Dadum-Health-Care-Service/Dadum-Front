@@ -191,7 +191,7 @@
 }
 
 .buyButton {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #667eea 0%, #3449ff 100%);
   border: none;
   color: white;
   font-weight: 600;
@@ -202,7 +202,7 @@
 }
 
 .buyButton:hover {
-  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+  background: linear-gradient(135deg, #5a67d8 0%, #3449ff 100%);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
@@ -233,7 +233,7 @@
 }
 
 .productDetailsHeader {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #667eea 0%, #3449ff 100%);
   color: white;
   padding: 20px 30px;
   margin: 0;
@@ -316,28 +316,28 @@
   .productDetailContainer {
     padding: 10px;
   }
-  
+
   .productDetailContent {
     padding: 15px;
     margin: 5px;
   }
-  
+
   .productTitle {
     font-size: 1.8rem;
   }
-  
+
   .currentPrice {
     font-size: 1.6rem;
   }
-  
+
   .productImageContainer {
     height: 300px;
   }
-  
+
   .productDetailsBody {
     padding: 20px;
   }
-  
+
   .productDetailsHeader {
     padding: 15px 20px;
     font-size: 1.1rem;
@@ -349,72 +349,73 @@
   .productDetailContainer {
     padding: 5px;
   }
-  
+
   .productDetailContent {
     padding: 10px;
     margin: 0;
     border-radius: 8px;
   }
-  
+
   .productDetailGrid {
     flex-direction: column;
     gap: 20px;
   }
-  
+
   .productImageSection,
   .productInfoSection {
     min-width: unset;
     width: 100%;
   }
-  
+
   .detailsGrid {
     flex-direction: column;
     gap: 20px;
   }
-  
+
   .specificationsSection,
   .deliverySection {
     min-width: unset;
     width: 100%;
   }
-  
+
   .productTitle {
     font-size: 1.5rem;
     line-height: 1.3;
   }
-  
+
   .currentPrice {
     font-size: 1.4rem;
   }
-  
+
   .productImageContainer {
     height: 250px;
     border-radius: 8px;
   }
-  
+
   .productDetailsBody {
     padding: 15px;
   }
-  
+
   .productDetailsHeader {
     padding: 12px 15px;
     font-size: 1rem;
   }
-  
+
   .backButton {
     margin-bottom: 10px;
     padding: 10px;
   }
-  
+
   .purchaseActions {
     gap: 8px;
   }
-  
-  .buyButton, .wishlistButton {
+
+  .buyButton,
+  .wishlistButton {
     padding: 12px;
     font-size: 1rem;
   }
-  
+
   .sectionTitle {
     font-size: 1rem;
     margin-bottom: 15px;

@@ -50,29 +50,26 @@ function ComposeModal({ open, onClose, onSubmit }) {
   const canPost = text.trim().length > 0;
 
   const onFileChange = (e) => {
-    const f = e.target.files?.[0] ?? null;
-    setImageFile(f);
-    if (preview) URL.revokeObjectURL(preview);
-    setPreview(f ? URL.createObjectURL(f) : null);
+    const reader = new FileReader();
+
+    reader.onloadend = function () {
+      const base64String = reader.result; // data:image/png;base64,... 형태
+      setImageFile(base64String);
+      console.log(base64String);
+      setPreview(base64String);
+    };
+
+    reader.readAsDataURL(e.target.files[0]);
   };
 
   const handleSubmit = async () => {
     try {
       setUploading(true);
 
-      let imageUrl = null;
-      if (imageFile) {
-        // 이미지 업로드
-        const formData = new FormData();
-        formData.append("image", imageFile);
-        const uploadResponse = await POST("/posts/upload", formData);
-        imageUrl = uploadResponse.data.imageUrl;
-      }
-
       // 게시글 작성
       await POST("/posts", {
         postContent: text,
-        postImage: imageUrl,
+        postImage: imageFile ? imageFile : "/images/default.png",
         visibility: visibility,
       });
 

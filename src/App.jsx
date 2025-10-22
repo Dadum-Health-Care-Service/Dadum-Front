@@ -63,9 +63,9 @@ function AppContent() {
   usePageView();
   useEffect(() => {
     // Firebase 연결 상태 확인
-    //console.log("Firebase 앱:", app);
-    //console.log("환경변수:", import.meta.env.VITE_FIREBASE_API_KEY);
-    //console.log("알림 권한:", Notification.permission);
+    console.log("Firebase 앱:", app);
+    console.log("환경변수:", import.meta.env.VITE_FIREBASE_API_KEY);
+    console.log("알림 권한:", Notification.permission);
 
     const checkIsMobile = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -76,15 +76,24 @@ function AppContent() {
   }, []);
   // Service Worker 메시지 수신
   useEffect(() => {
+    console.log(navigator);
+    console.log(navigator.serviceWorker);
     if (!navigator.serviceWorker) return;
 
     navigator.serviceWorker.ready.then(() => {
-      //console.log("SW ready");
+      console.log("SW ready");
 
       const handleSWMessage = (event) => {
         console.log("SW 메시지 수신:", event.data);
         if (event.data.data.type === "REQUEST_ROLE") {
           console.log("REQUEST_ROLE");
+          setIsNotify(event.data.data.type);
+          // new Notification("권한요청", {
+          //   body: `테스터`,
+          //   icon: "/img/userAvatar.png",
+          //   tag: "fraud-alert",
+          // });
+        } else {
           setIsNotify(event.data.data.type);
         }
       };
