@@ -1,9 +1,9 @@
-import React, { useEffect, useMemo, useState, useCallback, useRef } from "react";
+import React, { useEffect, useMemo, useState, useCallback, useRef, useContext } from "react";
 import "./Social.css";
-import { Row, Col } from "react-bootstrap";
 import ParticipatedGatheringsSidebar from "./components/ParticipatedGatheringsSidebar";
 import PostCard from "./components/PostCard.jsx";
 import { useApi } from "../../../utils/api/useApi";
+import { AuthContext } from "../../../context/AuthContext";
 
 /* ===== util ===== */
 function toTime(v) {
@@ -30,11 +30,19 @@ function extractLikeInfo(p) {
 }
 function normalizeMe(d) {
   if (!d) return null;
+  
+  // AuthContext에서 제공하는 user 객체의 필드 매핑
+  const id = d.usersId ?? d.id ?? d.userId ?? d.memberId ?? "";
+  const email = d.email ?? "";
+  const handle = email ? email.split('@')[0] : (d.username ?? d.handle ?? d.loginId ?? "");
+  const name = d.nickName ?? d.nickname ?? d.name ?? d.displayName ?? d.userName ?? (email ? email.split('@')[0] : "사용자");
+  const avatar = d.profileImg ?? d.profileImage ?? d.avatar ?? d.imageUrl ?? d.photoUrl ?? d.picture ?? "";
+  
   return {
-    id: d.id ?? d.userId ?? d.memberId ?? d.username ?? "",
-    handle: d.username ?? d.userId ?? d.handle ?? d.loginId ?? "",
-    name: d.name ?? d.nickname ?? d.displayName ?? d.userName ?? "사용자",
-    avatar: d.profileImage ?? d.avatar ?? d.imageUrl ?? d.photoUrl ?? d.picture ?? "",
+    id: String(id),
+    handle: String(handle),
+    name: String(name),
+    avatar: String(avatar),
   };
 }
 
@@ -105,22 +113,23 @@ function ComposeModal({ open, onClose, onSubmit, me }) {
         </div>
 
         <div className="compose-card-body">
-          {/* 작성자 미니 프로필 */}
+          {/* 작성자 정보 */}
           <div className="compose-author">
-            <img
-              src={me?.avatar || "/images/default-avatar.png"}
-              alt=""
+            <img 
+              src={me?.avatar || "/img/userAvatar.png"} 
+              alt="" 
               className="compose-author__img"
             />
-            <div className="compose-author__meta">
+            <div>
               <div className="compose-author__name">{me?.name || "사용자"}</div>
-              <div className="compose-author__id">@{me?.handle || me?.id || "user"}</div>
+              <div className="compose-author__id">@{me?.handle || "user"}</div>
             </div>
           </div>
 
-          <div className="compose-row" style={{ marginTop: 8 }}>
+          {/* 텍스트 입력 */}
+          <div className="compose-row">
             <textarea
-              className="textarea"
+              className="compose-textarea"
               placeholder="무슨 일이 벌어지고 있나요?"
               value={text}
               onChange={(e) => setText(e.target.value)}
@@ -128,19 +137,25 @@ function ComposeModal({ open, onClose, onSubmit, me }) {
             />
           </div>
 
+          {/* 이미지 미리보기 */}
           {preview && <img src={preview} alt="" className="compose-preview" />}
 
+          {/* 하단 액션 바 */}
           <div className="compose-actions">
-            <div className="tools">
+            <div className="compose-tools">
               <label className="tool-btn" aria-label="사진 첨부">
-                <span className="ico">🖼️</span>
+                <span className="ico">📷</span>
+                <span className="tool-label">사진</span>
                 <input type="file" accept="image/*" style={{ display: "none" }} onChange={onFileChange} />
               </label>
-              <button className="tool-btn" type="button" aria-label="효과">🕺</button>
+              <button className="tool-btn" type="button" aria-label="이모지">
+                <span className="ico">😊</span>
+                <span className="tool-label">이모지</span>
+              </button>
             </div>
 
-            <div className="submit">
-              <div className="select pill pill--sm visibility">
+            <div className="compose-submit">
+              <div className="select pill visibility">
                 <select aria-label="공개 범위" value={visibility} onChange={(e) => setVisibility(e.target.value)}>
                   <option value="public">공개</option>
                   <option value="followers">팔로워</option>
@@ -167,6 +182,7 @@ function ComposeModal({ open, onClose, onSubmit, me }) {
 export default function Social() {
   const { GET } = useApi();
   const getRef = useRef(GET);        // GET 레퍼런스 고정
+  const { user } = useContext(AuthContext);
 
   const [tab, setTab] = useState("all");
   const [posts, setPosts] = useState([]);
@@ -193,21 +209,15 @@ export default function Social() {
     return () => { window.removeEventListener("resize", setVar); mo?.disconnect(); };
   }, []);
 
-  /* 현재 사용자 — 백엔드 실제 경로에 맞춰 변경 */
-  const ME_ENDPOINT = "/members/me"; // 예: '/auth/me' 또는 '/users/me'
-
+  /* 현재 사용자 정보 설정 */
   useEffect(() => {
-    let aborted = false;
-    (async () => {
-      try {
-        const r = await getRef.current(ME_ENDPOINT);
-        if (aborted) return;
-        const nm = normalizeMe(r?.data);
-        if (nm) setMe(nm);
-      } catch { /* 미표시만, 조용히 무시 */ }
-    })();
-    return () => { aborted = true; };
-  }, []);
+    if (user) {
+      const normalizedUser = normalizeMe(user);
+      if (normalizedUser) {
+        setMe(normalizedUser);
+      }
+    }
+  }, [user]);
 
   /* 피드 */
   const loadFeed = useCallback(async () => {
@@ -353,16 +363,6 @@ export default function Social() {
         </div>
       )}
 
-      {/* 모바일 전용 FAB (데스크톱에선 CSS로 숨김) */}
-      <button
-        className="compose-fab"
-        aria-label="게시글 작성 (단축키 N)"
-        title="게시글 작성 (N)"
-        onClick={() => setComposeOpen(true)}
-      >
-        <span className="compose-fab__icon">✍️</span>
-        <span className="compose-fab__label">글쓰기</span>
-      </button>
 
       {/* 작성 모달 */}
       <ComposeModal
