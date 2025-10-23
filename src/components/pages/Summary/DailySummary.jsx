@@ -18,7 +18,7 @@ axios.defaults.withCredentials = true;
  * - prod: VITE_API_URL 환경변수 사용
  */
 const ML_BASE = import.meta.env.VITE_API_URL || "/ml";
-const SUMMARY_MODEL = import.meta.env.VITE_SUMMARY_MODEL || "llm"; 
+const SUMMARY_MODEL = import.meta.env.VITE_SUMMARY_MODEL || "llm";
 
 /**
  *  ML 서버에서 쓰는 user_id (식단 저장용)
@@ -38,8 +38,8 @@ const addDays = (d, n) => {
  * - 이미 localStorage에 값이 있으면 그대로 둠 (덮어쓰지 않음)
  */
 const ensureDummyUser = () => {
-  const DUMMY_USERS_ID = "21";             
-  const DUMMY_EMAIL   = "test@test.com";   
+  const DUMMY_USERS_ID = "21";
+  const DUMMY_EMAIL = "test@test.com";
 
   if (!localStorage.getItem("usersId") && DUMMY_USERS_ID) {
     localStorage.setItem("usersId", DUMMY_USERS_ID);
@@ -48,7 +48,6 @@ const ensureDummyUser = () => {
     localStorage.setItem("email", DUMMY_EMAIL);
   }
 };
-
 
 /* -----------------  백엔드 응답 → 화면용 정규화 -----------------
  * 백엔드가 stepData/heartRateData/distanceWalked 등으로 내려줄 때
@@ -83,7 +82,9 @@ const normalizeHealthItems = (rawArr = [], usersIdForKey = "u") => {
     // React key 경고 방지용 id
     const id =
       x.id ??
-      (recordTime ? `${usersIdForKey}-${recordTime}-${idx}` : `${usersIdForKey}-${idx}`);
+      (recordTime
+        ? `${usersIdForKey}-${recordTime}-${idx}`
+        : `${usersIdForKey}-${idx}`);
 
     return {
       id,
@@ -96,7 +97,6 @@ const normalizeHealthItems = (rawArr = [], usersIdForKey = "u") => {
     };
   });
 };
-
 
 /* ----------------- 컴포넌트 ----------------- */
 export default function DailySummary() {
@@ -127,7 +127,7 @@ export default function DailySummary() {
   const [usersId, setUsersId] = useState("");
   const [healthItems, setHealthItems] = useState([]);
   const [showDetails, setShowDetails] = useState(false);
-  
+
   // 모달 상태
   const [showNoDataModal, setShowNoDataModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -137,7 +137,7 @@ export default function DailySummary() {
   const [alertType, setAlertType] = useState("success"); // success, error
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [saveMealId, setSaveMealId] = useState(null);
-  
+
   // 모달 상태 디버깅
   useEffect(() => {
     console.log("showNoDataModal 상태 변경:", showNoDataModal);
@@ -149,23 +149,35 @@ export default function DailySummary() {
   // 워치 데이터를 LLM 분석용으로 정리
   const prepareWatchDataForLLM = (items = []) => {
     if (!items || items.length === 0) return null;
-    
+
     // 최근 데이터 집계
-    const totalSteps = items.reduce((sum, item) => sum + Number(item.steps || 0), 0);
-    const totalCalories = items.reduce((sum, item) => sum + Number(item.caloriesKcal || 0), 0);
-    const totalDistance = items.reduce((sum, item) => sum + Number(item.distanceKm || 0), 0);
-    
+    const totalSteps = items.reduce(
+      (sum, item) => sum + Number(item.steps || 0),
+      0
+    );
+    const totalCalories = items.reduce(
+      (sum, item) => sum + Number(item.caloriesKcal || 0),
+      0
+    );
+    const totalDistance = items.reduce(
+      (sum, item) => sum + Number(item.distanceKm || 0),
+      0
+    );
+
     // 심박수 평균 계산
     const heartRates = items
-      .map(item => Number(item.heartRateAvg || 0))
-      .filter(hr => hr > 0);
-    const avgHeartRate = heartRates.length > 0 
-      ? Math.round(heartRates.reduce((a, b) => a + b, 0) / heartRates.length)
-      : 0;
-    
+      .map((item) => Number(item.heartRateAvg || 0))
+      .filter((hr) => hr > 0);
+    const avgHeartRate =
+      heartRates.length > 0
+        ? Math.round(heartRates.reduce((a, b) => a + b, 0) / heartRates.length)
+        : 0;
+
     // 최신 기록 시간
-    const latestRecord = items[0]?.recordTime ? new Date(items[0].recordTime).toLocaleString() : null;
-    
+    const latestRecord = items[0]?.recordTime
+      ? new Date(items[0].recordTime).toLocaleString()
+      : null;
+
     return {
       totalSteps,
       totalCalories,
@@ -174,7 +186,9 @@ export default function DailySummary() {
       latestRecord,
       dataCount: items.length,
       // LLM이 이해하기 쉬운 형태로 변환
-      summary: `오늘 총 걸음수: ${totalSteps.toLocaleString()}보, 소모 칼로리: ${totalCalories}kcal, 이동거리: ${totalDistance.toFixed(1)}km, 평균 심박수: ${avgHeartRate}bpm`
+      summary: `오늘 총 걸음수: ${totalSteps.toLocaleString()}보, 소모 칼로리: ${totalCalories}kcal, 이동거리: ${totalDistance.toFixed(
+        1
+      )}km, 평균 심박수: ${avgHeartRate}bpm`,
     };
   };
 
@@ -216,11 +230,30 @@ export default function DailySummary() {
     if (!id) return;
     try {
       const res = await axios.get(`/api/v1/health/${id}`);
-      console.log(res)
+      console.log(res);
       const arr = Array.isArray(res.data) ? res.data : [];
       // [ADD] 백엔드 스키마를 화면용으로 정규화 (가능하면 정규화 사용, 아니면 원본 유지)
       const normalized = normalizeHealthItems(arr, String(id));
-      setHealthItems(normalized.length ? normalized : arr); // [ADD]
+      console.log(normalized);
+      console.log("현재 설정된 날짜:", date);
+      // 문자열 → Date 객체로 변환
+      const dateObj = new Date(`${date}T00:00:00Z`);
+      // 한국 시간(KST) 기준 날짜 문자열로 변환
+      const dateKST = dateObj.toLocaleDateString("ko-KR", {
+        timeZone: "Asia/Seoul",
+      });
+      console.log(dateKST);
+      const filteredNormalized = normalized.filter((item) => {
+        if (!item.recordTime) return false;
+        console.log(item.recordTime);
+        const dateStr = new Date(item.recordTime).toLocaleDateString("ko-KR", {
+          timeZone: "Asia/Seoul",
+        });
+        return dateStr === dateKST;
+      });
+      console.log(filteredNormalized);
+
+      setHealthItems(filteredNormalized.length ? filteredNormalized : arr); // [ADD]
     } catch (e) {
       console.warn("health GET 실패:", e?.response?.data || e.message);
       setHealthItems([]);
@@ -242,7 +275,6 @@ export default function DailySummary() {
     }
   };
 
-
   // 워치 정보 표시: usersId 해석 → 워치 데이터 조회 → 워치 정보 열기
   const handleShowDetails = async () => {
     console.log("handleShowDetails 호출됨");
@@ -251,12 +283,14 @@ export default function DailySummary() {
       id = await fetchUsersIdFromSTS();
     }
     if (!id) {
-      alert("사용자 ID를 찾을 수 없습니다. 로그인 또는 이메일 저장을 확인하세요.");
+      alert(
+        "사용자 ID를 찾을 수 없습니다. 로그인 또는 이메일 저장을 확인하세요."
+      );
       return;
     }
     console.log("사용자 ID:", id);
     setUsersId(String(id));
-    
+
     // 워치 데이터 조회
     try {
       console.log("워치 데이터 조회 시작...");
@@ -265,17 +299,17 @@ export default function DailySummary() {
       const arr = Array.isArray(res.data) ? res.data : [];
       const normalized = normalizeHealthItems(arr, String(id));
       const currentHealthItems = normalized.length ? normalized : arr;
-      
+
       console.log("정규화된 워치 데이터:", currentHealthItems);
       console.log("워치 데이터 길이:", currentHealthItems.length);
-      
+
       // 워치 데이터가 있는지 확인
       if (!currentHealthItems || currentHealthItems.length === 0) {
         console.log("워치 데이터가 없음 - 모달 표시");
         setShowNoDataModal(true);
         return;
       }
-      
+
       console.log("워치 데이터 있음 - 상세 표시");
       setHealthItems(currentHealthItems);
       setShowDetails(true);
@@ -290,11 +324,19 @@ export default function DailySummary() {
   const loadDaily = async (d) => {
     setLoading(true);
     try {
-      const res = await fetch(`${ML_BASE}/summary/daily?user_id=${USER_ID}&date=${d}`);
+      const res = await fetch(
+        `${ML_BASE}/summary/daily?user_id=${USER_ID}&date=${d}`
+      );
       const j = await res.json();
       if (res.ok) {
         setTotals(
-          j.totals || { calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0, fiber_g: 0 }
+          j.totals || {
+            calories: 0,
+            protein_g: 0,
+            carbs_g: 0,
+            fat_g: 0,
+            fiber_g: 0,
+          }
         );
         setMeals(j.meals || []);
         setEditGrams({});
@@ -314,7 +356,6 @@ export default function DailySummary() {
   useEffect(() => {
     ensureDummyUser();
   }, []);
-  
 
   /* ---------- 최초 로딩 ---------- */
   useEffect(() => {
@@ -339,6 +380,7 @@ export default function DailySummary() {
   /* ---------- 날짜 변경 시 재로딩 ---------- */
   useEffect(() => {
     loadDaily(date);
+    fetchHealthDirect(usersId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [date]);
 
@@ -393,13 +435,13 @@ export default function DailySummary() {
       setDailyText(""); // 수정 후 다시 생성하도록 비움
       setSummaryModel("");
       setHealthHint("");
-      
+
       // 저장 성공 알림
       showAlert("식사 정보가 저장되었습니다.", "success");
     } else {
       showAlert(`저장 실패: ${data?.detail || res.statusText}`, "error");
     }
-    
+
     setShowSaveModal(false);
     setSaveMealId(null);
   };
@@ -417,11 +459,13 @@ export default function DailySummary() {
 
   const confirmDelete = async () => {
     if (!deleteMealId) return;
-    
+
     const prev = findById(deleteMealId);
     if (!prev?.id) return;
 
-    const res = await fetch(`${ML_BASE}/meal-log/${deleteMealId}`, { method: "DELETE" });
+    const res = await fetch(`${ML_BASE}/meal-log/${deleteMealId}`, {
+      method: "DELETE",
+    });
     const data = await res.json();
 
     if (res.ok) {
@@ -436,13 +480,13 @@ export default function DailySummary() {
       setDailyText(""); // 다시 생성하도록
       setSummaryModel("");
       setHealthHint("");
-      
+
       // 삭제 성공 알림
       showAlert("항목이 성공적으로 삭제되었습니다.", "success");
     } else {
       showAlert(`삭제 실패: ${data?.detail || res.statusText}`, "error");
     }
-    
+
     setShowDeleteModal(false);
     setDeleteMealId(null);
   };
@@ -469,17 +513,29 @@ export default function DailySummary() {
     // 1) 워치 데이터 분석
     const watchSummary = [];
     if (healthItems && healthItems.length > 0) {
-      const totalSteps = healthItems.reduce((sum, item) => sum + Number(item.steps || 0), 0);
-      const totalCaloriesBurned = healthItems.reduce((sum, item) => sum + Number(item.caloriesKcal || 0), 0);
-      const totalDistance = healthItems.reduce((sum, item) => sum + Number(item.distanceKm || 0), 0);
-      
+      const totalSteps = healthItems.reduce(
+        (sum, item) => sum + Number(item.steps || 0),
+        0
+      );
+      const totalCaloriesBurned = healthItems.reduce(
+        (sum, item) => sum + Number(item.caloriesKcal || 0),
+        0
+      );
+      const totalDistance = healthItems.reduce(
+        (sum, item) => sum + Number(item.distanceKm || 0),
+        0
+      );
+
       const heartRates = healthItems
-        .map(item => Number(item.heartRateAvg || 0))
-        .filter(hr => hr > 0);
-      const avgHeartRate = heartRates.length > 0 
-        ? Math.round(heartRates.reduce((a, b) => a + b, 0) / heartRates.length)
-        : 0;
-      
+        .map((item) => Number(item.heartRateAvg || 0))
+        .filter((hr) => hr > 0);
+      const avgHeartRate =
+        heartRates.length > 0
+          ? Math.round(
+              heartRates.reduce((a, b) => a + b, 0) / heartRates.length
+            )
+          : 0;
+
       watchSummary.push(`• 걸음수: ${totalSteps.toLocaleString()}보`);
       watchSummary.push(`• 이동거리: ${totalDistance.toFixed(1)}km`);
       watchSummary.push(`• 소모 칼로리: ${totalCaloriesBurned}kcal`);
@@ -487,17 +543,22 @@ export default function DailySummary() {
         watchSummary.push(`• 평균 심박수: ${avgHeartRate}bpm`);
       }
     }
-    
+
     // 2) 식단 데이터 분석
     const mealSummary = [];
     if (meals && meals.length > 0) {
       mealSummary.push(`• 총 ${meals.length}끼 식사 기록`);
       mealSummary.push(`• 섭취 칼로리: ${totals.calories}kcal`);
-      mealSummary.push(`• 단백질: ${totals.protein_g}g | 탄수화물: ${totals.carbs_g}g | 지방: ${totals.fat_g}g`);
-      
+      mealSummary.push(
+        `• 단백질: ${totals.protein_g}g | 탄수화물: ${totals.carbs_g}g | 지방: ${totals.fat_g}g`
+      );
+
       // 칼로리 수지 분석
       if (healthItems && healthItems.length > 0) {
-        const burned = healthItems.reduce((sum, item) => sum + Number(item.caloriesKcal || 0), 0);
+        const burned = healthItems.reduce(
+          (sum, item) => sum + Number(item.caloriesKcal || 0),
+          0
+        );
         const balance = totals.calories - burned;
         const balanceText = balance > 0 ? `+${balance}` : `${balance}`;
         mealSummary.push(`• 칼로리 수지: ${balanceText}kcal (섭취 - 소모)`);
@@ -505,62 +566,85 @@ export default function DailySummary() {
     } else {
       mealSummary.push("• 아직 등록된 식사가 없습니다.");
     }
-    
+
     // 3) 건강 조언 생성 (규칙 기반)
     const advice = [];
-    
+
     // 활동량 평가
     if (healthItems && healthItems.length > 0) {
-      const totalSteps = healthItems.reduce((sum, item) => sum + Number(item.steps || 0), 0);
+      const totalSteps = healthItems.reduce(
+        (sum, item) => sum + Number(item.steps || 0),
+        0
+      );
       if (totalSteps < 5000) {
-        advice.push("오늘 활동량이 부족합니다. 가벼운 산책이나 스트레칭을 추천합니다.");
+        advice.push(
+          "오늘 활동량이 부족합니다. 가벼운 산책이나 스트레칭을 추천합니다."
+        );
       } else if (totalSteps >= 10000) {
         advice.push("훌륭합니다! 오늘 활동량 목표를 달성했습니다.");
       } else {
-        advice.push("적당한 활동량을 유지하고 있습니다. 조금만 더 움직이면 1만보 달성입니다.");
+        advice.push(
+          "적당한 활동량을 유지하고 있습니다. 조금만 더 움직이면 1만보 달성입니다."
+        );
       }
     }
-    
+
     // 영양 균형 평가
     if (meals && meals.length > 0) {
-      const proteinRatio = (totals.protein_g * 4) / Math.max(1, totals.calories) * 100;
-      const carbsRatio = (totals.carbs_g * 4) / Math.max(1, totals.calories) * 100;
-      const fatRatio = (totals.fat_g * 9) / Math.max(1, totals.calories) * 100;
-      
+      const proteinRatio =
+        ((totals.protein_g * 4) / Math.max(1, totals.calories)) * 100;
+      const carbsRatio =
+        ((totals.carbs_g * 4) / Math.max(1, totals.calories)) * 100;
+      const fatRatio =
+        ((totals.fat_g * 9) / Math.max(1, totals.calories)) * 100;
+
       if (proteinRatio < 15) {
-        advice.push("단백질이 부족합니다. 달걀, 두부, 살코기 섭취를 늘려보세요.");
+        advice.push(
+          "단백질이 부족합니다. 달걀, 두부, 살코기 섭취를 늘려보세요."
+        );
       }
       if (totals.fiber_g < 15) {
         advice.push("식이섬유가 부족합니다. 샐러드, 과일, 통곡물을 더 드세요.");
       }
       if (carbsRatio > 70) {
-        advice.push("탄수화물 비중이 높습니다. 단백질과 채소를 늘려 균형을 맞추세요.");
+        advice.push(
+          "탄수화물 비중이 높습니다. 단백질과 채소를 늘려 균형을 맞추세요."
+        );
       }
       if (fatRatio > 35) {
         advice.push("지방 비중이 높습니다. 튀김이나 기름진 음식을 줄여보세요.");
       }
-      
+
       // 칼로리 수지 평가
       if (healthItems && healthItems.length > 0) {
-        const burned = healthItems.reduce((sum, item) => sum + Number(item.caloriesKcal || 0), 0);
+        const burned = healthItems.reduce(
+          (sum, item) => sum + Number(item.caloriesKcal || 0),
+          0
+        );
         const balance = totals.calories - burned;
         if (balance > 500) {
-          advice.push("섭취 칼로리가 소모량보다 많습니다. 활동량을 늘리거나 식사량을 조절하세요.");
+          advice.push(
+            "섭취 칼로리가 소모량보다 많습니다. 활동량을 늘리거나 식사량을 조절하세요."
+          );
         } else if (balance < -500) {
-          advice.push("소모 칼로리가 섭취량보다 많습니다. 충분한 영양 섭취에 유의하세요.");
+          advice.push(
+            "소모 칼로리가 섭취량보다 많습니다. 충분한 영양 섭취에 유의하세요."
+          );
         }
       }
     }
-    
+
     // 전반적인 평가가 없으면 긍정 메시지
     if (advice.length === 0) {
-      advice.push("오늘 하루 영양과 활동량의 균형이 좋습니다. 계속 유지하세요.");
+      advice.push(
+        "오늘 하루 영양과 활동량의 균형이 좋습니다. 계속 유지하세요."
+      );
     }
-    
+
     return {
-      watchSummary: watchSummary.join('\n'),
-      mealSummary: mealSummary.join('\n'),
-      advice: advice.join('\n\n')
+      watchSummary: watchSummary.join("\n"),
+      mealSummary: mealSummary.join("\n"),
+      advice: advice.join("\n\n"),
     };
   };
 
@@ -569,17 +653,37 @@ export default function DailySummary() {
     setDailyText("분석 중…");
     setSummaryModel("");
     setHealthHint("");
-    
+
     try {
       // usersId 확인 및 워치 데이터 최신화
       let id = usersId || localStorage.getItem("usersId");
       if (!id) {
         id = await fetchUsersIdFromSTS();
       }
-      
+
       if (id) {
         const latestHealthItems = await fetchHealthRaw(id);
-        setHealthItems(latestHealthItems);
+        console.log(latestHealthItems);
+        // 문자열 → Date 객체로 변환
+        const dateObj = new Date(`${date}T00:00:00Z`);
+        // 한국 시간(KST) 기준 날짜 문자열로 변환
+        const dateKST = dateObj.toLocaleDateString("ko-KR", {
+          timeZone: "Asia/Seoul",
+        });
+        console.log(dateKST);
+        const filteredNormalized = latestHealthItems.filter((item) => {
+          if (!item.recordTime) return false;
+          console.log(item.recordTime);
+          const dateStr = new Date(item.recordTime).toLocaleDateString(
+            "ko-KR",
+            {
+              timeZone: "Asia/Seoul",
+            }
+          );
+          return dateStr === dateKST;
+        });
+        console.log(filteredNormalized);
+        setHealthItems(filteredNormalized);
 
         // LLM 요약 시도
         const watchData = prepareWatchDataForLLM(latestHealthItems);
@@ -607,20 +711,19 @@ export default function DailySummary() {
           console.warn("LLM 요약 실패, 로컬 분석으로 대체", e);
         }
       }
-      
+
       // 잠시 대기 (데이터 업데이트 반영)
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
       // 프론트엔드 자체 분석 수행
       const analysis = generateLocalAnalysis();
-      
+
       // 결과 조합 (AI 섹션은 조언만 표시)
       const fullSummary = analysis.advice || "";
-      
+
       setDailyText(fullSummary);
       setHealthHint(analysis.watchSummary);
       setSummaryModel("local-analysis");
-      
     } catch (e) {
       console.error("분석 실패:", e);
       setDailyText(`분석 중 오류가 발생했습니다: ${e.message}`);
@@ -631,12 +734,12 @@ export default function DailySummary() {
   // 영양소 비율 계산
   const calculateNutritionRatios = () => {
     if (!totals || totals.calories === 0) return null;
-    
+
     const proteinCal = totals.protein_g * 4;
     const carbsCal = totals.carbs_g * 4;
     const fatCal = totals.fat_g * 9;
     const totalCal = proteinCal + carbsCal + fatCal || 1;
-    
+
     return {
       protein: Math.round((proteinCal / totalCal) * 100),
       carbs: Math.round((carbsCal / totalCal) * 100),
@@ -649,15 +752,27 @@ export default function DailySummary() {
   // 활동량 계산
   const calculateActivityStats = () => {
     if (!healthItems || healthItems.length === 0) return null;
-    
-    const totalSteps = healthItems.reduce((sum, item) => sum + Number(item.steps || 0), 0);
-    const totalCaloriesBurned = healthItems.reduce((sum, item) => sum + Number(item.caloriesKcal || 0), 0);
-    const totalDistance = healthItems.reduce((sum, item) => sum + Number(item.distanceKm || 0), 0);
-    const heartRates = healthItems.map(item => Number(item.heartRateAvg || 0)).filter(hr => hr > 0);
-    const avgHeartRate = heartRates.length > 0 
-      ? Math.round(heartRates.reduce((a, b) => a + b, 0) / heartRates.length)
-      : 0;
-    
+
+    const totalSteps = healthItems.reduce(
+      (sum, item) => sum + Number(item.steps || 0),
+      0
+    );
+    const totalCaloriesBurned = healthItems.reduce(
+      (sum, item) => sum + Number(item.caloriesKcal || 0),
+      0
+    );
+    const totalDistance = healthItems.reduce(
+      (sum, item) => sum + Number(item.distanceKm || 0),
+      0
+    );
+    const heartRates = healthItems
+      .map((item) => Number(item.heartRateAvg || 0))
+      .filter((hr) => hr > 0);
+    const avgHeartRate =
+      heartRates.length > 0
+        ? Math.round(heartRates.reduce((a, b) => a + b, 0) / heartRates.length)
+        : 0;
+
     return {
       totalSteps,
       totalCaloriesBurned,
@@ -669,29 +784,39 @@ export default function DailySummary() {
   };
 
   const activityStats = calculateActivityStats();
-  const calorieBalance = activityStats ? totals.calories - activityStats.totalCaloriesBurned : 0;
+  const calorieBalance = activityStats
+    ? totals.calories - activityStats.totalCaloriesBurned
+    : 0;
 
   // 하이라이트 인사이트(칩) 생성
   const buildInsightChips = () => {
     const chips = [];
     if (activityStats) {
-      if (activityStats.totalSteps >= 10000) chips.push({ text: "목표 달성", tone: "good" });
-      else if (activityStats.totalSteps < 5000) chips.push({ text: "활동량 낮음", tone: "warn" });
+      if (activityStats.totalSteps >= 10000)
+        chips.push({ text: "목표 달성", tone: "good" });
+      else if (activityStats.totalSteps < 5000)
+        chips.push({ text: "활동량 낮음", tone: "warn" });
     }
 
     if (totals && totals.calories > 0) {
-      const proteinRatio = (totals.protein_g * 4) / Math.max(1, totals.calories) * 100;
-      const carbsRatio = (totals.carbs_g * 4) / Math.max(1, totals.calories) * 100;
-      const fatRatio = (totals.fat_g * 9) / Math.max(1, totals.calories) * 100;
+      const proteinRatio =
+        ((totals.protein_g * 4) / Math.max(1, totals.calories)) * 100;
+      const carbsRatio =
+        ((totals.carbs_g * 4) / Math.max(1, totals.calories)) * 100;
+      const fatRatio =
+        ((totals.fat_g * 9) / Math.max(1, totals.calories)) * 100;
       if (proteinRatio < 15) chips.push({ text: "단백질 보강", tone: "warn" });
-      if (totals.fiber_g < 15) chips.push({ text: "식이섬유 부족", tone: "warn" });
+      if (totals.fiber_g < 15)
+        chips.push({ text: "식이섬유 부족", tone: "warn" });
       if (carbsRatio > 70) chips.push({ text: "탄수화물 과다", tone: "warn" });
       if (fatRatio > 35) chips.push({ text: "지방 과다", tone: "warn" });
     }
 
     if (activityStats) {
-      if (calorieBalance > 0) chips.push({ text: `+${calorieBalance}kcal`, tone: "warn" });
-      if (calorieBalance < -200) chips.push({ text: `${calorieBalance}kcal`, tone: "good" });
+      if (calorieBalance > 0)
+        chips.push({ text: `+${calorieBalance}kcal`, tone: "warn" });
+      if (calorieBalance < -200)
+        chips.push({ text: `${calorieBalance}kcal`, tone: "good" });
     }
     return chips.slice(0, 4);
   };
@@ -708,7 +833,18 @@ export default function DailySummary() {
 
   // 건강 조언 가시성 톤 분류
   const adviceTone = (line) => {
-    const warnKeys = ["부족", "높", "위험", "주의", "줄이", "증가", "과다", "불균형", "부담", "초과"];
+    const warnKeys = [
+      "부족",
+      "높",
+      "위험",
+      "주의",
+      "줄이",
+      "증가",
+      "과다",
+      "불균형",
+      "부담",
+      "초과",
+    ];
     const goodKeys = ["유지", "좋", "적정", "안정", "달성", "양호", "괜찮"];
     const has = (arr) => arr.some((k) => line.includes(k));
     if (has(warnKeys)) return "warning";
@@ -720,10 +856,23 @@ export default function DailySummary() {
   const buildActivityChips = () => {
     if (!activityStats) return [];
     const chips = [];
-    chips.push({ label: "걸음수", value: activityStats.totalSteps.toLocaleString()+"보" });
-    chips.push({ label: "이동거리", value: activityStats.totalDistance.toFixed(1)+"km" });
-    chips.push({ label: "소모 칼로리", value: `${activityStats.totalCaloriesBurned}kcal` });
-    if (activityStats.avgHeartRate) chips.push({ label: "평균 심박", value: `${activityStats.avgHeartRate}bpm` });
+    chips.push({
+      label: "걸음수",
+      value: activityStats.totalSteps.toLocaleString() + "보",
+    });
+    chips.push({
+      label: "이동거리",
+      value: activityStats.totalDistance.toFixed(1) + "km",
+    });
+    chips.push({
+      label: "소모 칼로리",
+      value: `${activityStats.totalCaloriesBurned}kcal`,
+    });
+    if (activityStats.avgHeartRate)
+      chips.push({
+        label: "평균 심박",
+        value: `${activityStats.avgHeartRate}bpm`,
+      });
     return chips;
   };
 
@@ -731,12 +880,15 @@ export default function DailySummary() {
   const buildExerciseRecommendations = () => {
     const rec = [];
     if (activityStats) {
-      if (activityStats.totalSteps < 6000) rec.push("빠른 걷기 30분 또는 가벼운 조깅 20분");
-      else if (activityStats.totalSteps < 10000) rec.push("빠른 걷기 15분 + 스트레칭 10분");
+      if (activityStats.totalSteps < 6000)
+        rec.push("빠른 걷기 30분 또는 가벼운 조깅 20분");
+      else if (activityStats.totalSteps < 10000)
+        rec.push("빠른 걷기 15분 + 스트레칭 10분");
       else rec.push("휴식 겸 스트레칭 10분, 가벼운 코어 운동 10분");
     }
     if (ratios) {
-      if (ratios.protein < 15) rec.push("상/하체 근력운동 20분 (스쿼트·푸시업·플랭크)");
+      if (ratios.protein < 15)
+        rec.push("상/하체 근력운동 20분 (스쿼트·푸시업·플랭크)");
       if (ratios.fat > 35) rec.push("인터벌 자전거/런 15분으로 지질 대사 개선");
     }
     return rec.slice(0, 3);
@@ -748,10 +900,14 @@ export default function DailySummary() {
     if (totals) {
       const surplus = calorieBalance > 300;
       const lowFiber = totals.fiber_g < 15;
-      const highFat = (totals.fat_g * 9) / Math.max(1, totals.calories) * 100 > 35;
-      const highCarb = (totals.carbs_g * 4) / Math.max(1, totals.calories) * 100 > 70;
-      if (surplus && highFat) risk.push("지방간/대사증후군 위험 증가 (칼로리·지방 과다)");
-      if (highCarb && activityStats && activityStats.totalSteps < 6000) risk.push("인슐린 저항성 위험 (탄수화물 높고 활동량 낮음)");
+      const highFat =
+        ((totals.fat_g * 9) / Math.max(1, totals.calories)) * 100 > 35;
+      const highCarb =
+        ((totals.carbs_g * 4) / Math.max(1, totals.calories)) * 100 > 70;
+      if (surplus && highFat)
+        risk.push("지방간/대사증후군 위험 증가 (칼로리·지방 과다)");
+      if (highCarb && activityStats && activityStats.totalSteps < 6000)
+        risk.push("인슐린 저항성 위험 (탄수화물 높고 활동량 낮음)");
       if (lowFiber) risk.push("변비/지질 이상 위험 (식이섬유 부족)");
     }
     return risk.slice(0, 3);
@@ -812,75 +968,88 @@ export default function DailySummary() {
       </div>
 
       {/* AI 분석 결과 */}
-      {dailyText && dailyText !== "요약이 없습니다." && dailyText !== "분석 중…" && (
-        <div className="report-section">
-          <h2>AI 건강 분석 보고서</h2>
-          {/* 인사이트 칩 */}
-          <div className="insights">
-            {buildInsightChips().map((c, idx) => (
-              <span key={idx} className={`chip ${c.tone}`}>{c.text}</span>
-            ))}
-          </div>
-          {/* 활동 현황 칩 */}
-          {activityStats && (
-            <>
-              <div className="subttl">활동 현황</div>
-              <div className="activity-chips">
-                {buildActivityChips().map((a, i) => (
-                  <div key={i} className="activity-chip">
-                    <span className="label">{a.label}</span>
-                    <span className="value">{a.value}</span>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-
-          {/* 운동 추천 */}
-          {buildExerciseRecommendations().length > 0 && (
-            <>
-              <div className="subttl">운동 추천</div>
-              <ul style={{ paddingLeft: 18, marginTop: 0 }}>
-                {buildExerciseRecommendations().map((r, i) => (
-                  <li key={i}>{r}</li>
-                ))}
-              </ul>
-            </>
-          )}
-
-          {/* 리스크 힌트 */}
-          {buildRiskHints().length > 0 && (
-            <>
-              <div className="subttl">건강 리스크 힌트</div>
-              <ul style={{ paddingLeft: 18, marginTop: 0 }}>
-                {buildRiskHints().map((r, i) => (
-                  <li key={i}>{r}</li>
-                ))}
-              </ul>
-            </>
-          )}
-          <div style={{ 
-            whiteSpace: "pre-wrap", 
-            lineHeight: 1.8, 
-            color: "#2d3748",
-            fontSize: "15px"
-          }}>
-            {/* 불릿으로 정리된 조언 (운동/리스크 톤과 유사하게 강조) */}
-            {/* 섹션 제목 스타일 */}
-            <div className="subttl" style={{ marginBottom: 6 }}>건강 조언</div>
-            <ul style={{ paddingLeft: 18, margin: 0 }}>
-              {toBulletedLines(dailyText).map((line, idx) => (
-                <li key={idx} className={`advice-line ${adviceTone(line)}`}>{line}</li>
+      {dailyText &&
+        dailyText !== "요약이 없습니다." &&
+        dailyText !== "분석 중…" && (
+          <div className="report-section">
+            <h2>AI 건강 분석 보고서</h2>
+            {/* 인사이트 칩 */}
+            <div className="insights">
+              {buildInsightChips().map((c, idx) => (
+                <span key={idx} className={`chip ${c.tone}`}>
+                  {c.text}
+                </span>
               ))}
-            </ul>
-          </div>
-          {healthItems.length > 0 && (
-            <div className="mt-2" style={{ fontSize: "13px", color: "#718096" }}>
-              워치 데이터 {healthItems.length}건 기반 분석
             </div>
-          )}
-        </div>
-      )}
+            {/* 활동 현황 칩 */}
+            {activityStats && (
+              <>
+                <div className="subttl">활동 현황</div>
+                <div className="activity-chips">
+                  {buildActivityChips().map((a, i) => (
+                    <div key={i} className="activity-chip">
+                      <span className="label">{a.label}</span>
+                      <span className="value">{a.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {/* 운동 추천 */}
+            {buildExerciseRecommendations().length > 0 && (
+              <>
+                <div className="subttl">운동 추천</div>
+                <ul style={{ paddingLeft: 18, marginTop: 0 }}>
+                  {buildExerciseRecommendations().map((r, i) => (
+                    <li key={i}>{r}</li>
+                  ))}
+                </ul>
+              </>
+            )}
+
+            {/* 리스크 힌트 */}
+            {buildRiskHints().length > 0 && (
+              <>
+                <div className="subttl">건강 리스크 힌트</div>
+                <ul style={{ paddingLeft: 18, marginTop: 0 }}>
+                  {buildRiskHints().map((r, i) => (
+                    <li key={i}>{r}</li>
+                  ))}
+                </ul>
+              </>
+            )}
+            <div
+              style={{
+                whiteSpace: "pre-wrap",
+                lineHeight: 1.8,
+                color: "#2d3748",
+                fontSize: "15px",
+              }}
+            >
+              {/* 불릿으로 정리된 조언 (운동/리스크 톤과 유사하게 강조) */}
+              {/* 섹션 제목 스타일 */}
+              <div className="subttl" style={{ marginBottom: 6 }}>
+                건강 조언
+              </div>
+              <ul style={{ paddingLeft: 18, margin: 0 }}>
+                {toBulletedLines(dailyText).map((line, idx) => (
+                  <li key={idx} className={`advice-line ${adviceTone(line)}`}>
+                    {line}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {healthItems.length > 0 && (
+              <div
+                className="mt-2"
+                style={{ fontSize: "13px", color: "#718096" }}
+              >
+                워치 데이터 {healthItems.length}건 기반 분석
+              </div>
+            )}
+          </div>
+        )}
 
       {/* 활동량 요약 */}
       <div className="report-section">
@@ -888,125 +1057,168 @@ export default function DailySummary() {
         <div className="summary-grid">
           <div className="summary-card primary">
             <div className="summary-card-label">걸음수</div>
-            <div className="summary-card-value">{(activityStats?.totalSteps || 0).toLocaleString()}</div>
+            <div className="summary-card-value">
+              {(activityStats?.totalSteps || 0).toLocaleString()}
+            </div>
             <div className="summary-card-unit">/ 10,000 보</div>
           </div>
           <div className="summary-card primary">
             <div className="summary-card-label">이동 거리</div>
-            <div className="summary-card-value">{(activityStats?.totalDistance || 0).toFixed(1)}</div>
+            <div className="summary-card-value">
+              {(activityStats?.totalDistance || 0).toFixed(1)}
+            </div>
             <div className="summary-card-unit">km</div>
           </div>
           <div className="summary-card primary">
             <div className="summary-card-label">소모 칼로리</div>
-            <div className="summary-card-value">{activityStats?.totalCaloriesBurned || 0}</div>
+            <div className="summary-card-value">
+              {activityStats?.totalCaloriesBurned || 0}
+            </div>
             <div className="summary-card-unit">kcal</div>
           </div>
           {(activityStats?.avgHeartRate || 0) > 0 && (
             <div className="summary-card primary">
               <div className="summary-card-label">평균 심박수</div>
-              <div className="summary-card-value">{activityStats?.avgHeartRate || 0}</div>
+              <div className="summary-card-value">
+                {activityStats?.avgHeartRate || 0}
+              </div>
               <div className="summary-card-unit">bpm</div>
             </div>
           )}
         </div>
-        
+
         {/* 걸음수 진행바 */}
         <div className="stat-bar">
           <div className="stat-bar-label">
             목표 달성률
-            <div style={{ fontSize: '11px', color: '#999', fontWeight: 'normal', marginTop: '2px' }}>
+            <div
+              style={{
+                fontSize: "11px",
+                color: "#999",
+                fontWeight: "normal",
+                marginTop: "2px",
+              }}
+            >
               (10,000보 기준)
             </div>
           </div>
           <div className="stat-bar-visual">
-            <div className="stat-bar-fill" style={{ width: `${activityStats?.stepsProgress || 0}%`, minWidth: (activityStats?.stepsProgress || 0) > 0 ? '2%' : '0', height: '100%', minHeight: '21px' }}>
-              {(activityStats?.stepsProgress || 0) >= 15 && `${Math.round(activityStats?.stepsProgress || 0)}%`}
+            <div
+              className="stat-bar-fill"
+              style={{
+                width: `${activityStats?.stepsProgress || 0}%`,
+                minWidth: (activityStats?.stepsProgress || 0) > 0 ? "2%" : "0",
+                height: "100%",
+                minHeight: "21px",
+              }}
+            >
+              {(activityStats?.stepsProgress || 0) >= 15 &&
+                `${Math.round(activityStats?.stepsProgress || 0)}%`}
             </div>
           </div>
-          <div className="stat-bar-value">{Math.round(activityStats?.stepsProgress || 0)}%</div>
+          <div className="stat-bar-value">
+            {Math.round(activityStats?.stepsProgress || 0)}%
+          </div>
         </div>
       </div>
 
       {/* 식단 요약 */}
       <div className="report-section">
         <h2>식단 현황</h2>
-          <div className="summary-grid">
-            <div className="summary-card primary">
-              <div className="summary-card-label">총 칼로리</div>
-              <div className="summary-card-value">{totals?.calories || 0}</div>
-              <div className="summary-card-unit">kcal</div>
-            </div>
-            <div className="summary-card primary">
-              <div className="summary-card-label">단백질</div>
-              <div className="summary-card-value">{totals?.protein_g || 0}</div>
-              <div className="summary-card-unit">g ({ratios?.protein || 0}%)</div>
-            </div>
-            <div className="summary-card primary">
-              <div className="summary-card-label">탄수화물</div>
-              <div className="summary-card-value">{totals?.carbs_g || 0}</div>
-              <div className="summary-card-unit">g ({ratios?.carbs || 0}%)</div>
-            </div>
-            <div className="summary-card primary">
-              <div className="summary-card-label">지방</div>
-              <div className="summary-card-value">{totals?.fat_g || 0}</div>
-              <div className="summary-card-unit">g ({ratios?.fat || 0}%)</div>
-            </div>
+        <div className="summary-grid">
+          <div className="summary-card primary">
+            <div className="summary-card-label">총 칼로리</div>
+            <div className="summary-card-value">{totals?.calories || 0}</div>
+            <div className="summary-card-unit">kcal</div>
           </div>
-
-          {/* 칼로리 수지 */}
-          <div className="stat-bar">
-            <div className="stat-bar-label">칼로리 수지</div>
-            <div className="stat-bar-visual">
-              <div
-                className="stat-bar-fill"
-                style={{
-                  width: `${Math.min(100, Math.abs(calorieBalance || 0) / 30)}%`,
-                  background: (calorieBalance || 0) > 0 
-                    ? 'linear-gradient(90deg, #f56565 0%, #e53e3e 100%)'
-                    : 'linear-gradient(90deg, #68d391 0%, #48bb78 100%)'
-                }}
-              >
-                {Math.abs(calorieBalance || 0) >= 30 && `${Math.round(calorieBalance || 0)}kcal`}
-              </div>
-            </div>
-            <div className="stat-bar-value">
-              {(calorieBalance || 0) > 0 ? '+' : ''}{calorieBalance || 0}kcal
-            </div>
+          <div className="summary-card primary">
+            <div className="summary-card-label">단백질</div>
+            <div className="summary-card-value">{totals?.protein_g || 0}</div>
+            <div className="summary-card-unit">g ({ratios?.protein || 0}%)</div>
           </div>
-
-          {/* 영양소 비율 바 */}
-          <div className="stat-bar">
-            <div className="stat-bar-label">단백질 비율</div>
-            <div className="stat-bar-visual">
-              <div className="stat-bar-fill" style={{ width: `${ratios?.protein || 0}%`, minWidth: (ratios?.protein || 0) > 0 ? '2%' : '0', height: '100%', minHeight: '21px' }}>
-                {(ratios?.protein || 0) >= 15 && `${ratios?.protein || 0}%`}
-              </div>
-            </div>
-            <div className="stat-bar-value">{ratios?.protein || 0}%</div>
+          <div className="summary-card primary">
+            <div className="summary-card-label">탄수화물</div>
+            <div className="summary-card-value">{totals?.carbs_g || 0}</div>
+            <div className="summary-card-unit">g ({ratios?.carbs || 0}%)</div>
           </div>
-          <div className="stat-bar">
-            <div className="stat-bar-label">탄수화물 비율</div>
-            <div className="stat-bar-visual">
-              <div className="stat-bar-fill" style={{ width: `${ratios?.carbs || 0}%` }}>
-                {(ratios?.carbs || 0) >= 15 && `${ratios?.carbs || 0}%`}
-              </div>
-            </div>
-            <div className="stat-bar-value">{ratios?.carbs || 0}%</div>
-          </div>
-          <div className="stat-bar">
-            <div className="stat-bar-label">지방 비율</div>
-            <div className="stat-bar-visual">
-              <div className="stat-bar-fill" style={{ width: `${ratios?.fat || 0}%` }}>
-                {(ratios?.fat || 0) >= 15 && `${ratios?.fat || 0}%`}
-              </div>
-            </div>
-            <div className="stat-bar-value">{ratios?.fat || 0}%</div>
-          </div>
-
-          <div className="mt-3" style={{ fontSize: "14px", color: "#718096" }}>
-            총 {meals?.length || 0}끼 식사 기록
+          <div className="summary-card primary">
+            <div className="summary-card-label">지방</div>
+            <div className="summary-card-value">{totals?.fat_g || 0}</div>
+            <div className="summary-card-unit">g ({ratios?.fat || 0}%)</div>
           </div>
         </div>
+
+        {/* 칼로리 수지 */}
+        <div className="stat-bar">
+          <div className="stat-bar-label">칼로리 수지</div>
+          <div className="stat-bar-visual">
+            <div
+              className="stat-bar-fill"
+              style={{
+                width: `${Math.min(100, Math.abs(calorieBalance || 0) / 30)}%`,
+                background:
+                  (calorieBalance || 0) > 0
+                    ? "linear-gradient(90deg, #f56565 0%, #e53e3e 100%)"
+                    : "linear-gradient(90deg, #68d391 0%, #48bb78 100%)",
+              }}
+            >
+              {Math.abs(calorieBalance || 0) >= 30 &&
+                `${Math.round(calorieBalance || 0)}kcal`}
+            </div>
+          </div>
+          <div className="stat-bar-value">
+            {(calorieBalance || 0) > 0 ? "+" : ""}
+            {calorieBalance || 0}kcal
+          </div>
+        </div>
+
+        {/* 영양소 비율 바 */}
+        <div className="stat-bar">
+          <div className="stat-bar-label">단백질 비율</div>
+          <div className="stat-bar-visual">
+            <div
+              className="stat-bar-fill"
+              style={{
+                width: `${ratios?.protein || 0}%`,
+                minWidth: (ratios?.protein || 0) > 0 ? "2%" : "0",
+                height: "100%",
+                minHeight: "21px",
+              }}
+            >
+              {(ratios?.protein || 0) >= 15 && `${ratios?.protein || 0}%`}
+            </div>
+          </div>
+          <div className="stat-bar-value">{ratios?.protein || 0}%</div>
+        </div>
+        <div className="stat-bar">
+          <div className="stat-bar-label">탄수화물 비율</div>
+          <div className="stat-bar-visual">
+            <div
+              className="stat-bar-fill"
+              style={{ width: `${ratios?.carbs || 0}%` }}
+            >
+              {(ratios?.carbs || 0) >= 15 && `${ratios?.carbs || 0}%`}
+            </div>
+          </div>
+          <div className="stat-bar-value">{ratios?.carbs || 0}%</div>
+        </div>
+        <div className="stat-bar">
+          <div className="stat-bar-label">지방 비율</div>
+          <div className="stat-bar-visual">
+            <div
+              className="stat-bar-fill"
+              style={{ width: `${ratios?.fat || 0}%` }}
+            >
+              {(ratios?.fat || 0) >= 15 && `${ratios?.fat || 0}%`}
+            </div>
+          </div>
+          <div className="stat-bar-value">{ratios?.fat || 0}%</div>
+        </div>
+
+        <div className="mt-3" style={{ fontSize: "14px", color: "#718096" }}>
+          총 {meals?.length || 0}끼 식사 기록
+        </div>
+      </div>
 
       {/* 워치 정보 상세 패널 */}
       {showDetails && healthItems && healthItems.length > 0 && (
@@ -1024,15 +1236,25 @@ export default function DailySummary() {
                 </tr>
               </thead>
               <tbody>
-                {healthItems.slice(0, 20).map((h) => (
-                  <tr key={h.id}>
-                    <td>{h.recordTime ? new Date(h.recordTime).toLocaleString() : "-"}</td>
-                    <td>{h.steps ? h.steps.toLocaleString() : "-"} 보</td>
-                    <td>{h.caloriesKcal ?? "-"} kcal</td>
-                    <td>{h.distanceKm ?? "-"} km</td>
-                    <td>{h.heartRateAvg ?? "-"} bpm</td>
-                  </tr>
-                ))}
+                {healthItems
+                  .sort((a, b) => {
+                    console.log(a, b);
+                    return b?._raw?.healthId - a?._raw?.healthId;
+                  })
+                  .slice(0, 20)
+                  .map((h) => (
+                    <tr key={h.id}>
+                      <td>
+                        {h.recordTime
+                          ? new Date(h.recordTime).toLocaleString()
+                          : "-"}
+                      </td>
+                      <td>{h.steps ? h.steps.toLocaleString() : "-"} 보</td>
+                      <td>{h.caloriesKcal ?? "-"} kcal</td>
+                      <td>{h.distanceKm ?? "-"} km</td>
+                      <td>{h.heartRateAvg ?? "-"} bpm</td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
           </div>
@@ -1077,7 +1299,10 @@ export default function DailySummary() {
                         style={{ minWidth: "150px" }}
                         value={editLabel[m.id] ?? m.label ?? ""}
                         onChange={(e) =>
-                          setEditLabel((s) => ({ ...s, [m.id]: e.target.value }))
+                          setEditLabel((s) => ({
+                            ...s,
+                            [m.id]: e.target.value,
+                          }))
                         }
                         onKeyDown={(e) => e.key === "Enter" && saveRow(m.id)}
                       />
@@ -1091,7 +1316,10 @@ export default function DailySummary() {
                         step={10}
                         value={editGrams[m.id] ?? m.grams}
                         onChange={(e) =>
-                          setEditGrams((s) => ({ ...s, [m.id]: e.target.value }))
+                          setEditGrams((s) => ({
+                            ...s,
+                            [m.id]: e.target.value,
+                          }))
                         }
                         onKeyDown={(e) => e.key === "Enter" && saveRow(m.id)}
                       />
@@ -1103,7 +1331,10 @@ export default function DailySummary() {
                     <td>{m.fiber_g}g</td>
                     <td>
                       <div className="d-flex gap-1">
-                        <button className="btn btn-primary btn-sm" onClick={() => handleSaveClick(m.id)}>
+                        <button
+                          className="btn btn-primary btn-sm"
+                          onClick={() => handleSaveClick(m.id)}
+                        >
                           저장
                         </button>
                         <button
@@ -1119,20 +1350,29 @@ export default function DailySummary() {
               </tbody>
             </table>
           </div>
-          {loading && <div className="mt-2" style={{ fontSize: "13px", color: "#718096" }}>불러오는 중…</div>}
+          {loading && (
+            <div
+              className="mt-2"
+              style={{ fontSize: "13px", color: "#718096" }}
+            >
+              불러오는 중…
+            </div>
+          )}
         </div>
       )}
 
       {/* 빈 상태 메시지 */}
-      {(!meals || meals.length === 0) && (!healthItems || healthItems.length === 0) && (
-        <div className="empty-state">
-          <div className="empty-state-icon">📊</div>
-          <div className="empty-state-text">
-            아직 등록된 데이터가 없습니다.<br />
-            식사 기록이나 워치 데이터를 추가해보세요.
+      {(!meals || meals.length === 0) &&
+        (!healthItems || healthItems.length === 0) && (
+          <div className="empty-state">
+            <div className="empty-state-icon">📊</div>
+            <div className="empty-state-text">
+              아직 등록된 데이터가 없습니다.
+              <br />
+              식사 기록이나 워치 데이터를 추가해보세요.
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       {/* 워치 정보 없음 모달 */}
       <ModalComponent
@@ -1143,12 +1383,14 @@ export default function DailySummary() {
         variant={ModalComponent.VARIANTS.DEFAULT}
       >
         <ModalComponent.Section>
-          <div style={{ textAlign: 'center', padding: '20px 0' }}>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>⌚</div>
-            <p style={{ fontSize: '16px', color: '#666', margin: '0 0 20px 0' }}>
+          <div style={{ textAlign: "center", padding: "20px 0" }}>
+            <div style={{ fontSize: "48px", marginBottom: "16px" }}>⌚</div>
+            <p
+              style={{ fontSize: "16px", color: "#666", margin: "0 0 20px 0" }}
+            >
               워치 정보가 없습니다.
             </p>
-            <p style={{ fontSize: '14px', color: '#999', margin: 0 }}>
+            <p style={{ fontSize: "14px", color: "#999", margin: 0 }}>
               워치 정보를 연동해주세요.
             </p>
           </div>
@@ -1173,7 +1415,14 @@ export default function DailySummary() {
         closeOnOverlayClick={true}
       >
         <ModalComponent.Section>
-          <p style={{ fontSize: '16px', color: '#666', margin: '0 0 20px 0', textAlign: 'center' }}>
+          <p
+            style={{
+              fontSize: "16px",
+              color: "#666",
+              margin: "0 0 20px 0",
+              textAlign: "center",
+            }}
+          >
             식사 정보를 저장하시겠습니까?
           </p>
         </ModalComponent.Section>
@@ -1182,7 +1431,7 @@ export default function DailySummary() {
             variant="primary"
             size="medium"
             onClick={confirmSave}
-            style={{ marginRight: '8px' }}
+            style={{ marginRight: "8px" }}
           >
             저장
           </ButtonComponent>
@@ -1205,10 +1454,24 @@ export default function DailySummary() {
         closeOnOverlayClick={true}
       >
         <ModalComponent.Section>
-          <p style={{ fontSize: '16px', color: '#666', margin: '0 0 20px 0', textAlign: 'center' }}>
+          <p
+            style={{
+              fontSize: "16px",
+              color: "#666",
+              margin: "0 0 20px 0",
+              textAlign: "center",
+            }}
+          >
             이 항목을 삭제하시겠습니까?
           </p>
-          <p style={{ fontSize: '14px', color: '#999', margin: 0, textAlign: 'center' }}>
+          <p
+            style={{
+              fontSize: "14px",
+              color: "#999",
+              margin: 0,
+              textAlign: "center",
+            }}
+          >
             삭제된 항목은 복구할 수 없습니다.
           </p>
         </ModalComponent.Section>
@@ -1217,7 +1480,7 @@ export default function DailySummary() {
             variant="secondary"
             size="medium"
             onClick={cancelDelete}
-            style={{ marginRight: '8px' }}
+            style={{ marginRight: "8px" }}
           >
             취소
           </ButtonComponent>
@@ -1240,20 +1503,24 @@ export default function DailySummary() {
         closeOnOverlayClick={true}
       >
         <ModalComponent.Section>
-          <div style={{ textAlign: 'center', padding: '20px 0' }}>
-            <div style={{ 
-              fontSize: '48px', 
-              marginBottom: '16px',
-              color: alertType === "success" ? '#28a745' : '#dc3545'
-            }}>
-              {alertType === "success" ? '✓' : '⚠'}
+          <div style={{ textAlign: "center", padding: "20px 0" }}>
+            <div
+              style={{
+                fontSize: "48px",
+                marginBottom: "16px",
+                color: alertType === "success" ? "#28a745" : "#dc3545",
+              }}
+            >
+              {alertType === "success" ? "✓" : "⚠"}
             </div>
-            <p style={{ 
-              fontSize: '16px', 
-              color: '#666', 
-              margin: '0 0 10px 0',
-              lineHeight: '1.5'
-            }}>
+            <p
+              style={{
+                fontSize: "16px",
+                color: "#666",
+                margin: "0 0 10px 0",
+                lineHeight: "1.5",
+              }}
+            >
               {alertMessage}
             </p>
           </div>
