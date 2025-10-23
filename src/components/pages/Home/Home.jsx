@@ -315,12 +315,27 @@ const Home = () => {
               return endDateStr === today || endDateStr === koreanTodayStr;
             });
             
-            const uniqueRoutineIds = [...new Set(todayResults.map(r => r.setId || r.id))];
+            const validTodayResults = todayResults.filter(r => r.setId || r.id);
+            const uniqueRoutineIds = [...new Set(validTodayResults.map(r => r.setId || r.id))];
             setTodayCompletedCount(uniqueRoutineIds.length);
+            const todayForTime = new Date().toISOString().split('T')[0];
+            const koreanTodayForTime = new Date();
+            koreanTodayForTime.setHours(koreanTodayForTime.getHours() + 9);
+            const koreanTodayStrForTime = koreanTodayForTime.toISOString().split('T')[0];
             
             const totalSeconds = results.reduce((sum, record) => {
-              const time = record.routineResult?.rouTime || 0;
-              return sum + time;
+              if (!record.tEnd) {
+                return sum;
+              }
+              
+              const endDate = new Date(record.tEnd);
+              const endDateStr = endDate.toISOString().split('T')[0];
+              
+              if (endDateStr === todayForTime || endDateStr === koreanTodayStrForTime) {
+                const time = record.routineResult?.rouTime || 0;
+                return sum + time;
+              }
+              return sum;
             }, 0);
             
             const hours = Math.floor(totalSeconds / 3600);
@@ -366,14 +381,14 @@ const Home = () => {
             
             setUserStats({
               consecutiveDays,
-              totalRoutines: formattedRoutines.length,
+              totalRoutines: results.length,
               totalTime: totalTimeStr
             });
           } else {
             setTodayCompletedCount(0);
             setUserStats({
               consecutiveDays: 0,
-              totalRoutines: formattedRoutines.length,
+              totalRoutines: 0,
               totalTime: "0시간"
             });
           }
@@ -382,7 +397,7 @@ const Home = () => {
           setTodayCompletedCount(0);
           setUserStats({
             consecutiveDays: 0,
-            totalRoutines: formattedRoutines.length,
+            totalRoutines: 0,
             totalTime: "0시간"
           });
         }
@@ -407,17 +422,17 @@ const Home = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
-
-  useEffect(() => {
-    fetchUserData();
-    fetchWeather();
-  }, [fetchUserData, fetchWeather]);
+  }, [user, GET, POST]);
 
   useEffect(() => {
     if (user) {
       fetchUserData();
-    } else {
+      fetchWeather();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) {
       setUserRoutines([]);
       setTodayCompletedCount(0);
       setUserStats({
@@ -426,7 +441,7 @@ const Home = () => {
         totalTime: "0시간",
       });
     }
-  }, [user, fetchUserData]);
+  }, [user]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -437,17 +452,16 @@ const Home = () => {
   }, [reviews.length]);
 
   useEffect(() => {
-    const handleFocus = () => fetchUserData();
-    const handleVisibility = () => {
-      if (document.visibilityState === "visible") fetchUserData();
+    const handleFocus = () => {
+      if (user) {
+        fetchUserData();
+      }
     };
-    window.addEventListener("focus", handleFocus);
-    document.addEventListener("visibilitychange", handleVisibility);
-    return () => {
-      window.removeEventListener("focus", handleFocus);
-      document.removeEventListener("visibilitychange", handleVisibility);
-    };
-  }, [fetchUserData]);
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [user]);
+
 
   const startRoutine = (routineId) => {
     navigate('/routine');
@@ -571,8 +585,8 @@ const Home = () => {
             <Col md={4} className="mb-3">
               <CardComponent className={styles.challengeCard}>
                 <div className={styles.challengeContent}>
-                  <h5 className={styles.challengeTitle}>총 시간</h5>
-                  <div className={styles.challengeTarget}>{userStats?.totalTime ?? "0시간"}</div>
+                  <h5 className={styles.challengeTitle}>오늘의 총 운동시간</h5>
+                  <div className={styles.challengeTarget}>{userStats?.totalTime ?? "0시간"}</div>
                   <div className={styles.challengeProgress}>
                     <div className={styles.progressBar}>
                       <div className={styles.progressFill} style={{ 
