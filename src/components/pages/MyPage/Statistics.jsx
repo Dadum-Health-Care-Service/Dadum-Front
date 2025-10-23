@@ -164,7 +164,7 @@ export default function Statistics(){
 
     return (
     <>
-        <div>
+        <div className="pb-3">
             <div className="d-flex justify-content-end mx-2 pb-3">
                 <div
                     style={{
