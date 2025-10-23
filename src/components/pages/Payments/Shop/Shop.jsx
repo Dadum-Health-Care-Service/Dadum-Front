@@ -85,7 +85,7 @@ export default function Shop() {
     <div className={styles.shopContainer}>
       {/* 헤더 */}
       <div className={styles.shopHeader}>
-        <h1 className={styles.shopTitle}>Dadum Shop</h1>
+        <h1 className={styles.shopTitle}>🏪 Dadum Shop</h1>
         <p className={styles.shopSubtitle}>
           당신의 운동을 더욱 특별하게 만들어줄 제품들을 만나보세요
         </p>

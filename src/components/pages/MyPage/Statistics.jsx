@@ -134,7 +134,7 @@ export default function Statistics() {
   }, [user?.usersId, dataType]);
 
   const HealthStatPage = () => {
-    const latestHealthData = healthData[healthData.length - 1];
+    const latestHealthData = healthData[0];
     const safeGetLatest = (dataArray) => {
       if (!dataArray || dataArray.length === 0) return null;
       return dataArray[dataArray.length - 1];
