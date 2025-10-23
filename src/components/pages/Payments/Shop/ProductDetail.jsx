@@ -16,7 +16,6 @@ export default function ProductDetail() {
       try {
         setLoading(true);
         const response = await GET(`/shop/products/${productId}`, {}, null, false);
-        console.log('상품 상세 API 응답:', response);
         setProduct(response.data);
         setQuantity(1); // 상품 로드 시 수량 초기화
       } catch (error) {
@@ -121,18 +120,13 @@ export default function ProductDetail() {
             <div className={styles.productImageSection}>
               <div className={styles.productImageContainer}>
                 <img 
-                  src={product.image || "/img/userAvatar.png"} 
+                  src={product.image} 
                   alt={product.productName}
                   className={styles.productDetailImage}
                   onError={(e) => {
                     e.target.src = "/img/userAvatar.png";
                   }}
                 />
-                {product.stock > 0 && (
-                  <span className={styles.productBadge}>
-                    재고있음
-                  </span>
-                )}
               </div>
             </div>
 
@@ -265,9 +259,48 @@ export default function ProductDetail() {
           </div>
         </div>
 
+        {/* 상품 설명 */}
+        {(product.description || product.detailFile) && (
+          <div className={styles.productDescription}>
+            <h3 className={styles.descriptionTitle}>상품 설명</h3>
+            <div className={styles.descriptionContent}>
+              {/* 텍스트 설명 */}
+              {product.description && product.description.split('\n').map((line, index) => (
+                <p key={index} className={styles.descriptionLine}>
+                  {line}
+                </p>
+              ))}
+              
+              {/* 상세정보 파일 */}
+              {product.detailFile && (
+                <div className={styles.detailFileContent}>
+                  {product.detailFileType && product.detailFileType.startsWith('image/') ? (
+                    <img 
+                      src={product.detailFile} 
+                      alt="상품 상세정보"
+                      className={styles.detailFileImage}
+                    />
+                  ) : product.detailFileType === 'application/pdf' ? (
+                    <div className={styles.detailFilePdf}>
+                      <iframe 
+                        src={product.detailFile} 
+                        className={styles.detailFileIframe}
+                        title="상품 상세정보 PDF"
+                      />
+                    </div>
+                  ) : (
+                    <div className={styles.detailFileText}>
+                      <pre className={styles.detailFilePre}>{product.detailFile}</pre>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* 상품 상세 정보 */}
         <div className={styles.productDetailsCard}>
-          <h4 className={styles.productDetailsHeader}>상품 상세 정보</h4>
           <div className={styles.productDetailsBody}>
             <div className={styles.detailsGrid}>
               <div className={styles.specificationsSection}>
@@ -295,7 +328,6 @@ export default function ProductDetail() {
                   <li>🚚 무료 배송 (5만원 이상 구매 시)</li>
                   <li>📦 배송 기간: 1-3일</li>
                   <li>🔄 교환/반품: 7일 이내</li>
-                  <li>💳 안전한 결제 시스템</li>
                 </ul>
               </div>
             </div>

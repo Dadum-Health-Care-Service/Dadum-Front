@@ -7,8 +7,6 @@ import { useApi } from "../../../../utils/api/useApi";
 import styles from "./SellerDashboard.module.css";
 
 export default function SellerDashboard() {
-    console.log('SellerDashboard 컴포넌트 렌더링됨');
-    
     const { GET } = useApi();
     const [dashboardData, setDashboardData] = useState({
         todayRevenue: 0,
@@ -32,22 +30,17 @@ export default function SellerDashboard() {
     const loadDashboardData = async () => {
         try {
             setLoading(true);
-            console.log('대시보드 데이터 로드 시작...');
             
             // 대시보드 데이터 로드
             const dashboardResponse = await GET('/seller/dashboard/stats');
-            console.log('대시보드 응답:', dashboardResponse);
-            console.log('대시보드 데이터:', dashboardResponse.data);
             setDashboardData(dashboardResponse.data);
             
             // 최근 주문 로드
             const ordersResponse = await GET('/seller/orders/recent');
-            console.log('주문 응답:', ordersResponse);
             setRecentOrders(ordersResponse.data);
             
             // 환불 통계 로드
             const refundsResponse = await GET('/seller/refunds/statistics');
-            console.log('환불 통계 응답:', refundsResponse);
             if (refundsResponse.data) {
                 setDashboardData(prev => ({
                     ...prev,
@@ -69,9 +62,6 @@ export default function SellerDashboard() {
         }).format(amount);
     };
 
-    console.log('렌더링 시점 - loading:', loading);
-    console.log('렌더링 시점 - dashboardData:', dashboardData);
-    console.log('렌더링 시점 - recentOrders:', recentOrders);
 
     if (loading) {
         return (
@@ -85,7 +75,6 @@ export default function SellerDashboard() {
         );
     }
 
-    console.log('SellerDashboard JSX 렌더링 시작');
     
     return (
         <ContainerComponent variant="default" className={`p-4 ${styles.dashboardContainer}`}>
@@ -96,7 +85,7 @@ export default function SellerDashboard() {
             {/* 통계 테이블 */}
             <CardComponent variant="outlined" className="mb-4">
                 <div className="p-3 border-bottom">
-                    <h5 className="mb-0">📊 판매 현황 요약</h5>
+                    <h5 className="mb-0">판매 현황 요약</h5>
                 </div>
                 <div className="p-0">
                     <div className="table-responsive">
@@ -111,40 +100,40 @@ export default function SellerDashboard() {
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td className={`fw-bold text-primary ${styles.metricLabel}`}>💰 매출</td>
-                                    <td className={`text-center text-primary fw-bold ${styles.metricValue} ${styles.today}`}>{formatCurrency(dashboardData.todayRevenue)}</td>
-                                    <td className={`text-center text-primary ${styles.metricValue}`}>{formatCurrency(dashboardData.monthlyRevenue)}</td>
+                                    <td className={`fw-bold ${styles.metricLabel}`}>매출</td>
+                                    <td className={`text-center fw-bold ${styles.metricValue} ${styles.today}`}>{formatCurrency(dashboardData.todayRevenue)}</td>
+                                    <td className={`text-center ${styles.metricValue}`}>{formatCurrency(dashboardData.monthlyRevenue)}</td>
                                     <td className="text-center text-muted">-</td>
                                 </tr>
                                 <tr>
-                                    <td className={`fw-bold text-success ${styles.metricLabel}`}>📦 주문수</td>
-                                    <td className={`text-center text-success fw-bold ${styles.metricValue} ${styles.today}`}>{dashboardData.todayOrders}</td>
-                                    <td className={`text-center text-success ${styles.metricValue}`}>{dashboardData.monthlyOrders}</td>
+                                    <td className={`fw-bold ${styles.metricLabel}`}>주문수</td>
+                                    <td className={`text-center fw-bold ${styles.metricValue} ${styles.today}`}>{dashboardData.todayOrders}</td>
+                                    <td className={`text-center ${styles.metricValue}`}>{dashboardData.monthlyOrders}</td>
                                     <td className="text-center text-muted">-</td>
                                 </tr>
                                 <tr>
-                                    <td className={`fw-bold text-warning ${styles.metricLabel}`}>⏳ 처리 대기</td>
-                                    <td className={`text-center text-warning fw-bold ${styles.metricValue} ${styles.today}`}>{dashboardData.pendingOrders}</td>
-                                    <td className="text-center text-muted">-</td>
-                                    <td className="text-center text-muted">-</td>
-                                </tr>
-                                <tr>
-                                    <td className={`fw-bold text-info ${styles.metricLabel}`}>📋 등록 상품</td>
-                                    <td className="text-center text-muted">-</td>
-                                    <td className="text-center text-muted">-</td>
-                                    <td className={`text-center text-info fw-bold ${styles.metricValue}`}>{dashboardData.totalProducts}</td>
-                                </tr>
-                                <tr>
-                                    <td className={`fw-bold text-danger ${styles.metricLabel}`}>💸 환불 대기</td>
-                                    <td className={`text-center text-danger fw-bold ${styles.metricValue} ${styles.today}`}>{dashboardData.pendingRefunds}</td>
+                                    <td className={`fw-bold ${styles.metricLabel}`}>처리 대기</td>
+                                    <td className={`text-center fw-bold ${styles.metricValue} ${styles.today}`}>{dashboardData.pendingOrders}</td>
                                     <td className="text-center text-muted">-</td>
                                     <td className="text-center text-muted">-</td>
                                 </tr>
                                 <tr>
-                                    <td className={`fw-bold text-secondary ${styles.metricLabel}`}>📊 총 환불 건수</td>
+                                    <td className={`fw-bold ${styles.metricLabel}`}>등록 상품</td>
                                     <td className="text-center text-muted">-</td>
                                     <td className="text-center text-muted">-</td>
-                                    <td className={`text-center text-secondary fw-bold ${styles.metricValue}`}>{dashboardData.totalRefunds}</td>
+                                    <td className={`text-center fw-bold ${styles.metricValue}`}>{dashboardData.totalProducts}</td>
+                                </tr>
+                                <tr>
+                                    <td className={`fw-bold ${styles.metricLabel}`}>환불 대기</td>
+                                    <td className={`text-center fw-bold ${styles.metricValue} ${styles.today}`}>{dashboardData.pendingRefunds}</td>
+                                    <td className="text-center text-muted">-</td>
+                                    <td className="text-center text-muted">-</td>
+                                </tr>
+                                <tr>
+                                    <td className={`fw-bold ${styles.metricLabel}`}>총 환불 건수</td>
+                                    <td className="text-center text-muted">-</td>
+                                    <td className="text-center text-muted">-</td>
+                                    <td className={`text-center fw-bold ${styles.metricValue}`}>{dashboardData.totalRefunds}</td>
                                 </tr>
                             </tbody>
                         </table>

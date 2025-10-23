@@ -52,7 +52,6 @@ export default function Shop() {
 
   const handleBuyNow = (product) => {
     // 구매하기 버튼 클릭 시 바로 주문 페이지로 이동
-    console.log("구매하기:", product);
     const productForOrder = {
       id: product.id || product.productId,
       name: product.name || product.productName,
@@ -117,20 +116,17 @@ export default function Shop() {
             >
               <div className={styles.productImageContainer}>
                 <img
-                  src={product.image || "/img/userAvatar.png"}
+                  src={product.image}
                   alt={product.name || product.productName}
                   className={styles.productImage}
                   onError={(e) => {
                     e.target.src = "/img/userAvatar.png";
                   }}
                 />
-                {product.stock > 0 && (
-                  <span className={styles.productBadge}>재고있음</span>
-                )}
               </div>
               <div className={styles.productContent}>
                 <h3 className={styles.productTitle}>{product.name || product.productName}</h3>
-                <p className={styles.productDescription}>{product.description}</p>
+                
                 <div className={styles.priceContainer}>
                   <span className={styles.currentPrice}>
                     {product.price.toLocaleString()}원

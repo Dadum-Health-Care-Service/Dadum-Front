@@ -1,16 +1,4 @@
 /* Shop 페이지 스타일 */
-.wideOrderModal {
-  max-width: 95vw !important;
-  width: 95vw !important;
-}
-
-@media (min-width: 1200px) {
-  .wideOrderModal {
-    max-width: 1200px !important;
-    width: 1200px !important;
-  }
-}
-
 .shopContainer {
   min-height: 100vh;
   background: #f8fafc;
@@ -80,8 +68,8 @@
 .productsGrid {
   margin: 0 20px 20px 20px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
   width: calc(100% - 40px);
 }
 
@@ -103,7 +91,7 @@
 
 .productImageContainer {
   position: relative;
-  height: 200px;
+  height: 140px;
   overflow: hidden;
 }
 
@@ -141,36 +129,36 @@
 }
 
 .productContent {
-  padding: 20px;
+  padding: 12px;
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
 .productTitle {
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: 700;
   color: #2c3e50;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   line-height: 1.3;
 }
 
 .productDescription {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: #7f8c8d;
-  margin-bottom: 16px;
-  line-height: 1.5;
+  margin-bottom: 8px;
+  line-height: 1.4;
   flex: 1;
 }
 
 .priceContainer {
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 .stockInfo {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: #666;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
   font-weight: 500;
 }
 
@@ -182,7 +170,7 @@
 }
 
 .currentPrice {
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: #e74c3c;
 }
@@ -190,7 +178,7 @@
 .productActions {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .buyButton {
@@ -198,8 +186,9 @@
   border: none;
   color: white;
   font-weight: 600;
-  padding: 12px;
-  border-radius: 8px;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 0.9rem;
   transition: all 0.3s ease;
 }
 
@@ -214,8 +203,9 @@
   border: 2px solid #3b82f6;
   color: #3b82f6;
   font-weight: 600;
-  padding: 10px;
-  border-radius: 8px;
+  padding: 6px;
+  border-radius: 6px;
+  font-size: 0.9rem;
   transition: all 0.3s ease;
 }
 
@@ -257,8 +247,8 @@
   }
   
   .productsGrid {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
     margin: 0 10px 20px 10px;
     width: calc(100% - 20px);
   }
