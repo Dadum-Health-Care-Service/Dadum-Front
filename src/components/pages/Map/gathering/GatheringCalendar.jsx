@@ -65,15 +65,15 @@ const GatheringCalendar = () => {
   const getGatheringsForDate = useCallback((date) => {
     console.log('getGatheringsForDate 호출됨:', date);
     console.log('participatedGatherings:', participatedGatherings);
-    
+
     if (!participatedGatherings) {
       console.log('participatedGatherings가 없음');
       return [];
     }
-    
+
     const targetDate = moment(date).format('YYYY-MM-DD');
     console.log('targetDate:', targetDate);
-    
+
     const filteredGatherings = participatedGatherings.filter(gathering => {
       if (!gathering.nextMeetingDate) {
         console.log('gathering.nextMeetingDate가 없음:', gathering.title);
@@ -83,96 +83,63 @@ const GatheringCalendar = () => {
       console.log('gatheringDate:', gatheringDate, 'targetDate:', targetDate);
       return gatheringDate === targetDate;
     });
-    
+
     console.log('필터링된 모임들:', filteredGatherings);
     return filteredGatherings;
   }, [participatedGatherings]);
 
   // 날짜 클릭 핸들러
   const handleDateClick = useCallback((slotInfo) => {
-    console.log('onSelectSlot 호출됨:', slotInfo);
+    console.log('날짜 클릭됨:', slotInfo);
     const date = slotInfo.start;
-    console.log('날짜 클릭됨:', date);
-    const gatheringsForDate = getGatheringsForDate(date);
-    console.log('해당 날짜의 모임들:', gatheringsForDate);
-    if (gatheringsForDate.length > 0) {
-      setSelectedDate(date);
-      setShowDateModal(true);
-      console.log('모달 열림');
-    } else {
-      console.log('해당 날짜에 모임이 없음');
-    }
-  }, [getGatheringsForDate]);
+    setSelectedDate(date);
+    setShowDateModal(true);
+  }, []);
 
-  // 달력 날짜 클릭 이벤트 리스너 추가 (더 안정적인 방법)
+  // 모바일/데스크탑용 직접 클릭 이벤트
   React.useEffect(() => {
-    const handleCalendarClick = (event) => {
-      console.log('캘린더 클릭됨:', event.target);
+    const handleDateClick = (event) => {
+      console.log('클릭 이벤트 발생:', event.target);
       const target = event.target;
       const dateCell = target.closest('.rbc-date-cell');
       
-      console.log('dateCell:', dateCell);
+      console.log('dateCell 찾음:', dateCell);
       
       if (dateCell) {
-        const dateText = dateCell.querySelector('.rbc-day-bg')?.getAttribute('data-date') || 
-                        dateCell.textContent.trim();
+        // 여러 방법으로 날짜 정보 가져오기
+        const dateString = dateCell.getAttribute('data-date') || 
+                          dateCell.getAttribute('data-rbc-date') ||
+                          dateCell.querySelector('[data-date]')?.getAttribute('data-date');
         
-        console.log('dateText:', dateText);
+        console.log('dateString:', dateString);
         
-        if (dateText && dateText.match(/^\d+$/)) {
-          const currentDate = new Date();
-          const year = currentDate.getFullYear();
-          const month = currentDate.getMonth();
-          const day = parseInt(dateText);
-          
-          console.log('파싱된 날짜:', { year, month, day });
-          
-          const clickedDate = new Date(year, month, day);
+        if (dateString) {
+          const clickedDate = new Date(dateString);
           console.log('클릭된 날짜:', clickedDate);
-          
-          // handleDateClick을 직접 호출
-          const gatheringsForDate = getGatheringsForDate(clickedDate);
-          console.log('해당 날짜의 모임들:', gatheringsForDate);
-          if (gatheringsForDate.length > 0) {
+          setSelectedDate(clickedDate);
+          setShowDateModal(true);
+        } else {
+          // 날짜 텍스트에서 파싱 시도
+          const dayText = dateCell.textContent.trim();
+          if (dayText && dayText.match(/^\d+$/)) {
+            const today = new Date();
+            const clickedDate = new Date(today.getFullYear(), today.getMonth(), parseInt(dayText));
+            console.log('텍스트에서 파싱된 날짜:', clickedDate);
             setSelectedDate(clickedDate);
             setShowDateModal(true);
-            console.log('모달 열림');
-          } else {
-            console.log('해당 날짜에 모임이 없음');
           }
         }
       }
     };
 
-    // 커서 스타일을 JavaScript로 설정
-    const setCursorStyles = () => {
-      const dateCells = document.querySelectorAll('.rbc-date-cell');
-      dateCells.forEach(cell => {
-        const hasEvent = cell.querySelector('.rbc-event');
-        if (hasEvent) {
-          cell.style.cursor = 'pointer';
-        } else {
-          cell.style.cursor = 'default';
-        }
-      });
-    };
-
-    // 컴포넌트가 마운트된 후 이벤트 리스너 추가
+    // 이벤트 리스너 추가 (클릭과 터치 모두)
     const addEventListeners = () => {
       const calendarElement = document.querySelector('.rbc-calendar');
-      const calendarWrapper = document.querySelector('.calendarWrapper');
-      
-      console.log('calendarElement:', calendarElement);
-      console.log('calendarWrapper:', calendarWrapper);
-      
       if (calendarElement) {
-        calendarElement.addEventListener('click', handleCalendarClick);
         console.log('이벤트 리스너 추가됨');
+        calendarElement.addEventListener('click', handleDateClick);
+        calendarElement.addEventListener('touchstart', handleDateClick);
         return calendarElement;
-      } else if (calendarWrapper) {
-        calendarWrapper.addEventListener('click', handleCalendarClick);
-        console.log('wrapper에 이벤트 리스너 추가됨');
-        return calendarWrapper;
       }
       return null;
     };
@@ -180,30 +147,30 @@ const GatheringCalendar = () => {
     // 즉시 시도
     let element = addEventListeners();
     
-    // 커서 스타일 설정
-    setCursorStyles();
-    
-    // 만약 요소를 찾지 못했다면 잠시 후 다시 시도
+    // 요소를 찾지 못했다면 잠시 후 재시도
     if (!element) {
       const timeoutId = setTimeout(() => {
         element = addEventListeners();
-        setCursorStyles();
-      }, 100);
+      }, 500);
       
       return () => {
         clearTimeout(timeoutId);
         if (element) {
-          element.removeEventListener('click', handleCalendarClick);
+          element.removeEventListener('click', handleDateClick);
+          element.removeEventListener('touchstart', handleDateClick);
         }
       };
     }
-    
+
     return () => {
       if (element) {
-        element.removeEventListener('click', handleCalendarClick);
+        element.removeEventListener('click', handleDateClick);
+        element.removeEventListener('touchstart', handleDateClick);
       }
     };
-  }, [getGatheringsForDate]);
+  }, []);
+
+
 
   // 이벤트 클릭 핸들러 (무시)
   const handleSelectEvent = useCallback((event) => {
@@ -215,7 +182,7 @@ const GatheringCalendar = () => {
   const eventStyleGetter = useCallback((event) => {
     const gathering = event.resource.gathering;
     let backgroundColor = '#3174ad';
-    
+
     switch (gathering.category) {
       case 'fitness':
         backgroundColor = '#e74c3c';
@@ -273,7 +240,7 @@ const GatheringCalendar = () => {
 
   return (
     <div className={styles.calendarContainer}>
-      <h3 
+      <h3
         className={styles.calendarTitle}
         onClick={() => setIsExpanded(!isExpanded)}
         style={{ cursor: 'pointer' }}
@@ -283,57 +250,73 @@ const GatheringCalendar = () => {
           {isExpanded ? '▼' : '▶'}
         </span>
       </h3>
-      
+
       {isExpanded && (
         <div className={styles.calendarWrapper}>
         <Calendar
-          localizer={localizer}
-          events={events}
-          startAccessor="start"
-          endAccessor="end"
-          style={{ height: 400 }}
-          onSelectEvent={handleSelectEvent}
-          onSelectSlot={handleDateClick}
-          eventPropGetter={eventStyleGetter}
-          views={['month']}
-          defaultView="month"
-          culture="ko"
-          selectable={true}
-          popup={true}
-          messages={{
-            next: '다음',
-            previous: '이전',
-            today: '오늘',
-            month: '월',
-            week: '주',
-            day: '일',
-            agenda: '일정',
-            date: '날짜',
-            time: '시간',
-            event: '이벤트',
-            noEventsInRange: '이 기간에 일정이 없습니다.',
-            showMore: (total) => `+${total}개 더 보기`
-          }}
+              localizer={localizer}
+              events={events}
+              startAccessor="start"
+              endAccessor="end"
+              style={{ height: 400 }}
+              onSelectEvent={handleSelectEvent}
+              onSelectSlot={handleDateClick}
+              eventPropGetter={eventStyleGetter}
+              views={['month']}
+              defaultView="month"
+              culture="ko"
+              selectable={true}
+              selectableStart="00:00"
+              selectableEnd="23:59"
+              popup={true}
+              messages={{
+                next: '다음',
+                previous: '이전',
+                today: '오늘',
+                month: '월',
+                week: '주',
+                day: '일',
+                agenda: '일정',
+                date: '날짜',
+                time: '시간',
+                event: '이벤트',
+                noEventsInRange: '이 기간에 일정이 없습니다.',
+                showMore: (total) => `+${total}개 더 보기`
+              }}
         />
         </div>
       )}
 
       {/* 날짜별 일정 모달 */}
-      {showDateModal && selectedDate && (
+      {showDateModal && (
         <div className={styles.dateModal}>
           <div className={styles.dateModalContent}>
             <div className={styles.dateModalHeader}>
-              <h4>{moment(selectedDate).format('YYYY년 MM월 DD일')} 일정</h4>
+              <h4>{selectedDate ? moment(selectedDate).format('YYYY년 MM월 DD일') : '일정'} 일정</h4>
               <button 
                 className={styles.closeButton}
-                onClick={() => setShowDateModal(false)}
+                onClick={() => {
+                  console.log('모달 닫기 버튼 클릭');
+                  setShowDateModal(false);
+                }}
               >
                 ✕
               </button>
             </div>
             <div className={styles.dateModalBody}>
               {getGatheringsForDate(selectedDate).map((gathering) => (
-                <div key={gathering.gatheringId} className={styles.gatheringItem}>
+                <div
+                  key={gathering.gatheringId}
+                  className={styles.gatheringItem}
+                  onClick={() => {
+                    // 일정 목록 모달은 닫고 모임 상세 모달 열기
+                    setShowDateModal(false);
+                    window.dispatchEvent(new CustomEvent('showGatheringDetail', { 
+                      detail: { gathering } 
+                    }));
+                  }}
+                  style={{ cursor: 'pointer' }}
+                >
                   <div className={styles.gatheringTitle}>{gathering.title}</div>
                   <div className={styles.gatheringTime}>
                     {moment(gathering.nextMeetingDate).format('HH:mm')}

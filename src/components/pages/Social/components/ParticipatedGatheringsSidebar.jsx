@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParticipatedGatherings } from '../hooks/useParticipatedGatherings';
 import GatheringCalendar from '../../Map/gathering/GatheringCalendar';
 import GatheringDetail from '../../Map/gathering/GatheringDetail';
@@ -36,6 +36,21 @@ const ParticipatedGatheringsSidebar = () => {
     setShowDetailModal(false);
     setSelectedGathering(null);
   };
+
+  // 달력에서 모임 클릭 시 모달 열기
+  useEffect(() => {
+    const handleShowGatheringDetail = (event) => {
+      const { gathering } = event.detail;
+      setSelectedGathering(gathering);
+      setShowDetailModal(true);
+    };
+
+    window.addEventListener('showGatheringDetail', handleShowGatheringDetail);
+    
+    return () => {
+      window.removeEventListener('showGatheringDetail', handleShowGatheringDetail);
+    };
+  }, []);
 
   if (loading) {
     return (
@@ -155,8 +170,9 @@ const ParticipatedGatheringsSidebar = () => {
       {/* 모임 상세 모달 */}
       {showDetailModal && selectedGathering && (
         <GatheringDetail
+          show={showDetailModal}
+          onHide={handleCloseModal}
           gathering={selectedGathering}
-          onClose={handleCloseModal}
         />
       )}
     </div>
