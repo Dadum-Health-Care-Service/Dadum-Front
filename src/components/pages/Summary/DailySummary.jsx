@@ -224,7 +224,9 @@ export default function DailySummary() {
       id = await fetchUsersIdFromSTS();
     }
     if (!id) {
-      alert("사용자 ID를 찾을 수 없습니다. 로그인 또는 이메일 저장을 확인하세요.");
+      alert(
+        "사용자 ID를 찾을 수 없습니다. 로그인 또는 이메일 저장을 확인하세요."
+      );
       return;
     }
     setUsersId(String(id));
@@ -270,7 +272,13 @@ export default function DailySummary() {
       
       if (res.status === 200) {
         setTotals(
-          j.totals || { calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0, fiber_g: 0 }
+          j.totals || {
+            calories: 0,
+            protein_g: 0,
+            carbs_g: 0,
+            fat_g: 0,
+            fiber_g: 0,
+          }
         );
         setMeals(j.meals || []);
         console.log('[DailySummary] Set meals:', j.meals?.length || 0, 'items');
@@ -405,7 +413,7 @@ export default function DailySummary() {
     } else {
       showAlert(`저장 실패: ${data?.detail || res.statusText}`, "error");
     }
-    
+
     setShowSaveModal(false);
     setSaveMealId(null);
   };
@@ -422,7 +430,7 @@ export default function DailySummary() {
 
   const confirmDelete = async () => {
     if (!deleteMealId) return;
-    
+
     const prev = findById(deleteMealId);
     if (!prev?.id) return;
 
@@ -446,7 +454,7 @@ export default function DailySummary() {
     } else {
       showAlert(`삭제 실패: ${data?.detail || res.statusText}`, "error");
     }
-    
+
     setShowDeleteModal(false);
     setDeleteMealId(null);
   };
@@ -621,13 +629,13 @@ export default function DailySummary() {
     setDailyText("분석 중…");
     setSummaryModel("");
     setHealthHint("");
-    
+
     try {
       let id = usersId || localStorage.getItem("usersId");
       if (!id) {
         id = await fetchUsersIdFromSTS();
       }
-      
+
       if (id) {
         // 실시간 워치 데이터 조회
         const latestHealthItems = await fetchHealthRaw(id);
@@ -689,11 +697,10 @@ export default function DailySummary() {
       const analysis = generateLocalAnalysis();
       
       const fullSummary = analysis.advice || "";
-      
+
       setDailyText(fullSummary);
       setHealthHint(analysis.watchSummary);
       setSummaryModel("local-analysis");
-      
     } catch (e) {
       // 분석 실패
       setDailyText(`분석 중 오류가 발생했습니다: ${e.message}`);
@@ -703,12 +710,12 @@ export default function DailySummary() {
   // Calculation functions
   const calculateNutritionRatios = () => {
     if (!totals || totals.calories === 0) return null;
-    
+
     const proteinCal = totals.protein_g * 4;
     const carbsCal = totals.carbs_g * 4;
     const fatCal = totals.fat_g * 9;
     const totalCal = proteinCal + carbsCal + fatCal || 1;
-    
+
     return {
       protein: Math.round((proteinCal / totalCal) * 100),
       carbs: Math.round((carbsCal / totalCal) * 100),
@@ -718,15 +725,27 @@ export default function DailySummary() {
 
   const calculateActivityStats = () => {
     if (!healthItems || healthItems.length === 0) return null;
-    
-    const totalSteps = healthItems.reduce((sum, item) => sum + Number(item.steps || 0), 0);
-    const totalCaloriesBurned = healthItems.reduce((sum, item) => sum + Number(item.caloriesKcal || 0), 0);
-    const totalDistance = healthItems.reduce((sum, item) => sum + Number(item.distanceKm || 0), 0);
-    const heartRates = healthItems.map(item => Number(item.heartRateAvg || 0)).filter(hr => hr > 0);
-    const avgHeartRate = heartRates.length > 0 
-      ? Math.round(heartRates.reduce((a, b) => a + b, 0) / heartRates.length)
-      : 0;
-    
+
+    const totalSteps = healthItems.reduce(
+      (sum, item) => sum + Number(item.steps || 0),
+      0
+    );
+    const totalCaloriesBurned = healthItems.reduce(
+      (sum, item) => sum + Number(item.caloriesKcal || 0),
+      0
+    );
+    const totalDistance = healthItems.reduce(
+      (sum, item) => sum + Number(item.distanceKm || 0),
+      0
+    );
+    const heartRates = healthItems
+      .map((item) => Number(item.heartRateAvg || 0))
+      .filter((hr) => hr > 0);
+    const avgHeartRate =
+      heartRates.length > 0
+        ? Math.round(heartRates.reduce((a, b) => a + b, 0) / heartRates.length)
+        : 0;
+
     return {
       totalSteps,
       totalCaloriesBurned,
@@ -746,23 +765,31 @@ export default function DailySummary() {
   const buildInsightChips = () => {
     const chips = [];
     if (activityStats) {
-      if (activityStats.totalSteps >= 10000) chips.push({ text: "목표 달성", tone: "good" });
-      else if (activityStats.totalSteps < 5000) chips.push({ text: "활동량 낮음", tone: "warn" });
+      if (activityStats.totalSteps >= 10000)
+        chips.push({ text: "목표 달성", tone: "good" });
+      else if (activityStats.totalSteps < 5000)
+        chips.push({ text: "활동량 낮음", tone: "warn" });
     }
 
     if (totals && totals.calories > 0) {
-      const proteinRatio = (totals.protein_g * 4) / Math.max(1, totals.calories) * 100;
-      const carbsRatio = (totals.carbs_g * 4) / Math.max(1, totals.calories) * 100;
-      const fatRatio = (totals.fat_g * 9) / Math.max(1, totals.calories) * 100;
+      const proteinRatio =
+        ((totals.protein_g * 4) / Math.max(1, totals.calories)) * 100;
+      const carbsRatio =
+        ((totals.carbs_g * 4) / Math.max(1, totals.calories)) * 100;
+      const fatRatio =
+        ((totals.fat_g * 9) / Math.max(1, totals.calories)) * 100;
       if (proteinRatio < 15) chips.push({ text: "단백질 보강", tone: "warn" });
-      if (totals.fiber_g < 15) chips.push({ text: "식이섬유 부족", tone: "warn" });
+      if (totals.fiber_g < 15)
+        chips.push({ text: "식이섬유 부족", tone: "warn" });
       if (carbsRatio > 70) chips.push({ text: "탄수화물 과다", tone: "warn" });
       if (fatRatio > 35) chips.push({ text: "지방 과다", tone: "warn" });
     }
 
     if (activityStats) {
-      if (calorieBalance > 0) chips.push({ text: `+${calorieBalance}kcal`, tone: "warn" });
-      if (calorieBalance < -200) chips.push({ text: `${calorieBalance}kcal`, tone: "good" });
+      if (calorieBalance > 0)
+        chips.push({ text: `+${calorieBalance}kcal`, tone: "warn" });
+      if (calorieBalance < -200)
+        chips.push({ text: `${calorieBalance}kcal`, tone: "good" });
     }
     return chips.slice(0, 4);
   };
@@ -777,7 +804,18 @@ export default function DailySummary() {
   };
 
   const adviceTone = (line) => {
-    const warnKeys = ["부족", "높", "위험", "주의", "줄이", "증가", "과다", "불균형", "부담", "초과"];
+    const warnKeys = [
+      "부족",
+      "높",
+      "위험",
+      "주의",
+      "줄이",
+      "증가",
+      "과다",
+      "불균형",
+      "부담",
+      "초과",
+    ];
     const goodKeys = ["유지", "좋", "적정", "안정", "달성", "양호", "괜찮"];
     const has = (arr) => arr.some((k) => line.includes(k));
     if (has(warnKeys)) return "warning";
@@ -849,10 +887,23 @@ export default function DailySummary() {
   const buildActivityChips = () => {
     if (!activityStats) return [];
     const chips = [];
-    chips.push({ label: "걸음수", value: activityStats.totalSteps.toLocaleString()+"보" });
-    chips.push({ label: "이동거리", value: activityStats.totalDistance.toFixed(1)+"km" });
-    chips.push({ label: "소모 칼로리", value: `${activityStats.totalCaloriesBurned}kcal` });
-    if (activityStats.avgHeartRate) chips.push({ label: "평균 심박", value: `${activityStats.avgHeartRate}bpm` });
+    chips.push({
+      label: "걸음수",
+      value: activityStats.totalSteps.toLocaleString() + "보",
+    });
+    chips.push({
+      label: "이동거리",
+      value: activityStats.totalDistance.toFixed(1) + "km",
+    });
+    chips.push({
+      label: "소모 칼로리",
+      value: `${activityStats.totalCaloriesBurned}kcal`,
+    });
+    if (activityStats.avgHeartRate)
+      chips.push({
+        label: "평균 심박",
+        value: `${activityStats.avgHeartRate}bpm`,
+      });
     return chips;
   };
 
@@ -1172,7 +1223,14 @@ export default function DailySummary() {
         closeOnOverlayClick={true}
       >
         <ModalComponent.Section>
-          <p style={{ fontSize: '16px', color: '#666', margin: '0 0 20px 0', textAlign: 'center' }}>
+          <p
+            style={{
+              fontSize: "16px",
+              color: "#666",
+              margin: "0 0 20px 0",
+              textAlign: "center",
+            }}
+          >
             식사 정보를 저장하시겠습니까?
           </p>
         </ModalComponent.Section>
@@ -1181,7 +1239,7 @@ export default function DailySummary() {
             variant="primary"
             size="medium"
             onClick={confirmSave}
-            style={{ marginRight: '8px' }}
+            style={{ marginRight: "8px" }}
           >
             저장
           </ButtonComponent>
@@ -1203,10 +1261,24 @@ export default function DailySummary() {
         closeOnOverlayClick={true}
       >
         <ModalComponent.Section>
-          <p style={{ fontSize: '16px', color: '#666', margin: '0 0 20px 0', textAlign: 'center' }}>
+          <p
+            style={{
+              fontSize: "16px",
+              color: "#666",
+              margin: "0 0 20px 0",
+              textAlign: "center",
+            }}
+          >
             이 항목을 삭제하시겠습니까?
           </p>
-          <p style={{ fontSize: '14px', color: '#999', margin: 0, textAlign: 'center' }}>
+          <p
+            style={{
+              fontSize: "14px",
+              color: "#999",
+              margin: 0,
+              textAlign: "center",
+            }}
+          >
             삭제된 항목은 복구할 수 없습니다.
           </p>
         </ModalComponent.Section>
@@ -1271,20 +1343,24 @@ export default function DailySummary() {
         closeOnOverlayClick={true}
       >
         <ModalComponent.Section>
-          <div style={{ textAlign: 'center', padding: '20px 0' }}>
-            <div style={{ 
-              fontSize: '48px', 
-              marginBottom: '16px',
-              color: alertType === "success" ? '#28a745' : '#dc3545'
-            }}>
-              {alertType === "success" ? '✓' : '⚠'}
+          <div style={{ textAlign: "center", padding: "20px 0" }}>
+            <div
+              style={{
+                fontSize: "48px",
+                marginBottom: "16px",
+                color: alertType === "success" ? "#28a745" : "#dc3545",
+              }}
+            >
+              {alertType === "success" ? "✓" : "⚠"}
             </div>
-            <p style={{ 
-              fontSize: '16px', 
-              color: '#666', 
-              margin: '0 0 10px 0',
-              lineHeight: '1.5'
-            }}>
+            <p
+              style={{
+                fontSize: "16px",
+                color: "#666",
+                margin: "0 0 10px 0",
+                lineHeight: "1.5",
+              }}
+            >
               {alertMessage}
             </p>
           </div>

@@ -86,7 +86,7 @@ export default function RoutineDetailModal({
         const timeBasedKcal = estimatedTimeMinutes * 4;
 
         // 볼륨 기반 칼로리 (1kg 들어올림당 0.01kcal)
-        const volumeBasedKcal = totalVolume * 0.01;
+        const volumeBasedKcal = totalVolume * 0.1;
 
         const estimatedKcal = Math.round(timeBasedKcal + volumeBasedKcal);
 
@@ -133,7 +133,7 @@ export default function RoutineDetailModal({
       setWorkoutData((prev) => {
         const updatedData = {
           ...prev,
-          
+
           exercises: workoutExercises.map((exercise, index) => {
             if (
               prev.exercises[index] &&
@@ -687,7 +687,7 @@ export default function RoutineDetailModal({
     // 시간 기반: 초당 약 0.067 kcal 소모 (분당 4kcal / 60초)
     // 볼륨 기반: 1kg 들어올림당 약 0.01 kcal
     const timeBasedKcal = (totalTime / 1000) * 0.067;
-    const volumeBasedKcal = totalVolume * 0.01;
+    const volumeBasedKcal = totalVolume * 0.1;
     const estimatedKcal = Math.round(timeBasedKcal + volumeBasedKcal);
 
     const formatToLocalDateTime = (timestamp) => {

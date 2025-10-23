@@ -25,10 +25,15 @@ export default function Shop() {
   const loadProducts = async () => {
     try {
       setLoading(true);
-      const response = await GET('/seller/products/public/active', {}, null, false);
+      const response = await GET(
+        "/seller/products/public/active",
+        {},
+        null,
+        false
+      );
       setProducts(response.data || []);
     } catch (error) {
-      console.error('상품 목록 로드 실패:', error);
+      console.error("상품 목록 로드 실패:", error);
       setProducts([]);
     } finally {
       setLoading(false);
@@ -69,25 +74,25 @@ export default function Shop() {
       price: product.price,
       image: product.imageData || product.imageUrl,
       description: product.description,
-      stock: product.stock
+      stock: product.stock,
     };
     localStorage.setItem("selectedProduct", JSON.stringify(productForOrder));
     // OrderPage로 이동
-    navigate('/order');
+    navigate("/order");
   };
 
   return (
     <div className={styles.shopContainer}>
       {/* 헤더 */}
       <div className={styles.shopHeader}>
-        <h1 className={styles.shopTitle}>🏪 Dadum Shop</h1>
+        <h1 className={styles.shopTitle}>Dadum Shop</h1>
         <p className={styles.shopSubtitle}>
           당신의 운동을 더욱 특별하게 만들어줄 제품들을 만나보세요
         </p>
         <div className={styles.shopActions}>
           <ButtonComponent
             variant="outline"
-            onClick={() => navigate('/orders')}
+            onClick={() => navigate("/orders")}
           >
             📋 주문 내역
           </ButtonComponent>
@@ -123,7 +128,11 @@ export default function Shop() {
             <div key={product.productId} className={styles.productCard}>
               <div className={styles.productImageContainer}>
                 <img
-                  src={product.imageData || product.imageUrl || "https://via.placeholder.com/300x200?text=No+Image"}
+                  src={
+                    product.imageData ||
+                    product.imageUrl ||
+                    "https://via.placeholder.com/300x200?text=No+Image"
+                  }
                   alt={product.productName}
                   className={styles.productImage}
                 />
@@ -133,35 +142,35 @@ export default function Shop() {
               </div>
               <div className={styles.productContent}>
                 <h3 className={styles.productTitle}>{product.productName}</h3>
-                <p className={styles.productDescription}>{product.description}</p>
+                <p className={styles.productDescription}>
+                  {product.description}
+                </p>
                 <div className={styles.priceContainer}>
                   <span className={styles.currentPrice}>
                     {product.price.toLocaleString()}원
                   </span>
                 </div>
-                <div className={styles.stockInfo}>
-                  재고: {product.stock}개
+                <div className={styles.stockInfo}>재고: {product.stock}개</div>
+                <div className={styles.productActions}>
+                  <ButtonComponent
+                    variant="primary"
+                    fullWidth
+                    onClick={() => handleProductClick(product)}
+                    className={styles.buyButton}
+                  >
+                    💳 구매하기
+                  </ButtonComponent>
+                  <ButtonComponent
+                    variant="outline"
+                    fullWidth
+                    className={styles.wishlistButton}
+                  >
+                    💝 위시리스트
+                  </ButtonComponent>
                 </div>
-              <div className={styles.productActions}>
-                <ButtonComponent
-                  variant="primary"
-                  fullWidth
-                  onClick={() => handleProductClick(product)}
-                  className={styles.buyButton}
-                >
-                  💳 구매하기
-                </ButtonComponent>
-                <ButtonComponent
-                  variant="outline"
-                  fullWidth
-                  className={styles.wishlistButton}
-                >
-                  💝 위시리스트
-                </ButtonComponent>
               </div>
             </div>
-          </div>
-        ))
+          ))
         )}
       </div>
 
