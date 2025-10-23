@@ -463,36 +463,38 @@ export default function Settings() {
 
   return (
     <>
-      <ContainerComponent variant="default" className="p-3 mb-5">
-        <ContainerComponent size="medium" variant="default" className="mb-3">
-          <HeaderComponent variant="filled" size="small" align="center">
-            <HeaderComponent.Navigation>
-              <HeaderComponent.MenuItem
-                active={activeHeaderMenu === "userInfo"}
-                onClick={() => handleHeaderMenuClick("userInfo")}
-              >
-                회원 정보 변경
-              </HeaderComponent.MenuItem>
-              <HeaderComponent.MenuItem
-                active={activeHeaderMenu === "updatePassword"}
-                onClick={() => handleHeaderMenuClick("updatePassword")}
-              >
-                비밀번호 변경
-              </HeaderComponent.MenuItem>
-              <HeaderComponent.MenuItem
-                active={activeHeaderMenu === "withdrawalUser"}
-                onClick={() => handleHeaderMenuClick("withdrawalUser")}
-              >
-                회원 탈퇴
-              </HeaderComponent.MenuItem>
-            </HeaderComponent.Navigation>
-          </HeaderComponent>
-        </ContainerComponent>
+      <div style={{maxWidth:'750px', margin:'0 auto'}}>
+        <ContainerComponent variant="default" className="p-3 mb-5">
+          <ContainerComponent size="medium" variant="default" className="mb-3">
+            <HeaderComponent variant="filled" size="small" align="center">
+              <HeaderComponent.Navigation>
+                <HeaderComponent.MenuItem
+                  active={activeHeaderMenu === "userInfo"}
+                  onClick={() => handleHeaderMenuClick("userInfo")}
+                >
+                  회원 정보 변경
+                </HeaderComponent.MenuItem>
+                <HeaderComponent.MenuItem
+                  active={activeHeaderMenu === "updatePassword"}
+                  onClick={() => handleHeaderMenuClick("updatePassword")}
+                >
+                  비밀번호 변경
+                </HeaderComponent.MenuItem>
+                <HeaderComponent.MenuItem
+                  active={activeHeaderMenu === "withdrawalUser"}
+                  onClick={() => handleHeaderMenuClick("withdrawalUser")}
+                >
+                  회원 탈퇴
+                </HeaderComponent.MenuItem>
+              </HeaderComponent.Navigation>
+            </HeaderComponent>
+          </ContainerComponent>
 
-        <ContainerComponent size="medium" variant="outlined">
-          {renderSettingPages(activeHeaderMenu)}
+          <ContainerComponent size="medium" variant="outlined">
+            {renderSettingPages(activeHeaderMenu)}
+          </ContainerComponent>
         </ContainerComponent>
-      </ContainerComponent>
+      </div>
     </>
   );
 }
