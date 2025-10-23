@@ -103,7 +103,7 @@
   margin-top: var(--toolbar-offset);
   padding-bottom: 8px;
   z-index: 5;
-  background: linear-gradient(180deg, #f6f9ff 75%, rgba(246,249,255,0));
+  background: linear-gradient(180deg, #f6f9ff 75%, rgba(246, 249, 255, 0));
 }
 .social-root .seg { display: flex; gap: 8px; }
 /* ❌ CSS Modules 전용 문법(composes) 제거 */
@@ -203,7 +203,7 @@
   border: 1.5px solid var(--border);
   border-radius: var(--radius);
   background: #fff;
-  box-shadow: 0 6px 20px rgba(157, 184, 255, .18);
+  box-shadow: 0 6px 20px rgba(157, 184, 255, 0.18);
 }
 .m-card-head{
   display: grid;
