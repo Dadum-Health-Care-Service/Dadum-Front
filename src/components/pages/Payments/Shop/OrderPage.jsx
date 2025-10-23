@@ -91,62 +91,20 @@ export default function OrderPage() {
   const fetchOrderPageData = async () => {
     try {
       setLoading(true);
-    
-      const productData = sampleProducts.find(p => p.id === parseInt(productId));
-      if (productData) {
-        setProduct(productData);
-      } else {
-        throw new Error('상품을 찾을 수 없습니다.');
-      }
-      
+      // localStorage에서 선택된 상품 정보가 없는 경우 쇼핑몰로 리다이렉트
+      navigate('/shop');
     } catch (error) {
       console.error('주문 페이지 데이터 로딩 실패:', error);
-      // 에러 발생 시 기본 데이터로 폴백
-      setFallbackData();
+      // 에러 발생 시 쇼핑몰로 리다이렉트
+      navigate('/shop');
     } finally {
       setLoading(false);
     }
   };
 
   const setFallbackData = () => {
-    // API 호출 실패 시 기본 데이터 설정
-    const fallbackProduct = {
-      id: parseInt(productId),
-      name: '상품 정보를 불러올 수 없습니다',
-      category: 'unknown',
-      price: 0,
-      originalPrice: 0,
-      image: '/img/yoga.jpeg',
-      badge: '',
-      description: '상품 정보를 불러올 수 없습니다'
-    };
-    
-    setProduct(fallbackProduct);
-    setOrdererInfo({
-      name: '',
-      email: '',
-      phone: '',
-      address: '',
-      detailAddress: '',
-      zipCode: ''
-    });
-    setDeliveryInfo({
-      name: '',
-      contact1: '',
-      contact2: '',
-      address: '',
-      detailAddress: '',
-      zipCode: '',
-      deliveryMessage: '',
-      depositorName: '',
-      deliveryType: 'domestic',
-      addressType: 'home'
-    });
-    setDiscountInfo({
-      deposit: 0,
-      coupon: '',
-      availableDeposit: 0
-    });
+    // 상품 정보가 없는 경우 쇼핑몰로 리다이렉트
+    navigate('/shop');
   };
 
   const calculateDiscount = (original, current) => {

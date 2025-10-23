@@ -12,9 +12,10 @@ export default function Shop() {
 
   const categories = [
     { id: "all", name: "전체" },
+    { id: "fitness", name: "피트니스" },
+    { id: "nutrition", name: "영양제" },
     { id: "equipment", name: "운동기구" },
     { id: "clothing", name: "운동복" },
-    { id: "supplement", name: "보충제" },
   ];
 
   // 상품 데이터 로드
@@ -116,11 +117,11 @@ export default function Shop() {
             >
               <div className={styles.productImageContainer}>
                 <img
-                  src={product.image || "https://picsum.photos/300/200?random=999"}
+                  src={product.image || "/img/userAvatar.png"}
                   alt={product.name || product.productName}
                   className={styles.productImage}
                   onError={(e) => {
-                    e.target.src = "https://picsum.photos/300/200?random=999";
+                    e.target.src = "/img/userAvatar.png";
                   }}
                 />
                 {product.stock > 0 && (

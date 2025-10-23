@@ -121,11 +121,11 @@ export default function ProductDetail() {
             <div className={styles.productImageSection}>
               <div className={styles.productImageContainer}>
                 <img 
-                  src={product.image || "https://picsum.photos/500/500?random=999"} 
+                  src={product.image || "/img/userAvatar.png"} 
                   alt={product.productName}
                   className={styles.productDetailImage}
                   onError={(e) => {
-                    e.target.src = "https://picsum.photos/500/500?random=999";
+                    e.target.src = "/img/userAvatar.png";
                   }}
                 />
                 {product.stock > 0 && (

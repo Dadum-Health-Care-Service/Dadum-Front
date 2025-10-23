@@ -228,18 +228,16 @@ export default function ProductManagement() {
 
     return (
         <ContainerComponent variant="default" className="p-4">
-            <HeaderComponent variant="filled" size="medium" className="mb-4">
-                <div className="d-flex justify-content-between align-items-center">
-                    <h2 className="mb-0">상품 관리</h2>
-                    <ButtonComponent 
-                        variant="primary" 
-                        size="small"
-                        onClick={openAddModal}
-                    >
-                        상품 등록
-                    </ButtonComponent>
-                </div>
-            </HeaderComponent>
+            <div className="d-flex justify-content-between align-items-center mb-4 p-3 bg-light rounded">
+                <h2 className="mb-0">상품 관리</h2>
+                <ButtonComponent 
+                    variant="primary" 
+                    size="small"
+                    onClick={openAddModal}
+                >
+                    상품 등록
+                </ButtonComponent>
+            </div>
 
             {/* 검색 및 필터 */}
             <CardComponent variant="outlined" className="mb-4">

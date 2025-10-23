@@ -25,9 +25,10 @@ const SalesAnalysis = () => {
   // 카테고리 옵션
   const categoryOptions = [
     { value: 'all', label: '전체' },
+    { value: 'fitness', label: '피트니스' },
+    { value: 'nutrition', label: '영양제' },
     { value: 'equipment', label: '운동기구' },
-    { value: 'clothing', label: '운동복' },
-    { value: 'supplement', label: '보충제' }
+    { value: 'clothing', label: '운동복' }
   ];
 
   // 매출 데이터 로드
