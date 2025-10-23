@@ -249,6 +249,16 @@ export default function Profile() {
         //수정완료 모달 띄우고 프로필 페이지 렌더
         showBasicModal("수정 되었습니다", "프로필 수정");
         setClickEdit(false);
+        
+        // AuthContext의 사용자 정보 업데이트 (social에 아바타 반영하기 위한 로직)
+        dispatch({ 
+          type: "UPDATE_USER", 
+          userData: { 
+            profileImg: inputs.profileImg,
+            nickName: inputs.nickName,
+            usersName: inputs.name
+          } 
+        });
       } catch (error) {
         //오류 모달 띄우고 프로필 페이지 렌더
         console.log(error);

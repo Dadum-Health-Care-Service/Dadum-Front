@@ -13,6 +13,11 @@ function authReducer(state, action){
             //로그아웃인 경우 로컬스토리지에서 user정보 지우기
             localStorage.removeItem('user');
             return {...state, user:null};
+        case 'UPDATE_USER':
+            //사용자 정보 업데이트
+            const updatedUser = {...state.user, ...action.userData};
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+            return {...state, user:updatedUser};
         default:
             return state;
     };

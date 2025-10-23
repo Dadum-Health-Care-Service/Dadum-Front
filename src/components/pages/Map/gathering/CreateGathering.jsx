@@ -409,9 +409,9 @@ const CreateGathering = ({ show, onHide, onSuccess, initialLocation = null }) =>
             value={formData.scheduleType}
             onChange={(e) => handleInputChange('scheduleType', e.target.value)}
           >
-            <option value="ONE_TIME">일회성 모임</option>
-            <option value="WEEKLY">주기적 모임 (매주)</option>
-            <option value="MONTHLY">주기적 모임 (매월)</option>
+            <option value="ONE_TIME">일회성</option>
+            <option value="WEEKLY">매주</option>
+            <option value="MONTHLY">매월</option>
             <option value="CUSTOM">사용자 정의</option>
           </Form.Select>
         </Form.Group>
