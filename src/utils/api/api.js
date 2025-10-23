@@ -53,7 +53,7 @@ function POST(URL, data = {}, accessToken, isAuth = true, source = "main") {
       return axios.post(host[source] + URL, payload, {
         withCredentials: true,
         headers: {
-          "Content-Type": "apcation/x-www-form-urlencoded;charset=UTF-8",
+          "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
           "X-Requested-With": "XMLHttpRequest",
           Accept: "application/json",
         },
@@ -67,14 +67,14 @@ function POST(URL, data = {}, accessToken, isAuth = true, source = "main") {
         withCredentials: false,
       });
     }
-    
+
     // FormData인 경우 Content-Type 헤더를 설정하지 않음 (브라우저가 자동 설정)
     if (data instanceof FormData) {
       return axios.post(host[source] + URL, data, {
         headers: headers,
       });
     }
-    
+
     return axios.post(host[source] + URL, data, {
       headers: headers,
     });
