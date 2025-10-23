@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Container, Row, Col, Badge } from "react-bootstrap";
 import ContainerComponent from "../../common/ContainerComponent";
@@ -23,6 +23,8 @@ const Home = () => {
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
   const [weather, setWeather] = useState(null);
   const [weatherLoading, setWeatherLoading] = useState(true);
+  const [dataStatus, setDataStatus] = useState(""); // 데이터 로딩 상태 메시지
+  const isLoadingRef = useRef(false); // 로딩 중복 실행 방지
   const { GET, POST } = useApi();
   const { user } = useAuth();
 
@@ -265,19 +267,45 @@ const Home = () => {
     { stars: 5, text: "스마트 워치와 연동되어 종합 건강 리포트를 받아볼 수 있어서 만족스럽습니다.", author: "강OO / 자영업자" },
   ];
 
-  const fetchUserData = useCallback(async () => {
+
+  useEffect(() => {
+    if (user && !isLoadingRef.current) {
+      isLoadingRef.current = true;
+      
+      const loadUserData = async () => {
     setLoading(true);
+        setDataStatus("데이터를 불러오는 중...");
+        console.log("fetchUserData 시작 - 현재 사용자:", user?.email);
+        
     try {
+          console.log("루틴 목록 조회 시작");
       const routinesRes = await GET("/routine/list", {}, true).catch(err => {
-        console.warn("루틴 목록 조회 실패 (서버 에러 무시):", err.message);
+            console.error("루틴 목록 조회 실패:", err);
+            console.error("오류 상세:", {
+              status: err.response?.status,
+              statusText: err.response?.statusText,
+              data: err.response?.data,
+              message: err.message
+            });
+            
+            if (err.response?.status === 401) {
+              console.error("JWT 토큰 인증 실패 - 로그인이 필요합니다");
+              setDataStatus("로그인이 필요합니다. 다시 로그인해주세요.");
+            } else if (err.response?.status === 500) {
+              setDataStatus("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+            } else {
+              setDataStatus("데이터를 불러올 수 없습니다. 네트워크를 확인해주세요.");
+            }
+            
         return { data: [] };
       });
       
+          console.log("루틴 목록 조회 결과:", routinesRes);
       const routineArray = routinesRes?.data || [];
+          console.log("루틴 배열:", routineArray);
       
       if (Array.isArray(routineArray) && routineArray.length > 0) {
         const formattedRoutines = routineArray.map((routine, index) => {
-          
           const exerciseCount = routine.saveRoutineDto?.length || 0;
           return {
             id: routine.setId,
@@ -290,12 +318,31 @@ const Home = () => {
         setUserRoutines(formattedRoutines);
         
         try {
+              console.log("루틴 완료 기록 조회 시작");
           const resultsRes = await POST("/routine/result", {}, true).catch(err => {
-            console.warn("루틴 완료 기록 조회 실패:", err.message);
+                console.error("루틴 완료 기록 조회 실패:", err);
+                console.error("오류 상세:", {
+                  status: err.response?.status,
+                  statusText: err.response?.statusText,
+                  data: err.response?.data,
+                  message: err.message
+                });
+                
+                if (err.response?.status === 401) {
+                  console.error("JWT 토큰 인증 실패 - 로그인이 필요합니다");
+                  setDataStatus("로그인이 필요합니다. 다시 로그인해주세요.");
+                } else if (err.response?.status === 500) {
+                  setDataStatus("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+                } else {
+                  setDataStatus("운동 기록을 불러올 수 없습니다.");
+                }
+                
             return { data: [] };
           });
           
+              console.log("루틴 완료 기록 조회 결과:", resultsRes);
           const results = resultsRes?.data || [];
+              console.log("완료 기록 배열:", results);
           
           if (Array.isArray(results) && results.length > 0) {
             const today = new Date().toISOString().split('T')[0];
@@ -315,9 +362,10 @@ const Home = () => {
               return endDateStr === today || endDateStr === koreanTodayStr;
             });
             
-            const validTodayResults = todayResults.filter(r => r.setId || r.id);
-            const uniqueRoutineIds = [...new Set(validTodayResults.map(r => r.setId || r.id))];
+                const validTodayResults = todayResults.filter(r => r.setId || r.id);
+                const uniqueRoutineIds = [...new Set(validTodayResults.map(r => r.setId || r.id))];
             setTodayCompletedCount(uniqueRoutineIds.length);
+            
             const todayForTime = new Date().toISOString().split('T')[0];
             const koreanTodayForTime = new Date();
             koreanTodayForTime.setHours(koreanTodayForTime.getHours() + 9);
@@ -351,7 +399,6 @@ const Home = () => {
               totalTimeStr = `${seconds}초`;
             }
             
-            
             const uniqueDates = [...new Set(results.map(r => {
               const date = r.tEnd || r.tStart;
               return date ? new Date(date).toISOString().split('T')[0] : null;
@@ -359,10 +406,10 @@ const Home = () => {
             
             let consecutiveDays = 0;
             if (uniqueDates.length > 0) {
-              const today = new Date().toISOString().split('T')[0];
+                  const today = new Date().toISOString().split('T')[0];
               const latestDate = uniqueDates[0];
               
-              if (latestDate === today) {
+                  if (latestDate === today) {
                 consecutiveDays = 1;
                 
                 for (let i = 1; i < uniqueDates.length; i++) {
@@ -378,30 +425,42 @@ const Home = () => {
                 }
               }
             }
+                
+                console.log("계산된 통계:", {
+                  consecutiveDays,
+                  totalRoutines: results.length,
+                  totalTime: totalTimeStr,
+                  todayCompletedCount: uniqueRoutineIds.length
+                });
             
             setUserStats({
               consecutiveDays,
-              totalRoutines: results.length,
+                  totalRoutines: results.length,
               totalTime: totalTimeStr
             });
+                setDataStatus(""); // 성공적으로 로드됨
           } else {
+                console.log("완료 기록이 없음");
             setTodayCompletedCount(0);
             setUserStats({
               consecutiveDays: 0,
-              totalRoutines: 0,
+                  totalRoutines: 0,
               totalTime: "0시간"
             });
+                setDataStatus("아직 운동 기록이 없습니다. 첫 운동을 시작해보세요!");
           }
         } catch (statsError) {
-          console.warn("루틴 통계 계산 실패:", statsError.message);
+              console.error("루틴 통계 계산 실패:", statsError);
           setTodayCompletedCount(0);
           setUserStats({
             consecutiveDays: 0,
-            totalRoutines: 0,
+                totalRoutines: 0,
             totalTime: "0시간"
           });
+              setDataStatus("운동 기록을 처리하는 중 오류가 발생했습니다.");
         }
       } else {
+            console.log("루틴이 없음");
         setUserRoutines([]);
         setTodayCompletedCount(0);
         setUserStats({
@@ -409,6 +468,7 @@ const Home = () => {
           totalRoutines: 0,
           totalTime: "0시간"
         });
+            setDataStatus("아직 등록된 루틴이 없습니다. 첫 루틴을 만들어보세요!");
       }
     } catch (e) {
       console.error("사용자 데이터 로딩 실패", e);
@@ -419,15 +479,16 @@ const Home = () => {
         totalRoutines: 0,
         totalTime: "0시간"
       });
+          setDataStatus("데이터를 불러오는 중 오류가 발생했습니다.");
     } finally {
       setLoading(false);
+          isLoadingRef.current = false;
+          console.log("fetchUserData 완료");
     }
-  }, [user, GET, POST]);
+      };
 
-  useEffect(() => {
-    if (user) {
-      fetchUserData();
-      fetchWeather();
+      loadUserData();
+    fetchWeather();
     }
   }, [user]);
 
@@ -440,6 +501,8 @@ const Home = () => {
         totalRoutines: 0,
         totalTime: "0시간",
       });
+      setDataStatus("");
+      isLoadingRef.current = false;
     }
   }, [user]);
 
@@ -453,14 +516,231 @@ const Home = () => {
 
   useEffect(() => {
     const handleFocus = () => {
-      if (user) {
-        fetchUserData();
+      if (user && !isLoadingRef.current) {
+        isLoadingRef.current = true;
+        
+        const loadUserData = async () => {
+          setLoading(true);
+          setDataStatus("데이터를 불러오는 중...");
+          console.log("fetchUserData 시작 - 현재 사용자:", user?.email);
+          
+          try {
+            console.log("루틴 목록 조회 시작");
+            const routinesRes = await GET("/routine/list", {}, true).catch(err => {
+              console.error("루틴 목록 조회 실패:", err);
+              console.error("오류 상세:", {
+                status: err.response?.status,
+                statusText: err.response?.statusText,
+                data: err.response?.data,
+                message: err.message
+              });
+              
+              if (err.response?.status === 401) {
+                console.error("JWT 토큰 인증 실패 - 로그인이 필요합니다");
+                setDataStatus("로그인이 필요합니다. 다시 로그인해주세요.");
+              } else if (err.response?.status === 500) {
+                setDataStatus("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+              } else {
+                setDataStatus("데이터를 불러올 수 없습니다. 네트워크를 확인해주세요.");
+              }
+              
+              return { data: [] };
+            });
+            
+            console.log("루틴 목록 조회 결과:", routinesRes);
+            const routineArray = routinesRes?.data || [];
+            console.log("루틴 배열:", routineArray);
+            
+            if (Array.isArray(routineArray) && routineArray.length > 0) {
+              const formattedRoutines = routineArray.map((routine, index) => {
+                const exerciseCount = routine.saveRoutineDto?.length || 0;
+                return {
+                  id: routine.setId,
+                  title: routine.routineName || `내 운동 ${index + 1}`,
+                  time: exerciseCount > 0 ? `${exerciseCount}개 운동` : "운동 없음",
+                  icon: ""
+                };
+              });
+              
+              setUserRoutines(formattedRoutines);
+              
+              try {
+                console.log("루틴 완료 기록 조회 시작");
+                const resultsRes = await POST("/routine/result", {}, true).catch(err => {
+                  console.error("루틴 완료 기록 조회 실패:", err);
+                  console.error("오류 상세:", {
+                    status: err.response?.status,
+                    statusText: err.response?.statusText,
+                    data: err.response?.data,
+                    message: err.message
+                  });
+                  
+                  if (err.response?.status === 401) {
+                    console.error("JWT 토큰 인증 실패 - 로그인이 필요합니다");
+                    setDataStatus("로그인이 필요합니다. 다시 로그인해주세요.");
+                  } else if (err.response?.status === 500) {
+                    setDataStatus("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+                  } else {
+                    setDataStatus("운동 기록을 불러올 수 없습니다.");
+                  }
+                  
+                  return { data: [] };
+                });
+                
+                console.log("루틴 완료 기록 조회 결과:", resultsRes);
+                const results = resultsRes?.data || [];
+                console.log("완료 기록 배열:", results);
+                
+                if (Array.isArray(results) && results.length > 0) {
+                  const today = new Date().toISOString().split('T')[0];
+                  
+                  const todayResults = results.filter(r => {
+                    if (!r.tEnd) {
+                      return false;
+                    }
+                    
+                    const endDate = new Date(r.tEnd);
+                    const endDateStr = endDate.toISOString().split('T')[0];
+                    
+                    const koreanToday = new Date();
+                    koreanToday.setHours(koreanToday.getHours() + 9);
+                    const koreanTodayStr = koreanToday.toISOString().split('T')[0];
+                    
+                    return endDateStr === today || endDateStr === koreanTodayStr;
+                  });
+                  
+                  const validTodayResults = todayResults.filter(r => r.setId || r.id);
+                  const uniqueRoutineIds = [...new Set(validTodayResults.map(r => r.setId || r.id))];
+                  setTodayCompletedCount(uniqueRoutineIds.length);
+                  
+                  const todayForTime = new Date().toISOString().split('T')[0];
+                  const koreanTodayForTime = new Date();
+                  koreanTodayForTime.setHours(koreanTodayForTime.getHours() + 9);
+                  const koreanTodayStrForTime = koreanTodayForTime.toISOString().split('T')[0];
+                  
+                  const totalSeconds = results.reduce((sum, record) => {
+                    if (!record.tEnd) {
+                      return sum;
+                    }
+                    
+                    const endDate = new Date(record.tEnd);
+                    const endDateStr = endDate.toISOString().split('T')[0];
+                    
+                    if (endDateStr === todayForTime || endDateStr === koreanTodayStrForTime) {
+                      const time = record.routineResult?.rouTime || 0;
+                      return sum + time;
+                    }
+                    return sum;
+                  }, 0);
+                  
+                  const hours = Math.floor(totalSeconds / 3600);
+                  const minutes = Math.floor((totalSeconds % 3600) / 60);
+                  const seconds = totalSeconds % 60;
+                  
+                  let totalTimeStr = "";
+                  if (hours > 0) {
+                    totalTimeStr = `${hours}시간 ${minutes}분`;
+                  } else if (minutes > 0) {
+                    totalTimeStr = `${minutes}분 ${seconds}초`;
+                  } else {
+                    totalTimeStr = `${seconds}초`;
+                  }
+                  
+                  const uniqueDates = [...new Set(results.map(r => {
+                    const date = r.tEnd || r.tStart;
+                    return date ? new Date(date).toISOString().split('T')[0] : null;
+                  }).filter(Boolean))].sort((a, b) => new Date(b) - new Date(a));
+                  
+                  let consecutiveDays = 0;
+                  if (uniqueDates.length > 0) {
+                    const today = new Date().toISOString().split('T')[0];
+                    const latestDate = uniqueDates[0];
+                    
+                    if (latestDate === today) {
+                      consecutiveDays = 1;
+                      
+                      for (let i = 1; i < uniqueDates.length; i++) {
+                        const prevDate = new Date(uniqueDates[i - 1]);
+                        const currDate = new Date(uniqueDates[i]);
+                        const diff = Math.floor((prevDate - currDate) / (1000 * 60 * 60 * 24));
+                        
+                        if (diff === 1) {
+                          consecutiveDays++;
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                  }
+                  
+                  console.log("계산된 통계:", {
+                    consecutiveDays,
+                    totalRoutines: results.length,
+                    totalTime: totalTimeStr,
+                    todayCompletedCount: uniqueRoutineIds.length
+                  });
+                  
+                  setUserStats({
+                    consecutiveDays,
+                    totalRoutines: results.length,
+                    totalTime: totalTimeStr
+                  });
+                  setDataStatus(""); // 성공적으로 로드됨
+                } else {
+                  console.log("완료 기록이 없음");
+                  setTodayCompletedCount(0);
+                  setUserStats({
+                    consecutiveDays: 0,
+                    totalRoutines: 0,
+                    totalTime: "0시간"
+                  });
+                  setDataStatus("아직 운동 기록이 없습니다. 첫 운동을 시작해보세요!");
+                }
+              } catch (statsError) {
+                console.error("루틴 통계 계산 실패:", statsError);
+                setTodayCompletedCount(0);
+                setUserStats({
+                  consecutiveDays: 0,
+                  totalRoutines: 0,
+                  totalTime: "0시간"
+                });
+                setDataStatus("운동 기록을 처리하는 중 오류가 발생했습니다.");
+              }
+            } else {
+              console.log("루틴이 없음");
+              setUserRoutines([]);
+              setTodayCompletedCount(0);
+              setUserStats({
+                consecutiveDays: 0,
+                totalRoutines: 0,
+                totalTime: "0시간"
+              });
+              setDataStatus("아직 등록된 루틴이 없습니다. 첫 루틴을 만들어보세요!");
+            }
+          } catch (e) {
+            console.error("사용자 데이터 로딩 실패", e);
+            setUserRoutines([]);
+            setTodayCompletedCount(0);
+            setUserStats({
+              consecutiveDays: 0,
+              totalRoutines: 0,
+              totalTime: "0시간"
+            });
+            setDataStatus("데이터를 불러오는 중 오류가 발생했습니다.");
+          } finally {
+            setLoading(false);
+            isLoadingRef.current = false;
+            console.log("fetchUserData 완료");
+          }
+        };
+        
+        loadUserData();
       }
     };
 
     window.addEventListener('focus', handleFocus);
     return () => window.removeEventListener('focus', handleFocus);
-  }, [user]);
+  }, [user, GET, POST]);
 
 
   const startRoutine = (routineId) => {
@@ -537,28 +817,41 @@ const Home = () => {
       <section className={styles.challengesSection}>
         <Container>
           <h3 className={styles.sectionTitle}>오늘의 도전 과제</h3>
+          
+          {dataStatus && (
+            <div className="text-center mb-3">
+              <div className={`alert ${dataStatus.includes('오류') || dataStatus.includes('실패') ? 'alert-danger' : 'alert-info'}`} role="alert">
+                {dataStatus}
+              </div>
+            </div>
+          )}
+          
           <Row>
             <Col md={4} className="mb-3">
               <CardComponent className={styles.challengeCard}>
                 <div className={styles.challengeContent}>
                   <h5 className={styles.challengeTitle}>연속 달성</h5>
                   <div className={styles.challengeTarget}>{userStats?.consecutiveDays ?? 0} 일 연속</div>
-                  <div className={styles.consecutiveDays}>
-                    {[1,2,3,4,5,6,7].map((day) => (
-                      <div 
-                        key={day} 
-                        className={`${styles.dayIndicator} ${day <= (userStats?.consecutiveDays ?? 0) ? styles.dayActive : ''}`}
-                      ></div>
-                    ))}
-                  </div>
-                  <div className={styles.motivationText}>
-                    {userStats?.consecutiveDays === 0 ? "오늘부터 시작해보세요!" :
-                     userStats?.consecutiveDays === 1 ? "첫 걸음을 내딛었어요!" :
-                     userStats?.consecutiveDays === 2 ? "꾸준히 하고 있어요!" :
-                     userStats?.consecutiveDays === 3 ? "습관이 만들어지고 있어요!" :
-                     userStats?.consecutiveDays === 4 ? "정말 잘하고 있어요!" :
-                     userStats?.consecutiveDays === 5 ? "완벽한 일주일이에요!" :
-                     userStats?.consecutiveDays >= 6 ? "운동 마스터가 되었어요!" : "좋은 습관 유지 중!"}
+                  <div className={styles.challengeProgress}>
+                    <div className={styles.consecutiveDays}>
+                      {[1,2,3,4,5,6,7].map((day) => (
+                        <div 
+                          key={day} 
+                          className={`${styles.dayIndicator} ${day <= (userStats?.consecutiveDays ?? 0) ? styles.dayActive : ''}`}
+                        ></div>
+                      ))}
+                    </div>
+                    <span className={styles.progressText}>
+                      <span style={{ color: '#0A66FF', fontWeight: 500 }}>
+                        {userStats?.consecutiveDays === 0 ? "오늘부터 시작해보세요!" :
+                         userStats?.consecutiveDays === 1 ? "첫 걸음을 내딛었어요!" :
+                         userStats?.consecutiveDays === 2 ? "꾸준히 하고 있어요!" :
+                         userStats?.consecutiveDays === 3 ? "습관이 만들어지고 있어요!" :
+                         userStats?.consecutiveDays === 4 ? "정말 잘하고 있어요!" :
+                         userStats?.consecutiveDays === 5 ? "완벽한 일주일이에요!" :
+                         userStats?.consecutiveDays >= 6 ? "운동 마스터가 되었어요!" : "좋은 습관 유지 중!"}
+                      </span>
+                    </span>
                   </div>
                 </div>
               </CardComponent>
@@ -566,7 +859,7 @@ const Home = () => {
             <Col md={4} className="mb-3">
               <CardComponent className={styles.challengeCard}>
                 <div className={styles.challengeContent}>
-                  <h5 className={styles.challengeTitle}>오늘 완료</h5>
+                  <h5 className={styles.challengeTitle}>오늘 완료된 루틴 갯수</h5>
                   <div className={styles.challengeTarget}>{todayCompletedCount}/3개 루틴</div>
                   <div className={styles.challengeProgress}>
                     <div className={styles.progressBar}>
