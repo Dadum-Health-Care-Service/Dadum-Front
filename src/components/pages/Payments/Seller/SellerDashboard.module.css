@@ -7,6 +7,56 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* 통계 테이블 스타일 */
+.statsTable {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.statsTable thead th {
+    background: #f8fafc;
+    color: #374151;
+    border: none;
+    font-weight: 600;
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.statsTable tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.statsTable tbody tr:hover {
+    background-color: #f9fafb;
+}
+
+.statsTable tbody td {
+    padding: 1rem;
+    border-bottom: 1px solid #f3f4f6;
+    vertical-align: middle;
+}
+
+.statsTable tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.metricLabel {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #374151;
+}
+
+.metricValue {
+    font-weight: 500;
+    font-size: 1rem;
+    color: #111827;
+}
+
+.metricValue.today {
+    font-weight: 600;
+}
+
 .statCard {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;

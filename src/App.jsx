@@ -148,6 +148,7 @@ function AppContent() {
                 <Route path="/calorie" element={<CalorieCam />}></Route>
                 <Route path="/daily" element={<DailySummary />}></Route>
                 <Route path="/shop" element={<Shop />}></Route>
+                <Route path="/shop/product/:productId" element={<ProductDetail />}></Route>
                 <Route path="/order" element={<OrderPage />}></Route>
                 <Route path="/orders" element={<OrderHistory />}></Route>
                 <Route

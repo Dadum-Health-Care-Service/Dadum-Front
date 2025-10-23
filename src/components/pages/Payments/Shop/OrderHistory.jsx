@@ -6,7 +6,6 @@ import ModalComponent from '../../../common/ModalComponent';
 import styles from './OrderHistory.module.css';
 
 export default function OrderHistory() {
-  console.log("OrderHistory 컴포넌트 렌더링됨");
   const { GET, DELETE, POST } = useApi();
   const { user } = useContext(AuthContext);
   const [orders, setOrders] = useState([]);
@@ -22,7 +21,6 @@ export default function OrderHistory() {
   const [additionalInfo, setAdditionalInfo] = useState('');
 
   useEffect(() => {
-    console.log("OrderHistory useEffect 실행됨");
     fetchOrders();
   }, []);
 
@@ -30,7 +28,6 @@ export default function OrderHistory() {
     try {
       // 사용자 로그인 확인
       if (!user || !user.accessToken) {
-        console.log("사용자가 로그인하지 않음");
         setOrders([]);
         setError('');
         setLoading(false);
@@ -38,16 +35,10 @@ export default function OrderHistory() {
       }
 
       // 실제 API 호출 (useApi 사용)
-      console.log("실제 API로 주문 내역 조회 중...");
-      console.log("사용자 정보:", user);
-      console.log("Access Token:", user.accessToken);
-      
       const response = await GET('/orders', {}, true, 'main');
-      console.log("API 응답:", response);
       
       // axios 응답을 직접 처리
       if (response && response.data) {
-        console.log("응답 데이터:", response.data);
         // 백엔드 응답 구조에 맞게 수정
         const ordersData = response.data.orders || response.data || [];
         setOrders(ordersData);

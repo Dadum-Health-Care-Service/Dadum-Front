@@ -1,0 +1,963 @@
+/* OrderPage 전용 스타일 */
+.orderPageContainer {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 20px 0;
+  width: 100%;
+  max-width: none;
+}
+
+.orderPageHeader {
+  text-align: center;
+  margin-bottom: 30px;
+  padding: 30px 20px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  margin: 0 20px 30px 20px;
+  max-width: none;
+}
+
+.orderPageTitle {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #3b82f6 0%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.orderPageSubtitle {
+  font-size: 1.1rem;
+  color: #7f8c8d;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.backButton {
+  background: #6c757d;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 20px;
+}
+
+.backButton:hover {
+  background: #5a6268;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+}
+
+.userInfoAlert {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  border: none;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 10px rgba(33, 150, 243, 0.1);
+}
+
+.userInfoAlert .alert-heading {
+  color: #1976d2;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.userInfoAlert .alert-text {
+  color: #424242;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.warningAlert {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  border: none;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 10px rgba(255, 152, 0, 0.1);
+}
+
+.warningAlert .alert-heading {
+  color: #f57c00;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.warningAlert .alert-text {
+  color: #424242;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* 주문자 정보 카드 */
+.ordererInfoCard {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  width: 100%;
+  max-width: none;
+}
+
+.ordererInfoCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.ordererInfoHeader {
+  background: linear-gradient(135deg, #3b82f6 100%);
+  color: white;
+  padding: 20px;
+  border-bottom: none;
+}
+
+.ordererInfoTitle {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.ordererInfoBody {
+  padding: 24px;
+}
+
+.formLabel {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+}
+
+.formControl {
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background-color: #fafafa;
+}
+
+.formControl:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+  background-color: white;
+}
+
+.formControl:read-only {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
+.emailInputGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.emailInput {
+  flex: 1;
+}
+
+.emailAt {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #6c757d;
+  padding: 0 8px;
+}
+
+.emailSelect {
+  flex: 1;
+}
+
+.addressInputGroup {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.zipCodeInput {
+  flex: 1;
+}
+
+.addressSearchButton {
+  flex: 1;
+  background: #3b82f6;
+  border: none;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.addressSearchButton:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+.addressInput {
+  margin-bottom: 12px;
+}
+
+.detailAddressInput {
+  margin-bottom: 0;
+}
+
+/* 배송 정보 카드 */
+.deliveryInfoCard {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  width: 100%;
+  max-width: none;
+}
+
+.deliveryInfoCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.deliveryInfoHeader {
+  background: linear-gradient(135deg, #3b82f6);
+  color: white;
+  padding: 20px;
+  border-bottom: none;
+}
+
+.deliveryInfoTitle {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.deliveryInfoBody {
+  padding: 24px;
+}
+
+.deliveryTypeGroup {
+  margin-bottom: 20px;
+}
+
+.deliveryTypeLabel {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 12px;
+  font-size: 0.95rem;
+}
+
+.deliveryTypeOptions {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.deliveryTypeRadio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.deliveryTypeRadio input[type="radio"] {
+  margin: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.deliveryTypeRadio label {
+  margin: 0;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+}
+
+.addressTypeGroup {
+  margin-bottom: 20px;
+}
+
+.addressTypeLabel {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 12px;
+  font-size: 0.95rem;
+}
+
+.addressTypeOptions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.addressTypeRadio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.addressTypeRadio input[type="radio"] {
+  margin: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.addressTypeRadio label {
+  margin: 0;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+}
+
+.deliveryMessageTextarea {
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background-color: #fafafa;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.deliveryMessageTextarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+  background-color: white;
+}
+
+.deliveryMessageHelp {
+  color: #6c757d;
+  font-size: 0.85rem;
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
+.deliveryMessageWarning {
+  color: #dc3545;
+  font-size: 0.85rem;
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
+.depositorNameInput {
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background-color: #fafafa;
+}
+
+.depositorNameInput:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+  background-color: white;
+}
+
+.depositorNameHelp {
+  color: #6c757d;
+  font-size: 0.85rem;
+  margin-top: 8px;
+}
+
+.saveAddressCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.saveAddressCheckbox input[type="checkbox"] {
+  margin: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.saveAddressCheckbox label {
+  margin: 0;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+}
+
+/* 주문자 동의 카드 */
+.agreementCard {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  width: 100%;
+  max-width: none;
+}
+
+.agreementCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.agreementHeader {
+  background: linear-gradient(135deg, #3b82f6);
+  color: white;
+  padding: 20px;
+  border-bottom: none;
+}
+
+.agreementTitle {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.agreementBody {
+  padding: 24px;
+}
+
+.privacyTable {
+  margin-bottom: 24px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.privacyTable thead th {
+  background: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+  font-weight: 600;
+  color: #495057;
+  padding: 16px;
+  text-align: center;
+}
+
+.privacyTable tbody td {
+  padding: 16px;
+  border-bottom: 1px solid #dee2e6;
+  vertical-align: top;
+}
+
+.privacyTable tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.agreementCheckboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.agreementCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.agreementCheckbox:hover {
+  background: #e9ecef;
+}
+
+.agreementCheckbox input[type="checkbox"] {
+  margin: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.agreementCheckbox label {
+  margin: 0;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  flex: 1;
+}
+
+.allAgreeCheckbox {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  border: 2px solid #2196f3;
+}
+
+.allAgreeCheckbox:hover {
+  background: linear-gradient(135deg, #bbdefb 0%, #90caf9 100%);
+}
+
+/* 주문 상품 할인적용 카드 */
+.discountCard {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  width: 100%;
+  max-width: none;
+}
+
+.discountCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.discountHeader {
+  background: linear-gradient(135deg, #3b82f6);
+  color: white;
+  padding: 20px;
+  border-bottom: none;
+}
+
+.discountTitle {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.discountBody {
+  padding: 24px;
+}
+
+.priceBreakdown {
+  margin-bottom: 24px;
+}
+
+.priceItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 8px 0;
+}
+
+.priceItem:last-child {
+  border-top: 2px solid #e9ecef;
+  padding-top: 16px;
+  margin-top: 16px;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.priceLabel {
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.priceValue {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.discountValue {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+.totalAmount {
+  color: #dc3545;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.depositSection {
+  margin-bottom: 20px;
+}
+
+.depositLabel {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 12px;
+  font-size: 0.95rem;
+}
+
+.depositInputGroup {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.depositInput {
+  flex: 1;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background-color: #fafafa;
+}
+
+.depositInput:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+  background-color: white;
+}
+
+.depositCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.depositCheckbox input[type="checkbox"] {
+  margin: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.depositCheckbox label {
+  margin: 0;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+}
+
+.depositHelp {
+  color: #dc3545;
+  font-size: 0.85rem;
+  margin-top: 8px;
+}
+
+.couponSection {
+  margin-bottom: 24px;
+}
+
+.couponLabel {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 12px;
+  font-size: 0.95rem;
+}
+
+.couponInputGroup {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.couponInput {
+  flex: 1;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background-color: #fafafa;
+}
+
+.couponInput:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+  background-color: white;
+}
+
+.couponButton {
+  background: #6c757d;
+  border: none;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.couponButton:hover {
+  background: #5a6268;
+  transform: translateY(-1px);
+}
+
+.paymentButton {
+  background: linear-gradient(135deg, #3b82f6);
+  border: none;
+  color: white;
+  padding: 16px 24px;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+}
+
+.paymentButton:hover {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+}
+
+.paymentButton:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.paymentButton:disabled:hover {
+  background: #6c757d;
+  transform: none;
+  box-shadow: none;
+}
+
+.deliveryNotice {
+  margin-top: 16px;
+  padding: 12px;
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  color: #856404;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+/* 사이드 네비게이션 */
+.sideNavigation {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sideNavButton {
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  text-align: center;
+}
+
+.sideNavButton:hover {
+  transform: translateY(-1px);
+}
+
+.talkButton {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  color: white;
+}
+
+.talkButton:hover {
+  background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+}
+
+.infoButton {
+  background: #f8f9fa;
+  color: #6c757d;
+  border: 2px solid #e9ecef;
+}
+
+.infoButton:hover {
+  background: #e9ecef;
+  color: #495057;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1200px) {
+  .orderPageContainer {
+    padding: 15px 0;
+  }
+  
+  .orderPageHeader {
+    margin: 0 15px 20px 15px;
+    padding: 25px 15px;
+  }
+  
+  .ordererInfoBody,
+  .deliveryInfoBody,
+  .agreementBody,
+  .discountBody {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .orderPageContainer {
+    padding: 10px 0;
+  }
+  
+  .orderPageTitle {
+    font-size: 1.8rem;
+  }
+  
+  .orderPageSubtitle {
+    font-size: 1rem;
+  }
+  
+  .orderPageHeader {
+    margin: 0 10px 15px 10px;
+    padding: 20px 15px;
+  }
+  
+  .ordererInfoBody,
+  .deliveryInfoBody,
+  .agreementBody,
+  .discountBody {
+    padding: 16px;
+  }
+  
+  .emailInputGroup {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .addressInputGroup {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .deliveryTypeOptions,
+  .addressTypeOptions {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .depositInputGroup,
+  .couponInputGroup {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .sideNavigation {
+    margin-top: 20px;
+  }
+}
+
+@media (max-width: 576px) {
+  .orderPageContainer {
+    padding: 5px 0;
+  }
+  
+  .orderPageHeader {
+    margin: 0 5px 10px 5px;
+    padding: 15px 10px;
+  }
+  
+  .orderPageTitle {
+    font-size: 1.5rem;
+  }
+  
+  .orderPageSubtitle {
+    font-size: 0.9rem;
+  }
+  
+  .ordererInfoBody,
+  .deliveryInfoBody,
+  .agreementBody,
+  .discountBody {
+    padding: 12px;
+  }
+  
+  .formControl {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+  
+  .privacyTable {
+    font-size: 0.8rem;
+  }
+  
+  .privacyTable thead th,
+  .privacyTable tbody td {
+    padding: 10px 6px;
+  }
+  
+  .deliveryTypeOptions,
+  .addressTypeOptions {
+    gap: 8px;
+  }
+  
+  .deliveryTypeRadio,
+  .addressTypeRadio {
+    gap: 6px;
+  }
+  
+  .deliveryTypeRadio input[type="radio"],
+  .addressTypeRadio input[type="radio"] {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .agreementCheckbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .depositCheckbox input[type="checkbox"],
+  .saveAddressCheckbox input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .orderPageContainer {
+    padding: 0;
+  }
+  
+  .orderPageHeader {
+    margin: 0;
+    border-radius: 0;
+    padding: 15px 8px;
+  }
+  
+  .ordererInfoCard,
+  .deliveryInfoCard,
+  .agreementCard,
+  .discountCard {
+    margin: 0 0 16px 0;
+    border-radius: 0;
+  }
+  
+  .ordererInfoBody,
+  .deliveryInfoBody,
+  .agreementBody,
+  .discountBody {
+    padding: 10px;
+  }
+  
+  .ordererInfoHeader,
+  .deliveryInfoHeader,
+  .agreementHeader,
+  .discountHeader {
+    padding: 15px;
+  }
+  
+  .ordererInfoTitle,
+  .deliveryInfoTitle,
+  .agreementTitle,
+  .discountTitle {
+    font-size: 1.1rem;
+  }
+  
+  .formLabel {
+    font-size: 0.9rem;
+  }
+  
+  .formControl {
+    padding: 8px 10px;
+    font-size: 0.85rem;
+  }
+  
+  .privacyTable {
+    font-size: 0.75rem;
+  }
+  
+  .privacyTable thead th,
+  .privacyTable tbody td {
+    padding: 8px 4px;
+  }
+}
