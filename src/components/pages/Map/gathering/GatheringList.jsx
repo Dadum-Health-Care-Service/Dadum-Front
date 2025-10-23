@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, Button, Badge, Row, Col, Container, Spinner, Alert } from 'react-bootstrap';
 import { useKakaoMap } from '../hooks/useKakaoMap';
 import { useGatheringCategories, useGatherings } from './gtHooks';
+import { useParticipatedGatherings } from '../../Social/hooks/useParticipatedGatherings';
 import CreateGathering from './CreateGathering';
 import GatheringDetail from './GatheringDetail';
 import styles from './Gathering.module.css';
@@ -10,6 +11,7 @@ const GatheringList = () => {
   const { userLocation } = useKakaoMap();
   const { categories } = useGatheringCategories();
   const { gatherings, loading, error, fetchGatherings, joinGathering, leaveGathering } = useGatherings();
+  const { participatedGatherings } = useParticipatedGatherings();
   
   const [filteredGatherings, setFilteredGatherings] = useState([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -18,6 +20,12 @@ const GatheringList = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+
+  // 참여한 모임인지 확인하는 함수
+  const isParticipated = (gatheringId) => {
+    if (!participatedGatherings) return false;
+    return participatedGatherings.some(gathering => gathering.gatheringId === gatheringId);
+  };
 
 
   // 카테고리 필터링
@@ -178,16 +186,18 @@ const GatheringList = () => {
                   </div>
                 </div>
                 <div className={styles.listItemActions}>
-                  <button 
-                    className={styles.joinButton}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleJoinGathering(gathering.gatheringId);
-                    }}
-                    disabled={gathering.currentParticipants >= gathering.maxParticipants}
-                  >
-                    참여하기
-                  </button>
+                  {!isParticipated(gathering.gatheringId) && (
+                    <button 
+                      className={styles.joinButton}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleJoinGathering(gathering.gatheringId);
+                      }}
+                      disabled={gathering.currentParticipants >= gathering.maxParticipants}
+                    >
+                      참여하기
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
