@@ -6,7 +6,6 @@ import { useApi } from "../../../utils/api/useApi";
 import { useAuth } from "../../../context/AuthContext";
 import ActivityStats from "./components/ActivityStats";
 import NutritionStats from "./components/NutritionStats";
-import WatchDetails from "./components/WatchDetails";
 import MealDetails from "./components/MealDetails";
 import "./DailySummary.css";
 
@@ -109,7 +108,7 @@ export default function DailySummary() {
     if (!items || items.length === 0) return null;
     
     const totalSteps = items.reduce((sum, item) => sum + Number(item.steps || 0), 0);
-    const totalCalories = items.reduce((sum, item) => sum + Number(item.caloriesKcal || 0), 0);
+    const totalCalories = Math.ceil(items.reduce((sum, item) => sum + Number(item.caloriesKcal || 0), 0));
     const totalDistance = items.reduce((sum, item) => sum + Number(item.distanceKm || 0), 0);
     
     const heartRates = items
@@ -232,7 +231,7 @@ export default function DailySummary() {
     try {
       const startTime = Date.now();
       
-      // 테스트용: 하드코딩된 워치 데이터 사용
+      // 워치 데이터 조회
       const currentHealthItems = await fetchHealthRaw(id);
       
       const endTime = Date.now();
@@ -243,7 +242,27 @@ export default function DailySummary() {
         return;
       }
       
-      setHealthItems(currentHealthItems);
+      // 날짜별 필터링 적용
+      console.log("현재 설정된 날짜:", date);
+      // 문자열 → Date 객체로 변환
+      const dateObj = new Date(`${date}T00:00:00Z`);
+      // 한국 시간(KST) 기준 날짜 문자열로 변환
+      const dateKST = dateObj.toLocaleDateString("ko-KR", {
+        timeZone: "Asia/Seoul",
+      });
+      console.log(dateKST);
+      
+      const filteredHealthItems = currentHealthItems.filter((item) => {
+        if (!item.recordTime) return false;
+        console.log(item.recordTime);
+        const dateStr = new Date(item.recordTime).toLocaleDateString("ko-KR", {
+          timeZone: "Asia/Seoul",
+        });
+        return dateStr === dateKST;
+      });
+      console.log(filteredHealthItems);
+      
+      setHealthItems(filteredHealthItems.length ? filteredHealthItems : currentHealthItems);
       setShowDetails(true);
     } catch (e) {
       if (e?.response?.status === 500) {
@@ -332,6 +351,7 @@ export default function DailySummary() {
 
   useEffect(() => {
     loadDaily(date);
+    fetchHealthDirect(usersId);
   }, [date]);
 
   useEffect(() => {
@@ -631,13 +651,34 @@ export default function DailySummary() {
       if (id) {
         // 실시간 워치 데이터 조회
         const latestHealthItems = await fetchHealthRaw(id);
-        if (latestHealthItems.length > 0) {
-        setHealthItems(latestHealthItems);
+        console.log(latestHealthItems);
+        
+        // 날짜별 필터링 적용
+        // 문자열 → Date 객체로 변환
+        const dateObj = new Date(`${date}T00:00:00Z`);
+        // 한국 시간(KST) 기준 날짜 문자열로 변환
+        const dateKST = dateObj.toLocaleDateString("ko-KR", {
+          timeZone: "Asia/Seoul",
+        });
+        console.log(dateKST);
+        
+        const filteredHealthItems = latestHealthItems.filter((item) => {
+          if (!item.recordTime) return false;
+          console.log(item.recordTime);
+          const dateStr = new Date(item.recordTime).toLocaleDateString("ko-KR", {
+            timeZone: "Asia/Seoul",
+          });
+          return dateStr === dateKST;
+        });
+        console.log(filteredHealthItems);
+        
+        if (filteredHealthItems.length > 0) {
+          setHealthItems(filteredHealthItems);
         }
 
-        if ((!meals || meals.length === 0) && (!latestHealthItems || latestHealthItems.length === 0)) {
+        if ((!meals || meals.length === 0) && (!filteredHealthItems || filteredHealthItems.length === 0)) {
         } else {
-        const watchData = prepareWatchDataForLLM(latestHealthItems);
+        const watchData = prepareWatchDataForLLM(filteredHealthItems);
         try {
             const res = await POST(`/summary/analyze`, {
                 user_id: id,
@@ -720,7 +761,7 @@ export default function DailySummary() {
     if (!healthItems || healthItems.length === 0) return null;
     
     const totalSteps = healthItems.reduce((sum, item) => sum + Number(item.steps || 0), 0);
-    const totalCaloriesBurned = healthItems.reduce((sum, item) => sum + Number(item.caloriesKcal || 0), 0);
+    const totalCaloriesBurned = Math.ceil(healthItems.reduce((sum, item) => sum + Number(item.caloriesKcal || 0), 0));
     const totalDistance = healthItems.reduce((sum, item) => sum + Number(item.distanceKm || 0), 0);
     const heartRates = healthItems.map(item => Number(item.heartRateAvg || 0)).filter(hr => hr > 0);
     const avgHeartRate = heartRates.length > 0 
@@ -895,7 +936,7 @@ export default function DailySummary() {
     // 워치 데이터 기반 질병 위험 분석
     if (healthItems && healthItems.length > 0) {
       const totalSteps = healthItems.reduce((sum, item) => sum + Number(item.steps || 0), 0);
-      const totalCaloriesBurned = healthItems.reduce((sum, item) => sum + Number(item.caloriesKcal || 0), 0);
+      const totalCaloriesBurned = Math.ceil(healthItems.reduce((sum, item) => sum + Number(item.caloriesKcal || 0), 0));
       const avgHeartRate = healthItems.reduce((sum, item) => sum + Number(item.heartRateAvg || 0), 0) / healthItems.length;
       
       // 활동량 기반 질병 위험 분석
@@ -1002,15 +1043,52 @@ export default function DailySummary() {
         <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#212121', margin: '0 0 16px 0', paddingBottom: '12px', borderBottom: '2px solid #D6E4FF' }}>
           나의 워치 정보
         </h2>
-        <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-        <ButtonComponent
-          variant="primary"
-          size="large"
-          onClick={handleShowDetails}
-        >
-            워치 데이터 조회
-        </ButtonComponent>
-      </div>
+        {!showDetails ? (
+          <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+            <ButtonComponent
+              variant="primary"
+              size="large"
+              onClick={handleShowDetails}
+            >
+              워치 데이터 조회
+            </ButtonComponent>
+          </div>
+        ) : (
+          <div className="table-responsive">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>기록시각</th>
+                  <th>걸음수</th>
+                  <th>칼로리 (kcal)</th>
+                  <th>거리 (km)</th>
+                  <th>심박수 (bpm)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {healthItems.map((item, index) => (
+                  <tr key={index}>
+                    <td>
+                      {new Date(item.recordTime).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </td>
+                    <td>{item.steps || 0}</td>
+                    <td>{item.caloriesKcal || 0}</td>
+                    <td>{item.distanceKm || 0}</td>
+                    <td>{item.heartRateAvg || 0}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        {showDetails && healthItems && healthItems.length > 0 && (
+          <div className="mt-2" style={{ fontSize: "13px", color: "#718096" }}>
+            총 {healthItems.length}건의 워치 데이터
+          </div>
+        )}
       </ContainerComponent>
 
       {dailyText && dailyText !== "요약이 없습니다." && dailyText !== "분석 중…" && (
@@ -1089,9 +1167,6 @@ export default function DailySummary() {
         activityStats={activityStats}
       />
 
-      {showDetails && healthItems && healthItems.length > 0 && (
-        <WatchDetails healthItems={healthItems} />
-      )}
 
       {meals && meals.length > 0 && (
         <MealDetails 
