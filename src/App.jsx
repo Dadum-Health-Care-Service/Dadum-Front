@@ -59,7 +59,6 @@ function AppContent() {
   const [isNotify, setIsNotify] = useState(false);
   const location = useLocation();
   const { GET } = useApi();
-  const { showBasicModal }= useModal();
 
   usePageView();
   useEffect(() => {
@@ -109,7 +108,7 @@ function AppContent() {
           console.log('사용자 이메일: ',res.data.email);
         } catch (e) {
           console.log(e);
-          console.err('저장된 user의 정보와 일치하는 사용자가 없어 로그아웃 되었습니다');
+          console.error('저장된 user의 정보와 일치하는 사용자가 없어 로그아웃 되었습니다');
           dispatch({ type: "LOGOUT" });
         }
       };
