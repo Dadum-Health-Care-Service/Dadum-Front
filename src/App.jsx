@@ -119,7 +119,7 @@ function AppContent() {
   const noGNBpaths = ["/login", "/signup", "/findid", "/findpw"];
   const showGNB = user && !noGNBpaths.includes(location.pathname);
   const pagePadding =
-    isMobile && !noGNBpaths.includes(location.pathname) ? "90px" : "0px";
+    isMobile && !noGNBpaths.includes(location.pathname) && user ? "90px" : "0px";
 
   return (
     <>
