@@ -111,6 +111,7 @@ export default function DoughnutChart({ doughnutData, isMobile, isPolar }) {
                   const minLightness = 50;
                   const maxLightness = 100;
                   const ratio = entries[1] / totalSum;
+                  const label = entries[0];
 
                   const lightness = isPolar
                     ? 60 +
@@ -118,7 +119,25 @@ export default function DoughnutChart({ doughnutData, isMobile, isPolar }) {
                         (maxLightness - minLightness) * (1 - Math.min(ratio * 10, 2))) *
                         3
                     : minLightness + (maxLightness - minLightness) * (1 - Math.min(ratio * 10, 1)); // 값이 클수록 더 진하게 (50%~100% 밝기)
-                  return `hsl(220, 90%, ${lightness}%,${isPolar ? 0.8 : 1})`; // 파란색(hue 220) 계열
+                  
+                  let HUE = 220;
+                  let SATURATION = '90%';
+                  let FINAL_LIGHTNESS = lightness;
+
+                  if(label.includes('깊은 수면')) {
+                    HUE = 0;
+                    SATURATION='0%';
+                    FINAL_LIGHTNESS=15;
+                  }else if(label.includes('렘 수면')){
+                    HUE=0;
+                    SATURATION='0%';
+                    FINAL_LIGHTNESS=45;
+                  }else if(label.includes('얕은 수면')){
+                    HUE=0;
+                    SATURATION='0%';
+                    FINAL_LIGHTNESS=75;
+                  }
+                  return `hsl(${HUE}, ${SATURATION}, ${FINAL_LIGHTNESS}%,${isPolar ? 0.8 : 1})`; // 파란색(hue 220) 계열
                 })
               : [],
             fill: false,

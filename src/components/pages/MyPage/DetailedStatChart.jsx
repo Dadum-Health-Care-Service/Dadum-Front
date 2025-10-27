@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import styles from './DetailedStatChart.module.css'; 
+import DoughnutChart from '../../common/chart/DoughnutChart';
 
 const KEY_MAP = {
     'step': { dataKey: 'stepData', timeKey: 'currentTime', unit: '걸음' },
@@ -31,8 +32,9 @@ const getKSTStartOfDay = (date) => {
     const kstDate = new Date(utcDate.getTime() + (9 * 60 * 60 * 1000)); // KST = UTC + 9
 
     const startOfDay = new Date(kstDate.getFullYear(), kstDate.getMonth(), kstDate.getDate());
-    
-    return new Date(startOfDay.getTime() - (9 * 60 * 60 * 1000)); 
+
+    return startOfDay;
+    //return new Date(startOfDay.getTime() - (9 * 60 * 60 * 1000)); 
 };
 
 const getChartConfig = (healthKey, rawData, filterType) => {
@@ -68,9 +70,9 @@ const getChartConfig = (healthKey, rawData, filterType) => {
     filterEnd.setDate(kstTodayStart.getDate() + 1);
 
     if (filterType === '주') {
-        filterStart.setDate(kstTodayStart.getDate() - 6);
+        filterStart.setDate(kstTodayStart.getDate() - 7);
     } else if (filterType === '월') {
-        filterStart.setDate(kstTodayStart.getDate() - 29);
+        filterStart.setDate(kstTodayStart.getDate() - 30);
     } 
 
     const filteredRawData = rawData.filter(item => {
@@ -98,11 +100,21 @@ const getChartConfig = (healthKey, rawData, filterType) => {
                 }
             } else if(dataKey === 'distanceWalked') {
                 dataValue = (item.distanceWalked /1000) || 0;
+            } else if(dataKey === 'totalSleepMinutes'){
+                dataValue = {
+                    totalSleepMinutes:(item.totalSleepMinutes) ||0,
+                    remSleepMinutes:(item.remSleepMinutes)||0,
+                    deepSleepMinutes:(item.deepSleepMinutes)||0,
+                    lightSleepMinutes:(item.lightSleepMinutes)||0
+                }
             } else {
                 dataValue = item[dataKey] || 0;
             }
             
-            return dataValue > 0 ? { data: dataValue, time: timeValue } : null;
+            const sleepFilter = (dataKey === 'totalSleepMinutes' && dataValue.totalSleepMinutes === 0) ||
+                                (typeof dataValue === 'number' && dataValue === 0);
+            
+            return sleepFilter ? null : { data: dataValue, time: timeValue };
         })
         .filter(item => item !== null);
 
@@ -114,12 +126,36 @@ const getChartConfig = (healthKey, rawData, filterType) => {
         };
     }
 
-    const values = extractedData.map(d => d.data);
+    const values = extractedData.map(d => {
+        return healthKey === 'sleep' ? d.data.totalSleepMinutes : d.data
+    });
     const avgVal = values.reduce((sum, val) => sum + val, 0) / values.length;
     
     const actualMax = Math.max(...values, 1);
     const maxVal = adjustMax(actualMax);
     const yAxisMid = maxVal === 1 ? (maxVal/2).toFixed(1) : Math.round(maxVal / 2).toLocaleString();
+
+    if(healthKey==='sleep'){
+        const totalREM = extractedData.reduce((sum,d)=> sum+(d?.data?.remSleepMinutes || 0),0);
+        const totalLight = extractedData.reduce((sum,d)=> sum+(d?.data?.lightSleepMinutes|| 0),0);
+        const totalDeep = extractedData.reduce((sum,d)=>sum+(d?.data?.deepSleepMinutes || 0),0);
+
+        const avgDisplayValue = avgVal;
+
+        const totalSleepData={
+            '렘 수면':totalREM,
+            '얕은 수면':totalLight,
+            '깊은 수면':totalDeep,
+        };
+
+        return {
+            title, unit, avgValue:avgDisplayValue,
+            yAxisMax: maxVal.toLocaleString(), yAxisMid, 
+            valueFormatter, extractedData, filterType, totalSleepData,
+            getBarHeights:()=>values.map(val=>`${(val/maxVal)*100}%`)
+        };
+
+    }
 
     return { 
         title, unit, avgValue: avgVal,
@@ -131,6 +167,23 @@ const getChartConfig = (healthKey, rawData, filterType) => {
 
 const DetailedStatChart = ({ healthData, healthKey, valueClass }) => {
   const [selectedTab, setSelectedTab] = useState('일'); 
+  const [showDoughnut, setShowDoughnut] = useState(false);
+  const doughnutContainerRef = useRef(null);
+
+  const toggleDoughnut = ()=>{
+    if(healthKey==='sleep'){
+        setShowDoughnut(prev => !prev);
+    }
+  };
+
+  useEffect(()=>{
+    if(showDoughnut&&doughnutContainerRef.current){
+        doughnutContainerRef.current.scrollIntoView({
+            behavior:'smooth',
+            block:'start'
+        });
+    }
+  },[showDoughnut]);
   
   const chartConfig = useMemo(() => {
     if (!KEY_MAP[healthKey]) {
@@ -157,6 +210,8 @@ const DetailedStatChart = ({ healthData, healthKey, valueClass }) => {
 
   const currentMonth = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', timeZone: 'Asia/Seoul' });
 
+  const graphContainerStyle = healthKey==='sleep'?{cursor:'pointer'}:{};
+  const clickableClass = healthKey==='sleep'? styles.clickableGraph:'';
   return (
     <div className={styles.container}>
         <header className={styles.header}>
@@ -185,7 +240,7 @@ const DetailedStatChart = ({ healthData, healthKey, valueClass }) => {
                     </p>
                     <p className={styles.dateText}>{currentMonth}</p>
                 </section>
-                <section className={styles.graphContainer}>
+                <section className={`${styles.graphContainer} ${clickableClass}`} style={graphContainerStyle} onClick={toggleDoughnut}>
                     {/* Y축 레이블 */}
                     <div className={styles.yAxisLabels}>
                         <span className={styles.yLabel}>{chartConfig.yAxisMax}</span>
@@ -220,6 +275,15 @@ const DetailedStatChart = ({ healthData, healthKey, valueClass }) => {
             </>
         ) : (
             <div className="text-center p-2 mb-3">선택한 기간에 데이터가 없습니다.</div>
+        )}
+        {healthKey==='sleep' && showDoughnut && chartConfig.totalSleepData && (
+            <div style={{marginTop:'20px'}} onClick={toggleDoughnut} ref={doughnutContainerRef}>
+                <DoughnutChart
+                    doughnutData={chartConfig.totalSleepData}
+                    isMobile={false}
+                    isPolar={false}
+                />
+            </div>
         )}
     </div>
   );

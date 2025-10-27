@@ -166,14 +166,6 @@ function AppContent() {
                   path="/fraud-detection"
                   element={<FraudDetection />}
                 ></Route>
-                <Route
-                  path="/statistics"
-                  element={
-                    <div>
-                      <h1>통계페이지는 개발 중 입니다.</h1>
-                    </div>
-                  }
-                ></Route>
                 <Route path="/social" element={
                   <ErrorBoundary>
                     <Social />
