@@ -17,10 +17,10 @@ import { useApi } from "../../../utils/api/useApi";
 import axios from "axios";
 
 function Login() {
-  const { POST } = useApi();
+  const { POST, GET } = useApi();
   const navigate = useNavigate();
   const location = useLocation();
-  const { showBasicModal } = useModal();
+  const { showBasicModal, showConfirmModal } = useModal();
 
   // 현재 보여줄 뷰를 관리하는 상태 ('login', 'passwordless','loggedIn')
   const [view, setView] = useState("login");
@@ -221,6 +221,21 @@ function Login() {
                     dispatch({ type: "LOGIN", user: res.data });
                     setIsLoggedIn(true);
                     navigate("/");
+                  }).catch((err)=>{
+                    if(err?.status === 406){
+                      showConfirmModal('계정을 복구하시겠습니까?','탈퇴한 사용자','이미 탈퇴한 사용자 입니다',()=>{
+                        GET(`/users/restore/${loginId}`,{},false)
+                        .then((res)=>{
+                          console.log(res);
+                          showBasicModal("계정이 복구되었습니다. 다시 로그인 해 주세요.","계정 복구");
+                          navigate("/login",{replace:true});
+                        })
+                        .catch((err)=>{
+                          console.log(err);
+                          showBasicModal('계정 복구에 실패하였습니다','네트워크 오류');
+                        })
+                      });
+                    }
                   });
                 } else {
                   await POST(
@@ -275,7 +290,23 @@ function Login() {
                 navigate("/", { replace: true });
               }
             })
-            .catch();
+            .catch(e=>{
+              console.log(e);
+              if(e?.status === 406){
+                showConfirmModal('계정을 복구하시겠습니까?','탈퇴한 사용자','이미 탈퇴한 사용자 입니다',()=>{
+                  GET(`/users/restore/user${KAKAO_CLIENT_ID}@kakao.com`,{},false)
+                  .then((res)=>{
+                    console.log(res);
+                    showBasicModal("계정이 복구되었습니다. 다시 로그인 해 주세요.","계정 복구");
+                    navigate("/login",{replace:true});
+                  })
+                  .catch((err)=>{
+                    console.log(err);
+                    showBasicModal('계정 복구에 실패하였습니다','네트워크 오류');
+                  })
+                });
+              }
+            });
         })
         .catch((error) => {
           //toast
@@ -317,7 +348,21 @@ function Login() {
         })
         .catch((error) => {
           console.error("로그인 오류:", error);
-          if (typeof error.response?.data === "string") {
+          if(error?.status === 406){
+            showConfirmModal("계정을 복구하시겠습니까?",'탈퇴한 사용자','이미 탈퇴한 사용자 입니다',()=>{
+              GET(`/users/restore/${loginId}`,{},false)
+              .then((res)=>{
+                console.log(res);
+                showBasicModal('계정이 복구되었습니다. 다시 로그인 해 주세요.',"계정 복구");
+                navigate('/login',{replace:true});
+              })
+              .catch((err)=>{
+                console.log(err);
+                showBasicModal('계정 복구에 실패하였습니다','네트워크 오류');
+              })
+            });
+          }
+          else if (typeof error.response?.data === "string") {
             const msg = error.response.data;
             if (msg.length > 0)
               showBasicModal(
