@@ -67,14 +67,6 @@ function Login() {
     if(!user) setView('login');
   },[user]);
 
-  // login이 아닌 다른 페이지에서 view상태가 'passwordless'로 변경될때 loginId와 loginPw 가져오는 로직
-  useEffect(()=>{
-    if(view==='passwordless' && currentLoginInfo.id && currentLoginInfo.pw){
-      setLoginId(currentLoginInfo.id);
-      setLoginPw(currentLoginInfo.pw);
-    }
-  },[view, currentLoginInfo]);
-
   // view 상태가 'passwordless'로 변경될 때 QR 코드를 생성하는 로직 (Side Effect)
   useEffect(() => {
     const fetchQrCodeData = async () => {
@@ -85,7 +77,7 @@ function Login() {
           // 1. 일반 로그인으로 '임시 토큰' 먼저 받기
           const tokenResponse = await POST(
             "/passwordlessManageCheck",
-            { id: loginId, pw: loginPw },
+            currentLoginInfo,
             false,
             "passwordless"
           ).then((res) => {
@@ -153,7 +145,7 @@ function Login() {
     };
 
     fetchQrCodeData();
-  }, [view, loginId, loginPw]); // loginPw도 의존성에 추가
+  }, [view, loginId, loginPw, currentLoginInfo]); // loginPw도 의존성에 추가
 
   useEffect(() => {
     const confirmQrRegistered = async () => {
