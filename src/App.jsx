@@ -52,6 +52,7 @@ import GoogleTagManager from "./utils/tagmanager/GoogleTagManager.jsx";
 import usePageView from "./utils/tagmanager/PageView.jsx";
 import "./utils/webpush/foregroundMessage";
 import { useApi } from "./utils/api/useApi.jsx";
+import { LoginViewProvider } from "./context/LoginViewContext.jsx";
 
 function AppContent() {
   const { user, dispatch } = useContext(AuthContext);
@@ -204,7 +205,9 @@ function App() {
           <RunProvider>
             <RoutineProvider>
               <SuggestProvider>
-                <AppContent />
+                <LoginViewProvider>
+                  <AppContent />
+                </LoginViewProvider>
               </SuggestProvider>
             </RoutineProvider>
           </RunProvider>
