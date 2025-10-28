@@ -103,6 +103,7 @@ export default function MyPage() {
         className="w-100"
         style={{
           padding: "0 5% 0",
+          backgroundColor: "#F8FAFC",
         }}
       >
         <ContainerComponent size="large">

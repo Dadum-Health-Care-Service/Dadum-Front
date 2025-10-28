@@ -1,24 +1,25 @@
-import React, { useState, useMemo, useCallback } from 'react';
-import { Calendar, momentLocalizer } from 'react-big-calendar';
-import moment from 'moment';
-import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { useParticipatedGatherings } from '../../Social/hooks/useParticipatedGatherings';
-import { useGatheringCategories } from './gtHooks';
-import styles from './GatheringCalendar.module.css';
+import React, { useState, useMemo, useCallback } from "react";
+import { Calendar, momentLocalizer } from "react-big-calendar";
+import moment from "moment";
+import "react-big-calendar/lib/css/react-big-calendar.css";
+import { useParticipatedGatherings } from "../../Social/hooks/useParticipatedGatherings";
+import { useGatheringCategories } from "./gtHooks";
+import styles from "./GatheringCalendar.module.css";
 
 // 한국어 설정
-moment.updateLocale('ko', {
-  months: '1월_2월_3월_4월_5월_6월_7월_8월_9월_10월_11월_12월'.split('_'),
-  monthsShort: '1월_2월_3월_4월_5월_6월_7월_8월_9월_10월_11월_12월'.split('_'),
-  weekdays: '일요일_월요일_화요일_수요일_목요일_금요일_토요일'.split('_'),
-  weekdaysShort: '일_월_화_수_목_금_토'.split('_'),
-  weekdaysMin: '일_월_화_수_목_금_토'.split('_'),
+moment.updateLocale("ko", {
+  months: "1월_2월_3월_4월_5월_6월_7월_8월_9월_10월_11월_12월".split("_"),
+  monthsShort: "1월_2월_3월_4월_5월_6월_7월_8월_9월_10월_11월_12월".split("_"),
+  weekdays: "일요일_월요일_화요일_수요일_목요일_금요일_토요일".split("_"),
+  weekdaysShort: "일_월_화_수_목_금_토".split("_"),
+  weekdaysMin: "일_월_화_수_목_금_토".split("_"),
 });
 
 const localizer = momentLocalizer(moment);
 
 const GatheringCalendar = () => {
-  const { participatedGatherings, loading, error } = useParticipatedGatherings();
+  const { participatedGatherings, loading, error } =
+    useParticipatedGatherings();
   const { findCategory } = useGatheringCategories();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isExpanded, setIsExpanded] = useState(false);
@@ -28,23 +29,21 @@ const GatheringCalendar = () => {
   // 모임 데이터를 달력 이벤트로 변환 (숨김 처리)
   const events = useMemo(() => {
     if (!participatedGatherings) return [];
-
     return participatedGatherings
-      .filter(gathering => gathering.nextMeetingDate) // nextMeetingDate가 있는 모임만
+      .filter((gathering) => gathering.nextMeetingDate) // nextMeetingDate가 있는 모임만
       .map((gathering) => {
         // nextMeetingDate를 사용하여 정확한 날짜/시간으로 이벤트 생성
         const startDate = moment(gathering.nextMeetingDate).toDate();
-        const endDate = moment(startDate).add(2, 'hours').toDate(); // 2시간 동안
-
+        const endDate = moment(startDate).add(2, "hours").toDate(); // 2시간 동안
         return {
           id: gathering.gatheringId,
-          title: '●', // 작은 점으로 표시
+          title: "●", // 작은 점으로 표시
           start: startDate,
           end: endDate,
           resource: {
             gathering: gathering,
-            scheduleDetails: gathering.scheduleDetails
-          }
+            scheduleDetails: gathering.scheduleDetails,
+          },
         };
       })
       .filter(Boolean);
@@ -107,7 +106,7 @@ const GatheringCalendar = () => {
 
     // 이벤트 리스너 추가 (클릭과 터치 모두)
     const addEventListeners = () => {
-      const calendarElement = document.querySelector('.rbc-calendar');
+      const calendarElement = document.querySelector(".rbc-calendar");
       if (calendarElement) {
         calendarElement.addEventListener('click', handleDateClick);
         calendarElement.addEventListener('touchstart', handleDateClick);
@@ -118,31 +117,29 @@ const GatheringCalendar = () => {
 
     // 즉시 시도
     let element = addEventListeners();
-    
+
     // 요소를 찾지 못했다면 잠시 후 재시도
     if (!element) {
       const timeoutId = setTimeout(() => {
         element = addEventListeners();
       }, 500);
-      
+
       return () => {
         clearTimeout(timeoutId);
         if (element) {
-          element.removeEventListener('click', handleDateClick);
-          element.removeEventListener('touchstart', handleDateClick);
+          element.removeEventListener("click", handleDateClick);
+          element.removeEventListener("touchstart", handleDateClick);
         }
       };
     }
 
     return () => {
       if (element) {
-        element.removeEventListener('click', handleDateClick);
-        element.removeEventListener('touchstart', handleDateClick);
+        element.removeEventListener("click", handleDateClick);
+        element.removeEventListener("touchstart", handleDateClick);
       }
     };
   }, []);
-
-
 
   // 이벤트 클릭 핸들러 (무시)
   const handleSelectEvent = useCallback((event) => {
@@ -152,37 +149,37 @@ const GatheringCalendar = () => {
   // 이벤트 스타일 커스터마이징
   const eventStyleGetter = useCallback((event) => {
     const gathering = event.resource.gathering;
-    let backgroundColor = '#3174ad';
+    let backgroundColor = "#3174ad";
 
     switch (gathering.category) {
-      case 'fitness':
-        backgroundColor = '#e74c3c';
+      case "fitness":
+        backgroundColor = "#e74c3c";
         break;
-      case 'running':
-        backgroundColor = '#27ae60';
+      case "running":
+        backgroundColor = "#27ae60";
         break;
-      case 'yoga':
-        backgroundColor = '#9b59b6';
+      case "yoga":
+        backgroundColor = "#9b59b6";
         break;
-      case 'swimming':
-        backgroundColor = '#3498db';
+      case "swimming":
+        backgroundColor = "#3498db";
         break;
-      case 'cycling':
-        backgroundColor = '#f39c12';
+      case "cycling":
+        backgroundColor = "##2196f3";
         break;
       default:
-        backgroundColor = '#3174ad';
+        backgroundColor = "#3174ad";
     }
 
     return {
       style: {
         backgroundColor,
-        borderRadius: '5px',
+        borderRadius: "5px",
         opacity: 0.8,
-        color: 'white',
-        border: '0px',
-        display: 'block'
-      }
+        color: "white",
+        border: "0px",
+        display: "block",
+      },
     };
   }, []);
 
@@ -214,47 +211,45 @@ const GatheringCalendar = () => {
       <h3
         className={styles.calendarTitle}
         onClick={() => setIsExpanded(!isExpanded)}
-        style={{ cursor: 'pointer' }}
+        style={{ cursor: "pointer" }}
       >
         📅 모임 일정
-        <span className={styles.expandIcon}>
-          {isExpanded ? '▼' : '▶'}
-        </span>
+        <span className={styles.expandIcon}>{isExpanded ? "▼" : "▶"}</span>
       </h3>
 
       {isExpanded && (
         <div className={styles.calendarWrapper}>
-        <Calendar
-              localizer={localizer}
-              events={events}
-              startAccessor="start"
-              endAccessor="end"
-              style={{ height: 400 }}
-              onSelectEvent={handleSelectEvent}
-              onSelectSlot={handleDateClick}
-              eventPropGetter={eventStyleGetter}
-              views={['month']}
-              defaultView="month"
-              culture="ko"
-              selectable={true}
-              selectableStart="00:00"
-              selectableEnd="23:59"
-              popup={true}
-              messages={{
-                next: '다음',
-                previous: '이전',
-                today: '오늘',
-                month: '월',
-                week: '주',
-                day: '일',
-                agenda: '일정',
-                date: '날짜',
-                time: '시간',
-                event: '이벤트',
-                noEventsInRange: '이 기간에 일정이 없습니다.',
-                showMore: (total) => `+${total}개 더 보기`
-              }}
-        />
+          <Calendar
+            localizer={localizer}
+            events={events}
+            startAccessor="start"
+            endAccessor="end"
+            style={{ height: 400 }}
+            onSelectEvent={handleSelectEvent}
+            onSelectSlot={handleDateClick}
+            eventPropGetter={eventStyleGetter}
+            views={["month"]}
+            defaultView="month"
+            culture="ko"
+            selectable={true}
+            selectableStart="00:00"
+            selectableEnd="23:59"
+            popup={true}
+            messages={{
+              next: "다음",
+              previous: "이전",
+              today: "오늘",
+              month: "월",
+              week: "주",
+              day: "일",
+              agenda: "일정",
+              date: "날짜",
+              time: "시간",
+              event: "이벤트",
+              noEventsInRange: "이 기간에 일정이 없습니다.",
+              showMore: (total) => `+${total}개 더 보기`,
+            }}
+          />
         </div>
       )}
 
@@ -263,8 +258,13 @@ const GatheringCalendar = () => {
         <div className={styles.dateModal}>
           <div className={styles.dateModalContent}>
             <div className={styles.dateModalHeader}>
-              <h4>{selectedDate ? moment(selectedDate).format('YYYY년 MM월 DD일') : '일정'} 일정</h4>
-              <button 
+              <h4>
+                {selectedDate
+                  ? moment(selectedDate).format("YYYY년 MM월 DD일")
+                  : "일정"}{" "}
+                일정
+              </h4>
+              <button
                 className={styles.closeButton}
                 onClick={() => {
                   setShowDateModal(false);
@@ -281,18 +281,21 @@ const GatheringCalendar = () => {
                   onClick={() => {
                     // 일정 목록 모달은 닫고 모임 상세 모달 열기
                     setShowDateModal(false);
-                    window.dispatchEvent(new CustomEvent('showGatheringDetail', { 
-                      detail: { gathering } 
-                    }));
+                    window.dispatchEvent(
+                      new CustomEvent("showGatheringDetail", {
+                        detail: { gathering },
+                      })
+                    );
                   }}
-                  style={{ cursor: 'pointer' }}
+                  style={{ cursor: "pointer" }}
                 >
                   <div className={styles.gatheringTitle}>{gathering.title}</div>
                   <div className={styles.gatheringTime}>
-                    {moment(gathering.nextMeetingDate).format('HH:mm')}
+                    {moment(gathering.nextMeetingDate).format("HH:mm")}
                   </div>
                   <div className={styles.gatheringCategory}>
-                    {findCategory(gathering.category)?.icon} {findCategory(gathering.category)?.label}
+                    {findCategory(gathering.category)?.icon}{" "}
+                    {findCategory(gathering.category)?.label}
                   </div>
                 </div>
               ))}

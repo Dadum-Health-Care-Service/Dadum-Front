@@ -38,6 +38,7 @@
 
 .backButton {
   background: #6c757d;
+  height: 100%;
   border: none;
   color: white;
   padding: 10px 20px;
@@ -664,6 +665,7 @@
 }
 
 .couponButton {
+  height: 100%;
   background: #6c757d;
   border: none;
   color: white;
@@ -681,6 +683,7 @@
 }
 
 .paymentButton {
+  height: 100%;
   background: linear-gradient(135deg, #3b82f6);
   border: none;
   color: white;
@@ -732,6 +735,7 @@
 }
 
 .sideNavButton {
+  height: 100%;
   padding: 12px 20px;
   border-radius: 8px;
   font-weight: 500;
@@ -770,12 +774,12 @@
   .orderPageContainer {
     padding: 15px 0;
   }
-  
+
   .orderPageHeader {
     margin: 0 15px 20px 15px;
     padding: 25px 15px;
   }
-  
+
   .ordererInfoBody,
   .deliveryInfoBody,
   .agreementBody,
@@ -788,49 +792,49 @@
   .orderPageContainer {
     padding: 10px 0;
   }
-  
+
   .orderPageTitle {
     font-size: 1.8rem;
   }
-  
+
   .orderPageSubtitle {
     font-size: 1rem;
   }
-  
+
   .orderPageHeader {
     margin: 0 10px 15px 10px;
     padding: 20px 15px;
   }
-  
+
   .ordererInfoBody,
   .deliveryInfoBody,
   .agreementBody,
   .discountBody {
     padding: 16px;
   }
-  
+
   .emailInputGroup {
     flex-direction: column;
     gap: 12px;
   }
-  
+
   .addressInputGroup {
     flex-direction: column;
     gap: 12px;
   }
-  
+
   .deliveryTypeOptions,
   .addressTypeOptions {
     flex-direction: column;
     gap: 12px;
   }
-  
+
   .depositInputGroup,
   .couponInputGroup {
     flex-direction: column;
     gap: 12px;
   }
-  
+
   .sideNavigation {
     margin-top: 20px;
   }
@@ -840,62 +844,62 @@
   .orderPageContainer {
     padding: 5px 0;
   }
-  
+
   .orderPageHeader {
     margin: 0 5px 10px 5px;
     padding: 15px 10px;
   }
-  
+
   .orderPageTitle {
     font-size: 1.5rem;
   }
-  
+
   .orderPageSubtitle {
     font-size: 0.9rem;
   }
-  
+
   .ordererInfoBody,
   .deliveryInfoBody,
   .agreementBody,
   .discountBody {
     padding: 12px;
   }
-  
+
   .formControl {
     padding: 10px 12px;
     font-size: 0.9rem;
   }
-  
+
   .privacyTable {
     font-size: 0.8rem;
   }
-  
+
   .privacyTable thead th,
   .privacyTable tbody td {
     padding: 10px 6px;
   }
-  
+
   .deliveryTypeOptions,
   .addressTypeOptions {
     gap: 8px;
   }
-  
+
   .deliveryTypeRadio,
   .addressTypeRadio {
     gap: 6px;
   }
-  
+
   .deliveryTypeRadio input[type="radio"],
   .addressTypeRadio input[type="radio"] {
     width: 16px;
     height: 16px;
   }
-  
+
   .agreementCheckbox input[type="checkbox"] {
     width: 18px;
     height: 18px;
   }
-  
+
   .depositCheckbox input[type="checkbox"],
   .saveAddressCheckbox input[type="checkbox"] {
     width: 16px;
@@ -907,13 +911,13 @@
   .orderPageContainer {
     padding: 0;
   }
-  
+
   .orderPageHeader {
     margin: 0;
     border-radius: 0;
     padding: 15px 8px;
   }
-  
+
   .ordererInfoCard,
   .deliveryInfoCard,
   .agreementCard,
@@ -921,41 +925,41 @@
     margin: 0 0 16px 0;
     border-radius: 0;
   }
-  
+
   .ordererInfoBody,
   .deliveryInfoBody,
   .agreementBody,
   .discountBody {
     padding: 10px;
   }
-  
+
   .ordererInfoHeader,
   .deliveryInfoHeader,
   .agreementHeader,
   .discountHeader {
     padding: 15px;
   }
-  
+
   .ordererInfoTitle,
   .deliveryInfoTitle,
   .agreementTitle,
   .discountTitle {
     font-size: 1.1rem;
   }
-  
+
   .formLabel {
     font-size: 0.9rem;
   }
-  
+
   .formControl {
     padding: 8px 10px;
     font-size: 0.85rem;
   }
-  
+
   .privacyTable {
     font-size: 0.75rem;
   }
-  
+
   .privacyTable thead th,
   .privacyTable tbody td {
     padding: 8px 4px;
