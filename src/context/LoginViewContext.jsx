@@ -1,6 +1,5 @@
 import { createContext, useContext, useState } from "react";
 import { AuthContext } from "./AuthContext";
-import { useApi } from "../utils/api/useApi";
 import { useModal } from "./ModalContext";
 
 export const LoginViewContext = createContext();
