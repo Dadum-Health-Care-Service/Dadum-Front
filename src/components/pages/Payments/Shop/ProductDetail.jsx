@@ -1,20 +1,36 @@
 import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import ButtonComponent from '../../../common/ButtonComponent';
+import { GET } from '../../../../utils/api/api';
 import styles from './ProductDetail.module.css';
 
-export default function ProductDetail({ product: propProduct, onClose, onBuyNow }) {
+export default function ProductDetail() {
+  const { productId } = useParams();
+  const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  console.log('ProductDetail 렌더링됨, product:', propProduct);
+  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
-    console.log('useEffect 실행됨, propProduct:', propProduct);
-    if (propProduct) {
-      setProduct(propProduct);
-      setLoading(false);
+    const loadProduct = async () => {
+      try {
+        setLoading(true);
+        const response = await GET(`/shop/products/${productId}`, {}, null, false);
+        setProduct(response.data);
+        setQuantity(1); // 상품 로드 시 수량 초기화
+      } catch (error) {
+        console.error('상품 정보 로드 실패:', error);
+        // 상품을 찾을 수 없는 경우 쇼핑몰로 돌아가기
+        navigate('/shop');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (productId) {
+      loadProduct();
     }
-  }, [propProduct]);
+  }, [productId, navigate]);
 
 
   const calculateDiscount = (original, current) => {
@@ -22,15 +38,45 @@ export default function ProductDetail({ product: propProduct, onClose, onBuyNow 
   };
 
   const handleBuyNow = () => {
-    if (onBuyNow && product) {
-      onBuyNow(product);
+    if (product) {
+      // 상품 정보를 localStorage에 저장하여 OrderPage에서 사용할 수 있도록 함
+      const productForOrder = {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        description: product.description,
+        stock: product.stock,
+        quantity: quantity,
+        totalPrice: product.price * quantity
+      };
+      localStorage.setItem("selectedProduct", JSON.stringify(productForOrder));
+      // OrderPage로 이동
+      navigate('/order');
     }
   };
 
   const handleBackToShop = () => {
-    if (onClose) {
-      onClose();
+    navigate('/shop');
+  };
+
+  const handleQuantityChange = (newQuantity) => {
+    if (product && newQuantity >= 1 && newQuantity <= product.stock) {
+      setQuantity(newQuantity);
     }
+  };
+
+  const handleQuantityInputChange = (e) => {
+    const value = parseInt(e.target.value) || 1;
+    handleQuantityChange(value);
+  };
+
+  const decreaseQuantity = () => {
+    handleQuantityChange(quantity - 1);
+  };
+
+  const increaseQuantity = () => {
+    handleQuantityChange(quantity + 1);
   };
 
   if (loading) {
@@ -74,51 +120,138 @@ export default function ProductDetail({ product: propProduct, onClose, onBuyNow 
             <div className={styles.productImageSection}>
               <div className={styles.productImageContainer}>
                 <img 
-                  src={product.imageData || product.imageUrl || "https://via.placeholder.com/500x300?text=No+Image"} 
+                  src={product.image} 
                   alt={product.productName}
                   className={styles.productDetailImage}
+                  onError={(e) => {
+                    e.target.src = "/img/userAvatar.png";
+                  }}
                 />
-                {product.stock > 0 && (
-                  <span className={styles.productBadge}>
-                    재고있음
-                  </span>
-                )}
               </div>
             </div>
 
             {/* 상품 정보 */}
             <div className={styles.productInfoSection}>
               <div className={styles.productInfo}>
+                {/* 상품명 */}
                 <h1 className={styles.productTitle}>{product.productName}</h1>
-                <p className={styles.productCategory}>{product.category}</p>
                 
-                <div className={styles.priceContainer}>
-                  <span className={styles.currentPrice}>
-                    {product.price.toLocaleString()}원
-                  </span>
+                {/* 원산지/브랜드 */}
+                <div className={styles.productMeta}>
+                  <span className={styles.productBrand}>Dadum Shop</span>
                 </div>
 
-                <p className={styles.productDescription}>
-                  {product.detailedDescription || product.description}
-                </p>
+                {/* 평점 (더미 데이터) */}
+                <div className={styles.productRating}>
+                  <div className={styles.ratingStars}>
+                    <span className={styles.stars}>★★★★★</span>
+                    <span className={styles.ratingScore}>5.0</span>
+                  </div>
+                  <span className={styles.reviewCount}>(123개 상품평)</span>
+                </div>
+
+                {/* 가격 정보 */}
+                <div className={styles.priceContainer}>
+                  <div className={styles.priceRow}>
+                    <span className={styles.discountRate}>25%</span>
+                    <span className={styles.originalPrice}>
+                      {Math.round(product.price * 1.33).toLocaleString()}원
+                    </span>
+                  </div>
+                  <div className={styles.currentPriceRow}>
+                    <span className={styles.currentPrice}>
+                      {product.price.toLocaleString()}원
+                    </span>
+                    <span className={styles.priceUnit}>
+                      (10g당 {Math.round(product.price / 10)}원)
+                    </span>
+                  </div>
+                </div>
+
+                {/* 상품 옵션 */}
+                <div className={styles.productOptions}>
+                  <div className={styles.optionSection}>
+                    <h3 className={styles.optionTitle}>옵션 선택</h3>
+                    <div className={styles.optionList}>
+                      <div className={styles.optionItem}>
+                        <span className={styles.optionName}>기본 옵션</span>
+                        <span className={styles.optionPrice}>{product.price.toLocaleString()}원</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 수량 선택 */}
+                <div className={styles.quantitySection}>
+                  <h3 className={styles.quantityTitle}>수량</h3>
+                  <div className={styles.quantitySelector}>
+                    <button 
+                      className={styles.quantityBtn} 
+                      onClick={decreaseQuantity}
+                      disabled={quantity <= 1}
+                    >
+                      -
+                    </button>
+                    <input 
+                      type="number" 
+                      value={quantity} 
+                      min="1" 
+                      max={product.stock} 
+                      className={styles.quantityInput}
+                      onChange={handleQuantityInputChange}
+                    />
+                    <button 
+                      className={styles.quantityBtn} 
+                      onClick={increaseQuantity}
+                      disabled={quantity >= product.stock}
+                    >
+                      +
+                    </button>
+                  </div>
+                  <div className={styles.quantityInfo}>
+                    <span className={styles.stockInfo}>재고: {product.stock}개</span>
+                    <span className={styles.totalPrice}>
+                      총 {(product.price * quantity).toLocaleString()}원
+                    </span>
+                  </div>
+                </div>
+
+                {/* 배송 정보 */}
+                <div className={styles.shippingInfo}>
+                  <div className={styles.shippingRow}>
+                    <span className={styles.shippingLabel}>무료배송</span>
+                    <span className={styles.shippingText}>30,000원 이상 구매 시</span>
+                  </div>
+                  <div className={styles.shippingRow}>
+                    <span className={styles.shippingLabel}>도착 예정</span>
+                    <span className={styles.shippingText}>내일(화) 도착 보장 (오늘 주문 시)</span>
+                  </div>
+                </div>
+
+                {/* 적립 혜택 */}
+                <div className={styles.benefitsInfo}>
+                  <div className={styles.benefitRow}>
+                    <span className={styles.benefitLabel}>적립 혜택</span>
+                    <span className={styles.benefitText}>최대 {Math.round(product.price * 0.05)}원 적립</span>
+                  </div>
+                </div>
 
                 {/* 구매 버튼 */}
                 <div className={styles.purchaseActions}>
                   <ButtonComponent 
+                    variant="outline" 
+                    size="large" 
+                    className={styles.cartButton}
+                  >
+                    🛒 장바구니 담기
+                  </ButtonComponent>
+                  <ButtonComponent 
                     variant="primary" 
                     size="large" 
-                    fullWidth
                     onClick={handleBuyNow}
                     className={styles.buyButton}
                   >
-                    💳 구매하기
-                  </ButtonComponent>
-                  <ButtonComponent 
-                    variant="outline" 
-                    fullWidth
-                    className={styles.wishlistButton}
-                  >
-                    💝 위시리스트에 추가
+                    💳 바로구매
                   </ButtonComponent>
                 </div>
               </div>
@@ -126,9 +259,48 @@ export default function ProductDetail({ product: propProduct, onClose, onBuyNow 
           </div>
         </div>
 
+        {/* 상품 설명 */}
+        {(product.description || product.detailFile) && (
+          <div className={styles.productDescription}>
+            <h3 className={styles.descriptionTitle}>상품 설명</h3>
+            <div className={styles.descriptionContent}>
+              {/* 텍스트 설명 */}
+              {product.description && product.description.split('\n').map((line, index) => (
+                <p key={index} className={styles.descriptionLine}>
+                  {line}
+                </p>
+              ))}
+              
+              {/* 상세정보 파일 */}
+              {product.detailFile && (
+                <div className={styles.detailFileContent}>
+                  {product.detailFileType && product.detailFileType.startsWith('image/') ? (
+                    <img 
+                      src={product.detailFile} 
+                      alt="상품 상세정보"
+                      className={styles.detailFileImage}
+                    />
+                  ) : product.detailFileType === 'application/pdf' ? (
+                    <div className={styles.detailFilePdf}>
+                      <iframe 
+                        src={product.detailFile} 
+                        className={styles.detailFileIframe}
+                        title="상품 상세정보 PDF"
+                      />
+                    </div>
+                  ) : (
+                    <div className={styles.detailFileText}>
+                      <pre className={styles.detailFilePre}>{product.detailFile}</pre>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* 상품 상세 정보 */}
         <div className={styles.productDetailsCard}>
-          <h4 className={styles.productDetailsHeader}>상품 상세 정보</h4>
           <div className={styles.productDetailsBody}>
             <div className={styles.detailsGrid}>
               <div className={styles.specificationsSection}>
@@ -156,7 +328,6 @@ export default function ProductDetail({ product: propProduct, onClose, onBuyNow 
                   <li>🚚 무료 배송 (5만원 이상 구매 시)</li>
                   <li>📦 배송 기간: 1-3일</li>
                   <li>🔄 교환/반품: 7일 이내</li>
-                  <li>💳 안전한 결제 시스템</li>
                 </ul>
               </div>
             </div>

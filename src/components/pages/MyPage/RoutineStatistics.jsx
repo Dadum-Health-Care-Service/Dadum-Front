@@ -39,7 +39,7 @@ const dataToChart = (type, data)=>{
     switch (type){
         case 'kcal':
             return data.map(routine => {
-                return {data: routine.tEnd, kcal: routine.routineResult.kcal};
+                return {data: routine.tEnd, kcal: routine.routineResult.kcal, rouId: routine.id};
             });
         case 'growth':
             return data.map(routine => {
@@ -47,7 +47,7 @@ const dataToChart = (type, data)=>{
                     data: routine.tEnd,
                     muscle: routine.routineResult.muscle,
                     setTotal: routine.routineResult.reSet * routine.routineResult.setNum,
-                    volumeTotal: routine.routineResult.volume,
+                    volumeTotal: routine.routineResult.volum,
                     rouTime: routine.routineResult.rouTime,
                 };
             });
@@ -78,7 +78,7 @@ const dataToCompare = (type, thisData, lastData) =>{
         case 'kcal':
             return reduceFn(thisData,'kcal') - reduceFn(lastData,'kcal');
         case 'growth':
-            const keys = ['muscle', 'reSet', 'volume', 'rouTime'];
+            const keys = ['muscle', 'reSet', 'volum', 'rouTime'];
             return keys.map(key => reduceFn(thisData, key) - reduceFn(lastData, key));
         case 'activity':
             const getUniqueActivities = data => new Set(data.flatMap(e => e.routineEndDetails.map(detail => detail.srName))).size;
@@ -108,7 +108,7 @@ export default function RoutineStatPage(){
 
         const endDate = new Date();
         if (last) {
-            endDate.setDate(endDate.getDate()); 
+            endDate.setDate(endDate.getDate()-interval); 
         }
 
         const startDate = new Date(endDate);

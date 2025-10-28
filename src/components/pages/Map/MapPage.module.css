@@ -157,7 +157,6 @@
   color: #6c757d;
 }
 
-
 /* 메인 콘텐츠 영역 */
 .mainContent {
   display: flex;
@@ -564,8 +563,6 @@
   border-color: #3498db;
 }
 
-
-
 /* 반응형 디자인 */
 @media (max-width: 768px) {
   .locationButtons {
@@ -626,8 +623,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .errorContainer {
@@ -702,7 +703,7 @@
 
 .rating {
   font-size: 0.9rem;
-  color: #f39c12;
+  color: ##2196f3;
   font-weight: 500;
   white-space: nowrap;
 }
@@ -772,45 +773,45 @@
   .mapTitle {
     font-size: 2rem;
   }
-  
+
   .mapSubtitle {
     font-size: 1rem;
   }
-  
+
   .locationInfo {
     flex-direction: column;
     gap: 10px;
   }
-  
+
   .categoryButtons {
     justify-content: flex-start;
     overflow-x: auto;
     padding-bottom: 10px;
   }
-  
+
   .categoryButton {
     flex-shrink: 0;
   }
-  
+
   .facilitiesGrid {
     grid-template-columns: 1fr;
     gap: 16px;
   }
-  
+
   .facilityCard {
     padding: 16px;
   }
-  
+
   .facilityHeader {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
   }
-  
+
   .facilityName {
     margin-right: 0;
   }
-  
+
   /* 모바일에서 세로 레이아웃 */
   .gatheringListSection,
   .mapSection {
@@ -819,11 +820,11 @@
     overflow: hidden;
     box-sizing: border-box;
   }
-  
+
   .mapContainer {
     height: 350px;
   }
-  
+
   .sectionTitle {
     font-size: 1.2rem;
     margin-bottom: 15px;

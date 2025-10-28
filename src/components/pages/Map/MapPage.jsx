@@ -91,9 +91,7 @@ export default function MapPage() {
 
   // 카카오맵 초기화
   useEffect(() => {
-    console.log('🚀 ensureReady 호출 시작');
     ensureReady().then(() => {
-      console.log('✅ ensureReady 완료');
       if (mapRef.current) {
         initMap(mapRef.current);
       }
@@ -246,17 +244,12 @@ export default function MapPage() {
       // 좌표를 주소로 변환
       const address = await convertLocationToAddress({ lat, lng });
       
-      console.log('🔍 주소 변환 결과:', address);
-      
       // 주소 정보가 없을 때 좌표 기반 임시 주소 생성
       let finalAddress = address.address || address.roadAddress;
-      
-      console.log('📍 최종 주소:', finalAddress);
       
       if (!finalAddress) {
         // 좌표 기반 임시 주소 생성
         finalAddress = `위도: ${lat.toFixed(6)}, 경도: ${lng.toFixed(6)}`;
-        console.log('⚠️ 주소 변환 실패, 좌표 기반 주소 사용:', finalAddress);
       }
       
       setClickedLocation({

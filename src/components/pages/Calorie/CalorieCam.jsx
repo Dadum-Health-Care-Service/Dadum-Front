@@ -7,6 +7,25 @@ import { useApi } from '../../../utils/api/useApi';
 import { useAuth } from '../../../context/AuthContext';
 import styles from './CalorieCam.module.css';
 
+// 음식 라벨 한글 매핑
+const FOOD_LABEL_KO = {
+  rice: '밥',
+  pasta: '파스타',
+  pizza: '피자',
+  bread: '빵/디저트',
+  soup: '수프/국',
+  fries: '감자튀김',
+  steak: '스테이크',
+  burger: '버거',
+  salad: '샐러드',
+  fried_chicken: '치킨',
+  sandwich: '샌드위치',
+  bibimbap: '비빔밥',
+  bulgogi: '불고기',
+  kimchi_jjigae: '김치찌개',
+  unknown: '알 수 없음',
+};
+
 const CalorieCam = () => {
   console.log("CalorieCam 컴포넌트가 렌더링되었습니다!");
   
@@ -82,9 +101,10 @@ const CalorieCam = () => {
       const result = response.data;
       console.log('분석 결과:', result);
       
-      // 원래 백엔드 응답 형식에 맞게 변환
+      // 원래 백엔드 응답 형식에 맞게 변환 (한글 라벨 적용)
+      const labelKo = FOOD_LABEL_KO[result.label] || result.label || '알 수 없는 음식';
       const transformedResult = {
-        foodName: result.label || '알 수 없는 음식',
+        foodName: labelKo,
         calories: Math.round(result.calories || 0),
         nutrients: {
           '단백질': `${Math.round((result.protein_g || 0) * 10) / 10}g`,
@@ -92,7 +112,7 @@ const CalorieCam = () => {
           '지방': `${Math.round((result.fat_g || 0) * 10) / 10}g`,
           '식이섬유': `${Math.round((result.fiber_g || 0) * 10) / 10}g`,
         },
-        alternatives: result.meta?.clip_top5?.slice(0, 3).map(item => item.label) || [],
+        alternatives: (result.meta?.clip_top5?.slice(0, 3) || []).map((item) => FOOD_LABEL_KO[item.label] || item.label),
         confidence: result.confidence || 0,
         grams: Math.round(result.grams || 0),
         meta: {
@@ -120,20 +140,15 @@ const CalorieCam = () => {
         message: error.message,
         response: error.response?.data,
         status: error.response?.status,
-        config: error.config,
-        isFoodNameSearch: !!foodName
+        config: error.config
       });
       
-      let errorMessage = foodName 
-        ? '음식 정보를 불러오는 중 오류가 발생했습니다. 다시 시도해주세요.'
-        : '이미지 분석 중 오류가 발생했습니다. 다시 시도해주세요.';
+      let errorMessage = '이미지 분석 중 오류가 발생했습니다. 다시 시도해주세요.';
       
       if (error.response?.status === 413) {
         errorMessage = '이미지 파일이 너무 큽니다. 더 작은 이미지를 선택해주세요.';
       } else if (error.response?.status === 400) {
-        errorMessage = foodName
-          ? '해당 음식 정보를 찾을 수 없습니다. 다른 음식을 선택해주세요.'
-          : '이미지 형식이 올바르지 않습니다. JPG, PNG 형식의 이미지를 선택해주세요.';
+        errorMessage = '이미지 형식이 올바르지 않습니다. JPG, PNG 형식의 이미지를 선택해주세요.';
       } else if (error.response?.status === 500) {
         errorMessage = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
       } else if (error.code === 'NETWORK_ERROR') {
@@ -175,7 +190,8 @@ const CalorieCam = () => {
       const response = await POST('/meal-log', mealLogData, true, 'ai');
       const savedMeal = response.data;
       console.log('[CalorieCam] 식사 로그 자동 저장 완료:', savedMeal);
-      setSaveMessage(`식사 정보가 저장되었습니다!\n음식: ${savedMeal.label}\n칼로리: ${savedMeal.calories}kcal`);
+      const savedLabelKo = FOOD_LABEL_KO[savedMeal.label] || savedMeal.label;
+      setSaveMessage(`식사 정보가 저장되었습니다!\n음식: ${savedLabelKo}\n칼로리: ${savedMeal.calories}kcal`);
       setShowSaveModal(true);
     } catch (error) {
       console.error('[CalorieCam] 자동 저장 중 오류:', error);

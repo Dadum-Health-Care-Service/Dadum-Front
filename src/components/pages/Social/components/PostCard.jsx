@@ -15,10 +15,14 @@ const buildImageCandidates = (raw) => {
 const resolveImageUrl = (imagePath) => {
   if (!imagePath) return null;
   if (imagePath.startsWith("http")) return imagePath;
+  if (imagePath.startsWith("data:")) return imagePath; // Base64 데이터 URL 처리
   return `http://localhost:8080${imagePath}`;
 };
 
-const displayHandle = (userId) => {
+const displayHandle = (userId, userEmail) => {
+  if (userEmail) {
+    return userEmail.split('@')[0];
+  }
   return userId || "user";
 };
 
@@ -56,6 +60,7 @@ export default function PostCard({
     postImage,
     userName,
     userId,
+    userEmail,
     createdAt,
     profileImage,
     tags = [],
@@ -109,7 +114,7 @@ export default function PostCard({
           <div className="row1">
             <span className="name">{userName || "사용자"}</span>
             <span className="sub">
-              @{displayHandle(userId || "user")} · {createdAt || ""}
+              @{displayHandle(userId, userEmail)} · {createdAt || ""}
             </span>
           </div>
         </div>

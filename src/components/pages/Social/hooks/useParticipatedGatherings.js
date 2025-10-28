@@ -16,8 +16,12 @@ export const useParticipatedGatherings = () => {
       const response = await GET('/gatherings/participated', {}, true); // 인증 필요
       
       if (response.data.success) {
-        setParticipatedGatherings(response.data.gatherings || []);
-        return response.data.gatherings || [];
+        // 해체된 모임(INACTIVE 상태)은 제외
+        const activeGatherings = (response.data.gatherings || []).filter(
+          gathering => gathering.status === 'ACTIVE'
+        );
+        setParticipatedGatherings(activeGatherings);
+        return activeGatherings;
       } else {
         throw new Error(response.data.error || '참여한 모임 목록을 불러오는데 실패했습니다.');
       }

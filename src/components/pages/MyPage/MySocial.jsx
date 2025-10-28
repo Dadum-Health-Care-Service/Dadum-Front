@@ -17,7 +17,7 @@ export default function MySocial(){
     });
     const [postData,setPostData]=useState([]);
     const [commentData,setCommentData]=useState([]);
-    const [selectedType,setSelectedType]=useState(null);
+    const [selectedType,setSelectedType]=useState('posts');
     const navigate = useNavigate();
     const [loading, setLoding]=useState(false);
 
@@ -93,16 +93,18 @@ export default function MySocial(){
                         <ListComponent.Header>나의 글</ListComponent.Header>
                         <ListGroup.Item
                             action
-                            className="text-muted m-2"
+                            className="text-muted p-2"
                             style={{fontSize:'0.9rem'}} 
                         >
                             <div style={{
                                 display:'grid',
-                                gridTemplateColumns:"0.5fr 1fr 0.5fr"
+                                gridTemplateColumns:"max-content 1fr max-content",
+                                columnGap:'1rem',
+                                width:'100%'
                             }}>
-                                <div>ID</div>
+                                <div className="pr-2">ID</div>
                                 <div>내용</div>
-                                <div>등록일</div>
+                                <div className="pr-5">등록일</div>
                             </div>
                         </ListGroup.Item>
                         <hr className="text-secondary"/>
@@ -113,16 +115,24 @@ export default function MySocial(){
                                         key={i}
                                         action
                                         onClick={()=>navigate(`/social`)}
-                                        className="mx-2 my-1"
+                                        className="px-2 py-1"
                                     >
                                         <div style={{
                                             display:'grid',
-                                            gridTemplateColumns:'0.5fr 1fr 0.5fr',
+                                            gridTemplateColumns:'max-content 1fr max-content',
                                             fontSize:'0.9rem',
+                                            columnGap:'1rem',
+                                            width:'100%'
                                         }}>
                                             <React.Fragment>
-                                                <div>{post.postId}</div>
-                                                <div>{post.postContent}</div>
+                                                <div className="pr-2">{post.postId}</div>
+                                                <div style={{
+                                                    overflow:'hidden',
+                                                    wordBreak:'break-word',
+                                                    display:'-webkit-box',
+                                                    WebkitLineClamp:2,
+                                                    WebkitBoxOrient:'vertical',
+                                                }}>{post.postContent}</div>
                                                 <div>{post.postRegDate.slice(0,10)}</div>
                                             </React.Fragment>
                                         </div>
@@ -169,60 +179,31 @@ export default function MySocial(){
     }
     
     return <>
-        <div>
-            <div>
-                <div className="d-flex justify-content-between">
-                    <Card className="col-md-5">
-                        <div className="d-flex flex-column align-items-center">
-                            <img 
-                                className="rounded-circle mb-1 p-2" 
-                                style={{
-                                    width:"150px",
-                                    height:"150px",
-                                    filter:
-                                        userData.profileImg !== "/img/userAvatar.png"
-                                        ? "none"
-                                        : `invert(42%) sepia(92%) saturate(2385%) hue-rotate(199deg)
-                                                    brightness(95%) contrast(97%)`,
-                                }} 
-                                src={userData.profileImg}
-                            />
-                            <div className="fs-3">{userData.nickName}</div>
-                            <div className="text-muted">{userData.email}</div>
-                        </div>
-                        <div className="d-flex flex-row justify-content-around mt-4">
-                            <div className="d-flex flex-column align-items-center">
-                                <small className="text-muted">나의 글</small>
-                                <h6>{postData.length}</h6>
-                            </div>
-                            <div className="d-flex flex-column align-items-center">
-                                <small className="text-muted">나의 댓글</small>
-                                <h6>{commentData.length}</h6>
-                            </div>
+        <div className="pb-4">
+            <div className="d-flex flex-column flex-lg-row justify-content-start gap-3">
+                <div className="flex-shrink-0 w-100" style={{maxWidth:'300px', minWidth:'200px', margin:'0 auto'}}>
+                    <Card>
+                        <div className="d-flex flex-row justify-content-around">
+                            <ListComponent>
+                                <ListComponent.Item 
+                                    primary="나의 글"
+                                    selected={selectedType === 'posts'}
+                                    onClick={()=>handleSelectedType("posts")}
+                                    children={`${postData.length}개`}
+                                />
+                            </ListComponent>
+                            <ListComponent>
+                                <ListComponent.Item 
+                                    primary="나의 댓글"
+                                    selected={selectedType==="comments"}
+                                    onClick={()=>handleSelectedType("comments")}
+                                    children={`${commentData.length}개`}
+                                />
+                            </ListComponent>
                         </div>
                     </Card>
-                    <div className="col-6 d-flex justify-content-center align-items-center pl-2">
-                        <ListComponent variant="elevated" className="rounded">
-                            <ListComponent.Item
-                                primary="나의 글"
-                                secondary="내가 작성한 글 보기"
-                                icon="📋"
-                                selected={selectedType === "posts"}
-                                onClick={()=>handleSelectedType("posts")}
-                                className="pt-3"
-                            />
-                            <ListComponent.Item
-                                primary="나의 댓글"
-                                secondary="내가 작성한 댓글 보기"
-                                icon="📋"
-                                selected={selectedType === "comments"}
-                                onClick={()=>handleSelectedType("comments")}
-                                className="pt-3"
-                            />
-                        </ListComponent>
-                    </div>
                 </div>
-                <div className="py-3">
+                <div className="flex-grow-1 w-100" style={{maxWidth:'1000px', minWidth:'300px'}}>
                     {renderContent()}
                 </div>
             </div>

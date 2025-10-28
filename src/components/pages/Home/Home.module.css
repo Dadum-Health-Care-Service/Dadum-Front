@@ -13,23 +13,47 @@
 
 .challengeContent {
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: space-between;
+  padding: 0.75rem;
+  min-height: 180px;
 }
 
 .challengeTitle {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 600;
   color: #333;
   margin-bottom: 0.5rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.3rem; /* Fixed height for alignment */
 }
 
 .challengeTarget {
   font-size: 0.9rem;
   color: #666;
   margin-bottom: 1rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.1rem; /* Fixed height for alignment */
+  transform: translateY(-1px); /* 1픽셀 위로 이동 */
 }
 
 .challengeProgress {
   margin-bottom: 1rem;
+  flex-shrink: 0;
+  margin-top: 0.5rem; /* 연속달성 카드의 진행률바를 살짝 아래로 */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 3rem;
+  height: 2rem; /* Fixed height for alignment */
 }
 
 .progressBar {
@@ -43,13 +67,13 @@
 
 .progressFill {
   height: 100%;
-  background: linear-gradient(90deg, #ff6b6b, #ff8e8e);
+  background: linear-gradient(90deg, #0A66FF, #3B82F6);
   border-radius: 4px;
   transition: width 0.3s ease;
 }
 
 .progressText {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: #666;
   font-weight: 500;
 }
@@ -59,11 +83,14 @@
   justify-content: center;
   gap: 8px;
   margin-bottom: 0.5rem;
+  flex-shrink: 0;
+  height: 8px; /* 진행률바와 동일한 높이 */
+  align-items: center;
 }
 
 .dayIndicator {
-  width: 12px;
-  height: 12px;
+  width: 8px;
+  height: 8px;
   border-radius: 2px;
   background: #e0e0e0;
   transition: background-color 0.2s ease;
@@ -77,6 +104,9 @@
   font-size: 0.85rem;
   color: #0A66FF;
   font-weight: 500;
+  flex-shrink: 0;
+  margin-top: auto; /* 하단으로 정렬 */
+  text-align: center;
 }
 
 /* Nutrition & Recovery Section */
@@ -178,16 +208,16 @@
 /* Hero */
 .hero {
   text-align: center;
-  margin-bottom: 24px;
-  padding: 32px 16px;
+  margin-bottom: 40px;
+  padding: 60px 32px;
   background: linear-gradient(135deg, #eef4ff, #e6f2ff);
-  border-radius: 16px;
+  border-radius: 24px;
 }
 .heroTitle { 
-  font-size: 24px; 
+  font-size: 32px; 
   font-weight: 900; 
   color:#0A66FF; 
-  margin-bottom: 6px; 
+  margin-bottom: 12px; 
   line-height: 1.3;
   word-break: keep-all;
   text-align: center;
@@ -198,6 +228,8 @@
   line-height: 1.4;
   word-break: keep-all;
   text-align: center;
+  font-size: 1.2rem;
+  margin-bottom: 1.5rem;
 }
 
 .heroFeatures {
@@ -615,7 +647,7 @@
   margin: 20px 0;
 }
 
-.sectionTitle { font-size: 22px; font-weight: 900; color:#0A66FF; margin-bottom: 12px; text-align: center; }
+.sectionTitle { font-size: 26px; font-weight: 900; color:#0A66FF; margin-bottom: 20px; margin-top: 8px; text-align: center; }
 .sectionTitleLeft { font-size: 20px; font-weight: 900; color:#0A66FF; margin: 12px 0; text-align:center; white-space: nowrap; }
 .sectionTitleCenter { font-size: 20px; font-weight: 900; color:#0A66FF; margin-bottom: 12px; text-align: center; }
 

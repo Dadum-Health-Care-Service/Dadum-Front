@@ -52,6 +52,7 @@ import GoogleTagManager from "./utils/tagmanager/GoogleTagManager.jsx";
 import usePageView from "./utils/tagmanager/PageView.jsx";
 import "./utils/webpush/foregroundMessage";
 import { useApi } from "./utils/api/useApi.jsx";
+import { LoginViewProvider } from "./context/LoginViewContext";
 
 function AppContent() {
   const { user, dispatch } = useContext(AuthContext);
@@ -59,7 +60,6 @@ function AppContent() {
   const [isNotify, setIsNotify] = useState(false);
   const location = useLocation();
   const { GET } = useApi();
-  const { showBasicModal }= useModal();
 
   usePageView();
   useEffect(() => {
@@ -103,13 +103,15 @@ function AppContent() {
     if (user) {
       //console.log("handleAllowNotification");
       handleAllowNotification(user.accessToken);
-      const checkUser = async ()=>{
-        try{
-          const res = await GET(`/users/${user.usersId}`,{},false);
-          console.log('사용자 이메일: ',res.data.email);
+      const checkUser = async () => {
+        try {
+          const res = await GET(`/users/${user.usersId}`, {}, false);
+          console.log("사용자 이메일: ", res.data.email);
         } catch (e) {
           console.log(e);
-          console.err('저장된 user의 정보와 일치하는 사용자가 없어 로그아웃 되었습니다');
+          console.error(
+            "저장된 user의 정보와 일치하는 사용자가 없어 로그아웃 되었습니다"
+          );
           dispatch({ type: "LOGOUT" });
         }
       };
@@ -120,7 +122,9 @@ function AppContent() {
   const noGNBpaths = ["/login", "/signup", "/findid", "/findpw"];
   const showGNB = user && !noGNBpaths.includes(location.pathname);
   const pagePadding =
-    isMobile && !noGNBpaths.includes(location.pathname) ? "90px" : "0px";
+    isMobile && !noGNBpaths.includes(location.pathname) && user
+      ? "90px"
+      : "0px";
 
   return (
     <>
@@ -130,6 +134,7 @@ function AppContent() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          backgroundColor: "#EAF3FF",
         }}
       >
         {showGNB && <GNB isMobile={isMobile} isNotify={isNotify} />}
@@ -148,6 +153,10 @@ function AppContent() {
                 <Route path="/calorie" element={<CalorieCam />}></Route>
                 <Route path="/daily" element={<DailySummary />}></Route>
                 <Route path="/shop" element={<Shop />}></Route>
+                <Route
+                  path="/shop/product/:productId"
+                  element={<ProductDetail />}
+                ></Route>
                 <Route path="/order" element={<OrderPage />}></Route>
                 <Route path="/orders" element={<OrderHistory />}></Route>
                 <Route
@@ -167,18 +176,13 @@ function AppContent() {
                   element={<FraudDetection />}
                 ></Route>
                 <Route
-                  path="/statistics"
+                  path="/social"
                   element={
-                    <div>
-                      <h1>통계페이지는 개발 중 입니다.</h1>
-                    </div>
+                    <ErrorBoundary>
+                      <Social />
+                    </ErrorBoundary>
                   }
                 ></Route>
-                <Route path="/social" element={
-                  <ErrorBoundary>
-                    <Social />
-                  </ErrorBoundary>
-                }></Route>
                 <Route path="/place" element={<MapPage />}></Route>
                 <Route path="/mypage/*" element={<MyPage />}></Route>
                 <Route path="/seller/*" element={<SellerMain />}></Route>
@@ -212,7 +216,9 @@ function App() {
           <RunProvider>
             <RoutineProvider>
               <SuggestProvider>
-                <AppContent />
+                <LoginViewProvider>
+                  <AppContent />
+                </LoginViewProvider>
               </SuggestProvider>
             </RoutineProvider>
           </RunProvider>

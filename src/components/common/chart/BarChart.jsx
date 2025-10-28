@@ -26,22 +26,18 @@ export default function BarChart({ barData, isMobile }) {
     Legend,
     Tooltip,
   );
-  
-  const rowData = barData?.map(data => {
-    return data?.data?.substring(0, 10);
-  });
-  const chartRow = rowData?.filter((data, index) => {
-    return rowData.indexOf(data) === index;
-  });
-  const chartData = chartRow?.reduce((acc, date) => {
-    acc[date] = [];
-    return acc;
-  }, {});
-  barData?.forEach(data => {
-    chartData[data?.data?.substring(0, 10)].push(data.kcal);
-  });
 
-  const maxLength = chartData ? Math.max(...Object.values(chartData).map(arr => arr.length)) : null;
+  const allDates = barData?.map(data => data?.data?.substring(0,10)).filter((data,index,self)=>self.indexOf(data)===index).sort();
+
+  const allRouIds = barData?.map(data=>data?.rouId).filter((id,index,self)=>self.indexOf(id)===index).sort((a,b)=>a-b);
+
+  const chartDataByRouId = allRouIds?.reduce((acc,rouId)=>{
+    acc[rouId] = allDates.map(date=>{
+      const sumKcal = barData.filter(d=>d?.rouId === rouId && d?.data?.substring(0,10)===date).reduce((sum,r)=>sum+r.kcal,0);
+      return sumKcal > 0 ? sumKcal : null;
+    });
+    return acc;
+  },{});  
 
   //색상용 (파랑)
   const baseHue = 220;
@@ -49,25 +45,25 @@ export default function BarChart({ barData, isMobile }) {
   const maxLightness = 70;
   const minLightness = 40;
 
-  const stackedBarDatasets = Array.from({ length: maxLength }, (_, i) => {
-    const ratio = 1 - i / (maxLength - 1 || 1);
-    const lightness = minLightness + (maxLightness - minLightness) * ratio;
+  const stackedBarDatasets = allRouIds?.map((rouId,i)=>{
+    const totalRoutines = allRouIds.length || 1;
+    const ratio = 1-i/(totalRoutines-1||1);
+    const lightness = minLightness+(maxLightness-minLightness)*ratio;
+
     return {
-      type: 'bar',
-      label: `루틴 ${i + 1}`,
-      data: chartRow.map(label => chartData[label][i] ?? null),
+      type:'bar',
+      label:`루틴 ${i+1}`,
+      data:chartDataByRouId[rouId],
       backgroundColor: `hsl(${baseHue}, ${baseSaturation}%, ${lightness}%)`,
-      barThickness: chartRow.length > 7 ? (isMobile ? 5 : 20) : isMobile ? 20 : 50,
+      barThickness: allRouIds.length > 5 ? (isMobile?5:15):isMobile?20:50,
     };
-  });
+  })||[];
 
   const lineDataset = {
     type: 'line',
-    label: '칼로리 소모 추이',
-    data: chartRow?.map(label => {
-      const values = Array.from({ length: maxLength }, (_, i) => chartData[label][i] ?? 0);
-      const sum = values.reduce((a, b) => a + b, 0);
-      return values.length ? sum / values.length : 0;
+    label: '총 칼로리 소모 추이',
+    data: allDates?.map(date=>{
+      return barData.filter(d=>d?.data?.substring(0,10)===date).reduce((sum,r)=>sum+r.kcal,0);
     }),
     borderColor: 'rgba(0, 0, 0, 0.5)',
     backgroundColor: '#3d8bfd',
@@ -76,10 +72,11 @@ export default function BarChart({ barData, isMobile }) {
     tension: 0,
     yAxisID: 'y',
   };
+ 
   const datasets = [lineDataset, ...stackedBarDatasets];
   const data = barData
     ? {
-        labels: chartRow,
+        labels: allDates,
         datasets: datasets,
       }
     : null;

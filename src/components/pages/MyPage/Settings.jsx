@@ -5,9 +5,15 @@ import InputComponent from "../../common/InputComponent";
 import ButtonComponent from "../../common/ButtonComponent";
 import { AuthContext } from "../../../context/AuthContext";
 import { useModal } from "../../../context/ModalContext";
+import { useNavigate } from "react-router-dom";
 import { useApi } from "../../../utils/api/useApi";
 
+import { useLoginView } from "../../../context/LoginViewContext";
+
 export default function Settings() {
+  //패스워드리스 등록화면으로 이동
+  const { setView, setLoginInfo } = useLoginView();
+  const navigate = useNavigate();
   const { DELETE, POST, PUT, GET } = useApi();
   //유저 정보 읽어오기
   const { user, dispatch } = useContext(AuthContext);
@@ -50,6 +56,10 @@ export default function Settings() {
       setErrors({});
     }
   };
+
+  useEffect(() => {
+    handleReset();
+  }, [activeHeaderMenu]);
 
   //역할 관련 함수들
   const loadAvailableRoles = async () => {
@@ -279,6 +289,47 @@ export default function Settings() {
     }
   };
 
+  const handleRegisterPasswordless = async (e) => {
+    e.preventDefault();
+
+    const newErrors = {};
+    if (!passwords.currentPW)
+      newErrors.currentPW = "현재 비밀번호를 반드시 입력해주세요.";
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length === 0) {
+      //입력한 현재 비밀번호가 맞는지 확인
+      try {
+        const res = await POST("/users/auth/password/check", {
+          password: passwords.currentPW,
+        });
+      } catch (err) {
+        console.log("비밀번호 확인 호출 중 오류 발생: ", err);
+        //비밀번호 확인 중 오류가 발생하면 저장된 입력값 초기화
+        handleReset();
+        //오류 종류에 따라 모달 다르게 띄우기
+        if (err?.status === 400) {
+          showBasicModal("비밀번호가 일치하지 않습니다.", "비밀번호 오류");
+        } else {
+          showBasicModal(
+            "비밀번호 확인 중 오류가 발생하였습니다.",
+            "네트워크 에러"
+          );
+        }
+        return;
+      }
+      showConfirmModal(
+        "패스워드리스 등록 화면으로 이동하시겠습니까?",
+        "패스워드리스 등록",
+        "등록후에는 비밀번호로 로그인하실 수 없습니다",
+        async () => {
+          await setLoginInfo({ id: user.email, pw: passwords.currentPW });
+          await setView("passwordless");
+          await navigate("/login");
+        }
+      );
+    }
+  };
+
   //settings 탭에 따라 회원 정보 변경/비밀번호 변경/회원 탈퇴 렌더링
   const renderSettingPages = (menuId) => {
     switch (menuId) {
@@ -451,6 +502,34 @@ export default function Settings() {
           </ContainerComponent>
         );
       }
+      case "passwordless": {
+        return (
+          <ContainerComponent variant="filled" size="small">
+            <div style={{ padding: "3em 3em 0.5em 3em " }}>
+              <InputComponent
+                label="현재 비밀번호"
+                placeholder="현재 비밀번호를 입력해주세요"
+                type="password"
+                onChange={handleChange("currentPW")}
+                value={passwords.currentPW}
+                required
+                error={errors.currentPW}
+                className="mb-3"
+              />
+            </div>
+            <div className="d-flex justify-content-center">
+              <ButtonComponent
+                variant="primary"
+                size="small"
+                onClick={handleRegisterPasswordless}
+                className="h-75 mb-5"
+              >
+                확인
+              </ButtonComponent>
+            </div>
+          </ContainerComponent>
+        );
+      }
       default: {
         return (
           <ContainerComponent variant="filled" size="small" className="p-5">
@@ -463,36 +542,44 @@ export default function Settings() {
 
   return (
     <>
-      <ContainerComponent variant="default" className="p-3 mb-5">
-        <ContainerComponent size="medium" variant="default" className="mb-3">
-          <HeaderComponent variant="filled" size="small" align="center">
-            <HeaderComponent.Navigation>
-              <HeaderComponent.MenuItem
-                active={activeHeaderMenu === "userInfo"}
-                onClick={() => handleHeaderMenuClick("userInfo")}
-              >
-                회원 정보 변경
-              </HeaderComponent.MenuItem>
-              <HeaderComponent.MenuItem
-                active={activeHeaderMenu === "updatePassword"}
-                onClick={() => handleHeaderMenuClick("updatePassword")}
-              >
-                비밀번호 변경
-              </HeaderComponent.MenuItem>
-              <HeaderComponent.MenuItem
-                active={activeHeaderMenu === "withdrawalUser"}
-                onClick={() => handleHeaderMenuClick("withdrawalUser")}
-              >
-                회원 탈퇴
-              </HeaderComponent.MenuItem>
-            </HeaderComponent.Navigation>
-          </HeaderComponent>
-        </ContainerComponent>
+      <div style={{ maxWidth: "750px", margin: "0 auto" }}>
+        <ContainerComponent variant="default" className="p-3 mb-5">
+          <ContainerComponent size="medium" variant="default" className="mb-3">
+            <HeaderComponent variant="filled" size="small" align="center">
+              <HeaderComponent.Navigation>
+                <HeaderComponent.MenuItem
+                  active={activeHeaderMenu === "userInfo"}
+                  onClick={() => handleHeaderMenuClick("userInfo")}
+                >
+                  회원 정보 변경
+                </HeaderComponent.MenuItem>
+                <HeaderComponent.MenuItem
+                  active={activeHeaderMenu === "updatePassword"}
+                  onClick={() => handleHeaderMenuClick("updatePassword")}
+                >
+                  비밀번호 변경
+                </HeaderComponent.MenuItem>
+                <HeaderComponent.MenuItem
+                  active={activeHeaderMenu === "withdrawalUser"}
+                  onClick={() => handleHeaderMenuClick("withdrawalUser")}
+                >
+                  회원 탈퇴
+                </HeaderComponent.MenuItem>
+                <HeaderComponent.MenuItem
+                  active={activeHeaderMenu === "passwordless"}
+                  onClick={() => handleHeaderMenuClick("passwordless")}
+                >
+                  패스워드리스 등록
+                </HeaderComponent.MenuItem>
+              </HeaderComponent.Navigation>
+            </HeaderComponent>
+          </ContainerComponent>
 
-        <ContainerComponent size="medium" variant="outlined">
-          {renderSettingPages(activeHeaderMenu)}
+          <ContainerComponent size="medium" variant="outlined">
+            {renderSettingPages(activeHeaderMenu)}
+          </ContainerComponent>
         </ContainerComponent>
-      </ContainerComponent>
+      </div>
     </>
   );
 }

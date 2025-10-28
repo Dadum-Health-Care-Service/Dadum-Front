@@ -25,9 +25,10 @@ const SalesAnalysis = () => {
   // 카테고리 옵션
   const categoryOptions = [
     { value: 'all', label: '전체' },
+    { value: 'fitness', label: '피트니스' },
+    { value: 'nutrition', label: '영양제' },
     { value: 'equipment', label: '운동기구' },
-    { value: 'clothing', label: '운동복' },
-    { value: 'supplement', label: '보충제' }
+    { value: 'clothing', label: '운동복' }
   ];
 
   // 매출 데이터 로드
@@ -58,12 +59,6 @@ const SalesAnalysis = () => {
       ]);
 
       // 응답 데이터 처리 및 변환
-      console.log('📊 API 응답 데이터:', {
-        summary: summaryResponse.status === 'fulfilled' ? summaryResponse.value.data : null,
-        daily: dailyResponse.status === 'fulfilled' ? dailyResponse.value.data : null,
-        category: categoryResponse.status === 'fulfilled' ? categoryResponse.value.data : null,
-        products: productsResponse.status === 'fulfilled' ? productsResponse.value.data : null
-      });
 
       const summaryData = summaryResponse.status === 'fulfilled' 
         ? transformApiData(summaryResponse.value.data, 'summary')
@@ -118,11 +113,8 @@ const SalesAnalysis = () => {
 
   // 백엔드 API 응답 데이터 변환 함수
   const transformApiData = (apiData, dataType) => {
-    console.log(`🔄 변환 중 - 타입: ${dataType}, 데이터:`, apiData);
-    
     // 데이터가 null이거나 undefined인 경우 처리
     if (!apiData) {
-      console.log(`⚠️ 데이터 없음 - 타입: ${dataType}`);
       return dataType === 'summary' ? null : [];
     }
 
