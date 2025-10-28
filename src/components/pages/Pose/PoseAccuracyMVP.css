@@ -17,7 +17,7 @@
 }
 
 *{box-sizing:border-box}
-body{background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,Apple SD Gothic Neo,Noto Sans KR,sans-serif}
+body{ color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,Apple SD Gothic Neo,Noto Sans KR,sans-serif}
 
 /* ===== Page ===== */
 .pose-page{ display:flex; flex-direction:column; gap:16px; padding:12px; }
@@ -32,81 +32,87 @@ body{background:var(--bg); color:var(--text); font-family:system-ui,-apple-syste
 }
 .card-title{ margin:6px 0 12px; font-weight:700; font-size:16px}
 
-/* ===== Header Toolbar ===== */
+/* ===== Header Toolbar (rework) ===== */
 .card-head{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  flex-wrap:wrap;
+  display:flex; align-items:center; flex-wrap:wrap; gap:10px;
+  padding:8px 10px;
+  border:1px solid var(--border); border-radius:12px;
+  background:var(--card); box-shadow:var(--shadow);
 }
-.status{ font-weight:600; color:var(--text); }
+
+/* 상태 배지 */
+.status{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:4px 10px;
+  font-weight:700; color:var(--sky-700);
+  background:var(--primary-100);
+  border:1px solid var(--primary-300);
+  border-radius:999px;
+}
+.status::before{
+  content:""; width:8px; height:8px; border-radius:50%;
+  background:#94a3b8; display:inline-block;
+}
+.status.is-on::before{ background:var(--primary); }
 
 .toolbar-spacer{ flex:1 1 auto; }
 
-/* (기존) 전/후면 버튼 */
+/* 세그먼트 버튼 (전/후면/엔진/세그모드 공통) */
+.camera-switch{
+  display:inline-flex; border:1px solid var(--border); border-radius:10px;
+  overflow:hidden; background:#fff;
+}
 .camera-switch .cam-btn{
-  padding:6px 12px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  background:#fff;
-  box-shadow:0 1px 1px rgba(0,0,0,.04);
-  transition:all .15s ease;
-  cursor:pointer;
+  min-width:56px; height:36px; padding:0 12px;
+  border:0; background:transparent; cursor:pointer;
+  font-weight:600; color:var(--text);
 }
+.camera-switch .cam-btn + .cam-btn{ border-left:1px solid var(--border); }
 .camera-switch .cam-btn.on{
-  background:var(--primary-100);
-  border-color:var(--primary-300);
-  color:#1d4ed8;
+  background:var(--primary-100); color:var(--sky-700);
+  box-shadow: inset 0 0 0 2px var(--primary-300);
 }
-.camera-switch .cam-btn:not(.on):hover{ border-color:#c7d2fe; }
 
-/* ▶ 공통 칩 버튼(.cam-btn)을 어디서든 재사용 */
-.cam-btn{
-  padding:6px 12px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  background:#fff;
-  box-shadow:0 1px 1px rgba(0,0,0,.04);
-  transition:all .15s ease;
-  cursor:pointer;
-}
-.cam-btn.on{
-  background:var(--primary-100);
-  border-color:var(--primary-300);
-  color:#1d4ed8;
-}
-.cam-btn:not(.on):hover{ border-color:#c7d2fe; }
-
-.mock-controls{ display:flex; align-items:center; gap:10px; }
-
-/* (이전 토글 스타일은 남겨두되, 이제는 사용 안 함)
-   필요시 다른 요소가 참조해도 문제 없도록 유지 */
+/* 스위치 토글 */
 .toggle{
   display:inline-flex; align-items:center; gap:8px;
-  padding:6px 12px; border-radius:9999px;
-  border:1px solid var(--border); background:#f9fafb; color:#374151;
-  cursor:pointer; user-select:none; transition:all .15s ease;
+  height:36px; padding:0 12px;
+  border:1px solid var(--border); border-radius:9999px;
+  background:#fff; color:#374151; user-select:none; cursor:pointer;
 }
-.toggle.on{ background:var(--sky-100); border-color:var(--sky-300); color:var(--sky-700); }
-.toggle input{ display:none; }
+.toggle input{
+  -webkit-appearance:none; appearance:none;
+  width:44px; height:24px; border-radius:999px;
+  background:#e5e7eb; position:relative; outline:none;
+  transition:background .15s ease;
+}
+.toggle input::after{
+  content:""; position:absolute; top:2px; left:2px;
+  width:20px; height:20px; border-radius:50%;
+  background:#9ca3af; transition:left .15s ease, background .15s ease;
+}
+.toggle input:checked{ background:var(--primary-100); }
+.toggle input:checked::after{ left:22px; background:var(--primary); }
 
 /* 파일 선택 버튼 */
 .file-btn{
   position:relative; overflow:hidden;
   display:inline-flex; align-items:center; gap:8px;
-  padding:6px 12px; border-radius:10px;
+  height:36px; padding:0 12px; border-radius:10px;
   border:1px solid var(--border); background:#fff; box-shadow:var(--shadow);
-  cursor:pointer; transition:all .15s ease;
+  cursor:pointer; transition:border-color .15s ease;
 }
 .file-btn:hover{ border-color:#c7d2fe; }
 .file-btn.disabled{ opacity:.55; pointer-events:none; }
-.file-btn input[type="file"]{
-  position:absolute; inset:0; opacity:0; cursor:pointer;
-}
-.file-icon{ transform:translateY(-1px); }
+.file-btn input[type="file"]{ position:absolute; inset:0; opacity:0; cursor:pointer; }
 .file-name{
   max-width:280px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   color:var(--sub);
+}
+
+/* 작은 화면에서 파일명 숨김 */
+@media (max-width:560px){
+  .file-name{ display:none; }
 }
 
 /* ===== Stage / Viewport ===== */
@@ -185,6 +191,20 @@ body{background:var(--bg); color:var(--text); font-family:system-ui,-apple-syste
 .issues__item-detail{ color:#374151; font-size:14px; }
 .issues__item-fix{ margin-top:4px; color:#065f46; background:#ecfdf5; border:1px solid #a7f3d0; border-radius:8px; padding:6px 8px; font-size:13px; }
 
-/* 상태 줄(헤더)과 화면(캔버스) 사이 간격 */
-.card-head { padding-bottom: 10px; }
-.card-head + .stage { margin-top: 12px; }
+/* ==== Force button look & clickability (reset CSS 충돌 방지) ==== */
+button.cta, .cta {
+  -webkit-appearance: none;
+  appearance: none;
+  display: inline-block;
+  border: none !important;
+  background: var(--primary) !important;
+  color: #fff !important;
+  padding: 12px 16px !important;
+  font: inherit;
+  font-weight: 700;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: center;
+}
+.cta.stop { background: #ef4444 !important; }
+.camera-switch .cam-btn { -webkit-appearance:none; appearance:none; cursor:pointer; }
