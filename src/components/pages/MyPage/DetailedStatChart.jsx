@@ -93,8 +93,8 @@ const getChartConfig = (healthKey, rawData, filterType) => {
             } else if (dataKey === 'heartRateData') {
                 const hrData = item.heartRateData;
                 if (Array.isArray(hrData) && hrData.length > 0) {
-                    dataValue = hrData[0].bpm || 0;
-                    timeValue = hrData[0][timeKey]; 
+                    dataValue = hrData[hrData.length-1].bpm || 0;
+                    timeValue = hrData[hrData.length-1][timeKey]; 
                 } else {
                      dataValue = 0;
                 }

@@ -118,10 +118,12 @@ export default function Statistics(){
             return dataArray[dataArray.length - 1];
         };
         const latestHeartRate = safeGetLatest(latestHealthData?.heartRateData);
-        const latestTime = latestHeartRate?.time.substring(0, 10) || '오늘';
+        const latestTime = latestHealthData?.currentTime.substring(0, 10)+' '+latestHealthData?.currentTime.substring(11,19) || '오늘';
         const latestStep = safeGetLatest(latestHealthData?.stepData);
         const chartContainerRef = useRef(null);
 
+        console.log(healthData);
+        console.log(latestHealthData);
         useEffect(()=>{
             if(selectedKey !== null && chartContainerRef.current){
                 chartContainerRef.current.scrollIntoView({
