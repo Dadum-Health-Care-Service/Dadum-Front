@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function Settings() {
   //패스워드리스 등록화면으로 이동
-  const { globalSetLoginView, setCurrentLoginInfo } = useLoginView();
+  const { setView, setLoginInfo } = useLoginView();
   const navigate = useNavigate();
 
   const { DELETE, POST, PUT, GET } = useApi();
@@ -321,9 +321,9 @@ export default function Settings() {
         '패스워드리스 등록',
         '등록후에는 비밀번호로 로그인하실 수 없습니다',
         async ()=>{
-          await setCurrentLoginInfo({id:user.email, pw:passwords.currentPW});
-          await globalSetLoginView('passwordless');
-          navigate('/login');
+          await setLoginInfo({id:user.email, pw:passwords.currentPW});
+          await setView('passwordless');
+          await navigate('/login');
         }
       )
     }

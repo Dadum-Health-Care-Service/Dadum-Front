@@ -20,7 +20,7 @@ function Login() {
   const { POST, GET } = useApi();
   const navigate = useNavigate();
   const location = useLocation();
-  const { showBasicModal, showConfirmModal } = useModal();
+  const { showBasicModal, showConfirmModal, showLoadingModal, closeModal } = useModal();
 
   // 현재 보여줄 뷰를 관리하는 상태 ('login', 'passwordless','loggedIn')
   const { view, setView, currentLoginInfo } = useContext(LoginViewContext);
@@ -71,9 +71,13 @@ function Login() {
   useEffect(() => {
     const fetchQrCodeData = async () => {
       if (view === "passwordless") {
-        setIsQrLoading(true);
+        showLoadingModal('패스워드리스 등록화면 로딩중..','패스워드리스 등록','로딩이 완료되면 자동으로 닫힙니다. 잠시만 기다려 주세요.');
+        try{
+          await handlePasswordlessRegister();
+          closeModal();
 
-        try {
+          setIsQrLoading(true);
+
           // 1. 일반 로그인으로 '임시 토큰' 먼저 받기
           const tokenResponse = await POST(
             "/passwordlessManageCheck",
@@ -135,9 +139,10 @@ function Login() {
           setPushConnectorUrl(qrData.pushConnectorUrl);
           setPushConnectorToken(qrData.pushConnectorToken);
         } catch (error) {
+          closeModal();
           console.error("QR 코드 정보 가져오기 오류:", error);
           showBasicModal(error.message);
-          setView("login"); // 실패 시 로그인 화면으로
+          navigate('/mypage/settings',{replace:true}); // 실패 시 설정 화면으로
         } finally {
           setIsQrLoading(false);
         }
@@ -463,7 +468,7 @@ function Login() {
   const handlePasswordlessRegister = async () => {
     await POST(
       "/join",
-      { id: loginId, pw: loginPw },
+      currentLoginInfo,
       false,
       "passwordless"
     ).then(async (res) => {
@@ -685,14 +690,6 @@ function Login() {
               fullWidth
             >
               메인 화면으로 이동
-            </ButtonComponent>
-            <ButtonComponent
-              variant="outline-primary"
-              size="large"
-              onClick={handlePasswordlessRegister}
-              fullWidth
-            >
-              패스워드리스 등록
             </ButtonComponent>
           </div>
         </FormComponent>

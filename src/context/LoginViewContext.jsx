@@ -23,25 +23,8 @@ export const LoginViewProvider = ({children})=>{
                 showBasicModal('사용자 정보가 없어 패스워드리스 등록을 시작할 수 없습니다','패스워드리스 등록');
                 return;
             }
-            const handlePasswordlessRegister = async () => {
-                await POST(
-                    "/join",
-                    currentLoginInfo,
-                    false,
-                    "passwordless"
-                ).then(async (res) => {
-                    setView("passwordless");
-                })
-                //setView("passwordless");
-            };
-
-            try{
-                handlePasswordlessRegister();
-            }catch(e){
-                console.log(e);
-                showBasicModal('패스워드리스 등록에 실패하였습니다','패스워드리스 등록');
-            }
- 
+            
+            setView('passwordless');
         } else {
             setCurrentLoginInfo({id:"",pw:""});
             setView(newView);
@@ -49,8 +32,14 @@ export const LoginViewProvider = ({children})=>{
 
     };
 
+    const setLoginInfo = (loginInfo) =>{
+        if(loginInfo?.id && loginInfo?.pw){
+            setCurrentLoginInfo(loginInfo);
+        }
+    };
+
     return (
-        <LoginViewContext.Provider value={{view, globalSetLoginView, setCurrentLoginInfo}}>
+        <LoginViewContext.Provider value={{view, setView:globalSetLoginView, currentLoginInfo, setLoginInfo}}>
             {children}
         </LoginViewContext.Provider>
     );
