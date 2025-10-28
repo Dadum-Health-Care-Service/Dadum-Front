@@ -5,6 +5,7 @@ import InputComponent from "../../common/InputComponent";
 import ButtonComponent from "../../common/ButtonComponent";
 import ListComponent from "../../common/ListComponent";
 import { AuthContext } from "../../../context/AuthContext";
+import { LoginViewContext } from "../../../context/LoginViewContext";
 import {
   KAKAO_CLIENT_ID,
   KAKAO_AUTH_URL,
@@ -14,16 +15,18 @@ import styles from "./Login.module.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useModal } from "../../../context/ModalContext";
 import { useApi } from "../../../utils/api/useApi";
-import { LoginViewContext } from "../../../context/LoginViewContext";
+import axios from "axios";
 
 function Login() {
   const { POST, GET } = useApi();
   const navigate = useNavigate();
   const location = useLocation();
-  const { showBasicModal, showConfirmModal, showLoadingModal, closeModal } = useModal();
+  const { showBasicModal, showConfirmModal, showLoadingModal, closeModal } =
+    useModal();
+  const { view, setView, currentLoginInfo, setLoginInfo } =
+    useContext(LoginViewContext);
 
   // 현재 보여줄 뷰를 관리하는 상태 ('login', 'passwordless','loggedIn')
-  const { view, setView, currentLoginInfo } = useContext(LoginViewContext);
   const { user, dispatch } = useContext(AuthContext);
   // 로그인 타입 라디오 버튼 상태
   const [loginType, setLoginType] = useState("password");
@@ -63,16 +66,20 @@ function Login() {
   const kakaoRef = useRef(null);
 
   // user가 없으면 view 상태를 login으로 변경
-  useEffect(()=>{
-    if(!user) setView('login');
-  },[user]);
+  useEffect(() => {
+    if (!user) setView("login");
+  }, [user]);
 
   // view 상태가 'passwordless'로 변경될 때 QR 코드를 생성하는 로직 (Side Effect)
   useEffect(() => {
     const fetchQrCodeData = async () => {
       if (view === "passwordless") {
-        showLoadingModal('패스워드리스 등록화면 로딩중..','패스워드리스 등록','로딩이 완료되면 자동으로 닫힙니다. 잠시만 기다려 주세요.');
-        try{
+        showLoadingModal(
+          "패스워드리스 등록화면 로딩중..",
+          "패스워드리스 등록",
+          "로딩이 완료되면 자동으로 닫힙니다. 잠시만 기다려 주세요."
+        );
+        try {
           await handlePasswordlessRegister();
           closeModal();
 
@@ -141,18 +148,22 @@ function Login() {
         } catch (error) {
           closeModal();
           console.error("QR 코드 정보 가져오기 오류:", error);
-          if(error?.status===500) showBasicModal('패스워드리스 등록에 실패하였습니다','네트워크 에러');
-          else showBasicModal(error.message,'패스워드리스 등록');
-          navigate('/mypage/settings',{replace:true}); // 실패 시 설정 화면으로
+          setView("login");
+          if (error?.status === 500)
+            showBasicModal(
+              "패스워드리스 등록에 실패하였습니다",
+              "네트워크 에러"
+            );
+          else showBasicModal(error.message, "패스워드리스 등록");
+          navigate("/mypage/settings", { replace: true }); // 실패 시 설정 화면으로
         } finally {
-          setView('login');
           setIsQrLoading(false);
         }
       }
     };
 
     fetchQrCodeData();
-  }, [view, loginId, loginPw, currentLoginInfo]); // loginPw도 의존성에 추가
+  }, [view, currentLoginInfo]); // loginPw도 의존성에 추가
 
   useEffect(() => {
     const confirmQrRegistered = async () => {
@@ -226,27 +237,40 @@ function Login() {
                     "/users/auth/passwordless/login",
                     { email: loginId, passwordlessToken: pushConnectorToken },
                     false
-                  ).then((res) => {
-                    console.log(res.data);
-                    dispatch({ type: "LOGIN", user: res.data });
-                    setIsLoggedIn(true);
-                    navigate("/");
-                  }).catch((err)=>{
-                    if(err?.status === 406){
-                      showConfirmModal('계정을 복구하시겠습니까?','탈퇴한 사용자','이미 탈퇴한 사용자 입니다',()=>{
-                        GET(`/users/restore/${loginId}`,{},false)
-                        .then((res)=>{
-                          console.log(res);
-                          showBasicModal("계정이 복구되었습니다. 다시 로그인 해 주세요.","계정 복구");
-                          navigate("/login",{replace:true});
-                        })
-                        .catch((err)=>{
-                          console.log(err);
-                          showBasicModal('계정 복구에 실패하였습니다','네트워크 오류');
-                        })
-                      });
-                    }
-                  });
+                  )
+                    .then((res) => {
+                      console.log(res.data);
+                      dispatch({ type: "LOGIN", user: res.data });
+                      setIsLoggedIn(true);
+                      navigate("/");
+                    })
+                    .catch((err) => {
+                      if (err?.status === 406) {
+                        showConfirmModal(
+                          "계정을 복구하시겠습니까?",
+                          "탈퇴한 사용자",
+                          "이미 탈퇴한 사용자 입니다",
+                          () => {
+                            GET(`/users/restore/${loginId}`, {}, false)
+                              .then((res) => {
+                                console.log(res);
+                                showBasicModal(
+                                  "계정이 복구되었습니다. 다시 로그인 해 주세요.",
+                                  "계정 복구"
+                                );
+                                navigate("/login", { replace: true });
+                              })
+                              .catch((err) => {
+                                console.log(err);
+                                showBasicModal(
+                                  "계정 복구에 실패하였습니다",
+                                  "네트워크 오류"
+                                );
+                              });
+                          }
+                        );
+                      }
+                    });
                 } else {
                   await POST(
                     "/passwordlessCallApi",
@@ -300,21 +324,36 @@ function Login() {
                 navigate("/", { replace: true });
               }
             })
-            .catch(e=>{
+            .catch((e) => {
               console.log(e);
-              if(e?.status === 406){
-                showConfirmModal('계정을 복구하시겠습니까?','탈퇴한 사용자','이미 탈퇴한 사용자 입니다',()=>{
-                  GET(`/users/restore/user${KAKAO_CLIENT_ID}@kakao.com`,{},false)
-                  .then((res)=>{
-                    console.log(res);
-                    showBasicModal("계정이 복구되었습니다. 다시 로그인 해 주세요.","계정 복구");
-                    navigate("/login",{replace:true});
-                  })
-                  .catch((err)=>{
-                    console.log(err);
-                    showBasicModal('계정 복구에 실패하였습니다','네트워크 오류');
-                  })
-                });
+              if (e?.status === 406) {
+                showConfirmModal(
+                  "계정을 복구하시겠습니까?",
+                  "탈퇴한 사용자",
+                  "이미 탈퇴한 사용자 입니다",
+                  () => {
+                    GET(
+                      `/users/restore/user${KAKAO_CLIENT_ID}@kakao.com`,
+                      {},
+                      false
+                    )
+                      .then((res) => {
+                        console.log(res);
+                        showBasicModal(
+                          "계정이 복구되었습니다. 다시 로그인 해 주세요.",
+                          "계정 복구"
+                        );
+                        navigate("/login", { replace: true });
+                      })
+                      .catch((err) => {
+                        console.log(err);
+                        showBasicModal(
+                          "계정 복구에 실패하였습니다",
+                          "네트워크 오류"
+                        );
+                      });
+                  }
+                );
               }
             });
         })
@@ -355,25 +394,35 @@ function Login() {
         .then((res) => {
           dispatch({ type: "LOGIN", user: res.data });
           setView("loggedIn");
-          navigate('/');
+          navigate("/");
         })
         .catch((error) => {
           console.error("로그인 오류:", error);
-          if(error?.status === 406){
-            showConfirmModal("계정을 복구하시겠습니까?",'탈퇴한 사용자','이미 탈퇴한 사용자 입니다',()=>{
-              GET(`/users/restore/${loginId}`,{},false)
-              .then((res)=>{
-                console.log(res);
-                showBasicModal('계정이 복구되었습니다. 다시 로그인 해 주세요.',"계정 복구");
-                navigate('/login',{replace:true});
-              })
-              .catch((err)=>{
-                console.log(err);
-                showBasicModal('계정 복구에 실패하였습니다','네트워크 오류');
-              })
-            });
-          }
-          else if (typeof error.response?.data === "string") {
+          if (error?.status === 406) {
+            showConfirmModal(
+              "계정을 복구하시겠습니까?",
+              "탈퇴한 사용자",
+              "이미 탈퇴한 사용자 입니다",
+              () => {
+                GET(`/users/restore/${loginId}`, {}, false)
+                  .then((res) => {
+                    console.log(res);
+                    showBasicModal(
+                      "계정이 복구되었습니다. 다시 로그인 해 주세요.",
+                      "계정 복구"
+                    );
+                    navigate("/login", { replace: true });
+                  })
+                  .catch((err) => {
+                    console.log(err);
+                    showBasicModal(
+                      "계정 복구에 실패하였습니다",
+                      "네트워크 오류"
+                    );
+                  });
+              }
+            );
+          } else if (typeof error.response?.data === "string") {
             const msg = error.response.data;
             if (msg.length > 0)
               showBasicModal(
@@ -468,14 +517,13 @@ function Login() {
   };
 
   const handlePasswordlessRegister = async () => {
-    await POST(
-      "/join",
-      currentLoginInfo,
-      false,
-      "passwordless"
-    ).then(async (res) => {
-      setView("passwordless");
-    });
+    setLoginId(currentLoginInfo.id);
+    setLoginPw(currentLoginInfo.pw);
+    await POST("/join", currentLoginInfo, false, "passwordless").then(
+      async (res) => {
+        setView("passwordless");
+      }
+    );
     //setView("passwordless");
   };
 
@@ -665,7 +713,7 @@ function Login() {
       )}
 
       {/* 로그인 성공 화면 */}
-      {((view === "loggedIn" || user) && view !== "passwordless") && (
+      {(view === "loggedIn" || user) && view !== "passwordless" && (
         <FormComponent
           title="로그인"
           subtitle="다듬에 오신 것을 환영합니다."
