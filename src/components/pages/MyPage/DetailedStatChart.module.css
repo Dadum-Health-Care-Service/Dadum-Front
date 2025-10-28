@@ -98,6 +98,10 @@
     justify-content: flex-start;
 }
 
+.clickableGraph:hover{
+    opacity: 0.95;
+}
+
 .yAxisLabels {
     position: relative;
     top: 0;

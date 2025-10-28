@@ -119,7 +119,7 @@ function AppContent() {
   const noGNBpaths = ["/login", "/signup", "/findid", "/findpw"];
   const showGNB = user && !noGNBpaths.includes(location.pathname);
   const pagePadding =
-    isMobile && !noGNBpaths.includes(location.pathname) ? "90px" : "0px";
+    isMobile && !noGNBpaths.includes(location.pathname) && user ? "90px" : "0px";
 
   return (
     <>
@@ -165,14 +165,6 @@ function AppContent() {
                 <Route
                   path="/fraud-detection"
                   element={<FraudDetection />}
-                ></Route>
-                <Route
-                  path="/statistics"
-                  element={
-                    <div>
-                      <h1>통계페이지는 개발 중 입니다.</h1>
-                    </div>
-                  }
                 ></Route>
                 <Route path="/social" element={
                   <ErrorBoundary>
