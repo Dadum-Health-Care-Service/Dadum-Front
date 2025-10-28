@@ -14,7 +14,7 @@ import styles from "./Login.module.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useModal } from "../../../context/ModalContext";
 import { useApi } from "../../../utils/api/useApi";
-import { LoginViewContext } from "../../../context/LoginViewContext";
+import axios from "axios";
 
 function Login() {
   const { POST, GET } = useApi();
@@ -24,7 +24,7 @@ function Login() {
     useModal();
 
   // 현재 보여줄 뷰를 관리하는 상태 ('login', 'passwordless','loggedIn')
-  const { view, setView, currentLoginInfo } = useContext(LoginViewContext);
+  const [view, setView] = useState("login");
   const { user, dispatch } = useContext(AuthContext);
   // 로그인 타입 라디오 버튼 상태
   const [loginType, setLoginType] = useState("password");

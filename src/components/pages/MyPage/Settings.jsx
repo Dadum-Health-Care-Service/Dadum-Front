@@ -6,14 +6,11 @@ import ButtonComponent from "../../common/ButtonComponent";
 import { AuthContext } from "../../../context/AuthContext";
 import { useModal } from "../../../context/ModalContext";
 import { useApi } from "../../../utils/api/useApi";
-import { useLoginView } from "../../../context/LoginViewContext";
-import { useNavigate } from "react-router-dom";
 
 export default function Settings() {
   //패스워드리스 등록화면으로 이동
   const { setView, setLoginInfo } = useLoginView();
   const navigate = useNavigate();
-
   const { DELETE, POST, PUT, GET } = useApi();
   //유저 정보 읽어오기
   const { user, dispatch } = useContext(AuthContext);
@@ -57,9 +54,9 @@ export default function Settings() {
     }
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     handleReset();
-  },[activeHeaderMenu])
+  }, [activeHeaderMenu]);
 
   //역할 관련 함수들
   const loadAvailableRoles = async () => {
@@ -289,11 +286,12 @@ export default function Settings() {
     }
   };
 
-  const handleRegisterPasswordless = async (e) =>{
+  const handleRegisterPasswordless = async (e) => {
     e.preventDefault();
 
     const newErrors = {};
-    if (!passwords.currentPW) newErrors.currentPW = "현재 비밀번호를 반드시 입력해주세요.";
+    if (!passwords.currentPW)
+      newErrors.currentPW = "현재 비밀번호를 반드시 입력해주세요.";
     setErrors(newErrors);
     if (Object.keys(newErrors).length === 0) {
       //입력한 현재 비밀번호가 맞는지 확인
@@ -317,15 +315,15 @@ export default function Settings() {
         return;
       }
       showConfirmModal(
-        '패스워드리스 등록 화면으로 이동하시겠습니까?',
-        '패스워드리스 등록',
-        '등록후에는 비밀번호로 로그인하실 수 없습니다',
-        async ()=>{
-          await setLoginInfo({id:user.email, pw:passwords.currentPW});
-          await setView('passwordless');
-          await navigate('/login');
+        "패스워드리스 등록 화면으로 이동하시겠습니까?",
+        "패스워드리스 등록",
+        "등록후에는 비밀번호로 로그인하실 수 없습니다",
+        async () => {
+          await setLoginInfo({ id: user.email, pw: passwords.currentPW });
+          await setView("passwordless");
+          await navigate("/login");
         }
-      )
+      );
     }
   };
 
@@ -501,8 +499,8 @@ export default function Settings() {
           </ContainerComponent>
         );
       }
-      case 'passwordless': {
-        return(
+      case "passwordless": {
+        return (
           <ContainerComponent variant="filled" size="small">
             <div style={{ padding: "3em 3em 0.5em 3em " }}>
               <InputComponent
@@ -527,7 +525,7 @@ export default function Settings() {
               </ButtonComponent>
             </div>
           </ContainerComponent>
-        )
+        );
       }
       default: {
         return (
@@ -541,7 +539,7 @@ export default function Settings() {
 
   return (
     <>
-      <div style={{maxWidth:'750px', margin:'0 auto'}}>
+      <div style={{ maxWidth: "750px", margin: "0 auto" }}>
         <ContainerComponent variant="default" className="p-3 mb-5">
           <ContainerComponent size="medium" variant="default" className="mb-3">
             <HeaderComponent variant="filled" size="small" align="center">
@@ -565,8 +563,8 @@ export default function Settings() {
                   회원 탈퇴
                 </HeaderComponent.MenuItem>
                 <HeaderComponent.MenuItem
-                  active={activeHeaderMenu === 'passwordless'}
-                  onClick={()=> handleHeaderMenuClick('passwordless')}
+                  active={activeHeaderMenu === "passwordless"}
+                  onClick={() => handleHeaderMenuClick("passwordless")}
                 >
                   패스워드리스 등록
                 </HeaderComponent.MenuItem>
