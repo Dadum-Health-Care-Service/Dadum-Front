@@ -130,22 +130,12 @@ export const useKakaoMap = () => {
     await ensureReady();
     return new Promise((resolve, reject) => {
       try {
-        console.log('🔧 Geocoder 생성 시도:', {
-          services: !!window.kakao?.maps?.services,
-          Geocoder: !!window.kakao?.maps?.services?.Geocoder
-        });
-        
         const geocoder = new window.kakao.maps.services.Geocoder();
         const coord = new window.kakao.maps.LatLng(lat, lng);
         
-        console.log('📍 좌표 변환 시도:', { lat, lng });
-        
         geocoder.coord2Address(coord.getLng(), coord.getLat(), (result, status) => {
-          console.log('🔍 Geocoder 결과:', { result, status });
-          
           if (status === window.kakao.maps.services.Status.OK && result && result.length > 0) {
             const firstResult = result[0];
-            console.log('✅ 첫 번째 결과:', firstResult);
             
             const addressInfo = {
               address: firstResult.address?.address_name || '',
@@ -154,15 +144,12 @@ export const useKakaoMap = () => {
               region2Depth: firstResult.address?.region_2depth_name || '',
               region3Depth: firstResult.address?.region_3depth_name || ''
             };
-            console.log('🏠 최종 주소 정보:', addressInfo);
             resolve(addressInfo);
           } else {
-            console.log('❌ 주소 변환 실패:', { status, result });
             reject(new Error(`주소를 찾을 수 없습니다. 상태: ${status}`));
           }
         });
       } catch (error) {
-        console.log('💥 Geocoder 에러:', error);
         reject(error);
       }
     });
