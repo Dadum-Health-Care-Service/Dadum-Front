@@ -47,7 +47,7 @@
 .warningButton:hover {
   background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(243, 156, 18, 0.4);
+  box-shadow: 0 4px 12px rgba(8, 5, 1, 0.4);
 }
 
 .warningButton:disabled {
