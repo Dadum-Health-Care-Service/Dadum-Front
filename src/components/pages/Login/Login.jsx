@@ -99,7 +99,7 @@ function Login() {
           // 2. QR 요청을 위한 JSESSIONID 발급
           const jsessionidResponse = await POST(
             "/passwordlessCallApi",
-            { url: "isApUrl", params: `userId=${loginId}&QRReg=` },
+            { url: "isApUrl", params: `userId=${currentLoginInfo.id}&QRReg=` },
             false,
             "passwordless"
           ).then((res) => {
@@ -117,7 +117,7 @@ function Login() {
             "/passwordlessCallApi",
             {
               url: "joinApUrl",
-              params: `userId=${loginId}&token=${passwordlessToken}`,
+              params: `userId=${currentLoginInfo.id}&token=${passwordlessToken}`,
             },
             false,
             "passwordless"
@@ -141,9 +141,11 @@ function Login() {
         } catch (error) {
           closeModal();
           console.error("QR 코드 정보 가져오기 오류:", error);
-          showBasicModal(error.message);
+          if(error?.status===500) showBasicModal('패스워드리스 등록에 실패하였습니다','네트워크 에러');
+          else showBasicModal(error.message,'패스워드리스 등록');
           navigate('/mypage/settings',{replace:true}); // 실패 시 설정 화면으로
         } finally {
+          setView('login');
           setIsQrLoading(false);
         }
       }

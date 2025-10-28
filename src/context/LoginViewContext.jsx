@@ -9,8 +9,7 @@ export const useLoginView = () => useContext(LoginViewContext);
 
 export const LoginViewProvider = ({children})=>{
     const { user }=useContext(AuthContext);
-    const { POST } = useApi();
-    const { showBasicModal, showLoadingModal, closeModal }=useModal();
+    const { showBasicModal }=useModal();
 
     const [view, setView] = useState('login');
 
@@ -27,7 +26,7 @@ export const LoginViewProvider = ({children})=>{
             setView('passwordless');
         } else {
             setCurrentLoginInfo({id:"",pw:""});
-            setView(newView);
+            setView('login');
         }
 
     };
