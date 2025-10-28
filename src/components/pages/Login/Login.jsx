@@ -155,7 +155,6 @@ function Login() {
           else showBasicModal(error.message, "패스워드리스 등록");
           navigate("/mypage/settings", { replace: true }); // 실패 시 설정 화면으로
         } finally {
-          setView("login");
           setIsQrLoading(false);
         }
       }
