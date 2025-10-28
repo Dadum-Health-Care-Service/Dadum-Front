@@ -19,7 +19,9 @@
 .shopTitle {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #3b82f6;
+  background: linear-gradient(135deg, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   margin-bottom: 16px;
 }
 
@@ -241,37 +243,37 @@
   .shopTitle {
     font-size: 2rem;
   }
-  
+
   .shopSubtitle {
     font-size: 1rem;
   }
-  
+
   .productsGrid {
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 12px;
     margin: 0 10px 20px 10px;
     width: calc(100% - 20px);
   }
-  
+
   .shopHeader {
     margin: 0 10px 40px 10px;
     padding: 30px 15px;
   }
-  
+
   .categoryFilter {
     margin: 0 10px 20px 10px;
     padding: 15px;
   }
-  
+
   .categoryButtons {
     gap: 8px;
   }
-  
+
   .categoryBtn {
     padding: 8px 16px;
     font-size: 0.9rem;
   }
-  
+
   .emptyState {
     margin: 0 10px 20px 10px;
   }
