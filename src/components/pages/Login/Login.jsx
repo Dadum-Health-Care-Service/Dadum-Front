@@ -14,7 +14,7 @@ import styles from "./Login.module.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useModal } from "../../../context/ModalContext";
 import { useApi } from "../../../utils/api/useApi";
-import { LoginViewContext } from "../../../context/LoginViewContext";
+import axios from "axios";
 
 function Login() {
   const { POST, GET } = useApi();
@@ -23,7 +23,7 @@ function Login() {
   const { showBasicModal, showConfirmModal } = useModal();
 
   // 현재 보여줄 뷰를 관리하는 상태 ('login', 'passwordless','loggedIn')
-  const { view, setView, currentLoginInfo } = useContext(LoginViewContext);
+  const [view, setView] = useState("login");
   const { user, dispatch } = useContext(AuthContext);
   // 로그인 타입 라디오 버튼 상태
   const [loginType, setLoginType] = useState("password");
@@ -62,18 +62,7 @@ function Login() {
   //카카오 로그인용
   const kakaoRef = useRef(null);
 
-  // user가 없으면 view 상태를 login으로 변경
-  useEffect(()=>{
-    if(!user) setView('login');
-  },[user]);
-
-  // login이 아닌 다른 페이지에서 view상태가 'passwordless'로 변경될때 loginId와 loginPw 가져오는 로직
-  useEffect(()=>{
-    if(view==='passwordless' && currentLoginInfo.id && currentLoginInfo.pw){
-      setLoginId(currentLoginInfo.id);
-      setLoginPw(currentLoginInfo.pw);
-    }
-  },[view, currentLoginInfo]);
+  // 최초렌더링 시 user가 있다면
 
   // view 상태가 'passwordless'로 변경될 때 QR 코드를 생성하는 로직 (Side Effect)
   useEffect(() => {
@@ -356,7 +345,6 @@ function Login() {
         .then((res) => {
           dispatch({ type: "LOGIN", user: res.data });
           setView("loggedIn");
-          navigate('/');
         })
         .catch((error) => {
           console.error("로그인 오류:", error);
@@ -666,7 +654,7 @@ function Login() {
       )}
 
       {/* 로그인 성공 화면 */}
-      {((view === "loggedIn" || user) && view !== "passwordless") && (
+      {(view === "loggedIn" || user) && (
         <FormComponent
           title="로그인"
           subtitle="다듬에 오신 것을 환영합니다."

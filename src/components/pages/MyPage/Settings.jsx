@@ -6,14 +6,8 @@ import ButtonComponent from "../../common/ButtonComponent";
 import { AuthContext } from "../../../context/AuthContext";
 import { useModal } from "../../../context/ModalContext";
 import { useApi } from "../../../utils/api/useApi";
-import { useLoginView } from "../../../context/LoginViewContext";
-import { useNavigate } from "react-router-dom";
 
 export default function Settings() {
-  //패스워드리스 등록화면으로 이동
-  const { setView } = useLoginView();
-  const navigate = useNavigate();
-
   const { DELETE, POST, PUT, GET } = useApi();
   //유저 정보 읽어오기
   const { user, dispatch } = useContext(AuthContext);
@@ -467,18 +461,6 @@ export default function Settings() {
     }
   };
 
-  const registerPasswordless = () =>{
-    showConfirmModal(
-      '패스워드리스 등록 화면으로 이동하시겠습니까?',
-      '패스워드리스 등록',
-      '등록후에는 비밀번호로 로그인하실 수 없습니다',
-      async ()=>{
-        await setView('passwordless');
-        navigate('/login');
-      }
-    )
-  };
-
   return (
     <>
       <div style={{maxWidth:'750px', margin:'0 auto'}}>
@@ -503,11 +485,6 @@ export default function Settings() {
                   onClick={() => handleHeaderMenuClick("withdrawalUser")}
                 >
                   회원 탈퇴
-                </HeaderComponent.MenuItem>
-                <HeaderComponent.MenuItem
-                  onClick={registerPasswordless}
-                >
-                  패스워드리스 등록
                 </HeaderComponent.MenuItem>
               </HeaderComponent.Navigation>
             </HeaderComponent>
