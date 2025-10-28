@@ -71,7 +71,6 @@ const PaymentModal = ({ show, onHide, product, deliveryInfo, user, onPaymentSucc
         // 모바일 환경에서 추가 설정
         if (isMobile) {
           // 모바일 환경에서의 추가 설정
-          console.log('모바일 환경에서 결제 초기화');
         }
       } else {
         setError('아임포트 SDK를 불러올 수 없습니다. 페이지를 새로고침해주세요.');
@@ -211,14 +210,9 @@ const PaymentModal = ({ show, onHide, product, deliveryInfo, user, onPaymentSucc
 
 
     // 결제 데이터 로깅 (디버깅용)
-    console.log('결제 요청 데이터:', paymentData);
     
     window.IMP.request_pay(paymentData, (response) => {
       setLoading(false);
-      
-      // 응답 데이터 로깅 (디버깅용)
-      console.log('결제 응답 데이터:', response);
-      console.log('모바일 환경:', isMobile);
       
       // 응답 데이터 검증 및 정규화
       const normalizedResponse = {

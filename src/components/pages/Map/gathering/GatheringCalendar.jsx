@@ -29,23 +29,12 @@ const GatheringCalendar = () => {
   const events = useMemo(() => {
     if (!participatedGatherings) return [];
 
-    console.log('=== 캘린더 이벤트 생성 ===');
-    console.log('참여한 모임 수:', participatedGatherings.length);
-    console.log('참여한 모임 목록:', participatedGatherings);
-
     return participatedGatherings
       .filter(gathering => gathering.nextMeetingDate) // nextMeetingDate가 있는 모임만
       .map((gathering) => {
         // nextMeetingDate를 사용하여 정확한 날짜/시간으로 이벤트 생성
         const startDate = moment(gathering.nextMeetingDate).toDate();
         const endDate = moment(startDate).add(2, 'hours').toDate(); // 2시간 동안
-
-        console.log('이벤트 생성:', {
-          id: gathering.gatheringId,
-          title: gathering.title,
-          nextMeetingDate: gathering.nextMeetingDate,
-          startDate: startDate
-        });
 
         return {
           id: gathering.gatheringId,
@@ -63,34 +52,25 @@ const GatheringCalendar = () => {
 
   // 특정 날짜의 모임 목록 가져오기
   const getGatheringsForDate = useCallback((date) => {
-    console.log('getGatheringsForDate 호출됨:', date);
-    console.log('participatedGatherings:', participatedGatherings);
-
     if (!participatedGatherings) {
-      console.log('participatedGatherings가 없음');
       return [];
     }
 
     const targetDate = moment(date).format('YYYY-MM-DD');
-    console.log('targetDate:', targetDate);
 
     const filteredGatherings = participatedGatherings.filter(gathering => {
       if (!gathering.nextMeetingDate) {
-        console.log('gathering.nextMeetingDate가 없음:', gathering.title);
         return false;
       }
       const gatheringDate = moment(gathering.nextMeetingDate).format('YYYY-MM-DD');
-      console.log('gatheringDate:', gatheringDate, 'targetDate:', targetDate);
       return gatheringDate === targetDate;
     });
 
-    console.log('필터링된 모임들:', filteredGatherings);
     return filteredGatherings;
   }, [participatedGatherings]);
 
   // 날짜 클릭 핸들러
   const handleDateClick = useCallback((slotInfo) => {
-    console.log('날짜 클릭됨:', slotInfo);
     const date = slotInfo.start;
     setSelectedDate(date);
     setShowDateModal(true);
@@ -99,11 +79,8 @@ const GatheringCalendar = () => {
   // 모바일/데스크탑용 직접 클릭 이벤트
   React.useEffect(() => {
     const handleDateClick = (event) => {
-      console.log('클릭 이벤트 발생:', event.target);
       const target = event.target;
       const dateCell = target.closest('.rbc-date-cell');
-      
-      console.log('dateCell 찾음:', dateCell);
       
       if (dateCell) {
         // 여러 방법으로 날짜 정보 가져오기
@@ -111,11 +88,8 @@ const GatheringCalendar = () => {
                           dateCell.getAttribute('data-rbc-date') ||
                           dateCell.querySelector('[data-date]')?.getAttribute('data-date');
         
-        console.log('dateString:', dateString);
-        
         if (dateString) {
           const clickedDate = new Date(dateString);
-          console.log('클릭된 날짜:', clickedDate);
           setSelectedDate(clickedDate);
           setShowDateModal(true);
         } else {
@@ -124,7 +98,6 @@ const GatheringCalendar = () => {
           if (dayText && dayText.match(/^\d+$/)) {
             const today = new Date();
             const clickedDate = new Date(today.getFullYear(), today.getMonth(), parseInt(dayText));
-            console.log('텍스트에서 파싱된 날짜:', clickedDate);
             setSelectedDate(clickedDate);
             setShowDateModal(true);
           }
@@ -136,7 +109,6 @@ const GatheringCalendar = () => {
     const addEventListeners = () => {
       const calendarElement = document.querySelector('.rbc-calendar');
       if (calendarElement) {
-        console.log('이벤트 리스너 추가됨');
         calendarElement.addEventListener('click', handleDateClick);
         calendarElement.addEventListener('touchstart', handleDateClick);
         return calendarElement;
@@ -175,7 +147,6 @@ const GatheringCalendar = () => {
   // 이벤트 클릭 핸들러 (무시)
   const handleSelectEvent = useCallback((event) => {
     // 이벤트 클릭은 무시하고 날짜 클릭만 처리
-    console.log('이벤트 클릭됨 (무시):', event);
   }, []);
 
   // 이벤트 스타일 커스터마이징
@@ -296,7 +267,6 @@ const GatheringCalendar = () => {
               <button 
                 className={styles.closeButton}
                 onClick={() => {
-                  console.log('모달 닫기 버튼 클릭');
                   setShowDateModal(false);
                 }}
               >

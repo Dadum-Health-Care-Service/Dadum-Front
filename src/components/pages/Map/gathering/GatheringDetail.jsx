@@ -26,7 +26,6 @@ const GatheringDetail = ({ show, onHide, gathering, onJoin, onClose }) => {
   // 방장인지 확인하는 함수
   const isCreator = useCallback(() => {
     if (!gathering || !participants) {
-      console.log('isCreator: gathering 또는 participants가 없음', { gathering, participants });
       return false;
     }
     
@@ -39,12 +38,6 @@ const GatheringDetail = ({ show, onHide, gathering, onJoin, onClose }) => {
       currentUser = participants.find(p => p.role === 'CREATOR');
     }
     
-    console.log('isCreator 디버깅:', { 
-      currentUserId, 
-      participants, 
-      currentUser, 
-      isCreator: currentUser && currentUser.role === 'CREATOR' 
-    });
     return currentUser && currentUser.role === 'CREATOR';
   }, [gathering, participants, currentUserId]);
 
@@ -172,8 +165,6 @@ const GatheringDetail = ({ show, onHide, gathering, onJoin, onClose }) => {
   useEffect(() => {
     if (show && gathering && participants.length > 0) {
       // 참여자 목록이 로드된 후 상태 확인
-      console.log('참여자 목록:', participants);
-      console.log('현재 사용자 ID:', localStorage.getItem('userId'));
     }
   }, [show, gathering, participants]);
 
