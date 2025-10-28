@@ -1,23 +1,23 @@
 /* Social page theme variables (mirrored) */
 :root {
-  --primary: #0A66FF;
-  --primary-2: #3BAAFF;
-  --border: #D6E4FF;
-  --light: #F5F9FF;
+  --primary: #0a66ff;
+  --primary-2: #3baaff;
+  --border: #d6e4ff;
+  --light: #f5f9ff;
 }
 /* 보고서 컨테이너 */
 .report-container {
-  max-width: 1200px;
+  max-width: 1360px;
   margin: 0 auto;
   padding: 20px;
   /* 소셜 페이지 배경 스타일 매칭 */
-  background: linear-gradient(180deg, #f6f9ff, #e9f0ff);
+  background: #f8fafc;
 }
 
 /* 보고서 헤더 - 공통 컴포넌트 스타일 적용 */
 .report-header {
   background: #ffffff;
-  color: #0A66FF;
+  color: #0a66ff;
   padding: 30px;
   border-radius: 12px;
   margin-bottom: 24px;
@@ -44,7 +44,7 @@
   padding: 24px;
   margin-bottom: 20px;
   /* 소셜 카드 그림자 스타일 매칭 */
-  box-shadow: 0 6px 20px rgba(157, 184, 255, .18);
+  box-shadow: 0 6px 20px rgba(157, 184, 255, 0.18);
   transition: all 0.3s ease;
 }
 
@@ -113,7 +113,7 @@
 
 .stat-bar-fill {
   height: 100%;
-  background: linear-gradient(135deg, #0A66FF, #3BAAFF);
+  background: linear-gradient(135deg, #0a66ff, #3baaff);
   transition: width 0.3s ease;
   display: flex;
   align-items: center;
@@ -142,7 +142,7 @@
     padding: 16px;
     gap: 0;
   }
-  
+
   .stat-bar-label {
     min-width: auto;
     margin-bottom: 8px;
@@ -150,7 +150,7 @@
     text-align: center;
     order: 1;
   }
-  
+
   .stat-bar-visual {
     margin: 0 0 8px 0;
     height: 23px !important;
@@ -158,12 +158,12 @@
     min-width: auto;
     order: 2;
   }
-  
+
   .stat-bar-fill {
     font-size: 14px;
     padding-right: 12px;
     height: 100%;
-    background: linear-gradient(135deg, #0A66FF, #3BAAFF);
+    background: linear-gradient(135deg, #0a66ff, #3baaff);
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -171,7 +171,7 @@
     max-width: 100%;
     border-radius: 12px;
   }
-  
+
   .stat-bar-value {
     text-align: center;
     font-size: 16px;
@@ -180,7 +180,6 @@
     margin-top: 8px;
   }
 }
-
 
 /* 조언 카드 */
 .advice-list {
@@ -210,30 +209,79 @@
 }
 
 /* 건강 조언 라인 톤 */
-.advice-line{ margin-bottom:6px; color: #000000; }
-.advice-line.warning{ color: #000000; }
-.advice-line.success{ color: #000000; }
+.advice-line {
+  margin-bottom: 6px;
+  color: #000000;
+}
+.advice-line.warning {
+  color: #000000;
+}
+.advice-line.success {
+  color: #000000;
+}
 
 /* 인사이트 칩 */
-.insights { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-.chip {
-  padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 800;
-  border: 1.5px solid var(--border); color: var(--primary); background: var(--light);
+.insights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
 }
-.chip.good { color: #0f766e; border-color: #99f6e4; background: #ecfeff; }
-.chip.warn { color: #b45309; border-color: #fed7aa; background: #fff7ed; }
+.chip {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  border: 1.5px solid var(--border);
+  color: var(--primary);
+  background: var(--light);
+}
+.chip.good {
+  color: #0f766e;
+  border-color: #99f6e4;
+  background: #ecfeff;
+}
+.chip.warn {
+  color: #b45309;
+  border-color: #fed7aa;
+  background: #fff7ed;
+}
 
 /* 활동 현황 칩 그룹 */
-.activity-chips{ display:flex; flex-wrap:wrap; gap:8px; margin: 8px 0 14px; }
-.activity-chip{
-  padding: 8px 12px; border-radius: 10px; background:#fff; border:1.5px solid var(--border);
-  display:flex; gap:8px; align-items:baseline; box-shadow: 0 2px 8px rgba(157,184,255,.12);
+.activity-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 14px;
 }
-.activity-chip .label{ font-size:12px; color:#64748B; font-weight:700; }
-.activity-chip .value{ font-size:14px; font-weight:900; color:#0F172A; }
+.activity-chip {
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1.5px solid var(--border);
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  box-shadow: 0 2px 8px rgba(157, 184, 255, 0.12);
+}
+.activity-chip .label {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 700;
+}
+.activity-chip .value {
+  font-size: 14px;
+  font-weight: 900;
+  color: #0f172a;
+}
 
 /* 섹션 소제목 */
-.subttl{ font-size:14px; font-weight:900; color:#334155; margin: 6px 0 8px; }
+.subttl {
+  font-size: 14px;
+  font-weight: 900;
+  color: #334155;
+  margin: 6px 0 8px;
+}
 
 /* KPI tiles */
 /* KPI 제거 - 공간 확보 */
@@ -243,9 +291,9 @@
   width: 100%;
   border-collapse: collapse;
   margin-top: 16px;
-  border: 2px solid var(--border);            /* 공통 카드 보더 */
-  border-radius: 12px;                   /* 공통 카드 라운드 */
-  overflow: hidden;                      /* 라운드 유지 */
+  border: 2px solid var(--border); /* 공통 카드 보더 */
+  border-radius: 12px; /* 공통 카드 라운드 */
+  overflow: hidden; /* 라운드 유지 */
 }
 
 /* 체크박스 스타일 */
@@ -257,31 +305,39 @@
 }
 
 .data-table thead tr {
-  background: linear-gradient(135deg, #eef4ff, #e6f2ff); /* 전체 행 그라데이션 */
+  background: linear-gradient(
+    135deg,
+    #eef4ff,
+    #e6f2ff
+  ); /* 전체 행 그라데이션 */
 }
 
 .data-table th {
-  background: transparent;               /* 셀 단위 배경 제거 → 행 그라데이션 보임 */
+  background: transparent; /* 셀 단위 배경 제거 → 행 그라데이션 보임 */
   padding: 14px 12px;
   text-align: center;
   font-weight: 800;
-  color: #0A66FF;                        /* 파란색 텍스트 */
+  color: #0a66ff; /* 파란색 텍스트 */
   border-bottom: 1px solid rgba(10, 102, 255, 0.15); /* 은은한 하단 라인 */
 }
 
-.data-table th:first-child { border-top-left-radius: 12px; }
-.data-table th:last-child  { border-top-right-radius: 12px; }
+.data-table th:first-child {
+  border-top-left-radius: 12px;
+}
+.data-table th:last-child {
+  border-top-right-radius: 12px;
+}
 
 .data-table td {
   padding: 12px;
-  border-bottom: 1px solid var(--border);      /* 공통 카드 라인 */
-  color: #212121;                        /* 공통 텍스트 */
-  background: #ffffff;                   /* 카드 내부 흰색 */
+  border-bottom: 1px solid var(--border); /* 공통 카드 라인 */
+  color: #212121; /* 공통 텍스트 */
+  background: #ffffff; /* 카드 내부 흰색 */
   text-align: center;
 }
 
 .data-table tr:hover td {
-  background: #f5f9ff;                   /* 옅은 블루 호버 */
+  background: #f5f9ff; /* 옅은 블루 호버 */
 }
 
 /* 액션 버튼 영역 */

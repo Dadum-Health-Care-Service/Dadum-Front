@@ -134,6 +134,7 @@ function AppContent() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          backgroundColor: "#EAF3FF",
         }}
       >
         {showGNB && <GNB isMobile={isMobile} isNotify={isNotify} />}
