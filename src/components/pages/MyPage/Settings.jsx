@@ -5,7 +5,10 @@ import InputComponent from "../../common/InputComponent";
 import ButtonComponent from "../../common/ButtonComponent";
 import { AuthContext } from "../../../context/AuthContext";
 import { useModal } from "../../../context/ModalContext";
+import { useNavigate } from "react-router-dom";
 import { useApi } from "../../../utils/api/useApi";
+
+import { useLoginView } from "../../../context/LoginViewContext";
 
 export default function Settings() {
   //패스워드리스 등록화면으로 이동

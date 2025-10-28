@@ -5,6 +5,7 @@ import InputComponent from "../../common/InputComponent";
 import ButtonComponent from "../../common/ButtonComponent";
 import ListComponent from "../../common/ListComponent";
 import { AuthContext } from "../../../context/AuthContext";
+import { LoginViewContext } from "../../../context/LoginViewContext";
 import {
   KAKAO_CLIENT_ID,
   KAKAO_AUTH_URL,
@@ -22,9 +23,10 @@ function Login() {
   const location = useLocation();
   const { showBasicModal, showConfirmModal, showLoadingModal, closeModal } =
     useModal();
+  const { view, setView, currentLoginInfo, setLoginInfo } =
+    useContext(LoginViewContext);
 
   // 현재 보여줄 뷰를 관리하는 상태 ('login', 'passwordless','loggedIn')
-  const [view, setView] = useState("login");
   const { user, dispatch } = useContext(AuthContext);
   // 로그인 타입 라디오 버튼 상태
   const [loginType, setLoginType] = useState("password");
