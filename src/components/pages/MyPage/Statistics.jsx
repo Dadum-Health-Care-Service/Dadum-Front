@@ -135,7 +135,7 @@ export default function Statistics(){
                 title: "심박수", 
                 value: latestHeartRate?.bpm || 0, 
                 unit: "BPM", 
-                detail: latestTime, 
+                detail: latestHeartRate?.time.substring(0, 10)+' '+latestHeartRate?.time.substring(11,19) || '오늘',
                 key: "heartRate", 
                 valueClass: "#ff1616ff" 
             },
@@ -149,8 +149,10 @@ export default function Statistics(){
             },
             { 
                 title: "걷기 거리", 
-                value: parseFloat(((latestHealthData?.distanceWalked || 0) / 1000).toFixed(2)) || 0,
-                unit: "KM", 
+                value: (((latestHealthData?.distanceWalked || 0) / 1000) >=1 ? 
+                        parseFloat(((latestHealthData?.distanceWalked || 0) / 1000).toFixed(2)):
+                        (latestHealthData?.distanceWalked || 0) ) || 0,
+                unit: ((latestHealthData?.distanceWalked || 0) / 1000) >=1 ? "KM" :"M", 
                 detail: latestTime, 
                 key: "distance", 
                 valueClass: "#3399FF" 

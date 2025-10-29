@@ -43,11 +43,11 @@ const getChartConfig = (healthKey, rawData, filterType) => {
     const { dataKey, timeKey, unit } = config;
 
     let title ="데이터";
-    let valueFormatter = (value)=> Math.round(value).toLocaleString();
+    let valueFormatter = (value)=> value >=10 ? Math.round(value).toLocaleString() : value.toFixed(2);
     switch(healthKey){
         case 'step': title = '걸음 수'; break;
         case 'heartRate': title = '심박수'; break;
-        case 'distance': title = '걷기 거리'; valueFormatter = (value) => value.toFixed(2); break;
+        case 'distance': title = '걷기 거리'; break;
         case 'calories': title = '칼로리'; break;
         case 'activeCal': title = '활동 칼로리'; break;
         case 'sleep': title = '수면 시간'; break;
@@ -99,9 +99,7 @@ const getChartConfig = (healthKey, rawData, filterType) => {
             if(Array.isArray(hrData) && hrData.length >0){
                 dataValue = hrData[hrData.length-1].bpm || 0;
             } else dataValue = 0;
-        } else if(dataKey === 'distanceWalked'){
-            dataValue = (item.distanceWalked / 1000) || 0;
-        } else if(dataKey === 'totalSleepMinutes'){
+        }  else if(dataKey === 'totalSleepMinutes'){
             dataValue = {
                 total:(item.totalSleepMinutes) ||0,
                 rem:(item.remSleepMinutes)||0,
@@ -213,6 +211,15 @@ const getChartConfig = (healthKey, rawData, filterType) => {
             getBarHeights:()=>values.map(val=>`${(val/maxVal)*100}%`)
         };
 
+    } else if(healthKey === 'distance'){
+        const walkedAvgVal = (avgVal /1000) >= 1 ? (avgVal /1000) : avgVal
+        const walkedUnit = (avgVal /1000) >= 1 ? "km" : "m" 
+        return {
+            title, unit:walkedUnit, avgValue: walkedAvgVal,
+            yAxisMax: maxVal.toLocaleString(), yAxisMid, 
+            valueFormatter, extractedData, filterType,
+            getBarHeights: () => values.map(val => `${(val / maxVal) * 100}%`)
+        };
     }
 
     return { 
@@ -295,7 +302,9 @@ const DetailedStatChart = ({ healthData, healthKey, valueClass }) => {
                     <p className={styles.averageLabel}>{selectedTab}별 평균</p>
                     <p className={styles.averageValue}>
                         {chartConfig.valueFormatter(chartConfig.avgValue)}
-                        <span className={styles.unitText}>{chartConfig.unit}</span>
+                        <span className={styles.unitText}>
+                            {chartConfig.unit}
+                        </span>
                     </p>
                     <p className={styles.dateText}>{selectedTab === '일' ? currentDay : currentMonth}</p>
                 </section>
