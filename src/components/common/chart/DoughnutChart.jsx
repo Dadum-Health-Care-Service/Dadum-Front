@@ -68,6 +68,17 @@ export default function DoughnutChart({ doughnutData, isMobile, isPolar }) {
           padding: 8,
         },
       },
+      tooltip:{
+        callbacks: {
+          label: function (context) {
+            const currentValue = context.parsed;
+            const total = context.dataset.data.reduce((acc, data)=> acc+data,0);
+            if(total === 0) return 0;
+            const percentage = ((currentValue/total)*100).toFixed(1);
+            return typeof currentValue === 'number' ? `${currentValue} (${percentage}%)` : '';
+          }
+        }
+      }
     },
   };
 
@@ -113,12 +124,8 @@ export default function DoughnutChart({ doughnutData, isMobile, isPolar }) {
                   const ratio = entries[1] / totalSum;
                   const label = entries[0];
 
-                  const lightness = isPolar
-                    ? 60 +
-                      (minLightness +
-                        (maxLightness - minLightness) * (1 - Math.min(ratio * 10, 2))) *
-                        3
-                    : minLightness + (maxLightness - minLightness) * (1 - Math.min(ratio * 10, 1)); // 값이 클수록 더 진하게 (50%~100% 밝기)
+                  const baseLightness = minLightness + (maxLightness-minLightness) * (1 - (ratio*2));
+                  const lightness = isPolar ? 60 + baseLightness * 0.4 : baseLightness
                   
                   let HUE = 220;
                   let SATURATION = '90%';

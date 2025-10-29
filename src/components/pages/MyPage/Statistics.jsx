@@ -102,7 +102,6 @@ export default function Statistics(){
             try{
                 const res = await GET(`/health/${user.usersId}`,{}, false);
                 setHealthData(res.data);
-                console.log(healthData);
             } catch (e) {
                 showBasicModal('사용자의 신체 데이터 조회에 실패하였습니다','네트워크 오류');
             }
@@ -113,17 +112,15 @@ export default function Statistics(){
     
     const HealthStatPage = () => {
         const latestHealthData = healthData[healthData.length-1];
-        const safeGetLatest = (dataArray) =>{
-            if (!dataArray || dataArray.length === 0) return null;
-            return dataArray[dataArray.length - 1];
-        };
-        const latestHeartRate = safeGetLatest(latestHealthData?.heartRateData);
+        const latestHeartRate = (!latestHealthData?.heartRateData || latestHealthData?.heartRateData.length === 0) ? 
+                                null :
+                                latestHealthData?.heartRateData[latestHealthData?.heartRateData.length -1]
         const latestTime = latestHealthData?.currentTime.substring(0, 10)+' '+latestHealthData?.currentTime.substring(11,19) || '오늘';
-        const latestStep = safeGetLatest(latestHealthData?.stepData);
+        const latestStep = (!latestHealthData?.stepData || !latestHealthData?.stepData.length === 0) ?
+                            null :
+                            latestHealthData?.stepData.reduce((sum, current)=> sum+current, 0);
         const chartContainerRef = useRef(null);
 
-        console.log(healthData);
-        console.log(latestHealthData);
         useEffect(()=>{
             if(selectedKey !== null && chartContainerRef.current){
                 chartContainerRef.current.scrollIntoView({
