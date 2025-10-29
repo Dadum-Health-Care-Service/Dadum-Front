@@ -56,6 +56,7 @@
   /* 모바일에서 안전한 여백 확보 */
   max-width: calc(100vw - 32px);
   max-height: calc(100vh - 32px);
+  margin: auto;
 }
 
 /* 모달 애니메이션 */
@@ -294,12 +295,12 @@
     /* 모바일에서 하단 여백 증가 - 내비게이션 바와의 간격 확보 */
     padding-bottom: 120px;
   }
-  
+
   .modal {
     max-width: calc(100vw - 16px);
     max-height: calc(100vh - 16px);
   }
-  
+
   .modal-actions {
     flex-direction: column;
   }
@@ -307,16 +308,16 @@
   .modal-actions > * {
     width: 100%;
   }
-  
+
   .modal-header {
     padding: 16px 16px 8px 16px;
   }
-  
+
   .modal-content {
     padding: 8px 16px 16px 16px;
     max-height: calc(100vh - 120px);
   }
-  
+
   .modal-actions {
     padding: 16px 16px 8px 16px;
   }
