@@ -178,6 +178,12 @@ const getChartConfig = (healthKey, rawData, filterType) => {
         };
     }
 
+    extractedData.sort((a,b)=>{
+        const timeA = new Date(a.time);
+        const timeB = new Date(b.time);
+        return timeA.getTime() - timeB.getTime();
+    });
+
     const values = extractedData.map(d => {
         return healthKey === 'sleep' ? d.data.totalSleepMinutes : d.data
     });
@@ -261,6 +267,7 @@ const DetailedStatChart = ({ healthData, healthKey, valueClass }) => {
   });
 
   const currentMonth = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', timeZone: 'Asia/Seoul' });
+  const currentDay = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long',  day: 'numeric', timeZone: 'Asia/Seoul' })
 
   const graphContainerStyle = healthKey==='sleep'?{cursor:'pointer'}:{};
   const clickableClass = healthKey==='sleep'? styles.clickableGraph:'';
@@ -290,7 +297,7 @@ const DetailedStatChart = ({ healthData, healthKey, valueClass }) => {
                         {chartConfig.valueFormatter(chartConfig.avgValue)}
                         <span className={styles.unitText}>{chartConfig.unit}</span>
                     </p>
-                    <p className={styles.dateText}>{currentMonth}</p>
+                    <p className={styles.dateText}>{selectedTab === '일' ? currentDay : currentMonth}</p>
                 </section>
                 <section className={`${styles.graphContainer} ${clickableClass}`} style={graphContainerStyle} onClick={toggleDoughnut}>
                     {/* Y축 레이블 */}
