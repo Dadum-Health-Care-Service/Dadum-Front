@@ -3,16 +3,16 @@
 .calorieCamPage {
   min-height: 100vh;
   background: linear-gradient(135deg, #eef4ff 0%, #e6f2ff 100%);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
-
 
 /* Main Content */
 .mainContent {
-  max-width: 1200px;
+  max-width: 1360px;
   margin: 0 auto;
   padding: 3rem 2rem;
   text-align: center;
+  background-color: #f8fafc;
 }
 
 /* AI Tag */
@@ -29,12 +29,11 @@
   margin-bottom: 2rem;
 }
 
-
 /* Main Headline */
 .mainHeadline {
   font-size: 3rem;
   font-weight: 700;
-  color: #0F172A;
+  color: #0f172a;
   margin-bottom: 1.5rem;
   line-height: 1.2;
 }
@@ -46,7 +45,7 @@
 /* Description */
 .description {
   font-size: 1.125rem;
-  color: #64748B;
+  color: #64748b;
   margin-bottom: 3rem;
   max-width: 600px;
   margin-left: auto;
@@ -58,7 +57,7 @@
 .uploadContainer {
   max-width: 600px;
   margin: 0 auto 4rem;
-  border: 2px dashed #D6E4FF;
+  border: 2px dashed #d6e4ff;
   border-radius: 1rem;
   padding: 3rem 2rem;
   background: white;
@@ -96,13 +95,13 @@
 .uploadTitle {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #0F172A;
+  color: #0f172a;
   margin: 0;
 }
 
 .uploadSubtitle {
   font-size: 0.875rem;
-  color: #64748B;
+  color: #64748b;
   margin: 0;
 }
 
@@ -153,12 +152,12 @@
   text-align: center;
   background: white;
   border-radius: 1rem;
-  border: 1.5px solid #D6E4FF;
+  border: 1.5px solid #d6e4ff;
   box-shadow: 0 6px 20px rgba(157, 184, 255, 0.18);
 }
 
 .loadingContent p {
-  color: #64748B;
+  color: #64748b;
   font-weight: 500;
 }
 
@@ -172,8 +171,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Error Container */
@@ -200,14 +203,14 @@
   padding: 2rem;
   background: white;
   border-radius: 1rem;
-  border: 1.5px solid #D6E4FF;
+  border: 1.5px solid #d6e4ff;
   box-shadow: 0 6px 20px rgba(157, 184, 255, 0.18);
 }
 
 .resultTitle {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #0F172A;
+  color: #0f172a;
   margin-bottom: 1.5rem;
   text-align: center;
 }
@@ -224,7 +227,7 @@
   padding: 1.5rem;
   border-radius: 0.75rem;
   text-align: center;
-  border: 1.5px solid #D6E4FF;
+  border: 1.5px solid #d6e4ff;
   box-shadow: 0 6px 20px rgba(157, 184, 255, 0.18);
   transition: all 0.2s ease;
 }
@@ -237,7 +240,7 @@
 
 .resultItem h4 {
   font-size: 0.875rem;
-  color: #64748B;
+  color: #64748b;
   margin: 0 0 0.5rem 0;
   font-weight: 500;
 }
@@ -245,7 +248,7 @@
 .resultItem p {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #0F172A;
+  color: #0f172a;
   margin: 0;
 }
 
@@ -270,7 +273,7 @@
 .nutrients h4 {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #0F172A;
+  color: #0f172a;
   margin-bottom: 1rem;
   text-align: center;
 }
@@ -286,7 +289,7 @@
   padding: 1rem;
   border-radius: 0.5rem;
   text-align: center;
-  border: 1.5px solid #D6E4FF;
+  border: 1.5px solid #d6e4ff;
   box-shadow: 0 6px 20px rgba(157, 184, 255, 0.18);
   transition: all 0.2s ease;
 }
@@ -299,14 +302,14 @@
 
 .nutrientItem small {
   display: block;
-  color: #64748B;
+  color: #64748b;
   font-size: 0.75rem;
   margin-bottom: 0.25rem;
 }
 
 .nutrientItem span {
   font-weight: 600;
-  color: #0F172A;
+  color: #0f172a;
 }
 
 .alternatives {
@@ -316,7 +319,7 @@
 .alternatives h4 {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #0F172A;
+  color: #0f172a;
   margin-bottom: 1rem;
 }
 
@@ -345,7 +348,7 @@
 .sectionTitle {
   font-size: 2rem;
   font-weight: 700;
-  color: #0F172A;
+  color: #0f172a;
   margin-bottom: 2rem;
   text-align: center;
 }
@@ -363,7 +366,7 @@
   border-radius: 1rem;
   padding: 2rem;
   text-align: center;
-  border: 1.5px solid #D6E4FF;
+  border: 1.5px solid #d6e4ff;
   box-shadow: 0 6px 20px rgba(157, 184, 255, 0.18);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -373,16 +376,15 @@
   box-shadow: 0 10px 28px rgba(157, 184, 255, 0.25);
 }
 
-
 .featureCard h3 {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #0F172A;
+  color: #0f172a;
   margin: 0 0 1rem 0;
 }
 
 .featureCard p {
-  color: #64748B;
+  color: #64748b;
   line-height: 1.6;
   margin: 0;
 }
@@ -421,12 +423,12 @@
 .stepCard h3 {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #0F172A;
+  color: #0f172a;
   margin: 0 0 1rem 0;
 }
 
 .stepCard p {
-  color: #64748B;
+  color: #64748b;
   line-height: 1.6;
   margin: 0;
 }
@@ -462,7 +464,6 @@
   .nutrientGrid {
     grid-template-columns: repeat(2, 1fr);
   }
-
 }
 
 @media (max-width: 480px) {

@@ -31,36 +31,28 @@ const FraudDetection = ({ hideHeader = false }) => {
 
   const loadAIServiceStatus = async () => {
     try {
-      console.log('AI 서비스 상태 확인 시작...');
       const response = await GET('/ai/health', {}, true, 'main');
-      console.log('AI 서비스 상태 응답:', response);
       
       if (response && response.data) {
         setAiServiceStatus(response.data);
       } else {
-        console.error('AI 서비스 상태 확인 실패');
         setAiServiceStatus({ ai_service_healthy: false, status: 'unhealthy' });
       }
     } catch (error) {
-      console.error('AI 서비스 상태 확인 실패:', error);
       setAiServiceStatus({ ai_service_healthy: false, status: 'unhealthy' });
     }
   };
 
   const loadModelStatus = async () => {
     try {
-      console.log('AI 모델 상태 확인 시작...');
       const response = await GET('/ai/model-status', {}, true, 'main');
-      console.log('AI 모델 상태 응답:', response);
       
       if (response && response.data) {
         setModelStatus(response.data);
       } else {
-        console.error('모델 상태 확인 실패');
         setModelStatus({ is_trained: false, error: '모델 상태 확인 실패' });
       }
     } catch (error) {
-      console.error('모델 상태 확인 실패:', error);
       setModelStatus({ is_trained: false, error: error.message });
     }
   };
@@ -69,7 +61,6 @@ const FraudDetection = ({ hideHeader = false }) => {
     setLoading(true);
     try {
       if (!user || !user.accessToken) {
-        console.log("사용자가 로그인하지 않음");
         setRiskScores(prev => ({ 
           ...prev, 
           [transaction.transactionId]: { 
@@ -125,18 +116,9 @@ const FraudDetection = ({ hideHeader = false }) => {
       // 고유한 거래 ID 생성 (타임스탬프 + 랜덤)
       const uniqueTransactionId = `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
-      console.log('=== AI 탐지 요청 시작 ===');
-      console.log('요청 데이터:', { ...testTransaction, transactionId: uniqueTransactionId });
-      
       const response = await POST(`/ai/detect-fraud-simple?transactionId=${uniqueTransactionId}&amount=${testTransaction.amount}&userId=${testTransaction.userId}`, {}, true, 'main');
       
-      console.log('=== 백엔드 응답 ===');
-      console.log('응답:', response);
-      
       if (response && response.data) {
-        console.log('=== AI 분석 결과 ===');
-        console.log('결과:', response.data);
-        
         setRiskScores(prev => ({ ...prev, [testTransaction.transactionId]: response.data }));
         
         // 이상거래 발생 시 알림

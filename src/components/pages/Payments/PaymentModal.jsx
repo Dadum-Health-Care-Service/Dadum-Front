@@ -46,9 +46,9 @@ const PaymentModal = ({
             true,
             "main"
           );
-          console.log(response.data);
-          if (response.status === 200) {
-            setUserDetails(response.data);
+
+          if (response.status === "fulfilled") {
+            setUserDetails(response.value.data);
             setUserDetailsLoading(false);
             setError(""); // 성공 시 에러 메시지 초기화
           } else {
@@ -86,7 +86,6 @@ const PaymentModal = ({
         // 모바일 환경에서 추가 설정
         if (isMobile) {
           // 모바일 환경에서의 추가 설정
-          console.log("모바일 환경에서 결제 초기화");
         }
       } else {
         setError(
@@ -239,15 +238,8 @@ const PaymentModal = ({
     };
 
     // 결제 데이터 로깅 (디버깅용)
-    console.log("결제 요청 데이터:", paymentData);
-
     window.IMP.request_pay(paymentData, (response) => {
       setLoading(false);
-
-      // 응답 데이터 로깅 (디버깅용)
-      console.log("결제 응답 데이터:", response);
-      console.log("모바일 환경:", isMobile);
-
       // 응답 데이터 검증 및 정규화
       const normalizedResponse = {
         success: response.success,
@@ -391,7 +383,7 @@ const PaymentModal = ({
               }}
             >
               <span>{product.name}</span>
-              <span style={{ fontWeight: "bold", color: "#f39c12" }}>
+              <span style={{ fontWeight: "bold", color: "#2196f3" }}>
                 ₩{product.price.toLocaleString()}
               </span>
             </div>
@@ -424,7 +416,7 @@ const PaymentModal = ({
           </div>
         )}
 
-        {error && (
+        {/* {error && (
           <div className={`${styles.alertContainer} ${styles.alertDanger}`}>
             {error}
             <div style={{ marginTop: "8px" }}>
@@ -446,8 +438,8 @@ const PaymentModal = ({
                           "main"
                         );
 
-                        if (response.status === 200) {
-                          setUserDetails(response.data);
+                        if (response.status === "fulfilled") {
+                          setUserDetails(response.value.data);
                           setUserDetailsLoading(false);
                         } else {
                           throw new Error(
@@ -469,7 +461,7 @@ const PaymentModal = ({
               </ButtonComponent>
             </div>
           </div>
-        )}
+        )} */}
       </div>
 
       <ModalComponent.Actions align="right">

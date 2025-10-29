@@ -113,6 +113,10 @@ export default function SignUp(){
                     showBasicModal('사용 가능한 이메일 입니다','이메일 중복 확인');
                     setCheckEmail(true);
                 }
+                else if(error?.response?.status===406){
+                    showBasicModal('이미 탈퇴된 사용자 입니다. 계정을 복구하시려면 로그인 해 주세요.',"탈퇴한 사용자");
+                    setFormData((prev)=>({...prev,email:""}));
+                }
                 else {
                     showBasicModal('이메일 중복 조회 중 오류가 발생하였습니다','네트워크 에러');
                     setFormData((prev)=>({...prev,email:""}));

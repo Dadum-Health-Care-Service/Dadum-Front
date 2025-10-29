@@ -93,9 +93,6 @@ const SellerSettings = () => {
       setLoading(true);
       setError('');
 
-      console.log('🔧 판매자 설정 데이터 로드 시작');
-      console.log('🔧 현재 사용자:', user);
-      console.log('🔧 Access Token:', user?.accessToken);
 
       // 사용자가 로그인하지 않은 경우 처리
       if (!user || !user.accessToken) {
@@ -158,7 +155,6 @@ const SellerSettings = () => {
     if (user && user.accessToken) {
       loadSettingsData();
     } else {
-      console.log('🔧 사용자가 로그인하지 않음 - 데이터 로드 건너뜀');
     }
   }, [user]);
 

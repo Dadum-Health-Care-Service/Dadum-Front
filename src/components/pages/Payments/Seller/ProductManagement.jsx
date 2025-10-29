@@ -13,14 +13,14 @@ import styles from "./ProductManagement.module.css";
 export default function ProductManagement() {
     const { GET, POST, PUT, DELETE } = useApi();
     const { showBasicModal, showConfirmModal } = useModal();
-    
+
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [searchTerm, setSearchTerm] = useState("");
     const [categoryFilter, setCategoryFilter] = useState("all");
-    
+
     // 상품 등록/수정 모달 상태
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
@@ -34,6 +34,8 @@ export default function ProductManagement() {
     });
     const [imageFile, setImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
+    const [detailFile, setDetailFile] = useState(null);
+    const [detailFilePreview, setDetailFilePreview] = useState(null);
 
     useEffect(() => {
         loadProducts();
@@ -47,7 +49,7 @@ export default function ProductManagement() {
                 search: searchTerm,
                 category: categoryFilter
             });
-            
+
             setProducts(response.data?.products || []);
             setTotalPages(response.data?.totalPages || 1);
         } catch (error) {
@@ -74,15 +76,15 @@ export default function ProductManagement() {
                 showBasicModal('이미지 파일 크기는 5MB를 초과할 수 없습니다.', '오류');
                 return;
             }
-            
+
             // 이미지 파일 타입 확인
             if (!file.type.startsWith('image/')) {
                 showBasicModal('이미지 파일만 업로드 가능합니다.', '오류');
                 return;
             }
-            
+
             setImageFile(file);
-            
+
             // 미리보기 생성
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -92,8 +94,55 @@ export default function ProductManagement() {
         }
     };
 
+    // 상세정보 파일 처리 함수
+    const handleDetailFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // 파일 크기 제한 (10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                showBasicModal('파일 크기는 10MB를 초과할 수 없습니다.', '오류');
+                return;
+            }
+
+            // 허용된 파일 타입 확인
+            const allowedTypes = [
+                'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+                'application/pdf',
+                'text/plain', 'text/csv'
+            ];
+
+            if (!allowedTypes.includes(file.type)) {
+                showBasicModal('지원되지 않는 파일 형식입니다. (이미지, PDF, 텍스트 파일만 가능)', '오류');
+                return;
+            }
+
+            setDetailFile(file);
+
+            // 미리보기 생성 (이미지인 경우)
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    setDetailFilePreview(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                setDetailFilePreview(null);
+            }
+        }
+    };
+
     // 이미지를 Base64로 변환하는 함수
     const convertImageToBase64 = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+    };
+
+    // 파일을 Base64로 변환하는 함수
+    const convertFileToBase64 = (file) => {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
@@ -151,25 +200,37 @@ export default function ProductManagement() {
         });
         setImageFile(null);
         setImagePreview(null);
+        setDetailFile(null);
+        setDetailFilePreview(null);
         setEditingProduct(null);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         try {
             let imageData = null;
-            
+            let detailFileData = null;
+            let detailFileType = null;
+
             // 이미지 파일이 있으면 Base64로 변환
             if (imageFile) {
                 imageData = await convertImageToBase64(imageFile);
             }
-            
+
+            // 상세정보 파일이 있으면 Base64로 변환
+            if (detailFile) {
+                detailFileData = await convertFileToBase64(detailFile);
+                detailFileType = detailFile.type;
+            }
+
             const productData = {
                 ...productForm,
                 price: parseFloat(productForm.price),
                 stock: parseInt(productForm.stock),
-                imageData: imageData // Base64 이미지 데이터
+                imageData: imageData, // Base64 이미지 데이터
+                detailFileData: detailFileData, // Base64 상세정보 파일 데이터
+                detailFileType: detailFileType // 파일 타입
             };
 
             if (editingProduct) {
@@ -179,7 +240,7 @@ export default function ProductManagement() {
                 await POST('/seller/products', productData);
                 showBasicModal('상품이 등록되었습니다.', '성공');
             }
-            
+
             setIsModalOpen(false);
             resetForm();
             loadProducts();
@@ -228,18 +289,16 @@ export default function ProductManagement() {
 
     return (
         <ContainerComponent variant="default" className="p-4">
-            <HeaderComponent variant="filled" size="medium" className="mb-4">
-                <div className="d-flex justify-content-between align-items-center">
-                    <h2 className="mb-0">상품 관리</h2>
-                    <ButtonComponent 
-                        variant="primary" 
-                        size="small"
-                        onClick={openAddModal}
-                    >
-                        상품 등록
-                    </ButtonComponent>
-                </div>
-            </HeaderComponent>
+            <div className="d-flex justify-content-between align-items-center mb-4 p-3 bg-light rounded">
+                <h2 className="mb-0">상품 관리</h2>
+                <ButtonComponent
+                    variant="primary"
+                    size="small"
+                    onClick={openAddModal}
+                >
+                    상품 등록
+                </ButtonComponent>
+            </div>
 
             {/* 검색 및 필터 */}
             <CardComponent variant="outlined" className="mb-4">
@@ -255,7 +314,7 @@ export default function ProductManagement() {
                         </div>
                         <div className="col-md-4 mb-3">
                             <label className="form-label">카테고리</label>
-                            <select 
+                            <select
                                 className="form-select"
                                 value={categoryFilter}
                                 onChange={handleCategoryFilter}
@@ -268,8 +327,8 @@ export default function ProductManagement() {
                             </select>
                         </div>
                         <div className="col-md-2 mb-3 d-flex align-items-end">
-                            <ButtonComponent 
-                                variant="outline" 
+                            <ButtonComponent
+                                variant="outline"
                                 size="small"
                                 onClick={loadProducts}
                                 className="w-100"
@@ -290,7 +349,7 @@ export default function ProductManagement() {
                                 <div className="d-flex justify-content-between align-items-start mb-3">
                                     <h5 className="mb-0">{product.productName}</h5>
                                     <div className="dropdown">
-                                        <button 
+                                        <button
                                             className="btn btn-sm btn-outline-secondary dropdown-toggle"
                                             type="button"
                                             data-bs-toggle="dropdown"
@@ -299,7 +358,7 @@ export default function ProductManagement() {
                                         </button>
                                         <ul className="dropdown-menu">
                                             <li>
-                                                <button 
+                                                <button
                                                     className="dropdown-item"
                                                     onClick={() => openEditModal(product)}
                                                 >
@@ -307,7 +366,7 @@ export default function ProductManagement() {
                                                 </button>
                                             </li>
                                             <li>
-                                                <button 
+                                                <button
                                                     className="dropdown-item text-danger"
                                                     onClick={() => handleDelete(product)}
                                                 >
@@ -317,20 +376,20 @@ export default function ProductManagement() {
                                         </ul>
                                     </div>
                                 </div>
-                                
+
                                 {product.imageData && (
                                     <div className="mb-3">
-                                        <img 
-                                            src={product.imageData} 
+                                        <img
+                                            src={product.imageData}
                                             alt={product.productName}
                                             className="img-fluid rounded"
                                             style={{ maxHeight: '200px', objectFit: 'cover' }}
                                         />
                                     </div>
                                 )}
-                                
+
                                 <p className="text-muted small mb-2">{product.description}</p>
-                                
+
                                 <div className="d-flex justify-content-between align-items-center">
                                     <div>
                                         <div className="fw-bold text-primary">
@@ -354,8 +413,8 @@ export default function ProductManagement() {
                 <CardComponent variant="outlined">
                     <div className="text-center py-5">
                         <p className="text-muted">등록된 상품이 없습니다.</p>
-                        <ButtonComponent 
-                            variant="primary" 
+                        <ButtonComponent
+                            variant="primary"
                             size="small"
                             onClick={openAddModal}
                         >
@@ -405,11 +464,11 @@ export default function ProductManagement() {
                             />
                         </div>
                     </div>
-                    
+
                     <div className="row">
                         <div className="col-md-6 mb-3">
                             <label className="form-label">카테고리</label>
-                            <select 
+                            <select
                                 className="form-select"
                                 value={productForm.category}
                                 onChange={handleFormChange("category")}
@@ -433,17 +492,47 @@ export default function ProductManagement() {
                             />
                         </div>
                     </div>
-                    
                     <div className="mb-3">
-                        <InputComponent
-                            label="상품 설명"
+                        <label className="form-label">상품 설명 이미지 </label>
+                        <input
+                            type="file"
+                            className="form-control"
+                            accept="image/*,.pdf,.txt,.csv"
+                            onChange={handleDetailFileChange}
+                        />
+                        <small className="form-text text-muted">
+                            이미지, PDF, 텍스트 파일을 업로드할 수 있습니다. (최대 10MB)
+                        </small>
+                        {detailFilePreview && (
+                            <div className="mt-2">
+                                <img
+                                    src={detailFilePreview}
+                                    alt="상세정보 미리보기"
+                                    className="img-fluid rounded"
+                                    style={{ maxHeight: '200px', objectFit: 'cover' }}
+                                />
+                            </div>
+                        )}
+                        {detailFile && !detailFilePreview && (
+                            <div className="mt-2">
+                                <div className="alert alert-info">
+                                    <i className="fas fa-file"></i> {detailFile.name} ({(detailFile.size / 1024 / 1024).toFixed(2)}MB)
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">상품 설명</label>
+                        <textarea
+                            className="form-control"
                             placeholder="상품에 대한 설명을 입력하세요"
                             value={productForm.description}
                             onChange={handleFormChange("description")}
+                            rows={4}
                             required
                         />
                     </div>
-                    
+
                     <div className="mb-3">
                         <label className="form-label">상품 이미지</label>
                         <input
@@ -454,8 +543,8 @@ export default function ProductManagement() {
                         />
                         {imagePreview && (
                             <div className="mt-2">
-                                <img 
-                                    src={imagePreview} 
+                                <img
+                                    src={imagePreview}
                                     alt="미리보기"
                                     className="img-fluid rounded"
                                     style={{ maxHeight: '200px', objectFit: 'cover' }}
@@ -463,17 +552,19 @@ export default function ProductManagement() {
                             </div>
                         )}
                     </div>
-                    
+
+
+
                     <div className="d-flex justify-content-end gap-2">
-                        <ButtonComponent 
-                            variant="outline" 
+                        <ButtonComponent
+                            variant="outline"
                             size="small"
                             onClick={() => setIsModalOpen(false)}
                         >
                             취소
                         </ButtonComponent>
-                        <ButtonComponent 
-                            variant="primary" 
+                        <ButtonComponent
+                            variant="primary"
                             size="small"
                             type="submit"
                         >

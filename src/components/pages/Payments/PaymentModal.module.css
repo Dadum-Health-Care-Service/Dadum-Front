@@ -35,7 +35,7 @@
 }
 
 .warningButton {
-  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
   border: none;
   color: white;
   font-weight: 600;
@@ -45,9 +45,9 @@
 }
 
 .warningButton:hover {
-  background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(243, 156, 18, 0.4);
+  box-shadow: 0 4px 12px rgba(8, 5, 1, 0.4);
 }
 
 .warningButton:disabled {

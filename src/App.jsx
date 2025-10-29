@@ -10,6 +10,7 @@ import { app } from "../firebase";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import "./App.css";
+import ErrorBoundary from "./components/common/ErrorBoundary.jsx";
 
 // Pages
 import Home from "./components/pages/Home/Home.jsx";
@@ -51,6 +52,7 @@ import GoogleTagManager from "./utils/tagmanager/GoogleTagManager.jsx";
 import usePageView from "./utils/tagmanager/PageView.jsx";
 import "./utils/webpush/foregroundMessage";
 import { useApi } from "./utils/api/useApi.jsx";
+import { LoginViewProvider } from "./context/LoginViewContext";
 
 function AppContent() {
   const { user, dispatch } = useContext(AuthContext);
@@ -58,14 +60,13 @@ function AppContent() {
   const [isNotify, setIsNotify] = useState(false);
   const location = useLocation();
   const { GET } = useApi();
-  const { showBasicModal } = useModal();
 
   usePageView();
   useEffect(() => {
     // Firebase 연결 상태 확인
-    console.log("Firebase 앱:", app);
-    console.log("환경변수:", import.meta.env.VITE_FIREBASE_API_KEY);
-    console.log("알림 권한:", Notification.permission);
+    //console.log("Firebase 앱:", app);
+    //console.log("환경변수:", import.meta.env.VITE_FIREBASE_API_KEY);
+    //console.log("알림 권한:", Notification.permission);
 
     const checkIsMobile = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -76,24 +77,15 @@ function AppContent() {
   }, []);
   // Service Worker 메시지 수신
   useEffect(() => {
-    console.log(navigator);
-    console.log(navigator.serviceWorker);
     if (!navigator.serviceWorker) return;
 
     navigator.serviceWorker.ready.then(() => {
-      console.log("SW ready");
+      //console.log("SW ready");
 
       const handleSWMessage = (event) => {
         console.log("SW 메시지 수신:", event.data);
         if (event.data.data.type === "REQUEST_ROLE") {
           console.log("REQUEST_ROLE");
-          setIsNotify(event.data.data.type);
-          // new Notification("권한요청", {
-          //   body: `테스터`,
-          //   icon: "/img/userAvatar.png",
-          //   tag: "fraud-alert",
-          // });
-        } else {
           setIsNotify(event.data.data.type);
         }
       };
@@ -107,17 +99,8 @@ function AppContent() {
   }, []);
 
   useEffect(() => {
-    // Service Worker 등록 및 알림 권한 요청
-    if (
-      user &&
-      "serviceWorker" in navigator &&
-      "Notification" in window &&
-      window.isSecureContext
-    ) {
-      // 동적 import로 변경
-      import("./utils/webpush/foregroundMessage").catch((err) => {
-        console.warn("Firebase messaging not supported:", err);
-      });
+    // Service Worker 등록 및 알림 권한 요청 + 유효한 user상태인지 확인
+    if (user) {
       //console.log("handleAllowNotification");
       handleAllowNotification(user.accessToken);
       const checkUser = async () => {
@@ -126,7 +109,7 @@ function AppContent() {
           console.log("사용자 이메일: ", res.data.email);
         } catch (e) {
           console.log(e);
-          console.err(
+          console.error(
             "저장된 user의 정보와 일치하는 사용자가 없어 로그아웃 되었습니다"
           );
           dispatch({ type: "LOGOUT" });
@@ -139,7 +122,9 @@ function AppContent() {
   const noGNBpaths = ["/login", "/signup", "/findid", "/findpw"];
   const showGNB = user && !noGNBpaths.includes(location.pathname);
   const pagePadding =
-    isMobile && !noGNBpaths.includes(location.pathname) ? "90px" : "0px";
+    isMobile && !noGNBpaths.includes(location.pathname) && user
+      ? "90px"
+      : "0px";
 
   return (
     <>
@@ -149,6 +134,7 @@ function AppContent() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          backgroundColor: "#EAF3FF",
         }}
       >
         {showGNB && <GNB isMobile={isMobile} isNotify={isNotify} />}
@@ -167,6 +153,10 @@ function AppContent() {
                 <Route path="/calorie" element={<CalorieCam />}></Route>
                 <Route path="/daily" element={<DailySummary />}></Route>
                 <Route path="/shop" element={<Shop />}></Route>
+                <Route
+                  path="/shop/product/:productId"
+                  element={<ProductDetail />}
+                ></Route>
                 <Route path="/order" element={<OrderPage />}></Route>
                 <Route path="/orders" element={<OrderHistory />}></Route>
                 <Route
@@ -186,14 +176,14 @@ function AppContent() {
                   element={<FraudDetection />}
                 ></Route>
                 <Route
-                  path="/statistics"
+                  path="/social"
                   element={
-                    <div>
-                      <h1>통계페이지는 개발 중 입니다.</h1>
-                    </div>
+                    <ErrorBoundary>
+                      <Social />
+                    </ErrorBoundary>
                   }
                 ></Route>
-                <Route path="/social" element={<Social />}></Route>
+                <Route path="/place" element={<MapPage />}></Route>
                 <Route path="/mypage/*" element={<MyPage />}></Route>
                 <Route path="/seller/*" element={<SellerMain />}></Route>
                 <Route
@@ -213,6 +203,7 @@ function AppContent() {
           </Routes>
         </div>
       </main>
+      <GoogleTagManager gtmId="GTM-ND9XH56H" />
     </>
   );
 }
@@ -220,13 +211,14 @@ function AppContent() {
 function App() {
   return (
     <Router>
-      <GoogleTagManager gtmId="GTM-ND9XH56H" />
       <AuthProvider>
         <ModalProvider>
           <RunProvider>
             <RoutineProvider>
               <SuggestProvider>
-                <AppContent />
+                <LoginViewProvider>
+                  <AppContent />
+                </LoginViewProvider>
               </SuggestProvider>
             </RoutineProvider>
           </RunProvider>
