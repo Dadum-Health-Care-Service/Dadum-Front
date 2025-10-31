@@ -28,6 +28,13 @@ const redKeyMap = {
     exVolum:'특정 종목 수행 수',
 };
 
+const selectedMenuToNumber = {
+    muscle:0,
+    setTotal:1,
+    volumeTotal:2,
+    rouTime:3,
+};
+
 const toLocalDateTime = date => {
     const offsetMs = 9 * 60 * 60 * 1000; // UTC+9
     const koreaTime = new Date(date.getTime() + offsetMs);
@@ -90,7 +97,7 @@ const dataToCompare = (type, thisData, lastData) =>{
 export default function RoutineStatPage(){
     const { user }= useContext(AuthContext);
     const { POST } = useApi();
-    const { showConfirmModal }= useModal();
+    const { showConfirmModal, showBasicModal }= useModal();
     const [toggle, setToggle] = useState('week');
     const [originData, setOriginData]= useState(null);
     const [chartData, setChartData]=useState({
@@ -123,6 +130,8 @@ export default function RoutineStatPage(){
             return res.data;
         } catch (e){
             console.log(`fetch${type}Data Error:`,e);
+            showBasicModal('루틴 데이터를 불러올 수 없습니다','네트워크 에러');
+            return 'error';
         }
     };
 
@@ -146,6 +155,11 @@ export default function RoutineStatPage(){
 
             if(!currentData){
                 setOriginData([]);
+                setChartData({bar:null, line:null, doughnut:null});
+                return;
+            }
+            if(currentData==='error'){
+                setOriginData('fetch_fail'); 
                 setChartData({bar:null, line:null, doughnut:null});
                 return;
             }
@@ -182,15 +196,16 @@ export default function RoutineStatPage(){
     const redCalcMap = useMemo(()=>{
         const [muscle, setTotal, volumeTotal, rouTime] = compareCalcs.growth;
         return {
-            muscle: `${muscle}%`,
-            setTotal: `${setTotal}회`,
-            volumeTotal: `${volumeTotal}kg`,
-            rouTime: `${(rouTime / 60).toFixed(2)}시간`,
+            muscle: `${Math.abs(muscle)}%`,
+            setTotal: `${Math.abs(setTotal)}회`,
+            volumeTotal: `${Math.abs(volumeTotal)}kg`,
+            rouTime: `${(Math.abs(rouTime) / 60).toFixed(2)}시간`,
         };
     },[compareCalcs.growth]);
     
     const RenderStatus = ({data})=>{
         if(data === null) return <RadialGradientSpinner />;
+        if(data === 'fetch_fail') return <LoadFail />
         if(data.length===0){
             return (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '300px', color: '#808080ff', gap: '1em' }}>
@@ -205,8 +220,10 @@ export default function RoutineStatPage(){
     const LogSection = () =>{
         if (originData === null || originData.length === 0) {
             return (
-                <div className={styles['stats-logs']}>
-                    <RenderStatus data={originData} />
+                <div className={mobile ? styles['shadow-overlay-mobile'] : styles['shadow-overlay']} style={{width:'100%'}}>
+                    <div className={styles['stats-logs']}>
+                        <RenderStatus data={originData} />
+                    </div>
                 </div>
             );
         }
@@ -285,7 +302,11 @@ export default function RoutineStatPage(){
                                             이번 {toggle === 'week' ? '주' : '달'} <span className={styles['stats-span']}>칼로리</span> 소모량
                                         </h2>
                                         <h5 className={styles['stats-h5']}>
-                                            저번{toggle === 'week' ? '주' : '달'} 보다 {compareCalcs.kcal} kcal 더 소모했어요
+                                            {
+                                                compareCalcs.kcal >=0 ? 
+                                                `저번${toggle === 'week' ? '주' : '달'} 보다 ${compareCalcs.kcal} kcal 더 소모했어요` :
+                                                `저번${toggle === 'week' ? '주' : '달'} 보다 ${Math.abs(compareCalcs.kcal)} kcal 덜 소모했어요`
+                                            }
                                         </h5>
                                     </div>
                                 </div>
@@ -304,7 +325,11 @@ export default function RoutineStatPage(){
                                                     이번 {toggle === 'week' ? '주' : '달'} <span className={styles['stats-span']}>{keyMap[selectMenu]}</span> 성장 추이
                                                 </h2>
                                                 <h5 className={styles['stats-h5']}>
-                                                    저번{toggle === 'week' ? '주' : '달'}보다 {redCalcMap[selectMenu]} 더 성장했어요
+                                                    {
+                                                        compareCalcs.growth[selectedMenuToNumber[selectMenu]] >= 0 ? 
+                                                        `저번${toggle === 'week' ? '주' : '달'} 보다 ${redCalcMap[selectMenu]} 더 성장했어요` :
+                                                        `저번${toggle === 'week' ? '주' : '달'} 보다 ${redCalcMap[selectMenu]} 덜 성장했어요`
+                                                    }
                                                 </h5>
                                             </div>
                                             <Dropdown className="pb-2">
@@ -356,7 +381,11 @@ export default function RoutineStatPage(){
                                 <div className={styles['chart-title']}>
                                     <h2 className={styles['stats-h2']}>이번 {toggle === 'week' ? '주' : '달'} 운동 <span className={styles['stats-span']}>퍼포먼스</span></h2>
                                     <h5 className={styles['stats-h5']}>
-                                        저번{toggle === 'week' ? '주' : '달'}보다 {compareCalcs.activity}개 더 다양하게 운동했어요
+                                        {
+                                            compareCalcs.activity >= 0?
+                                            `저번${toggle === 'week' ? '주' : '달'}보다 ${compareCalcs.activity}개 더 다양하게 운동했어요` :
+                                            `저번${toggle === 'week' ? '주' : '달'}보다 ${Math.abs(compareCalcs.activity)}개 덜 운동했어요`
+                                        }
                                     </h5>
                                 </div>
                                 <DoughnutChart doughnutData={chartData.doughnut} isPolar={false} isMobile={mobile} />

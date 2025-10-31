@@ -102,7 +102,6 @@ export default function Statistics(){
             try{
                 const res = await GET(`/health/${user.usersId}`,{}, false);
                 setHealthData(res.data);
-                console.log(healthData);
             } catch (e) {
                 showBasicModal('사용자의 신체 데이터 조회에 실패하였습니다','네트워크 오류');
             }
@@ -113,17 +112,15 @@ export default function Statistics(){
     
     const HealthStatPage = () => {
         const latestHealthData = healthData[healthData.length-1];
-        const safeGetLatest = (dataArray) =>{
-            if (!dataArray || dataArray.length === 0) return null;
-            return dataArray[dataArray.length - 1];
-        };
-        const latestHeartRate = safeGetLatest(latestHealthData?.heartRateData);
+        const latestHeartRate = (!latestHealthData?.heartRateData || latestHealthData?.heartRateData.length === 0) ? 
+                                null :
+                                latestHealthData?.heartRateData[latestHealthData?.heartRateData.length -1]
         const latestTime = latestHealthData?.currentTime.substring(0, 10)+' '+latestHealthData?.currentTime.substring(11,19) || '오늘';
-        const latestStep = safeGetLatest(latestHealthData?.stepData);
+        const latestStep = (!latestHealthData?.stepData || !latestHealthData?.stepData.length === 0) ?
+                            null :
+                            latestHealthData?.stepData.reduce((sum, current)=> sum+current, 0);
         const chartContainerRef = useRef(null);
 
-        console.log(healthData);
-        console.log(latestHealthData);
         useEffect(()=>{
             if(selectedKey !== null && chartContainerRef.current){
                 chartContainerRef.current.scrollIntoView({
@@ -138,7 +135,7 @@ export default function Statistics(){
                 title: "심박수", 
                 value: latestHeartRate?.bpm || 0, 
                 unit: "BPM", 
-                detail: latestTime, 
+                detail: latestHeartRate?.time.substring(0, 10)+' '+latestHeartRate?.time.substring(11,19) || '오늘',
                 key: "heartRate", 
                 valueClass: "#ff1616ff" 
             },
@@ -152,8 +149,10 @@ export default function Statistics(){
             },
             { 
                 title: "걷기 거리", 
-                value: parseFloat(((latestHealthData?.distanceWalked || 0) / 1000).toFixed(2)) || 0,
-                unit: "KM", 
+                value: (((latestHealthData?.distanceWalked || 0) / 1000) >=1 ? 
+                        parseFloat(((latestHealthData?.distanceWalked || 0) / 1000).toFixed(2)):
+                        (latestHealthData?.distanceWalked || 0) ) || 0,
+                unit: ((latestHealthData?.distanceWalked || 0) / 1000) >=1 ? "KM" :"M", 
                 detail: latestTime, 
                 key: "distance", 
                 valueClass: "#3399FF" 

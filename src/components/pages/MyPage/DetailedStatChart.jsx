@@ -43,11 +43,11 @@ const getChartConfig = (healthKey, rawData, filterType) => {
     const { dataKey, timeKey, unit } = config;
 
     let title ="데이터";
-    let valueFormatter = (value)=> Math.round(value).toLocaleString();
+    let valueFormatter = (value)=> value >=10 ? Math.round(value).toLocaleString() : value.toFixed(2);
     switch(healthKey){
         case 'step': title = '걸음 수'; break;
         case 'heartRate': title = '심박수'; break;
-        case 'distance': title = '걷기 거리'; valueFormatter = (value) => value.toFixed(2); break;
+        case 'distance': title = '걷기 거리'; break;
         case 'calories': title = '칼로리'; break;
         case 'activeCal': title = '활동 칼로리'; break;
         case 'sleep': title = '수면 시간'; break;
@@ -79,44 +79,94 @@ const getChartConfig = (healthKey, rawData, filterType) => {
         const itemDate = new Date(item.currentTime); 
         return itemDate >= filterStart && itemDate < filterEnd; 
     });
-    
-    const extractedData = filteredRawData
-        .map(item => {
-            let dataValue = 0;
-            let timeValue = item.currentTime; 
 
-            if (!item) return null;
+    const groupData = new Map();
+    filteredRawData.forEach(item => {
+        const itemDate = new Date(item.currentTime);
+        let groupKey = '';
+        let dataValue = 0;
 
-            if (dataKey === 'stepData' && Array.isArray(item.stepData)) {
-                dataValue = item.stepData[0] || 0;
+        if(filterType === '일'){
+            groupKey = itemDate.toLocaleTimeString('ko-KR',{hour:'2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Seoul' });
+        } else {
+            groupKey = itemDate.toISOString().substring(0,10);
+        }
 
-            } else if (dataKey === 'heartRateData') {
-                const hrData = item.heartRateData;
-                if (Array.isArray(hrData) && hrData.length > 0) {
-                    dataValue = hrData[hrData.length-1].bpm || 0;
-                    timeValue = hrData[hrData.length-1][timeKey]; 
-                } else {
-                     dataValue = 0;
-                }
-            } else if(dataKey === 'distanceWalked') {
-                dataValue = (item.distanceWalked /1000) || 0;
-            } else if(dataKey === 'totalSleepMinutes'){
-                dataValue = {
-                    totalSleepMinutes:(item.totalSleepMinutes) ||0,
-                    remSleepMinutes:(item.remSleepMinutes)||0,
-                    deepSleepMinutes:(item.deepSleepMinutes)||0,
-                    lightSleepMinutes:(item.lightSleepMinutes)||0
-                }
+        if(dataKey === 'stepData' && Array.isArray(item.stepData)){
+            dataValue = item.stepData.reduce((sum, current)=> sum+current, 0);
+        } else if(dataKey === 'heartRateData'){
+            const hrData = item.heartRateData;
+            if(Array.isArray(hrData) && hrData.length >0){
+                dataValue = hrData[hrData.length-1].bpm || 0;
+            } else dataValue = 0;
+        }  else if(dataKey === 'totalSleepMinutes'){
+            dataValue = {
+                total:(item.totalSleepMinutes) ||0,
+                rem:(item.remSleepMinutes)||0,
+                deep:(item.deepSleepMinutes)||0,
+                light:(item.lightSleepMinutes)||0
+            };
+        } else {
+            dataValue = item[dataKey] || 0;
+        }
+
+        if(healthKey === 'sleep'){
+            const current = groupData.get(groupKey) || {
+                sumTotal:0, sumRem:0, sumDeep:0, sumLight:0, count:0, firstTime:item.currentTime
+            };
+            current.sumTotal += dataValue.total;
+            current.sumRem += dataValue.rem;
+            current.sumDeep += dataValue.deep;
+            current.sumLight += dataValue.light;
+            current.count++;
+            groupData.set(groupKey, current);
+        } else if(healthKey==='heartRate'){
+            if(filterType==='일'){
+                groupData.set(
+                    item.currentTime, 
+                    {sum:dataValue, count:1, firstTime:(Array.isArray(item.heartRateData) && item.heartRateData.length >0)
+                                                        ?(item.heartRateData[item.heartRateData.lengh-1]?.time || 0)
+                                                        :item.currentTime}
+                )
             } else {
-                dataValue = item[dataKey] || 0;
+                const current = groupData.get(groupKey) || {sum:0, count:0, firstTime:item.currentTime};
+                current.sum += dataValue;
+                current.count++;
+                groupData.set(groupKey, current);
             }
-            
-            const sleepFilter = (dataKey === 'totalSleepMinutes' && dataValue.totalSleepMinutes === 0) ||
-                                (typeof dataValue === 'number' && dataValue === 0);
-            
-            return sleepFilter ? null : { data: dataValue, time: timeValue };
-        })
-        .filter(item => item !== null);
+        } else {
+            const current = groupData.get(groupKey) || { sum: 0, count: 0, firstTime: item.currentTime };
+            current.sum += dataValue;
+            current.count++;
+            groupData.set(groupKey, current);
+        }
+    });
+
+    const extractedData = [];
+    groupData.forEach((group, key)=>{
+        if(healthKey === 'sleep'){
+            if(group.sumTotal > 0){
+                extractedData.push({
+                    data:{
+                        totalSleepMinutes: group.sumTotal,
+                        remSleepMinutes: group.sumRem,
+                        deepSleepMinutes: group.sumDeep,
+                        lightSleepMinutes: group.sumLight
+                    },
+                    time: group.firstTime
+                });
+            }
+        } else if(healthKey==='heartRate' && filterType==='일'){
+            if(group.sum >0){
+                extractedData.push({data: group.sum, time: group.firstTime});
+            }
+        } else {
+            if(group.count > 0 && group.sum >0){
+                const avgValue = group.sum / group.count;
+                extractedData.push({data:avgValue, time:group.firstTime});
+            }
+        }
+    });
 
     if (extractedData.length === 0) {
         return {
@@ -125,6 +175,12 @@ const getChartConfig = (healthKey, rawData, filterType) => {
             extractedData: [], getBarHeights: () => [], filterType: filterType
         };
     }
+
+    extractedData.sort((a,b)=>{
+        const timeA = new Date(a.time);
+        const timeB = new Date(b.time);
+        return timeA.getTime() - timeB.getTime();
+    });
 
     const values = extractedData.map(d => {
         return healthKey === 'sleep' ? d.data.totalSleepMinutes : d.data
@@ -155,6 +211,15 @@ const getChartConfig = (healthKey, rawData, filterType) => {
             getBarHeights:()=>values.map(val=>`${(val/maxVal)*100}%`)
         };
 
+    } else if(healthKey === 'distance'){
+        const walkedAvgVal = (avgVal /1000) >= 1 ? (avgVal /1000) : avgVal
+        const walkedUnit = (avgVal /1000) >= 1 ? "km" : "m" 
+        return {
+            title, unit:walkedUnit, avgValue: walkedAvgVal,
+            yAxisMax: maxVal.toLocaleString(), yAxisMid, 
+            valueFormatter, extractedData, filterType,
+            getBarHeights: () => values.map(val => `${(val / maxVal) * 100}%`)
+        };
     }
 
     return { 
@@ -209,6 +274,7 @@ const DetailedStatChart = ({ healthData, healthKey, valueClass }) => {
   });
 
   const currentMonth = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', timeZone: 'Asia/Seoul' });
+  const currentDay = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long',  day: 'numeric', timeZone: 'Asia/Seoul' })
 
   const graphContainerStyle = healthKey==='sleep'?{cursor:'pointer'}:{};
   const clickableClass = healthKey==='sleep'? styles.clickableGraph:'';
@@ -236,9 +302,11 @@ const DetailedStatChart = ({ healthData, healthKey, valueClass }) => {
                     <p className={styles.averageLabel}>{selectedTab}별 평균</p>
                     <p className={styles.averageValue}>
                         {chartConfig.valueFormatter(chartConfig.avgValue)}
-                        <span className={styles.unitText}>{chartConfig.unit}</span>
+                        <span className={styles.unitText}>
+                            {chartConfig.unit}
+                        </span>
                     </p>
-                    <p className={styles.dateText}>{currentMonth}</p>
+                    <p className={styles.dateText}>{selectedTab === '일' ? currentDay : currentMonth}</p>
                 </section>
                 <section className={`${styles.graphContainer} ${clickableClass}`} style={graphContainerStyle} onClick={toggleDoughnut}>
                     {/* Y축 레이블 */}
