@@ -530,11 +530,11 @@ body.modal-open {
 }
 
 /* 모달 내부 스타일 초기화 */
-.compose-modal * {
+/* .compose-modal * {
   text-align: initial !important;
   justify-content: initial !important;
   align-items: initial !important;
-}
+} */
 
 /* 모바일에서 모든 모달 z-index 높게 설정 */
 @media (max-width: 768px) {
@@ -647,8 +647,6 @@ body.modal-open {
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
-  background: #f8f9fa;
-  border: 2px solid #e9ecef;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -907,6 +905,9 @@ body.modal-open {
   .mobile-sidebar-overlay.show .mobile-sidebar {
     transform: translateX(0);
   }
+  .compose-actions {
+    flex-direction: column;
+  }
 }
 
 /* 작은 모바일 화면에서 사이드바 너비 조정 */
@@ -922,5 +923,8 @@ body.modal-open {
 
   .mobile-sidebar-content {
     padding: 16px;
+  }
+  .compose-actions {
+    flex-direction: column;
   }
 }

@@ -8,7 +8,7 @@
   top: auto;
   border-right: none;
   overflow-y: visible;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .calendarTitle {
@@ -55,8 +55,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .error {
@@ -290,7 +294,6 @@
   cursor: pointer !important;
 }
 
-
 /* 날짜 모달 스타일 */
 .dateModal {
   position: fixed;
@@ -406,20 +409,37 @@
     border-bottom: 1px solid #e9ecef;
     margin-bottom: 20px;
   }
-  
+
   .calendarWrapper {
     height: 400px;
     padding: 12px;
   }
-  
+
   .calendarWrapper :global(.rbc-toolbar) {
     flex-direction: column;
     gap: 8px;
   }
-  
+
   .calendarWrapper :global(.rbc-toolbar button) {
     font-size: 0.7rem;
     padding: 4px 8px;
   }
 }
 
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+  box-sizing: border-box;
+  pointer-events: auto;
+  /* 모바일에서 스크롤 방지 */
+  overflow: hidden;
+}

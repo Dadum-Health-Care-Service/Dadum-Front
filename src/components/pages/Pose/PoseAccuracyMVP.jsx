@@ -10,9 +10,7 @@ import "./PoseAccuracyMVP.css";
  * Config
  * ========================= */
 const API_BASE = import.meta.env.VITE_AI_BASE || "http://localhost:9000";
-const SHOW_ENGINE_TOGGLE =
-  (import.meta.env.DEV ?? false) ||
-  import.meta.env.VITE_SHOW_ENGINE_TOGGLE === "1";
+const SHOW_ENGINE_TOGGLE = true;
 const CFG = { LIVE_FPS: 20, YOLO_FPS: 10, WIN: 60, REF_N: 100 };
 const ANGLE_RANGE = {
   knee: { min: 60, max: 180 },
@@ -1377,7 +1375,7 @@ export default function PoseAccuracyMVP() {
             onChange={setSegMode}
             title="세그"
           />
-          {SHOW_ENGINE_TOGGLE && serverUp && (
+          {SHOW_ENGINE_TOGGLE && (
             <Segment
               options={engineOptions}
               value={engine}

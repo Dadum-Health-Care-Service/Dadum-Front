@@ -1,4 +1,12 @@
-import React, { useEffect, useMemo, useState, useCallback, useRef, useContext } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useState,
+  useCallback,
+  useRef,
+  useContext,
+} from "react";
+import { FaPencilAlt, FaCamera } from "react-icons/fa";
 import "./Social.css";
 import ParticipatedGatheringsSidebar from "./components/ParticipatedGatheringsSidebar";
 import PostCard from "./components/PostCard.jsx";
@@ -24,20 +32,42 @@ function sortPosts(list) {
   });
 }
 function extractLikeInfo(p) {
-  const isLiked = !!(p?.likedByMe ?? p?.isLiked ?? p?.liked ?? p?.userLiked ?? false);
-  const rawCount = p?.likeCount ?? p?.likes ?? p?.like_count ?? p?.totalLikes ?? 0;
+  const isLiked = !!(
+    p?.likedByMe ??
+    p?.isLiked ??
+    p?.liked ??
+    p?.userLiked ??
+    false
+  );
+  const rawCount =
+    p?.likeCount ?? p?.likes ?? p?.like_count ?? p?.totalLikes ?? 0;
   return { isLiked, likeCount: Number(rawCount) || 0 };
 }
 function normalizeMe(d) {
   if (!d) return null;
-  
+
   // AuthContext에서 제공하는 user 객체의 필드 매핑
   const id = d.usersId ?? d.id ?? d.userId ?? d.memberId ?? "";
   const email = d.email ?? "";
-  const handle = email ? email.split('@')[0] : (d.username ?? d.handle ?? d.loginId ?? "");
-  const name = d.nickName ?? d.nickname ?? d.name ?? d.displayName ?? d.userName ?? (email ? email.split('@')[0] : "사용자");
-  const avatar = d.profileImg ?? d.profileImage ?? d.avatar ?? d.imageUrl ?? d.photoUrl ?? d.picture ?? "";
-  
+  const handle = email
+    ? email.split("@")[0]
+    : d.username ?? d.handle ?? d.loginId ?? "";
+  const name =
+    d.nickName ??
+    d.nickname ??
+    d.name ??
+    d.displayName ??
+    d.userName ??
+    (email ? email.split("@")[0] : "사용자");
+  const avatar =
+    d.profileImg ??
+    d.profileImage ??
+    d.avatar ??
+    d.imageUrl ??
+    d.photoUrl ??
+    d.picture ??
+    "";
+
   return {
     id: String(id),
     handle: String(handle),
@@ -104,21 +134,34 @@ function ComposeModal({ open, onClose, onSubmit, me }) {
   };
 
   return (
-    <div className="compose-modal open" role="dialog" aria-modal="true" aria-label="게시글 작성">
+    <div
+      className="compose-modal open"
+      role="dialog"
+      aria-modal="true"
+      aria-label="게시글 작성"
+    >
       <div className="compose-backdrop" onClick={onClose} />
       <div className="compose-card">
         <div className="compose-card-head">
           <h4 className="compose-title">게시글 작성</h4>
-          <button className="compose-close" onClick={onClose} aria-label="닫기">✕</button>
+          <button className="compose-close" onClick={onClose} aria-label="닫기">
+            ✕
+          </button>
         </div>
 
         <div className="compose-card-body">
           {/* 작성자 정보 */}
           <div className="compose-author">
-            <img 
-              src={me?.avatar || "/img/userAvatar.png"} 
-              alt="" 
+            <img
+              src={me?.avatar || "/img/userAvatar.png"}
+              alt=""
               className="compose-author__img"
+              style={{
+                filter: me.avatar
+                  ? "none"
+                  : `invert(42%) sepia(92%) saturate(2385%) hue-rotate(199deg)
+                                      brightness(95%) contrast(97%)`,
+              }}
             />
             <div>
               <div className="compose-author__name">{me?.name || "사용자"}</div>
@@ -141,32 +184,53 @@ function ComposeModal({ open, onClose, onSubmit, me }) {
           {preview && <img src={preview} alt="" className="compose-preview" />}
 
           {/* 하단 액션 바 */}
-          <div className="compose-actions">
+          <div
+            className="compose-actions"
+            style={{ justifyContent: "spaceBetween" }}
+          >
             <div className="compose-tools">
               <label className="tool-btn" aria-label="사진 첨부">
-                <span className="ico">📷</span>
+                <span className="ico">
+                  <FaCamera />
+                </span>
                 <span className="tool-label">사진</span>
-                <input type="file" accept="image/*" style={{ display: "none" }} onChange={onFileChange} />
+                <input
+                  type="file"
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  onChange={onFileChange}
+                />
               </label>
-              <button className="tool-btn" type="button" aria-label="이모지">
-                <span className="ico">😊</span>
-                <span className="tool-label">이모지</span>
-              </button>
             </div>
 
-            <div className="compose-submit">
+            <div
+              className="compose-submit"
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "6px",
+              }}
+            >
               <div className="select pill visibility">
-                <select aria-label="공개 범위" value={visibility} onChange={(e) => setVisibility(e.target.value)}>
+                <select
+                  aria-label="공개 범위"
+                  value={visibility}
+                  onChange={(e) => setVisibility(e.target.value)}
+                >
                   <option value="public">공개</option>
                   <option value="followers">팔로워</option>
                   <option value="private">비공개</option>
                 </select>
               </div>
               <button
-                className={`post-btn cta${!canPost || uploading ? " disabled" : ""}`}
+                className={`post-btn cta${
+                  !canPost || uploading ? " disabled" : ""
+                }`}
                 type="button"
                 disabled={!canPost || uploading}
                 onClick={handleSubmit}
+                style={{ display: "flex", margin: 0 }}
               >
                 {uploading ? "업로드 중..." : "게시하기"}
               </button>
@@ -181,7 +245,7 @@ function ComposeModal({ open, onClose, onSubmit, me }) {
 /* ===== 페이지 ===== */
 export default function Social() {
   const { GET } = useApi();
-  const getRef = useRef(GET);        // GET 레퍼런스 고정
+  const getRef = useRef(GET); // GET 레퍼런스 고정
   const { user } = useContext(AuthContext);
 
   const [tab, setTab] = useState("all");
@@ -195,7 +259,9 @@ export default function Social() {
   useEffect(() => {
     const root = document.documentElement;
     const pickNav = () =>
-      document.querySelector(".bottom-navigation, .bottomNavigation, .bottom-nav, .bottomNav, .bottomBar");
+      document.querySelector(
+        ".bottom-navigation, .bottomNavigation, .bottom-nav, .bottomNav, .bottomBar"
+      );
     const setVar = () => {
       const nav = pickNav();
       const h = nav ? Math.ceil(nav.getBoundingClientRect().height) : 0;
@@ -205,8 +271,12 @@ export default function Social() {
     window.addEventListener("resize", setVar);
     const nav = pickNav();
     const mo = nav ? new MutationObserver(setVar) : null;
-    if (nav && mo) mo.observe(nav, { attributes: true, childList: true, subtree: true });
-    return () => { window.removeEventListener("resize", setVar); mo?.disconnect(); };
+    if (nav && mo)
+      mo.observe(nav, { attributes: true, childList: true, subtree: true });
+    return () => {
+      window.removeEventListener("resize", setVar);
+      mo?.disconnect();
+    };
   }, []);
 
   /* 현재 사용자 정보 설정 */
@@ -224,7 +294,9 @@ export default function Social() {
     try {
       setLoading(true);
       const resp =
-        tab === "all" ? await getRef.current("/posts/list") : await getRef.current("/posts");
+        tab === "all"
+          ? await getRef.current("/posts/list")
+          : await getRef.current("/posts");
       const list = Array.isArray(resp?.data) ? resp.data : [];
       setPosts(sortPosts(list));
     } catch (e) {
@@ -235,7 +307,9 @@ export default function Social() {
     }
   }, [tab]);
 
-  useEffect(() => { loadFeed(); }, [tab, loadFeed]);
+  useEffect(() => {
+    loadFeed();
+  }, [tab, loadFeed]);
 
   const handleLikeChange = useCallback(({ postId, liked, count }) => {
     setPosts((prev) =>
@@ -244,7 +318,9 @@ export default function Social() {
         if (pid !== postId) return p;
         const current = extractLikeInfo(p).likeCount;
         const nextCount =
-          typeof count === "number" ? count : Math.max(0, current + (liked ? 1 : -1));
+          typeof count === "number"
+            ? count
+            : Math.max(0, current + (liked ? 1 : -1));
         return {
           ...p,
           likedByMe: !!liked,
@@ -260,7 +336,10 @@ export default function Social() {
     );
   }, []);
 
-  const filtered = useMemo(() => (tab === "all" ? posts : posts.slice(0, 20)), [tab, posts]);
+  const filtered = useMemo(
+    () => (tab === "all" ? posts : posts.slice(0, 20)),
+    [tab, posts]
+  );
 
   /* 단축키: N → 작성 */
   useEffect(() => {
@@ -303,20 +382,39 @@ export default function Social() {
                   onClick={() => setTab("all")}
                   role="tab"
                   aria-selected={tab === "all"}
-                >전체</button>
+                >
+                  전체
+                </button>
                 <button
-                  className={`seg-btn ${tab === "following" ? "is-active" : ""}`}
+                  className={`seg-btn ${
+                    tab === "following" ? "is-active" : ""
+                  }`}
                   onClick={() => setTab("following")}
                   role="tab"
                   aria-selected={tab === "following"}
-                >내 게시글</button>
+                >
+                  내 게시글
+                </button>
               </div>
             </div>
             <div className="feed-actions">
               {/* 모바일 햄버거 버튼 */}
 
-              <button className="btn-primary" onClick={() => setComposeOpen(true)}>
-                ✍️ 글쓰기
+              <button
+                className="btn-primary"
+                onClick={() => setComposeOpen(true)}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "4px",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <FaPencilAlt />
+                  <>글쓰기</>
+                </div>
               </button>
             </div>
           </div>
@@ -344,7 +442,12 @@ export default function Social() {
 
       {/* 모바일 사이드바 오버레이 */}
       {isMobileSidebarOpen && (
-        <div className={`mobile-sidebar-overlay ${isMobileSidebarOpen ? 'show' : ''}`} onClick={() => setIsMobileSidebarOpen(false)}>
+        <div
+          className={`mobile-sidebar-overlay ${
+            isMobileSidebarOpen ? "show" : ""
+          }`}
+          onClick={() => setIsMobileSidebarOpen(false)}
+        >
           <div className="mobile-sidebar" onClick={(e) => e.stopPropagation()}>
             <div className="mobile-sidebar-header">
               <h3>참여한 모임</h3>
@@ -362,7 +465,6 @@ export default function Social() {
           </div>
         </div>
       )}
-
 
       {/* 작성 모달 */}
       <ComposeModal

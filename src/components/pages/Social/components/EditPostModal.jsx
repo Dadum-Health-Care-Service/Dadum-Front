@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useApi } from "../../../../utils/api/useApi";
+import ButtonComponent from "../../../common/ButtonComponent";
+import { FaCamera } from "react-icons/fa";
 
 export default function EditPostModal({ open, onClose, post, onUpdated }) {
   const [title, setTitle] = useState(post?.postTitle ?? "");
   const [content, setContent] = useState(post?.postContent ?? "");
+  const [imageFile, setImageFile] = useState("");
+  const [preview, setPreview] = useState("");
   const [imageUrl, setImageUrl] = useState(post?.postImage ?? "");
   const { PUT } = useApi();
 
@@ -12,8 +16,15 @@ export default function EditPostModal({ open, onClose, post, onUpdated }) {
       setTitle(post?.postTitle ?? "");
       setContent(post?.postContent ?? "");
       setImageUrl(post?.postImage ?? "");
+      setImageFile(post?.postImage ?? "");
+      setPreview(post?.postImage ?? "");
     }
   }, [open, post]);
+  useEffect(() => {
+    return () => {
+      if (preview && preview.startsWith("blob:")) URL.revokeObjectURL(preview);
+    };
+  }, [preview]);
 
   if (!open) return null;
 
@@ -21,10 +32,22 @@ export default function EditPostModal({ open, onClose, post, onUpdated }) {
     await PUT(`/posts/${post.postId}`, {
       postTitle: title,
       postContent: content,
-      postImage: imageUrl,
+      postImage: imageFile,
     });
     onUpdated?.();
     onClose();
+  };
+  const onFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result; // data:image/...;base64,....
+      console.log(base64String);
+      setImageFile(base64String);
+      setPreview(base64String);
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -43,12 +66,6 @@ export default function EditPostModal({ open, onClose, post, onUpdated }) {
           </button>
         </div>
         <div className="compose-card-body">
-          <input
-            placeholder="제목"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            style={{ width: "100%", marginBottom: 8 }}
-          />
           <textarea
             placeholder="내용"
             value={content}
@@ -56,17 +73,42 @@ export default function EditPostModal({ open, onClose, post, onUpdated }) {
             rows={4}
             style={{ width: "100%", marginBottom: 8 }}
           />
+          {/* 이미지 미리보기 */}
+          {preview && <img src={preview} alt="" className="compose-preview" />}
+
           <input
-            placeholder="이미지 URL(/images/xxx 또는 http…)"
-            value={imageUrl || ""}
-            onChange={(e) => setImageUrl(e.target.value)}
-            style={{ width: "100%", marginBottom: 8 }}
+            type="file"
+            accept="image/*"
+            style={{ display: "none" }}
+            onChange={onFileChange}
           />
-          <div style={{ textAlign: "right" }}>
-            <button onClick={onClose} style={{ marginRight: 8 }}>
-              취소
-            </button>
-            <button onClick={onSave}>저장</button>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginTop: "8px",
+            }}
+          >
+            <label className="tool-btn" aria-label="사진 첨부">
+              <span className="ico">
+                <FaCamera />
+              </span>
+              <span className="tool-label">사진</span>
+              <input
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                onChange={onFileChange}
+              />
+            </label>
+            <div style={{ display: "flex", gap: "4px" }}>
+              <ButtonComponent onClick={onSave}>저장</ButtonComponent>
+              <ButtonComponent onClick={onClose} variant="secondary">
+                취소
+              </ButtonComponent>
+            </div>
           </div>
         </div>
       </div>

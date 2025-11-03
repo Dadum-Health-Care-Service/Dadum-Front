@@ -4,6 +4,7 @@ import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { useParticipatedGatherings } from "../../Social/hooks/useParticipatedGatherings";
 import { useGatheringCategories } from "./gtHooks";
+import { Modal } from "react-bootstrap";
 import styles from "./GatheringCalendar.module.css";
 
 // 한국어 설정
@@ -50,23 +51,28 @@ const GatheringCalendar = () => {
   }, [participatedGatherings]);
 
   // 특정 날짜의 모임 목록 가져오기
-  const getGatheringsForDate = useCallback((date) => {
-    if (!participatedGatherings) {
-      return [];
-    }
-
-    const targetDate = moment(date).format('YYYY-MM-DD');
-
-    const filteredGatherings = participatedGatherings.filter(gathering => {
-      if (!gathering.nextMeetingDate) {
-        return false;
+  const getGatheringsForDate = useCallback(
+    (date) => {
+      if (!participatedGatherings) {
+        return [];
       }
-      const gatheringDate = moment(gathering.nextMeetingDate).format('YYYY-MM-DD');
-      return gatheringDate === targetDate;
-    });
 
-    return filteredGatherings;
-  }, [participatedGatherings]);
+      const targetDate = moment(date).format("YYYY-MM-DD");
+
+      const filteredGatherings = participatedGatherings.filter((gathering) => {
+        if (!gathering.nextMeetingDate) {
+          return false;
+        }
+        const gatheringDate = moment(gathering.nextMeetingDate).format(
+          "YYYY-MM-DD"
+        );
+        return gatheringDate === targetDate;
+      });
+
+      return filteredGatherings;
+    },
+    [participatedGatherings]
+  );
 
   // 날짜 클릭 핸들러
   const handleDateClick = useCallback((slotInfo) => {
@@ -79,14 +85,15 @@ const GatheringCalendar = () => {
   React.useEffect(() => {
     const handleDateClick = (event) => {
       const target = event.target;
-      const dateCell = target.closest('.rbc-date-cell');
-      
+      const dateCell = target.closest(".rbc-date-cell");
+
       if (dateCell) {
         // 여러 방법으로 날짜 정보 가져오기
-        const dateString = dateCell.getAttribute('data-date') || 
-                          dateCell.getAttribute('data-rbc-date') ||
-                          dateCell.querySelector('[data-date]')?.getAttribute('data-date');
-        
+        const dateString =
+          dateCell.getAttribute("data-date") ||
+          dateCell.getAttribute("data-rbc-date") ||
+          dateCell.querySelector("[data-date]")?.getAttribute("data-date");
+
         if (dateString) {
           const clickedDate = new Date(dateString);
           setSelectedDate(clickedDate);
@@ -96,7 +103,11 @@ const GatheringCalendar = () => {
           const dayText = dateCell.textContent.trim();
           if (dayText && dayText.match(/^\d+$/)) {
             const today = new Date();
-            const clickedDate = new Date(today.getFullYear(), today.getMonth(), parseInt(dayText));
+            const clickedDate = new Date(
+              today.getFullYear(),
+              today.getMonth(),
+              parseInt(dayText)
+            );
             setSelectedDate(clickedDate);
             setShowDateModal(true);
           }
@@ -108,8 +119,8 @@ const GatheringCalendar = () => {
     const addEventListeners = () => {
       const calendarElement = document.querySelector(".rbc-calendar");
       if (calendarElement) {
-        calendarElement.addEventListener('click', handleDateClick);
-        calendarElement.addEventListener('touchstart', handleDateClick);
+        calendarElement.addEventListener("click", handleDateClick);
+        calendarElement.addEventListener("touchstart", handleDateClick);
         return calendarElement;
       }
       return null;
@@ -216,7 +227,6 @@ const GatheringCalendar = () => {
         📅 모임 일정
         <span className={styles.expandIcon}>{isExpanded ? "▼" : "▶"}</span>
       </h3>
-
       {isExpanded && (
         <div className={styles.calendarWrapper}>
           <Calendar
@@ -252,57 +262,48 @@ const GatheringCalendar = () => {
           />
         </div>
       )}
-
       {/* 날짜별 일정 모달 */}
-      {showDateModal && (
-        <div className={styles.dateModal}>
-          <div className={styles.dateModalContent}>
-            <div className={styles.dateModalHeader}>
-              <h4>
-                {selectedDate
-                  ? moment(selectedDate).format("YYYY년 MM월 DD일")
-                  : "일정"}{" "}
-                일정
-              </h4>
-              <button
-                className={styles.closeButton}
+      <Modal
+        show={showDateModal}
+        onHide={() => setShowDateModal(false)}
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>
+            {selectedDate
+              ? `${moment(selectedDate).format("YYYY년 MM월 DD일")} 일정`
+              : "일정"}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className={styles.dateModalBody}>
+            {getGatheringsForDate(selectedDate).map((gathering) => (
+              <div
+                key={gathering.gatheringId}
+                className={styles.gatheringItem}
                 onClick={() => {
                   setShowDateModal(false);
+                  window.dispatchEvent(
+                    new CustomEvent("showGatheringDetail", {
+                      detail: { gathering },
+                    })
+                  );
                 }}
+                style={{ cursor: "pointer" }}
               >
-                ✕
-              </button>
-            </div>
-            <div className={styles.dateModalBody}>
-              {getGatheringsForDate(selectedDate).map((gathering) => (
-                <div
-                  key={gathering.gatheringId}
-                  className={styles.gatheringItem}
-                  onClick={() => {
-                    // 일정 목록 모달은 닫고 모임 상세 모달 열기
-                    setShowDateModal(false);
-                    window.dispatchEvent(
-                      new CustomEvent("showGatheringDetail", {
-                        detail: { gathering },
-                      })
-                    );
-                  }}
-                  style={{ cursor: "pointer" }}
-                >
-                  <div className={styles.gatheringTitle}>{gathering.title}</div>
-                  <div className={styles.gatheringTime}>
-                    {moment(gathering.nextMeetingDate).format("HH:mm")}
-                  </div>
-                  <div className={styles.gatheringCategory}>
-                    {findCategory(gathering.category)?.icon}{" "}
-                    {findCategory(gathering.category)?.label}
-                  </div>
+                <div className={styles.gatheringTitle}>{gathering.title}</div>
+                <div className={styles.gatheringTime}>
+                  {moment(gathering.nextMeetingDate).format("HH:mm")}
                 </div>
-              ))}
-            </div>
+                <div className={styles.gatheringCategory}>
+                  {findCategory(gathering.category)?.icon}{" "}
+                  {findCategory(gathering.category)?.label}
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
-      )}
+        </Modal.Body>
+      </Modal>
     </div>
   );
 };

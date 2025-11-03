@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Comments from "./Comments.jsx";
 import EditPostModal from "./EditPostModal.jsx";
 import LikeButton from "./LikeButton.jsx";
+import { FaCommentDots } from "react-icons/fa";
 import { useApi } from "../../../../utils/api/useApi";
 
 // 유틸리티 함수들
@@ -16,12 +17,12 @@ const resolveImageUrl = (imagePath) => {
   if (!imagePath) return null;
   if (imagePath.startsWith("http")) return imagePath;
   if (imagePath.startsWith("data:")) return imagePath; // Base64 데이터 URL 처리
-  return `http://localhost:8080${imagePath}`;
+  return `/img/userAvatar.png`;
 };
 
 const displayHandle = (userId, userEmail) => {
   if (userEmail) {
-    return userEmail.split('@')[0];
+    return userEmail.split("@")[0];
   }
   return userId || "user";
 };
@@ -106,7 +107,18 @@ export default function PostCard({
       {/* 헤더 */}
       <header className="m-card-head">
         {profileSrc ? (
-          <img className="avatar-img" src={profileSrc} alt="" />
+          <img
+            className="avatar-img"
+            src={profileSrc}
+            alt=""
+            style={{
+              filter:
+                profileSrc !== "/img/userAvatar.png"
+                  ? "none"
+                  : `invert(42%) sepia(92%) saturate(2385%) hue-rotate(199deg)
+                                      brightness(95%) contrast(97%)`,
+            }}
+          />
         ) : (
           <span className="avatar" aria-hidden />
         )}
@@ -189,8 +201,16 @@ export default function PostCard({
           onClick={() => setCommentsOpen((v) => !v)}
           aria-expanded={commentsOpen}
           aria-controls={`comments-${postId}`}
+          style={{
+            display: "flex",
+            gap: "4px",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
         >
-          <span aria-hidden>💬</span>
+          <span aria-hidden style={{ padding: "2px" }}>
+            <FaCommentDots />
+          </span>
           <span>댓글</span>
         </button>
 
