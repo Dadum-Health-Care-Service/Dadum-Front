@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Container, Row, Col, Badge, InputGroup } from "react-bootstrap";
 import {
   FaSearch,
   FaPlus,
   FaFilter,
   FaPlay,
+  FaStop,
   FaEdit,
   FaTrash,
 } from "react-icons/fa";
@@ -14,11 +15,24 @@ import InputComponent from "../../common/InputComponent";
 import SelectComponent from "../../common/SelectComponent";
 import ContainerComponent from "../../common/ContainerComponent";
 import styles from "./Routine.module.css";
-import ModalExample from "../../common/ModalExample";
+import RoutineCreateModal from "./RoutineCreateModal/RoutineCreateModal";
+import RoutineDetailModal from "./RoutineDetailModal/RoutineDetailModal";
+import TotalTimer from "../../common/TotalTimer";
+import { useApi } from "../../../utils/api/useApi";
+import { useModal } from "../../../context/ModalContext";
+import { RunContext } from "../../../context/RunContext";
 
 const Routine = () => {
+  const { GET, DELETE } = useApi();
   const [searchTerm, setSearchTerm] = useState("");
+  const [exercises, setExercises] = useState([]);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedRoutine, setSelectedRoutine] = useState(null);
+  const [routines, setRoutines] = useState([]);
+  const { showConfirmModal } = useModal();
+  const { useRun, useStop, isRunning, setId } = useContext(RunContext);
 
   const categories = [
     { id: "all", label: "전체", color: "primary" },
@@ -28,57 +42,26 @@ const Routine = () => {
     { id: "study", label: "학습", color: "secondary" },
   ];
 
-  const routines = [
-    {
-      id: 1,
-      title: "아침 루틴",
-      description: "하루를 시작하는 건강한 아침 루틴",
-      category: "morning",
-      time: "15분",
-      difficulty: "쉬움",
-      completed: true,
-      tasks: ["물 마시기", "스트레칭", "아침 식사"],
-    },
-    {
-      id: 2,
-      title: "운동 루틴",
-      description: "전신 운동을 위한 체계적인 루틴",
-      category: "exercise",
-      time: "30분",
-      difficulty: "보통",
-      completed: false,
-      tasks: ["준비운동", "유산소운동", "근력운동", "정리운동"],
-    },
-    {
-      id: 3,
-      title: "저녁 루틴",
-      description: "하루를 마무리하는 편안한 루틴",
-      category: "evening",
-      time: "20분",
-      difficulty: "쉬움",
-      completed: false,
-      tasks: ["정리정돈", "독서", "명상"],
-    },
-    {
-      id: 4,
-      title: "학습 루틴",
-      description: "효율적인 학습을 위한 루틴",
-      category: "study",
-      time: "45분",
-      difficulty: "보통",
-      completed: true,
-      tasks: ["목표 설정", "집중 학습", "복습"],
-    },
-  ];
+  const filteredRoutines = routines
+    .filter((routine) => {
+      const matchesSearch = routine.routineName
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
 
-  const filteredRoutines = routines.filter((routine) => {
-    const matchesSearch =
-      routine.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      routine.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory =
-      selectedCategory === "all" || routine.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+      const matchesCategory =
+        selectedCategory === "all" || routine.category === selectedCategory;
+      console.log(routine);
+      return matchesSearch && matchesCategory;
+    })
+    .sort((a, b) => {
+      if (a.setId > b.setId) {
+        return 1;
+      } else if (a.setId < b.setId) {
+        return -1;
+      } else {
+        return 0;
+      }
+    });
 
   const getCategoryColor = (categoryId) => {
     const category = categories.find((cat) => cat.id === categoryId);
@@ -89,14 +72,91 @@ const Routine = () => {
     const category = categories.find((cat) => cat.id === categoryId);
     return category ? category.label : "기타";
   };
+  const handleDetailModalOpen = (routine) => {
+    setSelectedRoutine(routine);
+    setIsDetailModalOpen(true);
+  };
+  const handleDetailModalClose = () => {
+    setSelectedRoutine(null);
+    setIsDetailModalOpen(false);
+  };
+  const handleDeleteRoutine = (routine) => {
+    console.log(routine);
+    showConfirmModal(
+      "루틴을 삭제하시겠습니까?",
+      "루틴 삭제",
+      "",
+      async () => {
+        await DELETE(`/routine/${routine.setId}/delete`, {}, true)
+          .then((res) => {
+            console.log(res);
+            showConfirmModal(
+              "루틴이 삭제되었습니다.",
+              "루틴 삭제",
+              "",
+              () => {
+                getRoutines();
+              },
+              false
+            );
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      },
+      true
+    );
+  };
 
+  const getRoutines = () => {
+    GET("/routine/list", {}, true)
+      .then((res) => {
+        setRoutines(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  useEffect(() => {
+    getRoutines();
+  }, []);
+
+  const getExercises = (exercises) => {
+    setExercises(exercises);
+  };
+  const handleRun = (runId) => {
+    useStop();
+    if (isRunning && runId === setId) {
+      useStop();
+    } else {
+      useRun(runId);
+    }
+  };
   return (
     <ContainerComponent className={`${styles.routine}`}>
-      <ModalExample />
+      <RoutineCreateModal
+        isModalOpen={isCreateModalOpen}
+        setIsModalOpen={setIsCreateModalOpen}
+        getExercises={getExercises}
+        getRoutines={getRoutines}
+      />
+      <RoutineDetailModal
+        routine={selectedRoutine}
+        exercises={exercises}
+        isModalOpen={isDetailModalOpen}
+        handleDetailModalClose={handleDetailModalClose}
+        getRoutines={getRoutines}
+        getExercises={getExercises}
+      />
       {/* Header */}
       <div className={styles.header}>
         <h1 className={styles.title}>루틴 관리</h1>
-        <ButtonComponent variant="primary" size="lg">
+        <ButtonComponent
+          variant="primary"
+          size="lg"
+          onClick={() => setIsCreateModalOpen(true)}
+        >
           <FaPlus className={styles.buttonIcon} />새 루틴 만들기
         </ButtonComponent>
       </div>
@@ -126,81 +186,90 @@ const Routine = () => {
         </div>
       </div>
 
-      {/* Categories */}
-      <div className={styles.categories}>
-        {categories.map((category) => (
-          <Badge
-            key={category.id}
-            bg={category.id === selectedCategory ? category.color : "light"}
-            text={category.id === selectedCategory ? "white" : "dark"}
-            className={styles.categoryBadge}
-            onClick={() => setSelectedCategory(category.id)}
-          >
-            {category.label}
-          </Badge>
-        ))}
-      </div>
-
       {/* Routines Grid */}
       <div className={styles.routinesGrid}>
-        {filteredRoutines.map((routine) => (
-          <div key={routine.id} className={styles.routineCard}>
+        {filteredRoutines?.map((routine) => (
+          <div key={routine.setId} className={styles.routineCard}>
             <CardComponent
               variant={routine.completed ? "success" : "primary"}
-              title={routine.title}
+              title={
+                <div className={styles.routineTitleContainer}>
+                  {routine.routineName}
+                  {isRunning && setId === routine.setId && (
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "1em",
+                        marginRight: "1em",
+                      }}
+                    >
+                      <img
+                        src={"/img/RunningRoutine.gif"}
+                        style={{ width: "30px", height: "30px" }}
+                      />
+                      <TotalTimer type="DETAIL" />
+                    </div>
+                  )}
+                </div>
+              }
               className={styles.routineCardComponent}
-              badge={routine.completed ? "완료" : "진행중"}
+              buttonText=""
+              badge={isRunning && setId === routine.setId ? "진행중" : "완료"}
+              onClick={() => handleDetailModalOpen(routine)}
             >
               <div className={styles.routineHeader}>
                 <div className={styles.routineInfo}>
-                  <h5 className={styles.routineTitle}>{routine.title}</h5>
+                  <div className={styles.routineTitleContainer}>
+                    <div className={styles.routineTitle}>{routine.title}</div>
+                  </div>
+
                   <p className={styles.routineDescription}>
                     {routine.description}
                   </p>
                 </div>
-                <div className={styles.routineMeta}>
-                  <Badge
-                    bg={getCategoryColor(routine.category)}
-                    className={styles.categoryBadge}
-                  >
-                    {getCategoryLabel(routine.category)}
-                  </Badge>
-                  <div className={styles.routineStats}>
-                    <span className={styles.time}>
-                      <FaPlay className={styles.icon} />
-                      {routine.time}
-                    </span>
-                    <Badge
-                      bg={routine.difficulty === "쉬움" ? "success" : "warning"}
-                      className={styles.difficultyBadge}
-                    >
-                      {routine.difficulty}
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-
-              <div className={styles.tasksList}>
-                <h6>할 일 목록:</h6>
-                <ul>
-                  {routine.tasks.map((task, index) => (
-                    <li key={index} className={styles.taskItem}>
-                      {task}
-                    </li>
-                  ))}
-                </ul>
               </div>
 
               <div className={styles.routineActions}>
-                <ButtonComponent variant="outline-primary" size="sm">
-                  <FaPlay className={styles.buttonIcon} />
-                  시작
+                <ButtonComponent
+                  variant="primary"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    console.log(routine.setId);
+                    console.log(setId);
+                    console.log(isRunning);
+                    handleRun(routine.setId);
+                  }}
+                  style={{
+                    background:
+                      isRunning && setId === routine.setId ? "red" : "#007bff",
+                  }}
+                >
+                  {isRunning && setId === routine.setId ? (
+                    <FaStop className={styles.buttonIcon} />
+                  ) : (
+                    <FaPlay className={styles.buttonIcon} />
+                  )}
+                  {isRunning && setId === routine.setId ? "중지" : "시작"}
                 </ButtonComponent>
-                <ButtonComponent variant="outline-secondary" size="sm">
+                <ButtonComponent
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleDetailModalOpen(routine)}
+                  disabled={isRunning && setId === routine.setId}
+                >
                   <FaEdit className={styles.buttonIcon} />
                   수정
                 </ButtonComponent>
-                <ButtonComponent variant="outline-danger" size="sm">
+                <ButtonComponent
+                  variant="secondary"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteRoutine(routine);
+                  }}
+                  disabled={isRunning && setId === routine.setId}
+                >
                   <FaTrash className={styles.buttonIcon} />
                   삭제
                 </ButtonComponent>

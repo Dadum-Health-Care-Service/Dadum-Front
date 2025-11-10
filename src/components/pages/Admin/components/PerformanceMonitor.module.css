@@ -1,0 +1,352 @@
+/* 성능 모니터링 컴포넌트 스타일 */
+.performanceMonitor {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  background-color: #f8fafc;
+  min-height: 100vh;
+}
+
+.headerCard {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.controlGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.autoRefreshLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.autoRefreshLabel input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.intervalSelect {
+  padding: 6px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 14px;
+}
+
+.intervalSelect option {
+  background: #667eea;
+  color: white;
+}
+
+.errorCard {
+  background-color: #fed7d7;
+  border-left: 4px solid #e53e3e;
+}
+
+.errorMessage {
+  color: #e53e3e;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* 시스템 리소스 카드 */
+.resourceCard {
+  background: white;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.resourceGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.resourceItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.resourceLabel {
+  font-weight: 600;
+  color: #4a5568;
+  font-size: 14px;
+}
+
+.resourceValue {
+  font-weight: 700;
+  font-size: 18px;
+  color: #2d3748;
+}
+
+.progressBar {
+  width: 100%;
+  height: 8px;
+  background-color: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #48bb78 0%, #38a169 50%, #2f855a 100%);
+  transition: width 0.3s ease;
+}
+
+/* 모델 상태 카드 */
+.modelCard {
+  background: white;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.modelGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.modelItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.modelLabel {
+  font-weight: 600;
+  color: #4a5568;
+  font-size: 14px;
+}
+
+.modelValue {
+  font-weight: 500;
+  font-size: 16px;
+  color: #2d3748;
+}
+
+.trained {
+  color: #38a169;
+  font-weight: 600;
+}
+
+.notTrained {
+  color: #e53e3e;
+  font-weight: 600;
+}
+
+/* 성능 메트릭 카드 */
+.metricsCard {
+  background: white;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.metricItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  background-color: #f7fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.metricLabel {
+  font-weight: 600;
+  color: #4a5568;
+  font-size: 14px;
+}
+
+.metricValue {
+  font-weight: 700;
+  font-size: 18px;
+  color: #2d3748;
+}
+
+/* 건강도 카드 */
+.healthCard {
+  background: white;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.healthStatus {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.healthScore {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.healthLabel {
+  font-weight: 600;
+  color: #4a5568;
+  font-size: 16px;
+}
+
+.healthValue {
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.excellent {
+  color: #38a169;
+}
+
+.good {
+  color: #d69e2e;
+}
+
+.warning {
+  color: #dd6b20;
+}
+
+.critical {
+  color: #e53e3e;
+}
+
+.unknown {
+  color: #a0aec0;
+}
+
+.healthChecks {
+  margin-top: 16px;
+}
+
+.healthChecks h4 {
+  margin: 0 0 12px 0;
+  color: #2d3748;
+  font-size: 16px;
+}
+
+.checkGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.checkItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: #f7fafc;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  font-size: 14px;
+}
+
+.checkItem span:first-child {
+  color: #4a5568;
+  font-weight: 500;
+}
+
+.checkItem span:last-child {
+  color: #2d3748;
+  font-weight: 600;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .performanceMonitor {
+    padding: 12px;
+    gap: 16px;
+  }
+
+  .controlGroup {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .autoRefreshLabel {
+    justify-content: center;
+  }
+
+  .intervalSelect {
+    width: 100%;
+    text-align: center;
+  }
+
+  .resourceGrid,
+  .modelGrid,
+  .metricsGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .metricItem {
+    padding: 8px;
+  }
+
+  .healthScore {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+
+  .checkGrid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .checkItem {
+    flex-direction: column;
+    gap: 4px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .performanceMonitor {
+    padding: 8px;
+    gap: 12px;
+  }
+
+  .resourceGrid,
+  .modelGrid,
+  .metricsGrid {
+    gap: 8px;
+  }
+
+  .metricItem {
+    padding: 6px;
+  }
+
+  .healthScore {
+    padding: 12px;
+  }
+
+  .checkItem {
+    padding: 6px 8px;
+  }
+}

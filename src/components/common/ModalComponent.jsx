@@ -44,6 +44,7 @@ const ModalComponent = ({
   showCloseButton = true,
   closeOnOverlayClick = true,
   className = "",
+  zIndex,
   // 외부에서 넘어올 수 있으나 DOM으로 전달되면 안 됨
   hasFooter, // eslint-disable-line no-unused-vars
   ...props
@@ -54,13 +55,21 @@ const ModalComponent = ({
       document.body.style.overflow = "hidden";
       document.body.style.paddingRight = "0px";
     } else {
-      document.body.style.overflow = "unset";
-      document.body.style.paddingRight = "0px";
+      // 다른 모달이 열려있는지 확인
+      const hasOpenModal = document.querySelector('[class*="modal-overlay"]');
+      if (!hasOpenModal) {
+        document.body.style.overflow = "unset";
+        document.body.style.paddingRight = "0px";
+      }
     }
 
     return () => {
-      document.body.style.overflow = "unset";
-      document.body.style.paddingRight = "0px";
+      // 정리 함수에서도 다른 모달이 열려있는지 확인
+      const hasOpenModal = document.querySelector('[class*="modal-overlay"]');
+      if (!hasOpenModal) {
+        document.body.style.overflow = "unset";
+        document.body.style.paddingRight = "0px";
+      }
     };
   }, [isOpen]);
 
@@ -167,22 +176,27 @@ const ModalComponent = ({
   if (!isOpen) return null;
 
   return (
-    <div
-      className={styles["modal-overlay"]}
-      onClick={handleOverlayClick}
-      onKeyDown={handleKeyDown}
-      tabIndex={-1}
-    >
-      <div
-        className={getModalClassName()}
-        onClick={handleModalClick}
-        {...props}
-      >
-        {renderHeader()}
-        {renderContent()}
-        {renderFooter()}
-      </div>
-    </div>
+    <>
+      {isOpen && (
+        <div
+          className={styles["modal-overlay"]}
+          onClick={handleOverlayClick}
+          style={zIndex ? { zIndex: zIndex - 1 } : {}}
+          tabIndex={-1}
+        >
+          <div
+            className={getModalClassName()}
+            onClick={handleModalClick}
+            style={zIndex ? { zIndex } : {}}
+            {...props}
+          >
+            {renderHeader()}
+            {renderContent()}
+            {renderFooter()}
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

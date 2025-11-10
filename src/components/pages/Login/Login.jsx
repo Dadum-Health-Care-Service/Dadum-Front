@@ -1,30 +1,39 @@
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useRef } from "react";
 import ContainerComponent from "../../common/ContainerComponent";
 import FormComponent from "../../common/FormComponent";
 import InputComponent from "../../common/InputComponent";
-import SelectComponent from "../../common/SelectComponent";
 import ButtonComponent from "../../common/ButtonComponent";
 import ListComponent from "../../common/ListComponent";
-import { POST } from "../../../utils/api/api";
 import { AuthContext } from "../../../context/AuthContext";
-
+import { LoginViewContext } from "../../../context/LoginViewContext";
+import {
+  KAKAO_CLIENT_ID,
+  KAKAO_AUTH_URL,
+  KAKAO_REDIRECT_URI,
+} from "../../../utils/oauth/oAuth";
 import styles from "./Login.module.css";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useModal } from "../../../context/ModalContext";
+import { useApi } from "../../../utils/api/useApi";
+import axios from "axios";
 
-function Login({ setIsLoggedIn, setActiveTab }) {
-  // 현재 보여줄 뷰를 관리하는 상태 ('login', 'register', 'passwordless')
-  const [view, setView] = useState("login");
-  const { dispatch } = useContext(AuthContext);
+function Login() {
+  const { POST, GET } = useApi();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { showBasicModal, showConfirmModal, showLoadingModal, closeModal } =
+    useModal();
+  const { view, setView, currentLoginInfo, setLoginInfo } =
+    useContext(LoginViewContext);
+
+  // 현재 보여줄 뷰를 관리하는 상태 ('login', 'passwordless','loggedIn')
+  const { user, dispatch } = useContext(AuthContext);
   // 로그인 타입 라디오 버튼 상태
   const [loginType, setLoginType] = useState("password");
 
   // 로그인 폼 입력 상태
   const [loginId, setLoginId] = useState("");
   const [loginPw, setLoginPw] = useState("");
-
-  // 회원가입 폼 입력 상태
-  const [signupId, setSignupId] = useState("");
-  const [signupPw, setSignupPw] = useState("");
-  const [signupPwConfirm, setSignupPwConfirm] = useState("");
 
   // PushConnector 연결
   const [pushConnectorUrl, setPushConnectorUrl] = useState("");
@@ -39,7 +48,7 @@ function Login({ setIsLoggedIn, setActiveTab }) {
   //QR 등록 여부
   const [isQrRegistered, setIsQrRegistered] = useState(false);
 
-  //세션 ID 설정
+  //루틴 ID 설정
   const [sessionId, setSessionId] = useState("");
 
   //서비스 패스워드 설정
@@ -47,17 +56,39 @@ function Login({ setIsLoggedIn, setActiveTab }) {
   const [currentTerm, setCurrentTerm] = useState(0);
   const [termLength, setTermLength] = useState(0);
 
+  //쿼리 파라미터 추출
+  const query = new URLSearchParams(location.search);
+
+  // 카카오 코드 추출
+  const kakaoCode = query.get("code");
+
+  //카카오 로그인용
+  const kakaoRef = useRef(null);
+
+  // user가 없으면 view 상태를 login으로 변경
+  useEffect(() => {
+    if (!user) setView("login");
+  }, [user]);
+
   // view 상태가 'passwordless'로 변경될 때 QR 코드를 생성하는 로직 (Side Effect)
   useEffect(() => {
     const fetchQrCodeData = async () => {
       if (view === "passwordless") {
-        setIsQrLoading(true);
-
+        showLoadingModal(
+          "패스워드리스 등록화면 로딩중..",
+          "패스워드리스 등록",
+          "로딩이 완료되면 자동으로 닫힙니다. 잠시만 기다려 주세요."
+        );
         try {
+          await handlePasswordlessRegister();
+          closeModal();
+
+          setIsQrLoading(true);
+
           // 1. 일반 로그인으로 '임시 토큰' 먼저 받기
           const tokenResponse = await POST(
             "/passwordlessManageCheck",
-            { id: loginId, pw: loginPw },
+            currentLoginInfo,
             false,
             "passwordless"
           ).then((res) => {
@@ -75,7 +106,7 @@ function Login({ setIsLoggedIn, setActiveTab }) {
           // 2. QR 요청을 위한 JSESSIONID 발급
           const jsessionidResponse = await POST(
             "/passwordlessCallApi",
-            { url: "isApUrl", params: `userId=${loginId}&QRReg=` },
+            { url: "isApUrl", params: `userId=${currentLoginInfo.id}&QRReg=` },
             false,
             "passwordless"
           ).then((res) => {
@@ -93,7 +124,7 @@ function Login({ setIsLoggedIn, setActiveTab }) {
             "/passwordlessCallApi",
             {
               url: "joinApUrl",
-              params: `userId=${loginId}&token=${passwordlessToken}`,
+              params: `userId=${currentLoginInfo.id}&token=${passwordlessToken}`,
             },
             false,
             "passwordless"
@@ -115,9 +146,16 @@ function Login({ setIsLoggedIn, setActiveTab }) {
           setPushConnectorUrl(qrData.pushConnectorUrl);
           setPushConnectorToken(qrData.pushConnectorToken);
         } catch (error) {
+          closeModal();
           console.error("QR 코드 정보 가져오기 오류:", error);
-          alert(error.message);
-          setView("login"); // 실패 시 로그인 화면으로
+          setView("login");
+          if (error?.status === 500)
+            showBasicModal(
+              "패스워드리스 등록에 실패하였습니다",
+              "네트워크 에러"
+            );
+          else showBasicModal(error.message, "패스워드리스 등록");
+          navigate("/mypage/settings", { replace: true }); // 실패 시 설정 화면으로
         } finally {
           setIsQrLoading(false);
         }
@@ -125,7 +163,7 @@ function Login({ setIsLoggedIn, setActiveTab }) {
     };
 
     fetchQrCodeData();
-  }, [view, loginId, loginPw]); // loginPw도 의존성에 추가
+  }, [view, currentLoginInfo]); // loginPw도 의존성에 추가
 
   useEffect(() => {
     const confirmQrRegistered = async () => {
@@ -147,7 +185,7 @@ function Login({ setIsLoggedIn, setActiveTab }) {
             if (res.data.result === "OK") {
               setIsQrRegistered(true);
               setIsLoggedIn(true);
-              setActiveTab("home");
+              navigate("/");
             }
           });
         }
@@ -199,12 +237,40 @@ function Login({ setIsLoggedIn, setActiveTab }) {
                     "/users/auth/passwordless/login",
                     { email: loginId, passwordlessToken: pushConnectorToken },
                     false
-                  ).then((res) => {
-                    console.log(res.data);
-                    dispatch({ type: "LOGIN", user: res.data });
-                    setIsLoggedIn(true);
-                    setActiveTab("home");
-                  });
+                  )
+                    .then((res) => {
+                      console.log(res.data);
+                      dispatch({ type: "LOGIN", user: res.data });
+                      setIsLoggedIn(true);
+                      navigate("/");
+                    })
+                    .catch((err) => {
+                      if (err?.status === 406) {
+                        showConfirmModal(
+                          "계정을 복구하시겠습니까?",
+                          "탈퇴한 사용자",
+                          "이미 탈퇴한 사용자 입니다",
+                          () => {
+                            GET(`/users/restore/${loginId}`, {}, false)
+                              .then((res) => {
+                                console.log(res);
+                                showBasicModal(
+                                  "계정이 복구되었습니다. 다시 로그인 해 주세요.",
+                                  "계정 복구"
+                                );
+                                navigate("/login", { replace: true });
+                              })
+                              .catch((err) => {
+                                console.log(err);
+                                showBasicModal(
+                                  "계정 복구에 실패하였습니다",
+                                  "네트워크 오류"
+                                );
+                              });
+                          }
+                        );
+                      }
+                    });
                 } else {
                   await POST(
                     "/passwordlessCallApi",
@@ -215,7 +281,7 @@ function Login({ setIsLoggedIn, setActiveTab }) {
                     false,
                     "passwordless"
                   ).then((res) => {
-                    alert("사용자에 의한 연결 취소");
+                    showBasicModal("사용자에 의한 연결 취소");
                     setCurrentTerm(0);
                     setServicePassword("");
                   });
@@ -229,12 +295,80 @@ function Login({ setIsLoggedIn, setActiveTab }) {
     connectWebSocket();
   }, [pushConnectorToken]);
 
+  //카카오 로그인
+  useEffect(() => {
+    const grantType = "authorization_code";
+    if (kakaoCode) {
+      POST(
+        `/oauth/token?grant_type=${grantType}&client_id=${KAKAO_CLIENT_ID}&redirect_uri=${KAKAO_REDIRECT_URI}&code=${kakaoCode}`,
+        {},
+        false,
+        "kakao"
+      )
+        .then((res) => {
+          console.log(res);
+          const { access_token } = res.data;
+          console.log(access_token);
+          POST("/users/login/kakao", {
+            socialType: "kakao",
+            accessToken: access_token,
+          })
+            .then((res) => {
+              console.log("kakao login successful");
+              dispatch({ type: "LOGIN", user: res.data });
+
+              // 사용자 역할에 따라 적절한 페이지로 리다이렉트
+              if (res.data.role === "SUPER_ADMIN") {
+                navigate("/admin", { replace: true });
+              } else {
+                navigate("/", { replace: true });
+              }
+            })
+            .catch((e) => {
+              console.log(e);
+              if (e?.status === 406) {
+                showConfirmModal(
+                  "계정을 복구하시겠습니까?",
+                  "탈퇴한 사용자",
+                  "이미 탈퇴한 사용자 입니다",
+                  () => {
+                    GET(
+                      `/users/restore/user${KAKAO_CLIENT_ID}@kakao.com`,
+                      {},
+                      false
+                    )
+                      .then((res) => {
+                        console.log(res);
+                        showBasicModal(
+                          "계정이 복구되었습니다. 다시 로그인 해 주세요.",
+                          "계정 복구"
+                        );
+                        navigate("/login", { replace: true });
+                      })
+                      .catch((err) => {
+                        console.log(err);
+                        showBasicModal(
+                          "계정 복구에 실패하였습니다",
+                          "네트워크 오류"
+                        );
+                      });
+                  }
+                );
+              }
+            });
+        })
+        .catch((error) => {
+          //toast
+        });
+    }
+  }, [kakaoCode]);
+
   // 로그인 처리 핸들러
   const handleLogin = async (e) => {
     e.preventDefault(); // 폼 기본 제출 동작 방지
 
     if (!loginId) {
-      alert("아이디를 입력해주세요.");
+      showBasicModal("아이디를 입력해주세요.");
       return;
     }
 
@@ -243,7 +377,7 @@ function Login({ setIsLoggedIn, setActiveTab }) {
 
     if (loginType === "password") {
       if (!loginPw) {
-        alert("비밀번호를 입력해주세요.");
+        showBasicModal("비밀번호를 입력해주세요.");
         return;
       }
       console.log("로그인 방식: 비밀번호");
@@ -259,18 +393,45 @@ function Login({ setIsLoggedIn, setActiveTab }) {
       )
         .then((res) => {
           dispatch({ type: "LOGIN", user: res.data });
-          setIsLoggedIn(true);
-          setActiveTab("home");
+          setView("loggedIn");
+          navigate("/");
         })
         .catch((error) => {
           console.error("로그인 오류:", error);
-          if (error.response?.status === 403) {
-            console.log(error.response.data);
-            alert(error.response.data);
-          } else if (error.response?.status === 404) {
-            alert(error.response.data);
+          if (error?.status === 406) {
+            showConfirmModal(
+              "계정을 복구하시겠습니까?",
+              "탈퇴한 사용자",
+              "이미 탈퇴한 사용자 입니다",
+              () => {
+                GET(`/users/restore/${loginId}`, {}, false)
+                  .then((res) => {
+                    console.log(res);
+                    showBasicModal(
+                      "계정이 복구되었습니다. 다시 로그인 해 주세요.",
+                      "계정 복구"
+                    );
+                    navigate("/login", { replace: true });
+                  })
+                  .catch((err) => {
+                    console.log(err);
+                    showBasicModal(
+                      "계정 복구에 실패하였습니다",
+                      "네트워크 오류"
+                    );
+                  });
+              }
+            );
+          } else if (typeof error.response?.data === "string") {
+            const msg = error.response.data;
+            if (msg.length > 0)
+              showBasicModal(
+                msg.substring(msg.indexOf(":") + 1),
+                "로그인 실패"
+              );
+            else showBasicModal("로그인에 실패하였습니다", "로그인 실패");
           } else {
-            alert(error.response.data);
+            showBasicModal("로그인에 실패하였습니다.", "네트워크 에러");
           }
         });
 
@@ -354,59 +515,15 @@ function Login({ setIsLoggedIn, setActiveTab }) {
 
     return interval;
   };
-  // 회원가입 처리 핸들러
-  const handleSignup = async (e) => {
-    e.preventDefault();
-
-    if (!signupId || !signupPw || !signupPwConfirm) {
-      alert("모든 항목을 입력해주세요.");
-      return;
-    }
-    if (signupPw !== signupPwConfirm) {
-      alert("비밀번호가 일치하지 않습니다.");
-      return;
-    }
-
-    try {
-      //메인서버 가입
-      await POST(
-        "/users/signup",
-        {
-          usersName: "테스트유저",
-          email: signupId,
-          profileImg: "/img/userAvatar.png",
-          nickName: "테스트닉네임",
-          phoneNum: "01012345678",
-          biosDto: {
-            gender: false,
-            age: 40,
-            height: 180,
-            weight: 90,
-          },
-          authDto: {
-            password: signupPw,
-          },
-        },
-        false
-      );
-
-      alert("회원가입이 완료되었습니다! 로그인 페이지로 이동합니다.");
-      setView("login"); // 성공 시 로그인 뷰로 전환
-    } catch (error) {
-      console.error("회원가입 통신 오류:", error);
-      alert("서버와 통신 중 오류가 발생했습니다.");
-    }
-  };
 
   const handlePasswordlessRegister = async () => {
-    await POST(
-      "/join",
-      { id: loginId, pw: loginPw },
-      false,
-      "passwordless"
-    ).then(async (res) => {
-      setView("passwordless");
-    });
+    setLoginId(currentLoginInfo.id);
+    setLoginPw(currentLoginInfo.pw);
+    await POST("/join", currentLoginInfo, false, "passwordless").then(
+      async (res) => {
+        setView("passwordless");
+      }
+    );
     //setView("passwordless");
   };
 
@@ -418,12 +535,11 @@ function Login({ setIsLoggedIn, setActiveTab }) {
       </div>
 
       {/* 로그인 뷰 */}
-      {view === "login" && (
+      {view === "login" && !user && (
         <FormComponent
           title="로그인"
           subtitle="다듬에 오신 것을 환영합니다."
           onSubmit={handleLogin}
-          showActions={false}
           variant="elevated"
           size="large"
           layout="vertical"
@@ -499,87 +615,49 @@ function Login({ setIsLoggedIn, setActiveTab }) {
             >
               로그인
             </ButtonComponent>
-
+            <ButtonComponent
+              variant="ghost"
+              size="large"
+              fullWidth
+              style={{ objectFit: "fill", padding: "0" }}
+              onClick={() => {
+                kakaoRef.current.click();
+              }}
+            >
+              <img
+                src={"/img/kakao_login.png"}
+                style={{ height: "100%" }}
+                alt="kakao"
+              />
+              <a href={KAKAO_AUTH_URL} ref={kakaoRef} hidden></a>
+            </ButtonComponent>
             <ButtonComponent
               variant="outline-primary"
               size="large"
-              onClick={() => setView("register")}
+              onClick={() => navigate("/signup")}
               fullWidth
             >
               계정이 없으신가요? 회원가입
             </ButtonComponent>
           </div>
+
+          <div className={styles["button-find"]}>
+            <ButtonComponent
+              variant="outline-primary"
+              size="large"
+              onClick={() => navigate("/findid")}
+            >
+              아이디 찾기
+            </ButtonComponent>
+            <ButtonComponent
+              variant="outline-primary"
+              size="large"
+              onClick={() => navigate("/findpw")}
+            >
+              비밀번호 찾기
+            </ButtonComponent>
+          </div>
         </FormComponent>
-      )}
-
-      {/* 회원가입 뷰 */}
-      {view === "register" && (
-        <div className={styles["register-container"]}>
-          <FormComponent
-            title="회원가입"
-            subtitle="몇 가지 정보만 입력하면 바로 시작할 수 있어요."
-            onSubmit={handleSignup}
-            showActions={false}
-            variant="elevated"
-            size="large"
-            layout="vertical"
-          >
-            <FormComponent.Field label="아이디" required>
-              <InputComponent
-                placeholder="사용할 아이디를 입력하세요"
-                value={signupId}
-                onChange={(e) => setSignupId(e.target.value)}
-                required
-                variant="outlined"
-                size="medium"
-              />
-            </FormComponent.Field>
-
-            <FormComponent.Field label="비밀번호" required>
-              <InputComponent
-                type="password"
-                placeholder="비밀번호를 입력하세요"
-                value={signupPw}
-                onChange={(e) => setSignupPw(e.target.value)}
-                required
-                variant="outlined"
-                size="medium"
-              />
-            </FormComponent.Field>
-
-            <FormComponent.Field label="비밀번호 확인" required>
-              <InputComponent
-                type="password"
-                placeholder="비밀번호를 다시 한번 입력하세요"
-                value={signupPwConfirm}
-                onChange={(e) => setSignupPwConfirm(e.target.value)}
-                required
-                variant="outlined"
-                size="medium"
-              />
-            </FormComponent.Field>
-
-            <div className={styles["button-group"]}>
-              <ButtonComponent
-                type="submit"
-                variant="primary"
-                size="large"
-                onClick={handleSignup}
-                fullWidth
-              >
-                가입하기
-              </ButtonComponent>
-              <ButtonComponent
-                variant="outline-primary"
-                size="large"
-                onClick={() => setView("login")}
-                fullWidth
-              >
-                이미 계정이 있으신가요? 로그인
-              </ButtonComponent>
-            </div>
-          </FormComponent>
-        </div>
       )}
 
       {/* 패스워드리스 등록 뷰 */}
@@ -635,19 +713,21 @@ function Login({ setIsLoggedIn, setActiveTab }) {
       )}
 
       {/* 로그인 성공 화면 */}
-      {view === "loggedIn" && (
+      {(view === "loggedIn" || user) && view !== "passwordless" && (
         <FormComponent
           title="로그인"
           subtitle="다듬에 오신 것을 환영합니다."
           onSubmit={handleLogin}
-          showActions={false}
           variant="elevated"
           size="large"
           layout="vertical"
           className={styles["logged-in-container"]}
         >
           <h2>로그인 성공!</h2>
-          <p>환영합니다, {loginId}님!</p>
+          <p>
+            환영합니다, <span style={{ color: "#2563eb" }}>{user.email}</span>
+            님!
+          </p>
           <p>다듬 서비스를 이용하실 수 있습니다.</p>
 
           <div className={styles["button-group"]}>
@@ -655,28 +735,11 @@ function Login({ setIsLoggedIn, setActiveTab }) {
               variant="outline-primary"
               size="large"
               onClick={() => {
-                // App.jsx의 setIsLoggedIn을 호출하여 메인 앱으로 이동
-                window.location.reload(); // 임시로 페이지 새로고침
+                navigate("/", { replace: true });
               }}
               fullWidth
             >
               메인 화면으로 이동
-            </ButtonComponent>
-            <ButtonComponent
-              variant="outline-primary"
-              size="large"
-              onClick={handlePasswordlessRegister}
-              fullWidth
-            >
-              패스워드리스 등록
-            </ButtonComponent>
-            <ButtonComponent
-              variant="outline-primary"
-              size="large"
-              onClick={() => setView("login")}
-              fullWidth
-            >
-              다시 로그인
             </ButtonComponent>
           </div>
         </FormComponent>

@@ -3,11 +3,69 @@
   padding: 24px;
   max-width: 1200px;
   margin: 0 auto;
+  margin-bottom: 24px;
   background-color: #ffffff;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   gap: 24px;
+  border-radius: 1rem;
+}
+
+/* 로딩 상태 스타일 */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #17a2b8;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 에러 상태 스타일 */
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.errorMessage {
+  color: #dc3545;
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.retryButton {
+  background-color: #17a2b8;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.retryButton:hover {
+  background-color: #138496;
 }
 
 /* 웹 환경에서 2열 레이아웃 */
@@ -35,9 +93,9 @@
   
   /* 웹에서는 업적 컨테이너의 너비를 고정하여 일정한 레이아웃 유지 */
   .achievementsContainer {
-    width: 700px; /* 고정 너비로 설정 */
-    min-width: 700px;
-    max-width: 700px;
+    width: 600px; /* 고정 너비로 설정 */
+    min-width: 600px;
+    max-width: 600px;
   }
   
   /* 웹에서는 카테고리 간격을 더 줄임 */
@@ -57,8 +115,36 @@
 /* 모바일 환경 */
 @media (max-width: 1023px) {
   .mobileTitle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     margin-bottom: 16px;
+    position: relative;
   }
+}
+
+.refreshButton {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.refreshButton:hover:not(:disabled) {
+  background-color: #f8f9fa;
+}
+
+.refreshButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .pageTitle {
@@ -336,6 +422,34 @@
 }
 
 .achievementFooter {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.progressInfo {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.progressBar {
+  width: 100%;
+  height: 6px;
+  background-color: #e9ecef;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #17a2b8, #20c997);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.progressText {
   display: flex;
   justify-content: flex-end;
   align-items: center;

@@ -1,4 +1,4 @@
-import { createContext, useReducer } from "react";
+import { createContext, useReducer, useContext } from "react";
 
 //초기값 user는 로컬스토리지에 'user'라는 키로 저장된 데이터가 있으면 읽어오고 없으면 null저장
 const initialState = {user: JSON.parse(localStorage.getItem('user'))||null};
@@ -13,6 +13,11 @@ function authReducer(state, action){
             //로그아웃인 경우 로컬스토리지에서 user정보 지우기
             localStorage.removeItem('user');
             return {...state, user:null};
+        case 'UPDATE_USER':
+            //사용자 정보 업데이트
+            const updatedUser = {...state.user, ...action.userData};
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+            return {...state, user:updatedUser};
         default:
             return state;
     };
@@ -29,3 +34,12 @@ export function AuthProvider({children}){
         </AuthContext.Provider>
     </>
 };
+
+// useAuth 훅 추가
+export function useAuth() {
+    const context = useContext(AuthContext);
+    if (context === undefined) {
+        throw new Error('useAuth must be used within an AuthProvider');
+    }
+    return context;
+}

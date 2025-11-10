@@ -10,9 +10,11 @@
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  padding: 20px;
+  padding: 16px;
   box-sizing: border-box;
   pointer-events: auto;
+  /* 모바일에서 스크롤 방지 */
+  overflow: hidden;
 }
 
 /* 모달 자체는 포인터 이벤트를 허용하되, 오버레이 클릭은 처리 */
@@ -51,6 +53,10 @@
   box-sizing: border-box;
   /* 모달 내부 레이아웃 개선 */
   max-height: 90vh;
+  /* 모바일에서 안전한 여백 확보 */
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 32px);
+  margin: auto;
 }
 
 /* 모달 애니메이션 */
@@ -88,27 +94,27 @@
 
 /* 크기별 스타일 */
 .small {
-  width: calc(100vw - 48px);
+  width: calc(100vw - 32px);
   height: auto;
   min-height: 200px;
   max-width: 400px;
-  max-height: 90vh;
+  max-height: calc(100vh - 32px);
 }
 
 .medium {
-  width: calc(100vw - 48px);
+  width: calc(100vw - 32px);
   height: auto;
   min-height: 300px;
   max-width: 600px;
-  max-height: 90vh;
+  max-height: calc(100vh - 32px);
 }
 
 .large {
-  width: calc(100vw - 48px);
+  width: calc(100vw - 32px);
   height: auto;
   min-height: 400px;
   max-width: 800px;
-  max-height: 90vh;
+  max-height: calc(100vh - 32px);
 }
 
 /* 모달 헤더 */
@@ -174,14 +180,16 @@
   flex: 1;
   padding: 16px 24px 24px 24px;
   overflow-y: auto;
-  max-height: calc(100% - 120px);
+  max-height: calc(100vh - 200px);
   min-height: 0;
   flex-shrink: 1;
   /* 스크롤바 스타일링 및 스크롤 동작 개선 */
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 #f1f5f9;
   /* 스크롤 시 하단 여백 추가 */
-  padding-bottom: 80px;
+  padding-bottom: 20px;
+  /* 모바일에서 스크롤 개선 */
+  -webkit-overflow-scrolling: touch;
 }
 
 /* 웹킷 스크롤바 스타일링 */
@@ -260,6 +268,8 @@
 /* 반응형 디자인 - 모든 화면에서 동일한 스타일 */
 .modal-overlay {
   padding: 16px;
+  /* 하단 내비게이션 바와의 간격 확보 */
+  padding-bottom: 80px;
 }
 
 .modal-header {
@@ -280,12 +290,36 @@
 
 /* 모바일에서 액션 버튼 세로 배치 */
 @media (max-width: 480px) {
+  .modal-overlay {
+    padding: 8px;
+    /* 모바일에서 하단 여백 증가 - 내비게이션 바와의 간격 확보 */
+    padding-bottom: 120px;
+  }
+
+  .modal {
+    max-width: calc(100vw - 16px);
+    max-height: calc(100vh - 16px);
+  }
+
   .modal-actions {
     flex-direction: column;
   }
 
   .modal-actions > * {
     width: 100%;
+  }
+
+  .modal-header {
+    padding: 16px 16px 8px 16px;
+  }
+
+  .modal-content {
+    padding: 8px 16px 16px 16px;
+    max-height: calc(100vh - 120px);
+  }
+
+  .modal-actions {
+    padding: 16px 16px 8px 16px;
   }
 }
 

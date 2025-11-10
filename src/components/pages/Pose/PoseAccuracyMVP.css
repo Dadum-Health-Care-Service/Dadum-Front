@@ -1,85 +1,466 @@
-/* 컨테이너 */
-.pose-mog{
-  max-width: 375px; margin: 0 auto; padding: 12px; color:#0B1628;
-  font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+/* PoseAccuracyMVP.css */
+
+/* ===== Base ===== */
+:root {
+  --bg: #f7f8fb;
+  --card: #ffffff;
+  --text: #111827;
+  --sub: #6b7280;
+  --primary: #2563eb;
+  --primary-100: #dbeafe;
+  --primary-300: #93c5fd;
+  --sky-100: #e0f2fe;
+  --sky-300: #7dd3fc;
+  --sky-700: #0369a1;
+  --border: #e5e7eb;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-/* 헤더 */
-.mog-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
-.mog-header .brand{ font-weight:800; letter-spacing:.4px; }
-.mog-header .title{ font-weight:600; opacity:.9; }
-.mog-header .bell{ width:28px; height:28px; border-radius:50%;
-  background: radial-gradient(circle at 70% 30%, #FFD86B 0 40%, #F9B400 41% 100%); border:none; }
-
-/* 카드 */
-.card{
-  background:#FFFFFF; border:1px solid #E6EEF7; border-radius:16px;
-  box-shadow:0 6px 20px rgba(16,42,67,.06); padding:12px; margin-bottom:12px;
+* {
+  box-sizing: border-box;
 }
-.card__title{ font-size:14px; font-weight:700; margin-bottom:8px; }
-
-/* 라이브 스테이지 */
-.live-stage{ position:relative; }
-.live-viewport{
-  position:relative;
-  width:100%;
-  /* 비율: 모델 준비 전에도 16/9 유지 (초기 높이 0 방지) */
-  aspect-ratio: var(--live-ar, 16/9);
-  background:#000;
-  border-radius:12px; overflow:hidden;
-}
-.live-video{
-  position:absolute; inset:0; width:100%; height:100%;
-  opacity:0; pointer-events:none; /* 프레임 공급만, 표시 안 함 */
-}
-.live-canvas{
-  position:absolute; inset:0; width:100%; height:100%;
-  display:block; /* safari에서 0x0 되는 것 방지 */
+body {
+  /* background: var(--bg); */
+  color: var(--text);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial,
+    Apple SD Gothic Neo, Noto Sans KR, sans-serif;
 }
 
-.fs-btn{
-  position:absolute; right:8px; top:8px;
-  width:32px; height:32px; border-radius:8px; border:1px solid #DDE7F5;
-  background:#fff; display:grid; place-items:center; z-index:2; cursor:pointer;
+/* ===== Page ===== */
+.pose-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 12px;
 }
 
-/* 상태/액션 */
-.status-row{ display:flex; align-items:center; justify-content:space-between; margin-top:8px; }
-.status-left{ display:flex; gap:8px; align-items:center; }
-.status-ok{ width:8px; height:8px; border-radius:50%; background:#bbb; }
-.status-ok.on{ background:#22c55e; }
-.status-label{ font-size:12px; color:#0b1628; opacity:.8; }
-.status-actions .btn{ margin-left:6px; }
-
-.btn{ border:none; padding:8px 12px; border-radius:10px; cursor:pointer; }
-.btn-sm{ padding:6px 10px; font-size:12px; }
-.btn-primary{ background:#245cff; color:#fff; }
-.btn-secondary{ background:#e6eef7; color:#0b1628; }
-
-.cta-wrap{ display:flex; justify-content:center; margin:8px 0 12px; }
-.cta-primary{ width:100%; max-width:320px; }
-
-.dropzone{
-  border:1px dashed #BFD3F2; border-radius:12px; padding:16px; text-align:center; color:#4c5a74;
+/* ===== Card ===== */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 14px;
+}
+.card-title {
+  margin: 6px 0 12px;
+  font-weight: 700;
+  font-size: 16px;
 }
 
-/* 게이지/바(기존 스타일 유지) */
-.analysis{ display:flex; gap:12px; align-items:center; }
-.gauge{
-  --p: 0%;
-  width:96px; height:96px; border-radius:50%;
-  background:
-    conic-gradient(#2F6BFF var(--p), #E6EEF7 0),
-    radial-gradient(#fff 62%, transparent 63%);
-  display:grid; place-items:center; font-weight:800; color:#0B1628;
+/* ===== Header Toolbar (rework) ===== */
+.card-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  box-shadow: var(--shadow);
 }
-.gauge::after{ content: attr(data-val); font-size:18px; }
 
-.bars{ flex:1; display:grid; gap:6px; }
-.bar{ display:grid; grid-template-columns:64px 1fr; align-items:center; gap:6px; }
-.bar__track{ height:8px; background:#E6EEF7; border-radius:999px; overflow:hidden; }
-.bar__fill{ height:100%; background:linear-gradient(90deg,#2F6BFF,#5FD4FF); }
+/* 상태 배지 */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  font-weight: 700;
+  color: var(--sky-700);
+  background: var(--primary-100);
+  border: 1px solid var(--primary-300);
+  border-radius: 999px;
+}
+.status::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #94a3b8;
+  display: inline-block;
+}
+.status.is-on::before {
+  background: var(--primary);
+}
 
-/* 전체화면 폴백(.pfs) */
-.pfs{ position:fixed; inset:0; background:#000; z-index:9999; padding:12px; }
-.pfs .live-viewport{ height:100%; width:100%; aspect-ratio:auto; }
+.toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+/* 세그먼트 버튼 (전/후면/엔진/세그모드 공통) */
+.camera-switch {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+}
+.camera-switch .cam-btn {
+  min-width: 56px;
+  height: 36px;
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--text);
+}
+.camera-switch .cam-btn + .cam-btn {
+  border-left: 1px solid var(--border);
+}
+.camera-switch .cam-btn.on {
+  background: var(--primary-100);
+  color: var(--sky-700);
+  box-shadow: inset 0 0 0 2px var(--primary-300);
+}
+
+/* 스위치 토글 */
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  background: #fff;
+  color: #374151;
+  user-select: none;
+  cursor: pointer;
+}
+.toggle input {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 44px;
+  height: 24px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  position: relative;
+  outline: none;
+  transition: background 0.15s ease;
+}
+.toggle input::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #9ca3af;
+  transition: left 0.15s ease, background 0.15s ease;
+}
+.toggle input:checked {
+  background: var(--primary-100);
+}
+.toggle input:checked::after {
+  left: 22px;
+  background: var(--primary);
+}
+
+/* 파일 선택 버튼 */
+.file-btn {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #fff;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+.file-btn:hover {
+  border-color: #c7d2fe;
+}
+.file-btn.disabled {
+  opacity: 0.55;
+  pointer-events: none;
+}
+.file-btn input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.file-name {
+  max-width: 280px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--sub);
+}
+
+/* 작은 화면에서 파일명 숨김 */
+@media (max-width: 560px) {
+  .file-name {
+    display: none;
+  }
+}
+
+/* ===== Stage / Viewport ===== */
+.stage {
+  position: relative;
+  width: 100%;
+}
+.viewport {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 12px;
+  background: #000;
+  min-height: 360px;
+}
+.hidden {
+  display: none;
+}
+
+/* ===== CTA ===== */
+.cta {
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px 16px;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  background: var(--primary);
+  color: #fff;
+  transition: transform 0.03s ease, opacity 0.15s ease;
+}
+.cta:active {
+  transform: translateY(1px);
+}
+.cta.stop {
+  background: #ef4444;
+}
+
+/* ===== Dropzone (레퍼런스) ===== */
+.dropzone {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  color: #4b5563;
+  background: #f9fafb;
+}
+.dropzone:hover {
+  background: #f3f4f6;
+}
+.hint {
+  color: #6b7280;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+/* ===== Progress ===== */
+.progress-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #374151;
+  margin-bottom: 8px;
+}
+.spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #d1d5db;
+  border-top-color: #60a5fa;
+  animation: sp 1s linear infinite;
+}
+@keyframes sp {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.progress {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  background: #eef2ff;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.progress-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: #60a5fa;
+}
+
+/* ===== Chips / Cues ===== */
+.chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 8px 0;
+}
+.chip {
+  background: #f3f4f6;
+  border: 1px solid var(--border);
+  color: #374151;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+.chip--title {
+  background: #e5edff;
+  color: #1d4ed8;
+  border-color: #c7d2fe;
+}
+.cue-list {
+  margin: 6px 0 0 18px;
+  color: #374151;
+}
+
+/* ===== Exercise header ===== */
+.ex-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ex-name {
+  font-size: 18px;
+  font-weight: 700;
+}
+.ex-conf {
+  font-size: 12px;
+  color: #1f2937;
+  background: #ecfeff;
+  border: 1px solid #a5f3fc;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+/* ===== Metrics & ROM ===== */
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+.metric {
+  background: #f9fafb;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px;
+}
+.metric__label {
+  font-size: 12px;
+  color: var(--sub);
+}
+.metric__value {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.rom-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+.rom {
+  background: #f9fafb;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px;
+}
+.rom__label {
+  font-size: 12px;
+  color: var(--sub);
+  margin-bottom: 8px;
+}
+.rom__bar {
+  position: relative;
+  height: 8px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  overflow: hidden;
+}
+.rom__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: linear-gradient(90deg, #2f6bff, #5fd4ff);
+}
+.rom__val {
+  margin-top: 6px;
+  font-weight: 700;
+}
+
+/* ===== Issues ===== */
+.issues {
+  margin-top: 12px;
+}
+.issues__title {
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.issues__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.issues__item {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px;
+  background: #fff;
+}
+.issues__item-title {
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.issues__item-detail {
+  color: #374151;
+  font-size: 14px;
+}
+.issues__item-fix {
+  margin-top: 4px;
+  color: #065f46;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 13px;
+}
+
+/* ==== Force button look & clickability (reset CSS 충돌 방지) ==== */
+button.cta,
+.cta {
+  -webkit-appearance: none;
+  appearance: none;
+  display: inline-block;
+  border: none !important;
+  background: var(--primary) !important;
+  color: #fff !important;
+  padding: 12px 16px !important;
+  font: inherit;
+  font-weight: 700;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: center;
+}
+.cta.stop {
+  background: #ef4444 !important;
+}
+.camera-switch .cam-btn {
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}

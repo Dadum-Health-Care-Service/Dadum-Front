@@ -8,30 +8,46 @@ import {
   FaComments,
   FaCamera,
   FaUtensils,
-  FaTrophy,
-  FaRobot,
-} from "react-icons/fa"; // ← FaRobot 추가
+  FaShoppingBag,
+  FaMapMarkerAlt,
+} from "react-icons/fa"; // ← FaMapMarkerAlt 추가
 import styles from "./BottomNavigation.module.css";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
+import NotificationDot from "./NotificationDot";
+import { RunContext } from "../../context/RunContext";
 
 // 탭 설정을 상수로 분리
 const NAVIGATION_TABS = [
-  { id: "home", label: "홈", icon: FaHome },
-  { id: "routine", label: "루틴", icon: FaList },
-  { id: "achievement", label: "업적", icon: FaTrophy },
-  { id: "pose", label: "분석", icon: FaCamera },
-  { id: "calorie", label: "칼로리", icon: FaUtensils },
-  { id: "daily", label: "요약", icon: FaChartBar },
-  { id: "statistics", label: "통계", icon: FaChartBar },
-  { id: "social", label: "소셜", icon: FaComments },
-  { id: "mypage", label: "마이페이지", icon: FaUser },
+  { to: "/", label: "홈", icon: FaHome },
+  { to: "/routine", label: "루틴", icon: FaList },
+  { to: "/shop", label: "쇼핑", icon: FaShoppingBag },
+  { to: "/pose", label: "분석", icon: FaCamera },
+  { to: "/calorie", label: "칼로리", icon: FaUtensils },
+  { to: "/daily", label: "요약", icon: FaChartBar },
+  { to: "/social", label: "소셜", icon: FaComments },
+  { to: "/place", label: "플레이스", icon: FaMapMarkerAlt },
+  { to: "/mypage", label: "마이페이지", icon: FaUser },
+  { to: "/admin", label: "관리자", icon: FaUser },
 ];
 
 // 개별 탭 아이템 컴포넌트
-const NavigationTab = ({ tab, isActive, onTabChange }) => {
+const NavigationTab = ({ tab, isNotify }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { isRunning } = useContext(RunContext);
   const IconComponent = tab.icon;
 
+  const isActive =
+    location.pathname.startsWith('/mypage') 
+    ? tab.to === '/mypage' 
+    : location.pathname === '/shop' || location.pathname === '/orders'
+    ? tab.to === '/shop'
+    : location.pathname === tab.to;
+
   const handleClick = () => {
-    onTabChange(tab.id);
+    navigate(tab.to);
   };
 
   const getNavLinkClassName = () => {
@@ -43,7 +59,19 @@ const NavigationTab = ({ tab, isActive, onTabChange }) => {
   return (
     <Nav.Item className={styles.navItem}>
       <Nav.Link className={getNavLinkClassName()} onClick={handleClick}>
-        <IconComponent className={styles.icon} />
+        {isRunning && tab.to === "/routine" ? (
+          <img
+            src={"/img/RunningRoutine.gif"}
+            style={{
+              width: "20px",
+              height: "23px",
+              color: location.pathname === "/routine" ? "#2563eb" : "grey",
+            }}
+          />
+        ) : (
+          <IconComponent className={styles.icon} />
+        )}
+
         <span className={styles.label}>{tab.label}</span>
       </Nav.Link>
     </Nav.Item>
@@ -51,15 +79,21 @@ const NavigationTab = ({ tab, isActive, onTabChange }) => {
 };
 
 // 메인 BottomNavigation 컴포넌트
-const BottomNavigation = ({ activeTab, onTabChange }) => {
+const BottomNavigation = ({ isNotify }) => {
+  const { user } = useContext(AuthContext);
   const renderNavigationTabs = () => {
-    return NAVIGATION_TABS.map((tab) => (
-      <NavigationTab
-        key={tab.id}
-        tab={tab}
-        isActive={activeTab === tab.id}
-        onTabChange={onTabChange}
-      />
+    return NAVIGATION_TABS.filter((tab) => {
+      if (user.roles?.includes("SUPER_ADMIN")) {
+        return tab.to !== "/mypage";
+      } else {
+        return tab.to !== "/admin";
+      }
+      return true;
+    }).map((tab, i) => (
+      <React.Fragment key={i}>
+        <NavigationTab key={tab.to} tab={tab} />
+        {isNotify === "REQUEST_ROLE" && <NotificationDot />}
+      </React.Fragment>
     ));
   };
 

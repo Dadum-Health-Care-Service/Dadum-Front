@@ -1,34 +1,109 @@
-// src/components/pages/social/social.jsx
-import React, { useMemo, useState, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
-import "./social.css";
+import React, { useEffect, useMemo, useState, useCallback, useRef, useContext } from "react";
+import "./Social.css";
+import ParticipatedGatheringsSidebar from "./components/ParticipatedGatheringsSidebar";
+import PostCard from "./components/PostCard.jsx";
+import { useApi } from "../../../utils/api/useApi";
+import { AuthContext } from "../../../context/AuthContext";
 
-/* -----------------------------
-   모달(포털)
-   - 훅은 항상 호출하고, open으로 효과/렌더만 분기
------------------------------ */
-function ComposeModal({ open, onClose, text, setText, privacy, setPrivacy }) {
-  const textareaRef = useRef(null);
+/* ===== util ===== */
+function toTime(v) {
+  if (!v) return 0;
+  const d = new Date(v);
+  if (!isNaN(d)) return d.getTime();
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+}
+function sortPosts(list) {
+  return [...(list || [])].sort((a, b) => {
+    const ta = toTime(a?.createdAt);
+    const tb = toTime(b?.createdAt);
+    if (tb !== ta) return tb - ta;
+    const ia = Number(a?.postId ?? 0);
+    const ib = Number(b?.postId ?? 0);
+    return ib - ia;
+  });
+}
+function extractLikeInfo(p) {
+  const isLiked = !!(p?.likedByMe ?? p?.isLiked ?? p?.liked ?? p?.userLiked ?? false);
+  const rawCount = p?.likeCount ?? p?.likes ?? p?.like_count ?? p?.totalLikes ?? 0;
+  return { isLiked, likeCount: Number(rawCount) || 0 };
+}
+function normalizeMe(d) {
+  if (!d) return null;
+  
+  // AuthContext에서 제공하는 user 객체의 필드 매핑
+  const id = d.usersId ?? d.id ?? d.userId ?? d.memberId ?? "";
+  const email = d.email ?? "";
+  const handle = email ? email.split('@')[0] : (d.username ?? d.handle ?? d.loginId ?? "");
+  const name = d.nickName ?? d.nickname ?? d.name ?? d.displayName ?? d.userName ?? (email ? email.split('@')[0] : "사용자");
+  const avatar = d.profileImg ?? d.profileImage ?? d.avatar ?? d.imageUrl ?? d.photoUrl ?? d.picture ?? "";
+  
+  return {
+    id: String(id),
+    handle: String(handle),
+    name: String(name),
+    avatar: String(avatar),
+  };
+}
 
-  // ESC로 닫기 (열렸을 때만 리스너 등록)
+/* ===== 작성 모달 ===== */
+function ComposeModal({ open, onClose, onSubmit, me }) {
+  const { POST } = useApi();
+  const [text, setText] = useState("");
+  const [imageFile, setImageFile] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [visibility, setVisibility] = useState("public");
+  const [uploading, setUploading] = useState(false);
+
   useEffect(() => {
-    if (!open) return;
-    const onEsc = (e) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onEsc);
-    return () => window.removeEventListener("keydown", onEsc);
-  }, [open, onClose]);
-
-  // 열릴 때 자동 포커스
-  useEffect(() => {
-    if (open) textareaRef.current?.focus();
+    if (open) document.body.classList.add("modal-open");
+    else document.body.classList.remove("modal-open");
+    return () => document.body.classList.remove("modal-open");
   }, [open]);
+
+  useEffect(() => {
+    return () => {
+      if (preview && preview.startsWith("blob:")) URL.revokeObjectURL(preview);
+    };
+  }, [preview]);
+
+  if (!open) return null;
 
   const canPost = text.trim().length > 0;
 
-  // 렌더 분기 (훅 호출 이후에만!)
-  if (!open) return null;
+  const onFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result; // data:image/...;base64,....
+      setImageFile(base64String);
+      setPreview(base64String);
+    };
+    reader.readAsDataURL(file);
+  };
 
-  return createPortal(
+  const handleSubmit = async () => {
+    try {
+      setUploading(true);
+      await POST("/posts", {
+        postContent: text,
+        postImage: imageFile ? imageFile : "/images/default.png",
+        visibility,
+      });
+      setText("");
+      setImageFile(null);
+      setPreview(null);
+      onClose();
+      onSubmit(); // 피드 새로고침
+    } catch (error) {
+      console.error("게시글 작성 실패:", error);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
     <div className="compose-modal open" role="dialog" aria-modal="true" aria-label="게시글 작성">
       <div className="compose-backdrop" onClick={onClose} />
       <div className="compose-card">
@@ -38,204 +113,263 @@ function ComposeModal({ open, onClose, text, setText, privacy, setPrivacy }) {
         </div>
 
         <div className="compose-card-body">
+          {/* 작성자 정보 */}
+          <div className="compose-author">
+            <img 
+              src={me?.avatar || "/img/userAvatar.png"} 
+              alt="" 
+              className="compose-author__img"
+            />
+            <div>
+              <div className="compose-author__name">{me?.name || "사용자"}</div>
+              <div className="compose-author__id">@{me?.handle || "user"}</div>
+            </div>
+          </div>
+
+          {/* 텍스트 입력 */}
           <div className="compose-row">
-            <span className="avatar lg" aria-hidden />
             <textarea
-              ref={textareaRef}
-              placeholder="어떤 운동을 하셨나요?"
+              className="compose-textarea"
+              placeholder="무슨 일이 벌어지고 있나요?"
               value={text}
               onChange={(e) => setText(e.target.value)}
+              rows={4}
             />
           </div>
 
-          {/* 툴바 버튼 + 공개 셀렉트 + 게시하기 */}
+          {/* 이미지 미리보기 */}
+          {preview && <img src={preview} alt="" className="compose-preview" />}
+
+          {/* 하단 액션 바 */}
           <div className="compose-actions">
-            <div className="tools">
-              <button className="tool-btn" type="button" aria-label="사진 또는 영상 첨부"><span className="ico">🖼️</span></button>
-              <button className="tool-btn" type="button" aria-label="운동 기록 첨부"><span className="ico">🏋️</span></button>
+            <div className="compose-tools">
+              <label className="tool-btn" aria-label="사진 첨부">
+                <span className="ico">📷</span>
+                <span className="tool-label">사진</span>
+                <input type="file" accept="image/*" style={{ display: "none" }} onChange={onFileChange} />
+              </label>
+              <button className="tool-btn" type="button" aria-label="이모지">
+                <span className="ico">😊</span>
+                <span className="tool-label">이모지</span>
+              </button>
             </div>
 
-            <div className="submit">
-              <select
-                className="pill-select"
-                value={privacy}
-                onChange={(e) => setPrivacy(e.target.value)}
-                aria-label="공개 범위"
-              >
-                <option value="public">공개</option>
-                <option value="followers">팔로워</option>
-                <option value="private">비공개</option>
-              </select>
-
-              {/* CHANGED: Bootstrap btn-primary 제거 → 우리 cta만 사용 */}
+            <div className="compose-submit">
+              <div className="select pill visibility">
+                <select aria-label="공개 범위" value={visibility} onChange={(e) => setVisibility(e.target.value)}>
+                  <option value="public">공개</option>
+                  <option value="followers">팔로워</option>
+                  <option value="private">비공개</option>
+                </select>
+              </div>
               <button
-                className="post-btn cta"
+                className={`post-btn cta${!canPost || uploading ? " disabled" : ""}`}
                 type="button"
-                disabled={!canPost}
-                aria-disabled={!canPost}
-                onClick={() => {
-                  if (!canPost) return;
-                  // TODO: 서버 연동 시 전송 로직
-                  setText("");
-                  onClose();
-                }}
+                disabled={!canPost || uploading}
+                onClick={handleSubmit}
               >
-                게시하기
+                {uploading ? "업로드 중..." : "게시하기"}
               </button>
             </div>
           </div>
         </div>
       </div>
-    </div>,
-    document.body
+    </div>
   );
 }
 
-/* -----------------------------
-   소셜 페이지
------------------------------ */
+/* ===== 페이지 ===== */
 export default function Social() {
+  const { GET } = useApi();
+  const getRef = useRef(GET);        // GET 레퍼런스 고정
+  const { user } = useContext(AuthContext);
+
   const [tab, setTab] = useState("all");
+  const [posts, setPosts] = useState([]);
   const [isComposeOpen, setComposeOpen] = useState(false);
-  const [privacy, setPrivacy] = useState("public");
-  const [text, setText] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [me, setMe] = useState(null);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
-  // 모달 열릴 때 바디 스크롤 잠금
+  /* 하단 네비 높이 → CSS var */
   useEffect(() => {
-    document.body.classList.toggle("modal-open", isComposeOpen);
-    return () => document.body.classList.remove("modal-open");
-  }, [isComposeOpen]);
-
-  // 하단 네비 높이 측정 → CSS 변수 주입
-  useEffect(() => {
-    const selector = ".bottom-navigation, .bottom-nav, [data-bottom-nav], #bottom-nav";
-    const nav = document.querySelector(selector);
-
+    const root = document.documentElement;
+    const pickNav = () =>
+      document.querySelector(".bottom-navigation, .bottomNavigation, .bottom-nav, .bottomNav, .bottomBar");
     const setVar = () => {
-      const h = nav ? nav.getBoundingClientRect().height : 0;
-      document.documentElement.style.setProperty("--bottom-nav-h", `${h}px`);
+      const nav = pickNav();
+      const h = nav ? Math.ceil(nav.getBoundingClientRect().height) : 0;
+      root.style.setProperty("--bottom-nav-h", `${h}px`);
     };
-
     setVar();
-    const ro = nav ? new ResizeObserver(setVar) : null;
-    ro?.observe(nav);
     window.addEventListener("resize", setVar);
-    return () => {
-      window.removeEventListener("resize", setVar);
-      ro?.disconnect();
-    };
+    const nav = pickNav();
+    const mo = nav ? new MutationObserver(setVar) : null;
+    if (nav && mo) mo.observe(nav, { attributes: true, childList: true, subtree: true });
+    return () => { window.removeEventListener("resize", setVar); mo?.disconnect(); };
   }, []);
 
-  // 더미 피드
-  const posts = useMemo(
-    () => [
-      {
-        id: "p1",
-        name: "테스트1",
-        handle: "test1",
-        time: "2시간 전",
-        body: "오늘은 하체데이! 레그프레스 + 스쿼트. 끝나고 스트레칭 완료!",
-        tags: ["#하체", "#스쿼트"],
-        stats: { likes: 312, comments: 36, reposts: 18 },
-      },
-      {
-        id: "p2",
-        name: "테스트2",
-        handle: "test2",
-        time: "5시간 전",
-        body: "벤치 80kg 5×5 성공! 다음 주엔 82.5 도전합니다.",
-        tags: ["#가슴", "#벤치프레스"],
-        stats: { likes: 154, comments: 22, reposts: 4 },
-      },
-      {
-        id: "p3",
-        name: "테스트3",
-        handle: "test3",
-        time: "어제",
-        body: "헬스장 새 장비 들어왔어요. 시티드 로우 감성 좋네",
-        tags: ["#등"],
-        stats: { likes: 97, comments: 11, reposts: 3 },
-      },
-    ],
-    []
-  );
+  /* 현재 사용자 정보 설정 */
+  useEffect(() => {
+    if (user) {
+      const normalizedUser = normalizeMe(user);
+      if (normalizedUser) {
+        setMe(normalizedUser);
+      }
+    }
+  }, [user]);
 
-  const filtered = useMemo(
-    () => (tab === "all" ? posts : posts.slice(0, 2)),
-    [tab, posts]
-  );
+  /* 피드 */
+  const loadFeed = useCallback(async () => {
+    try {
+      setLoading(true);
+      const resp =
+        tab === "all" ? await getRef.current("/posts/list") : await getRef.current("/posts");
+      const list = Array.isArray(resp?.data) ? resp.data : [];
+      setPosts(sortPosts(list));
+    } catch (e) {
+      console.error("피드 로딩 실패:", e);
+      setPosts([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [tab]);
+
+  useEffect(() => { loadFeed(); }, [tab, loadFeed]);
+
+  const handleLikeChange = useCallback(({ postId, liked, count }) => {
+    setPosts((prev) =>
+      prev.map((p) => {
+        const pid = p.postId ?? p.id;
+        if (pid !== postId) return p;
+        const current = extractLikeInfo(p).likeCount;
+        const nextCount =
+          typeof count === "number" ? count : Math.max(0, current + (liked ? 1 : -1));
+        return {
+          ...p,
+          likedByMe: !!liked,
+          isLiked: !!liked,
+          liked: !!liked,
+          userLiked: !!liked,
+          likeCount: nextCount,
+          likes: nextCount,
+          like_count: nextCount,
+          totalLikes: nextCount,
+        };
+      })
+    );
+  }, []);
+
+  const filtered = useMemo(() => (tab === "all" ? posts : posts.slice(0, 20)), [tab, posts]);
+
+  /* 단축키: N → 작성 */
+  useEffect(() => {
+    const onKey = (e) => {
+      if ((e.key === "n" || e.key === "N") && !isComposeOpen) {
+        e.preventDefault();
+        setComposeOpen(true);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isComposeOpen]);
 
   return (
-    <div className="social-root">
-      {/* 탭 */}
-      <div className="m-toolbar">
-        <div className="seg" role="tablist" aria-label="피드 필터">
-          <button
-            className={`seg-btn ${tab === "all" ? "is-active" : ""}`}
-            onClick={() => setTab("all")}
-            role="tab"
-            aria-selected={tab === "all"}
-          >
-            전체
-          </button>
-          <button
-            className={`seg-btn ${tab === "following" ? "is-active" : ""}`}
-            onClick={() => setTab("following")}
-            role="tab"
-            aria-selected={tab === "following"}
-          >
-            팔로워
-          </button>
-        </div>
-      </div>
+    <div className="social-page">
+      {/* ===== 데스크톱 헤더행: 좌측 타이틀/탭, 우측 글쓰기 ===== */}
 
-      {/* 피드 */}
-      <div className="m-feed">
-        {filtered.map((p) => (
-          <article key={p.id} className="m-card">
-            <header className="m-card-head">
-              <span className="avatar" aria-hidden />
-              <div className="meta">
-                <div className="row1">
-                  <span className="name">{p.name}</span>
-                  <span className="sub">@{p.handle} · {p.time}</span>
-                </div>
-              </div>
-              <button className="more" aria-label="more">⋯</button>
-            </header>
+      {/* ===== 3-열 그리드 ===== */}
+      <div className="page-grid">
+        {/* 좌측 사이드(참여한 모임 사이드바) */}
+        <aside className="col left-col">
+          <ParticipatedGatheringsSidebar />
+        </aside>
 
-            <div className="m-card-body">
-              <p className="text">{p.body}</p>
-              <div className="tags">
-                {p.tags.map((t) => (
-                  <span key={t} className="chip">{t}</span>
-                ))}
+        {/* 가운데 피드 */}
+        <main className="col feed-col">
+          {/* 피드 헤더 */}
+          <div className="feed-header">
+            <div className="feed-tabs">
+              <button
+                className="mobile-hamburger"
+                onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+                aria-label="메뉴 열기"
+              >
+                ☰
+              </button>
+              <div className="seg" role="tablist" aria-label="피드 범위 선택">
+                <button
+                  className={`seg-btn ${tab === "all" ? "is-active" : ""}`}
+                  onClick={() => setTab("all")}
+                  role="tab"
+                  aria-selected={tab === "all"}
+                >전체</button>
+                <button
+                  className={`seg-btn ${tab === "following" ? "is-active" : ""}`}
+                  onClick={() => setTab("following")}
+                  role="tab"
+                  aria-selected={tab === "following"}
+                >내 게시글</button>
               </div>
-              <div className="media-skeleton" />
             </div>
+            <div className="feed-actions">
+              {/* 모바일 햄버거 버튼 */}
 
-            <footer className="m-card-actions">
-              <button className="icon-txt" type="button">💬 <span>{p.stats.comments}</span></button>
-              <button className="icon-txt" type="button">🔁 <span>{p.stats.reposts}</span></button>
-              <button className="icon-txt" type="button">❤️ <span>{p.stats.likes}</span></button>
-            </footer>
-          </article>
-        ))}
+              <button className="btn-primary" onClick={() => setComposeOpen(true)}>
+                ✍️ 글쓰기
+              </button>
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="loading">게시글을 불러오는 중...</div>
+          ) : (
+            <div className="m-feed">
+              {filtered.map((p) => {
+                const likeInfo = extractLikeInfo(p);
+                return (
+                  <PostCard
+                    key={p.postId ?? p.id}
+                    post={p}
+                    likeInfo={likeInfo}
+                    onLikeChange={handleLikeChange}
+                    onAfterMutate={loadFeed}
+                  />
+                );
+              })}
+            </div>
+          )}
+        </main>
       </div>
 
-      {/* 글쓰기 FAB */}
-      <button className="compose-fab" type="button" onClick={() => setComposeOpen(true)}>
-        ✍️ 글쓰기
-      </button>
+      {/* 모바일 사이드바 오버레이 */}
+      {isMobileSidebarOpen && (
+        <div className={`mobile-sidebar-overlay ${isMobileSidebarOpen ? 'show' : ''}`} onClick={() => setIsMobileSidebarOpen(false)}>
+          <div className="mobile-sidebar" onClick={(e) => e.stopPropagation()}>
+            <div className="mobile-sidebar-header">
+              <h3>참여한 모임</h3>
+              <button
+                className="mobile-sidebar-close"
+                onClick={() => setIsMobileSidebarOpen(false)}
+                aria-label="메뉴 닫기"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="mobile-sidebar-content">
+              <ParticipatedGatheringsSidebar />
+            </div>
+          </div>
+        </div>
+      )}
 
-      {/* 모달 */}
+
+      {/* 작성 모달 */}
       <ComposeModal
         open={isComposeOpen}
         onClose={() => setComposeOpen(false)}
-        text={text}
-        setText={setText}
-        privacy={privacy}
-        setPrivacy={setPrivacy}
+        onSubmit={loadFeed}
+        me={me}
       />
     </div>
   );

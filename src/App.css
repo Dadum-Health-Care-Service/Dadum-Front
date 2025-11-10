@@ -1,6 +1,8 @@
 .App {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+  /*min-height: 100vh;*/
+
+  background: linear-gradient(135deg, #eaf3ff 100%);
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -14,6 +16,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  background: linear-gradient(135deg, #eaf3ff 100%);
 }
 
 /* 커스텀 SelectComponent는 별도 CSS 파일에서 관리 */
@@ -126,6 +130,7 @@ body {
 .header,
 .App main {
   width: 100%;
+  height: 100vh;
   max-width: 1320px;
   margin: 0 auto;
   box-sizing: border-box;
@@ -161,15 +166,17 @@ header {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  max-width: 100%;
+  /* height: 100vh; */
   background: white;
-  position: fixed;
+  /* position: fixed; */
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   padding: 2rem;
+  overflow-x: hidden;
 }
 
 .login-header {

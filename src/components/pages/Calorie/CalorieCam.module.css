@@ -1,0 +1,486 @@
+/* 다듬 칼로리 캠 페이지 스타일 */
+
+.calorieCamPage {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #eef4ff 0%, #e6f2ff 100%);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Main Content */
+.mainContent {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+  text-align: center;
+  background-color: #f8fafc;
+}
+
+/* AI Tag */
+.aiTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #e3f2fd;
+  color: #1d4ed8;
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 2rem;
+}
+
+/* Main Headline */
+.mainHeadline {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+.highlight {
+  color: #3b82f6;
+}
+
+/* Description */
+.description {
+  font-size: 1.125rem;
+  color: #64748b;
+  margin-bottom: 3rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+/* Upload Container */
+.uploadContainer {
+  max-width: 600px;
+  margin: 0 auto 4rem;
+  border: 2px dashed #d6e4ff;
+  border-radius: 1rem;
+  padding: 3rem 2rem;
+  background: white;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(157, 184, 255, 0.18);
+}
+
+.uploadContainer:hover {
+  border-color: #3b82f6;
+  background: #f8fafc;
+  box-shadow: 0 10px 28px rgba(157, 184, 255, 0.25);
+}
+
+/* Upload Area */
+.uploadArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.uploadIcon {
+  width: 3rem;
+  height: 3rem;
+  background: #3b82f6;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin-bottom: 0.5rem;
+}
+
+.uploadTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0;
+}
+
+.uploadSubtitle {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.selectButton {
+  margin-top: 1rem;
+  background: #3b82f6;
+  border: none;
+  color: white;
+  padding: 0.75rem 2rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.selectButton:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+/* Image Preview */
+.imagePreview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.previewImage {
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: 0.75rem;
+  object-fit: cover;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.imageActions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Loading Container */
+.loadingContainer {
+  max-width: 400px;
+  margin: 0 auto 2rem;
+  padding: 2rem;
+  text-align: center;
+  background: white;
+  border-radius: 1rem;
+  border: 1.5px solid #d6e4ff;
+  box-shadow: 0 6px 20px rgba(157, 184, 255, 0.18);
+}
+
+.loadingContent p {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid #e5e7eb;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Error Container */
+.errorContainer {
+  max-width: 500px;
+  margin: 0 auto 2rem;
+  padding: 1rem;
+  background: #fef2f2;
+  border-radius: 1rem;
+  border: 1.5px solid #fca5a5;
+  box-shadow: 0 6px 20px rgba(252, 165, 165, 0.18);
+}
+
+.errorContent {
+  color: #dc2626;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* Result Container */
+.resultContainer {
+  max-width: 800px;
+  margin: 0 auto 4rem;
+  padding: 2rem;
+  background: white;
+  border-radius: 1rem;
+  border: 1.5px solid #d6e4ff;
+  box-shadow: 0 6px 20px rgba(157, 184, 255, 0.18);
+}
+
+.resultTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.resultGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.resultItem {
+  background: #ffffff;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  text-align: center;
+  border: 1.5px solid #d6e4ff;
+  box-shadow: 0 6px 20px rgba(157, 184, 255, 0.18);
+  transition: all 0.2s ease;
+}
+
+.resultItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(157, 184, 255, 0.25);
+  border-color: #bbdefb;
+}
+
+.resultItem h4 {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0 0 0.5rem 0;
+  font-weight: 500;
+}
+
+.resultItem p {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.confidence {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.confidence small {
+  background: #e3f2fd;
+  color: #1d4ed8;
+  padding: 0.5rem 1rem;
+  border-radius: 1rem;
+  font-weight: 500;
+  border: 1px solid #bbdefb;
+}
+
+.nutrients {
+  margin-bottom: 1.5rem;
+}
+
+.nutrients h4 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.nutrientGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.75rem;
+}
+
+.nutrientItem {
+  background: #ffffff;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  text-align: center;
+  border: 1.5px solid #d6e4ff;
+  box-shadow: 0 6px 20px rgba(157, 184, 255, 0.18);
+  transition: all 0.2s ease;
+}
+
+.nutrientItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(157, 184, 255, 0.25);
+  border-color: #bbdefb;
+}
+
+.nutrientItem small {
+  display: block;
+  color: #64748b;
+  font-size: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.nutrientItem span {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.alternatives {
+  text-align: center;
+}
+
+.alternatives h4 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 1rem;
+}
+
+.alternativeTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.alternativeTag {
+  background: #e3f2fd;
+  color: #1d4ed8;
+  padding: 0.5rem 1rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1px solid #bbdefb;
+}
+
+/* Features Section */
+.featuresSection {
+  margin-bottom: 4rem;
+}
+
+.sectionTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.featuresGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.featureCard {
+  background: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  text-align: center;
+  border: 1.5px solid #d6e4ff;
+  box-shadow: 0 6px 20px rgba(157, 184, 255, 0.18);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.featureCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(157, 184, 255, 0.25);
+}
+
+.featureCard h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 1rem 0;
+}
+
+.featureCard p {
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* How to Use Section */
+.howToUseSection {
+  margin-bottom: 2rem;
+}
+
+.stepsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.stepCard {
+  text-align: center;
+}
+
+.stepNumber {
+  width: 3rem;
+  height: 3rem;
+  background: #3b82f6;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 auto 1rem;
+}
+
+.stepCard h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 1rem 0;
+}
+
+.stepCard p {
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .mainContent {
+    padding: 2rem 1rem;
+  }
+
+  .mainHeadline {
+    font-size: 2rem;
+  }
+
+  .description {
+    font-size: 1rem;
+  }
+
+  .uploadContainer {
+    padding: 2rem 1rem;
+  }
+
+  .featuresGrid,
+  .stepsGrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .resultGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .nutrientGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .mainHeadline {
+    font-size: 1.75rem;
+  }
+
+  .uploadContainer {
+    padding: 1.5rem 1rem;
+  }
+
+  .imageActions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .imageActions button {
+    width: 100%;
+  }
+}

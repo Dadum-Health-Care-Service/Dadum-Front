@@ -129,7 +129,6 @@
 }
 
 .filled:hover:not(.disabled) {
-  background: #f1f5f9;
 }
 
 /* 클릭 가능한 컨테이너 */
@@ -218,29 +217,4 @@
   }
 }
 
-/* 다크 모드 지원 */
-@media (prefers-color-scheme: dark) {
-  .default,
-  .elevated,
-  .outlined {
-    background: #1f2937;
-    color: #f9fafb;
-  }
-
-  .filled {
-    background: #374151;
-    color: #f9fafb;
-  }
-
-  .outlined {
-    border-color: #4b5563;
-  }
-
-  .outlined:hover:not(.disabled) {
-    border-color: #6b7280;
-  }
-
-  .filled:hover:not(.disabled) {
-    background: #4b5563;
-  }
-}
+/* 다크 모드 비활성화: 항상 라이트 배경 유지 */

@@ -1,3 +1,427 @@
+/* Social page theme variables (mirrored) */
+:root {
+  --primary: #0a66ff;
+  --primary-2: #3baaff;
+  --border: #d6e4ff;
+  --light: #f5f9ff;
+}
+/* 보고서 컨테이너 */
+.report-container {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 20px;
+  /* 소셜 페이지 배경 스타일 매칭 */
+  background: #f8fafc;
+}
+
+/* 보고서 헤더 - 공통 컴포넌트 스타일 적용 */
+.report-header {
+  background: #ffffff;
+  color: #0a66ff;
+  padding: 30px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  box-shadow: 0 6px 20px rgba(157, 184, 255, 0.18);
+  border: 2px solid var(--border);
+}
+
+.report-header h1 {
+  margin: 0 0 8px 0;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.report-header .date {
+  font-size: 16px;
+  opacity: 0.95;
+}
+
+/* 보고서 섹션 - 공통 카드 스타일 적용 */
+.report-section {
+  background: #fff;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+  /* 소셜 카드 그림자 스타일 매칭 */
+  box-shadow: 0 6px 20px rgba(157, 184, 255, 0.18);
+  transition: all 0.3s ease;
+}
+
+.report-section:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  border-color: #bbdefb;
+}
+
+.report-section h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #212121;
+  margin: 0 0 16px 0;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--border);
+}
+
+/* 요약 카드 그리드 */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+/* 공통 CardComponent 사용 시 추가 스타일 */
+.summary-card-component {
+  text-align: center;
+  min-height: auto;
+}
+
+/* 기존 summary-card 관련 스타일은 CardComponent로 대체되어 제거됨 */
+
+/* 통계 바 - 공통 컴포넌트 색상 적용 */
+.report-container .stat-bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.stat-bar-label {
+  min-width: 100px;
+  font-weight: 600;
+  color: #212121;
+  font-size: 14px;
+}
+
+.stat-bar-visual {
+  flex: 1;
+  min-width: 120px;
+  height: 24px !important;
+  min-height: 24px !important;
+  background: var(--light);
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 0 8px;
+  position: relative;
+  border: 1px solid #bbdefb;
+}
+
+.stat-bar-fill {
+  height: 100%;
+  background: linear-gradient(135deg, #0a66ff, #3baaff);
+  transition: width 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 8px;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  max-width: 100%;
+  border-radius: 12px;
+}
+
+.stat-bar-value {
+  min-width: 60px;
+  text-align: right;
+  font-weight: 600;
+  color: #212121;
+  font-size: 14px;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .stat-bar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 16px;
+    gap: 0;
+  }
+
+  .stat-bar-label {
+    min-width: auto;
+    margin-bottom: 8px;
+    font-size: 16px;
+    text-align: center;
+    order: 1;
+  }
+
+  .stat-bar-visual {
+    margin: 0 0 8px 0;
+    height: 23px !important;
+    min-height: 23px !important;
+    min-width: auto;
+    order: 2;
+  }
+
+  .stat-bar-fill {
+    font-size: 14px;
+    padding-right: 12px;
+    height: 100%;
+    background: linear-gradient(135deg, #0a66ff, #3baaff);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    color: white;
+    max-width: 100%;
+    border-radius: 12px;
+  }
+
+  .stat-bar-value {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    order: 3;
+    margin-top: 8px;
+  }
+}
+
+/* 조언 카드 */
+.advice-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.advice-item {
+  padding: 16px;
+  margin-bottom: 12px;
+  background: #f7fafc;
+  border-left: 4px solid #667eea;
+  border-radius: 4px;
+  line-height: 1.6;
+  color: #2d3748;
+}
+
+.advice-item.warning {
+  background: #fffaf0;
+  border-left-color: #ed8936;
+}
+
+.advice-item.success {
+  background: #f0fff4;
+  border-left-color: #48bb78;
+}
+
+/* 건강 조언 라인 톤 */
+.advice-line {
+  margin-bottom: 6px;
+  color: #000000;
+}
+.advice-line.warning {
+  color: #000000;
+}
+.advice-line.success {
+  color: #000000;
+}
+
+/* 인사이트 칩 */
+.insights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.chip {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  border: 1.5px solid var(--border);
+  color: var(--primary);
+  background: var(--light);
+}
+.chip.good {
+  color: #0f766e;
+  border-color: #99f6e4;
+  background: #ecfeff;
+}
+.chip.warn {
+  color: #b45309;
+  border-color: #fed7aa;
+  background: #fff7ed;
+}
+
+/* 활동 현황 칩 그룹 */
+.activity-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 14px;
+}
+.activity-chip {
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1.5px solid var(--border);
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  box-shadow: 0 2px 8px rgba(157, 184, 255, 0.12);
+}
+.activity-chip .label {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 700;
+}
+.activity-chip .value {
+  font-size: 14px;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+/* 섹션 소제목 */
+.subttl {
+  font-size: 14px;
+  font-weight: 900;
+  color: #334155;
+  margin: 6px 0 8px;
+}
+
+/* KPI tiles */
+/* KPI 제거 - 공간 확보 */
+
+/* 데이터 테이블 */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+  border: 2px solid var(--border); /* 공통 카드 보더 */
+  border-radius: 12px; /* 공통 카드 라운드 */
+  overflow: hidden; /* 라운드 유지 */
+}
+
+/* 체크박스 스타일 */
+.data-table input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+
+.data-table thead tr {
+  background: linear-gradient(
+    135deg,
+    #eef4ff,
+    #e6f2ff
+  ); /* 전체 행 그라데이션 */
+}
+
+.data-table th {
+  background: transparent; /* 셀 단위 배경 제거 → 행 그라데이션 보임 */
+  padding: 14px 12px;
+  text-align: center;
+  font-weight: 800;
+  color: #0a66ff; /* 파란색 텍스트 */
+  border-bottom: 1px solid rgba(10, 102, 255, 0.15); /* 은은한 하단 라인 */
+}
+
+.data-table th:first-child {
+  border-top-left-radius: 12px;
+}
+.data-table th:last-child {
+  border-top-right-radius: 12px;
+}
+
+.data-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--border); /* 공통 카드 라인 */
+  color: #212121; /* 공통 텍스트 */
+  background: #ffffff; /* 카드 내부 흰색 */
+  text-align: center;
+}
+
+.data-table tr:hover td {
+  background: #f5f9ff; /* 옅은 블루 호버 */
+}
+
+/* 액션 버튼 영역 */
+.report-actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.report-actions button {
+  flex: 1;
+  min-width: 200px;
+}
+
+/* 빈 상태 */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #a0aec0;
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.empty-state-text {
+  font-size: 16px;
+  color: #718096;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .report-container {
+    padding: 12px;
+  }
+
+  .report-header {
+    padding: 20px;
+  }
+
+  .report-header h1 {
+    font-size: 22px;
+  }
+
+  .report-section {
+    padding: 16px;
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .summary-card-value {
+    font-size: 24px;
+  }
+
+  .stat-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .stat-bar-label {
+    margin-bottom: 8px;
+  }
+
+  .stat-bar-visual {
+    width: 100%;
+    margin: 8px 0;
+  }
+
+  .stat-bar-value {
+    width: 100%;
+    text-align: left;
+  }
+
+  .report-actions button {
+    min-width: 100%;
+  }
+}
+
+/* 레거시 스타일 유지 */
 .ds-root {
   gap: 12px;
 }
