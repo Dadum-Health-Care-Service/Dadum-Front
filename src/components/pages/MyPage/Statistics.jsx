@@ -199,7 +199,8 @@ export default function Statistics() {
             ? parseFloat(
                 ((latestHealthData?.distanceWalked || 0) / 1000).toFixed(2)
               )
-            : latestHealthData?.distanceWalked || 0) || 0,
+            : latestHealthData?.distanceWalked || 0
+          ).toFixed(2) || 0,
         unit: (latestHealthData?.distanceWalked || 0) / 1000 >= 1 ? "KM" : "M",
         detail: latestTime,
         key: "distance",

@@ -938,7 +938,7 @@ const Home = () => {
           <Row className="justify-content-center">
             <Col md={10}>
               <h1 className={styles.heroTitle}>
-                AI 기반 운동 분석 및 루틴 관리 서비스
+                AI 기반 운동 분석 및 종합 건강 관리 서비스
               </h1>
               <p className={styles.heroSub}>
                 실시간 자세 분석과 AI 칼로리 인식으로 운동을 더 정확하게.

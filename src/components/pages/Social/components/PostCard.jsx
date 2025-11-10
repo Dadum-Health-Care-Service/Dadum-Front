@@ -4,6 +4,7 @@ import EditPostModal from "./EditPostModal.jsx";
 import LikeButton from "./LikeButton.jsx";
 import { FaCommentDots } from "react-icons/fa";
 import { useApi } from "../../../../utils/api/useApi";
+import { useAuth } from "../../../../context/AuthContext.jsx";
 
 // 유틸리티 함수들
 const buildImageCandidates = (raw) => {
@@ -20,11 +21,11 @@ const resolveImageUrl = (imagePath) => {
   return `/img/userAvatar.png`;
 };
 
-const displayHandle = (userId, userEmail) => {
+const displayHandle = (usersId, userEmail) => {
   if (userEmail) {
     return userEmail.split("@")[0];
   }
-  return userId || "user";
+  return usersId || "user";
 };
 
 // 이미지 실패 시 후보 URL 순차 시도
@@ -54,13 +55,14 @@ export default function PostCard({
   onAfterMutate,
 }) {
   const { DELETE } = useApi();
+  const { user } = useAuth();
   const {
     postId,
     postTitle,
     postContent,
     postImage,
     userName,
-    userId,
+    usersId,
     userEmail,
     createdAt,
     profileImage,
@@ -71,7 +73,7 @@ export default function PostCard({
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const menuRef = useRef(null);
-
+  console.log(user.usersId, usersId);
   // 메뉴 바깥 클릭 닫기
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -99,6 +101,7 @@ export default function PostCard({
       console.error("게시글 삭제 실패:", error);
     }
   };
+  console.log(user.usersId, usersId);
 
   const profileSrc = profileImage ? resolveImageUrl(profileImage) : null;
 
@@ -126,37 +129,39 @@ export default function PostCard({
           <div className="row1">
             <span className="name">{userName || "사용자"}</span>
             <span className="sub">
-              @{displayHandle(userId, userEmail)} · {createdAt || ""}
+              @{displayHandle(usersId, userEmail)} · {createdAt || ""}
             </span>
           </div>
         </div>
 
         {/* 케밥 버튼 */}
-        <div ref={menuRef} style={{ position: "relative" }}>
-          <button
-            className="more"
-            aria-label="메뉴"
-            onClick={() => setMenuOpen((v) => !v)}
-          >
-            ⋯
-          </button>
-          {menuOpen && (
-            <div className="popup-menu">
-              <button
-                className="menu-item"
-                onClick={() => {
-                  setEditOpen(true);
-                  setMenuOpen(false);
-                }}
-              >
-                수정
-              </button>
-              <button className="menu-item danger" onClick={handleDelete}>
-                삭제
-              </button>
-            </div>
-          )}
-        </div>
+        {user.usersId === usersId && (
+          <div ref={menuRef} style={{ position: "relative" }}>
+            <button
+              className="more"
+              aria-label="메뉴"
+              onClick={() => setMenuOpen((v) => !v)}
+            >
+              ⋯
+            </button>
+            {menuOpen && (
+              <div className="popup-menu">
+                <button
+                  className="menu-item"
+                  onClick={() => {
+                    setEditOpen(true);
+                    setMenuOpen(false);
+                  }}
+                >
+                  수정
+                </button>
+                <button className="menu-item danger" onClick={handleDelete}>
+                  삭제
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </header>
 
       {/* 본문 */}
